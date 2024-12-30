@@ -2,6 +2,7 @@ import './App.css'
 import Button from './components/Button'
 import ButtonGroup from './components/ButtonGroup'
 import Pagination from './components/Pagination'
+import SubsCounter from './components/SubsCounter'
 
 function App() {
 	return (
@@ -108,6 +109,21 @@ function App() {
 					<Pagination currentPage={1} totalResults={120} resultsPerPage={20} onChange={(page)=>{
 						console.log('Selected page is ',page)
 					}}></Pagination>
+				</div>
+			</div>
+			<div className="d-flex flex-column gap-20">
+				<div className="d-flex flex-row gap-10">
+					<p>&nbsp;</p>
+					<p>&nbsp;</p>
+					<p>&nbsp;</p>
+				</div>
+			</div>
+			<div className="d-flex flex-column gap-20">
+				<div className="d-flex flex-row gap-10">
+					<p style={{ width: '100px' }}>Subs Counter</p>
+					<SubsCounter currentSubs={200} subsLimit={1500} onClick={()=>{
+						console.log('SubsCounter clicked!')
+					}}> </SubsCounter>
 				</div>
 			</div>
 		</>

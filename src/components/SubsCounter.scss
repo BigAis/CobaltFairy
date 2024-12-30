@@ -1,0 +1,46 @@
+.subs-counter{
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(218, 209, 197, 1);
+    border-radius: 8px;;
+    padding:20px 20px;
+    justify-content: space-between;
+    .leftPart{
+        .text{
+            font-family: 'Inter';
+            font-size:14px;
+            font-weight: 500;
+            line-height:17px;
+        }
+        .progress-container {
+            margin-top: 8px;
+            width: 100%; 
+            background-color: rgba(218, 209, 197, 1); 
+            border-radius: 8px;  
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2); 
+            .progress-bar {
+                height: 5px; 
+                background-color: #000; 
+                width: 0%;  
+                border-radius: 8px;  
+                text-align: center; 
+                line-height: 20px;  
+                color: black; 
+                transition: width 0.5s ease-in-out; 
+            }
+        }
+        
+    }
+    .rightPart{
+        svg{
+            margin-left: 20px;margin-right:-10px;
+            transition: all .15s ease-in-out;
+            cursor: pointer;
+        }
+    }
+    .rightPart:hover{
+        svg{
+            transform: scale(1.3);
+            margin-left:25px;
+        }
+    }
+}
