@@ -1,0 +1,74 @@
+.btn {
+	color: rgba(0, 0, 0, 1);
+	font-size: 14px;
+	font-weight: 500;
+	padding: 12px 20px 12px 20px;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.btn.btn-primary {
+	border: 2px solid #ff635d;
+	background-color: rgba(255, 195, 173, 0.5);
+}
+
+.btn.btn-secondary {
+	border: 2px solid rgba(218, 209, 197, 1);
+	background: rgba(255, 255, 255, 0.5);
+}
+
+.btn .icon {
+	margin-right: 5px;
+	font-size: 1.2em;
+}
+
+.btn.btn-primary.hovered {
+	background-color: rgba(255, 195, 173, 0.75);
+	box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+}
+
+.btn.btn.btn-secondary.hovered {
+	background-color: rgba(255, 255, 255, 0.7);
+	box-shadow: 0px 4px 7px 0px #0000001a;
+}
+
+.btn.btn-primary.active {
+	background-color: rgba(255, 195, 173, 0.75);
+}
+.btn.btn.btn-secondary.active {
+	background-color: rgba(255, 255, 255, 0.7);
+}
+
+.btn.btn-primary.inactive {
+	background: rgba(255, 195, 173, 0.25);
+	border: 2px solid rgba(255, 99, 93, 0.5);
+}
+.btn.btn-secondary.inactive {
+	background: rgba(255, 255, 255, 0.15);
+	border: 2px solid rgba(218, 209, 197, 0.5);
+}
+
+.btn.btn-primary.disabled {
+	background: rgba(255, 195, 173, 0.25);
+	border: 2px solid rgba(255, 99, 93, 0.5);
+}
+.btn.btn-secondary.disabled {
+	background: rgba(255, 255, 255, 0.15);
+	border: 2px solid rgba(218, 209, 197, 0.5);
+}
+.spinner {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border: 2px solid rgba(0, 0, 0, 0.3);
+	border-radius: 50%;
+	border-top-color: rgba(0, 0, 0, 1);
+	animation: spin 0.5s linear infinite;
+	margin-right: 8px;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
