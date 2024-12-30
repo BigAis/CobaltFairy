@@ -69,6 +69,7 @@ h6 {
 	isolation: isolate;
 }
 
+/** DS DEMO */
 body {
 	background-color: #fff2df;
 	font-family: 'Inter', sans-serif;
@@ -96,4 +97,5 @@ body {
 
 .flex-row {
 	flex-direction: row;
+	align-items:center;
 }

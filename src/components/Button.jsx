@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import './Button.css'
+import './Button.scss'
 
 const Button = ({ children, icon, type = 'primary', active = false, inactive = false, disabled = false, loading = false, onClick, className, ...props }) => {
 	const [hovered, setHovered] = useState(false)

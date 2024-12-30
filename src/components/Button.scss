@@ -2,9 +2,29 @@
 	color: rgba(0, 0, 0, 1);
 	font-size: 14px;
 	font-weight: 500;
-	padding: 12px 20px 12px 20px;
+	line-height: 17px;
+	padding: 10px 18px;
 	border-radius: 8px;
 	cursor: pointer;
+	transition: box-shadow .15s ease-in-out;
+
+	.icon {
+		margin-right: 5px;
+		font-size: 1.2em;
+		transform: scale(1.5);
+	}
+
+	.spinner {
+		display: inline-block;
+		width: 15px;
+		height: 15px;
+		border: 2px solid rgba(0, 0, 0, 0.3);
+		border-radius: 50%;
+		border-top-color: rgba(0, 0, 0, 1);
+		animation: spin 0.5s linear infinite;
+		margin-right: 3px;
+		margin-bottom: -3px;		
+	}
 }
 
 .btn.btn-primary {
@@ -16,18 +36,15 @@
 	border: 2px solid rgba(218, 209, 197, 1);
 	background: rgba(255, 255, 255, 0.5);
 }
-
-.btn .icon {
-	margin-right: 5px;
-	font-size: 1.2em;
+.btn.disabled, .btn.inactive, .btn.loading {
+	cursor:default;
 }
-
-.btn.btn-primary.hovered {
+.btn.btn-primary.hovered:not(.inactive):not(.loading) {
 	background-color: rgba(255, 195, 173, 0.75);
 	box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
 }
 
-.btn.btn.btn-secondary.hovered {
+.btn.btn-secondary.hovered:not(.inactive):not(.loading) {
 	background-color: rgba(255, 255, 255, 0.7);
 	box-shadow: 0px 4px 7px 0px #0000001a;
 }
@@ -35,7 +52,7 @@
 .btn.btn-primary.active {
 	background-color: rgba(255, 195, 173, 0.75);
 }
-.btn.btn.btn-secondary.active {
+.btn.btn-secondary.active {
 	background-color: rgba(255, 255, 255, 0.7);
 }
 
@@ -52,20 +69,12 @@
 	background: rgba(255, 195, 173, 0.25);
 	border: 2px solid rgba(255, 99, 93, 0.5);
 }
+
 .btn.btn-secondary.disabled {
 	background: rgba(255, 255, 255, 0.15);
 	border: 2px solid rgba(218, 209, 197, 0.5);
 }
-.spinner {
-	display: inline-block;
-	width: 10px;
-	height: 10px;
-	border: 2px solid rgba(0, 0, 0, 0.3);
-	border-radius: 50%;
-	border-top-color: rgba(0, 0, 0, 1);
-	animation: spin 0.5s linear infinite;
-	margin-right: 8px;
-}
+
 
 @keyframes spin {
 	to {
