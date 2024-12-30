@@ -1,5 +1,7 @@
 import './App.css'
 import Button from './components/Button'
+import ButtonGroup from './components/ButtonGroup'
+import Pagination from './components/Pagination'
 
 function App() {
 	return (
@@ -78,6 +80,34 @@ function App() {
 					<Button type="secondary" loading>
 						Primary
 					</Button>
+				</div>
+			</div>
+			<div className="d-flex flex-column gap-20">
+				<div className="d-flex flex-row gap-10">
+					<p>&nbsp;</p>
+					<p>&nbsp;</p>
+					<p>&nbsp;</p>
+				</div>
+			</div>
+			<div className="d-flex flex-column gap-20">
+				<div className="d-flex flex-row gap-10">
+					<p style={{ width: '100px' }}>Button Group</p>
+					<ButtonGroup value='today' options={[
+						{value:'today',label:'Today'},
+						{value:'7days',label:'7 Days'},
+						{value:'30days',label:'30 Days'},
+						{value:'all',label:'All'},
+					]} onChange={(value)=>{
+						console.log(value)
+					}}>
+
+					</ButtonGroup>
+				</div>
+				<div className="d-flex flex-row gap-10">
+					<p style={{ width: '100px' }}>Pagination</p>
+					<Pagination currentPage={1} totalResults={120} resultsPerPage={20} onChange={(page)=>{
+						console.log('Selected page is ',page)
+					}}></Pagination>
 				</div>
 			</div>
 		</>
