@@ -8,74 +8,105 @@
 	cursor: pointer;
 	transition: box-shadow 0.15s ease-in-out;
 
-	.icon {
-		margin-right: 5px;
-		font-size: 1.2em;
-		transform: scale(1.5);
-	}
-
-	.spinner {
-		display: inline-block;
-		width: 15px;
-		height: 15px;
-		border: 2px solid rgba(0, 0, 0, 0.3);
-		border-radius: 50%;
-		border-top-color: rgba(0, 0, 0, 1);
-		animation: spin 0.5s linear infinite;
-		margin-right: 3px;
-		margin-bottom: -3px;
-	}
-
 	&.btn-primary {
 		border: 2px solid #ff635d;
 		background-color: rgba(255, 195, 173, 0.5);
+
+		&.hovered:not(.inactive):not(.loading) {
+			background-color: rgba(255, 195, 173, 0.75);
+			box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+		}
+
+		&.active {
+			background-color: rgba(255, 195, 173, 0.75);
+		}
+
+		&.inactive {
+			background: rgba(255, 195, 173, 0.25);
+			border: 2px solid rgba(255, 99, 93, 0.5);
+		}
+
+		&.disabled {
+			background: rgba(255, 195, 173, 0.25);
+			border: 2px solid rgba(255, 99, 93, 0.5);
+		}
 	}
 
 	&.btn-secondary {
 		border: 2px solid rgba(218, 209, 197, 1);
 		background: rgba(255, 255, 255, 0.5);
+
+		&.hovered:not(.inactive):not(.loading) {
+			background-color: rgba(255, 255, 255, 0.7);
+			box-shadow: 0px 4px 7px 0px #0000001a;
+		}
+
+		&.active {
+			background-color: rgba(255, 255, 255, 0.7);
+		}
+
+		&.inactive {
+			background: rgba(255, 255, 255, 0.15);
+			border: 2px solid rgba(218, 209, 197, 0.5);
+		}
+
+		&.disabled {
+			background: rgba(255, 255, 255, 0.15);
+			border: 2px solid rgba(218, 209, 197, 0.5);
+		}
 	}
+
+	&.btn-action {
+		padding: 14px 18px;
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid rgba(218, 209, 197, 1);
+		font-family: 'Bitter', serif;
+		font-weight: 600;
+		font-size: 16px;
+		line-height: 19.2px;
+		font-optical-sizing: auto;
+
+		&.hovered:not(.inactive):not(.loading) {
+			background-color: rgba(255, 255, 255, 0.7);
+			box-shadow: 0px 4px 7px 0px #0000001a;
+		}
+
+		&.active {
+			background-color: rgba(255, 255, 255, 0.7);
+		}
+
+		&.inactive {
+			background: rgba(255, 255, 255, 0.15);
+			border: 2px solid rgba(218, 209, 197, 0.5);
+		}
+
+		&.disabled {
+			background: rgba(255, 255, 255, 0.15);
+			border: 2px solid rgba(218, 209, 197, 0.5);
+		}
+	}
+
 	&.btn.disabled,
 	&.btn.inactive,
 	&.btn.loading {
 		cursor: not-allowed;
 	}
-}
 
-.btn.btn-primary.hovered:not(.inactive):not(.loading) {
-	background-color: rgba(255, 195, 173, 0.75);
-	box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
-}
+	.icon {
+		margin-right: 5px;
+	}
 
-.btn.btn-secondary.hovered:not(.inactive):not(.loading) {
-	background-color: rgba(255, 255, 255, 0.7);
-	box-shadow: 0px 4px 7px 0px #0000001a;
-}
-
-.btn.btn-primary.active {
-	background-color: rgba(255, 195, 173, 0.75);
-}
-.btn.btn-secondary.active {
-	background-color: rgba(255, 255, 255, 0.7);
-}
-
-.btn.btn-primary.inactive {
-	background: rgba(255, 195, 173, 0.25);
-	border: 2px solid rgba(255, 99, 93, 0.5);
-}
-.btn.btn-secondary.inactive {
-	background: rgba(255, 255, 255, 0.15);
-	border: 2px solid rgba(218, 209, 197, 0.5);
-}
-
-.btn.btn-primary.disabled {
-	background: rgba(255, 195, 173, 0.25);
-	border: 2px solid rgba(255, 99, 93, 0.5);
-}
-
-.btn.btn-secondary.disabled {
-	background: rgba(255, 255, 255, 0.15);
-	border: 2px solid rgba(218, 209, 197, 0.5);
+	.spinner {
+		display: inline-block;
+		width: 16px;
+		height: 16px;
+		border: 2px solid rgba(0, 0, 0, 0.3);
+		border-radius: 50%;
+		border-top-color: rgba(0, 0, 0, 1);
+		animation: spin 0.5s linear infinite;
+		margin-right: 5px;
+		margin-bottom: -3px;
+	}
 }
 
 @keyframes spin {

@@ -4,8 +4,9 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import './Button.scss'
+import Icon from './Icon/Icon'
 
-const Button = ({ children, icon, type = 'primary', active = false, inactive = false, disabled = false, loading = false, onClick, className, ...props }) => {
+const Button = ({ children, icon, iconSize = null, type = 'primary', active = false, inactive = false, disabled = false, loading = false, onClick, className, ...props }) => {
 	const [hovered, setHovered] = useState(false)
 
 	const handleClick = (e) => {
@@ -22,7 +23,8 @@ const Button = ({ children, icon, type = 'primary', active = false, inactive = f
 			disabled,
 			loading,
 		},
-		type === 'primary' ? 'btn-primary' : 'btn-secondary',
+		`btn-${type}`, // type === 'primary' ? 'btn-primary' : 'btn-secondary',
+		// type === 'primary' ? 'btn-primary' : 'btn-secondary',
 		className // clases from props
 	)
 
@@ -31,7 +33,7 @@ const Button = ({ children, icon, type = 'primary', active = false, inactive = f
 			<button className={computedClassName} onClick={handleClick} disabled={disabled} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} {...props}>
 				{loading && <span className="spinner"></span>}
 
-				{icon && icon === 'plus' && !loading ? <span className="icon">+</span> : <span className="icon"></span>}
+				{icon && !loading && <Icon name={icon} size={iconSize} className="icon" />}
 
 				{children && <span className="text">{children}</span>}
 			</button>
@@ -42,8 +44,9 @@ const Button = ({ children, icon, type = 'primary', active = false, inactive = f
 // Prop types validation
 Button.propTypes = {
 	children: PropTypes.node,
-	icon: PropTypes.node,
-	type: PropTypes.oneOf(['primary', 'secondary', null]),
+	icon: PropTypes.string,
+	iconSize: PropTypes.number,
+	type: PropTypes.oneOf(['primary', 'secondary', 'action', null]),
 	hovered: PropTypes.bool,
 	active: PropTypes.bool,
 	inactive: PropTypes.bool,

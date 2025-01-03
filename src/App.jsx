@@ -18,20 +18,21 @@ function App() {
 					<div className="d-flex flex-column gap-20">
 						<div className="d-flex flex-row gap-10">
 							<p style={{ width: '100px' }}>Default</p>
-							<Button icon={'plus'}>Primary</Button>
+
+							<Button icon={'Plus'}>Primary</Button>
 							<Button>Primary</Button>
-							<Button type="secondary" icon={'plus'}>
+							<Button type="secondary" icon={'Plus'}>
 								Primary
 							</Button>
 							<Button type="secondary">Primary</Button>
 						</div>
 						<div className="d-flex flex-row gap-10">
 							<p style={{ width: '100px' }}>Hover (hover the mouse)</p>
-							<Button icon={'plus'} hovered>
+							<Button icon={'Plus'} hovered>
 								Primary
 							</Button>
 							<Button hovered>Primary</Button>
-							<Button type="secondary" icon={'plus'} hovered>
+							<Button type="secondary" icon={'Plus'} hovered>
 								Primary
 							</Button>
 							<Button type="secondary" hovered>
@@ -40,11 +41,11 @@ function App() {
 						</div>
 						<div className="d-flex flex-row gap-10">
 							<p style={{ width: '100px' }}>Active</p>
-							<Button icon={'plus'} active>
+							<Button icon={'Plus'} active>
 								Primary
 							</Button>
 							<Button active>Primary</Button>
-							<Button type="secondary" icon={'plus'} active>
+							<Button type="secondary" icon={'Plus'} active>
 								Primary
 							</Button>
 							<Button type="secondary" active>
@@ -53,11 +54,11 @@ function App() {
 						</div>
 						<div className="d-flex flex-row gap-10">
 							<p style={{ width: '100px' }}>Inactive</p>
-							<Button icon={'plus'} inactive>
+							<Button icon={'Plus'} inactive>
 								Primary
 							</Button>
 							<Button inactive>Primary</Button>
-							<Button type="secondary" icon={'plus'} inactive>
+							<Button type="secondary" icon={'Plus'} inactive>
 								Primary
 							</Button>
 							<Button type="secondary" inactive>
@@ -66,11 +67,11 @@ function App() {
 						</div>
 						<div className="d-flex flex-row gap-10">
 							<p style={{ width: '100px' }}>Disabled</p>
-							<Button icon={'plus'} disabled>
+							<Button icon={'Plus'} disabled>
 								Primary
 							</Button>
 							<Button disabled>Primary</Button>
-							<Button type="secondary" icon={'plus'} disabled>
+							<Button type="secondary" icon={'Plus'} disabled>
 								Primary
 							</Button>
 							<Button type="secondary" disabled>
@@ -79,11 +80,11 @@ function App() {
 						</div>
 						<div className="d-flex flex-row gap-10">
 							<p style={{ width: '100px' }}>Loading</p>
-							<Button icon={'plus'} loading>
+							<Button icon={'Plus'} loading>
 								Primary
 							</Button>
 							<Button loading>Primary</Button>
-							<Button type="secondary" icon={'plus'} loading>
+							<Button type="secondary" icon={'Plus'} loading>
 								Primary
 							</Button>
 							<Button type="secondary" loading>
@@ -152,34 +153,83 @@ function App() {
 					<div className="d-flex flex-column gap-20">
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'plus'} options={dropdownOptions} />
-							<Dropdown icon={'plus'} options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} options={dropdownOptions} />
+							<Dropdown icon={'Plus'} options={dropdownOptions} />
 						</div>
 
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'plus'} hovered options={dropdownOptions} />
-							<Dropdown icon={'plus'} hovered options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} hovered options={dropdownOptions} />
+							<Dropdown icon={'Plus'} hovered options={dropdownOptions} />
 						</div>
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'plus'} active options={dropdownOptions} />
-							<Dropdown icon={'plus'} active options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} active options={dropdownOptions} />
+							<Dropdown icon={'Plus'} active options={dropdownOptions} />
 						</div>
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'plus'} inactive options={dropdownOptions} />
-							<Dropdown icon={'plus'} inactive options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} inactive options={dropdownOptions} />
+							<Dropdown icon={'Plus'} inactive options={dropdownOptions} />
 						</div>
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'plus'} disabled options={dropdownOptions} />
-							<Dropdown icon={'plus'} disabled options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} disabled options={dropdownOptions} />
+							<Dropdown icon={'Plus'} disabled options={dropdownOptions} />
 						</div>
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
 							<Dropdown withDivider loading options={dropdownOptions} />
 							<Dropdown loading options={dropdownOptions} />
+						</div>
+					</div>
+				</div>
+				<div className="column">
+					<div className="d-flex flex-column gap-10">
+						<div className="d-flex flex-row gap-10">
+							<Button icon={'Envelope'} type="action">
+								Action Button
+							</Button>
+							<Button type="action">Action</Button>
+						</div>
+
+						<div className="d-flex flex-row gap-10">
+							<Button icon={'Envelope'} type="action">
+								Action Button
+							</Button>
+							<Button type="action">Action</Button>
+						</div>
+						<div className="d-flex flex-row gap-10">
+							<Button icon={'Envelope'} type="action" active>
+								Action Button
+							</Button>
+							<Button type="action" active>
+								Action
+							</Button>
+						</div>
+						<div className="d-flex flex-row gap-10">
+							<Button icon={'Envelope'} type="action" inactive>
+								Action Button
+							</Button>
+							<Button type="action" inactive>
+								Action
+							</Button>
+						</div>
+						<div className="d-flex flex-row gap-10">
+							<Button icon={'Envelope'} type="action" disabled>
+								Action Button
+							</Button>
+							<Button type="action" disabled>
+								Action
+							</Button>
+						</div>
+						<div className="d-flex flex-row gap-10">
+							<Button icon={'Envelope'} type="action" loading>
+								Action Button
+							</Button>
+							<Button type="action" loading>
+								Action
+							</Button>
 						</div>
 					</div>
 				</div>
