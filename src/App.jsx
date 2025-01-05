@@ -1,11 +1,15 @@
 import './App.css'
+import { useState } from 'react'
 import Button from './components/Button'
 import ButtonGroup from './components/ButtonGroup'
 import Pagination from './components/Pagination'
 import SubsCounter from './components/SubsCounter'
 import Dropdown from './components/Dropdown'
+import InputText from './components/InputText/InputText'
 
 function App() {
+	const [hasError, setHasError] = useState(true)
+
 	const handleLeftClick = () => {
 		alert('Left action triggered!')
 	}
@@ -257,6 +261,16 @@ function App() {
 							<Button type="action" loading>
 								Action
 							</Button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div className="main-wrapper d-flex gap-30" style={{ marginTop: '25px' }}>
+				<div className="column">
+					<div className="flex flex-column gap-20">
+						<div className="flex flex-row gap-10">
+							<InputText placeholder="Enter your name" label="name" hasError={hasError} errorMessage="Name must be at least 3 characters long." />
 						</div>
 					</div>
 				</div>
