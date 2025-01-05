@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import './Dropdown.scss'
 import './arrow.svg'
 
-const Dropdown = ({ options, active = false, inactive = false, disabled = false, loading = null, onOptionSelect = null, withDivider = null, className }) => {
+const Dropdown = ({ children, options, active = false, inactive = false, disabled = false, loading = null, onOptionSelect = null, withDivider = null, onLeftClick = null, className }) => {
 	const [isOpen, setIsOpen] = useState(false)
 	const [hovered, setHovered] = useState(false)
 	const [selectedOption, setSelectedOption] = useState(null)
@@ -51,13 +51,23 @@ const Dropdown = ({ options, active = false, inactive = false, disabled = false,
 
 	return (
 		<div className="dropdown-wrapper" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} ref={dropdownRef}>
-			<div className={computedClassName} onClick={toggleDropdown}>
-				{loading && <span className="spinner"></span>}
+			<div className={computedClassName}>
+				{withDivider && (
+					<div className="dropdown-left" onClick={onLeftClick}>
+						{/* Left Section */}
+						{children}
+					</div>
+				)}
 
-				{selectedOption ? selectedOption.label : 'Dropdown'}
-				<span className="dropdown-arrow"></span>
-				{withDivider && <span className="dropdown-divider"></span>}
+				{/* {withDivider && <span className="dropdown-divider"></span>} */}
+				<div className="dropdown-right" onClick={toggleDropdown}>
+					{/* Right Section */}
+					{loading && <span className="spinner"></span>}
+					{withDivider ? '' : 'Dropdown'}
+					<span className="dropdown-arrow" style={!withDivider ? { marginLeft: '10px' } : { marginLeft: '0' }}></span>
+				</div>
 			</div>
+
 			{isOpen && (
 				<div className="dropdown-menu">
 					{options.map((option, index) => (
@@ -72,6 +82,7 @@ const Dropdown = ({ options, active = false, inactive = false, disabled = false,
 }
 
 Dropdown.propTypes = {
+	children: PropTypes.node,
 	options: PropTypes.arrayOf(
 		PropTypes.shape({
 			value: PropTypes.string.isRequired,
@@ -83,6 +94,7 @@ Dropdown.propTypes = {
 	disabled: PropTypes.bool,
 	loading: PropTypes.bool,
 	onOptionSelect: PropTypes.func,
+	onLeftClick: PropTypes.func,
 	withDivider: PropTypes.bool,
 	className: PropTypes.string,
 }

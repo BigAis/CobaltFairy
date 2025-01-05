@@ -6,6 +6,9 @@ import SubsCounter from './components/SubsCounter'
 import Dropdown from './components/Dropdown'
 
 function App() {
+	const handleLeftClick = () => {
+		alert('Left action triggered!')
+	}
 	const dropdownOptions = [
 		{ value: 'option1', label: 'Option 1' },
 		{ value: 'option2', label: 'Option 2' },
@@ -153,34 +156,58 @@ function App() {
 					<div className="d-flex flex-column gap-20">
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'Plus'} options={dropdownOptions} />
-							<Dropdown icon={'Plus'} options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} options={dropdownOptions} onLeftClick={handleLeftClick}>
+								test
+							</Dropdown>
+							<Dropdown icon={'Plus'} options={dropdownOptions}>
+								test
+							</Dropdown>
 						</div>
 
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'Plus'} hovered options={dropdownOptions} />
-							<Dropdown icon={'Plus'} hovered options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} hovered options={dropdownOptions}>
+								test
+							</Dropdown>
+							<Dropdown icon={'Plus'} hovered options={dropdownOptions}>
+								test
+							</Dropdown>
 						</div>
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'Plus'} active options={dropdownOptions} />
-							<Dropdown icon={'Plus'} active options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} active options={dropdownOptions}>
+								test
+							</Dropdown>
+							<Dropdown icon={'Plus'} active options={dropdownOptions}>
+								test
+							</Dropdown>
 						</div>
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'Plus'} inactive options={dropdownOptions} />
-							<Dropdown icon={'Plus'} inactive options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} inactive options={dropdownOptions}>
+								test
+							</Dropdown>
+							<Dropdown icon={'Plus'} inactive options={dropdownOptions}>
+								test
+							</Dropdown>
 						</div>
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider icon={'Plus'} disabled options={dropdownOptions} />
-							<Dropdown icon={'Plus'} disabled options={dropdownOptions} />
+							<Dropdown withDivider icon={'Plus'} disabled options={dropdownOptions}>
+								test
+							</Dropdown>
+							<Dropdown icon={'Plus'} disabled options={dropdownOptions}>
+								test
+							</Dropdown>
 						</div>
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider loading options={dropdownOptions} />
-							<Dropdown loading options={dropdownOptions} />
+							<Dropdown withDivider loading options={dropdownOptions}>
+								test
+							</Dropdown>
+							<Dropdown loading options={dropdownOptions}>
+								test
+							</Dropdown>
 						</div>
 					</div>
 				</div>

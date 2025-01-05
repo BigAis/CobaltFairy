@@ -4,15 +4,19 @@
 	width: 100%;
 
 	.dropdown {
+		display: flex; /* Allow left and right sections to sit side-by-side */
+		align-items: center;
+		position: relative;
 		border: 2px solid rgba(218, 209, 197, 1);
-		line-height: 17px;
-		padding: 10px 58px 10px 18px;
 		font-size: 14px;
 		font-weight: 500;
 		font-family: 'Inter', sans-serif;
 		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.5);
 		width: 100%;
+
+		// padding: 10px;
+
 		cursor: pointer;
 
 		&.hovered:not(.disabled):not(.inactive):not(.loading) {
@@ -54,6 +58,7 @@
 			font-size: 1.2em;
 			transform: scale(1.5);
 		}
+
 		.spinner {
 			display: inline-block;
 			width: 15px;
@@ -64,6 +69,29 @@
 			animation: spin 0.5s linear infinite;
 			margin-right: 3px;
 			margin-bottom: -3px;
+		}
+
+		.dropdown-left {
+			flex: 1;
+			padding: 10px;
+			text-align: center;
+			cursor: pointer;
+			border-right: 2px solid rgba(218, 209, 197, 1);
+		}
+
+		.dropdown-right {
+			// flex: 3;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 10px;
+			cursor: pointer;
+
+			.dropdown-arrow {
+				// margin-left: 8px;
+				position: static; /* Adjust positioning */
+				transform: none;
+			}
 		}
 	}
 
@@ -76,16 +104,17 @@
 		width: 10px;
 		height: 10px;
 		background: url('./arrow.svg') no-repeat center center;
-		background-size: contain; /* Adjust size to fit the arrow */
+		background-size: contain;
 	}
 
 	.dropdown-divider {
 		position: absolute;
-		right: 40px; /* Position it before the arrow */
+		right: calc(75%); /* Divide based on left/right ratio */
 		top: 0;
 		height: 100%;
 		width: 2px;
 		background-color: rgba(218, 209, 197, 1);
+		z-index: 1;
 	}
 
 	.dropdown-menu {
@@ -122,5 +151,14 @@
 
 	.dropdown-menu-hidden {
 		display: none;
+	}
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
 	}
 }
