@@ -1,0 +1,47 @@
+.sketch-picker {
+    position: absolute;
+    margin-left: 10px;
+    margin-top: 340px;
+}
+.color-picker-container {
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgb(218, 209, 197);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  
+  .color-display {
+    display: flex;
+    padding:10px; 
+    align-items: center;
+  }
+  
+  .color-preview {
+    width: 25px;
+    height: 25px;
+    border-radius: 4px;
+  }
+  
+  .hex-code {
+    font-family: 'Inter';
+    font-size: 14px;
+    line-height: 17px;
+    text-transform: uppercase;
+    padding-left: 10px;
+  }
+  
+  .opacity-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-left: 2px solid rgb(218, 209, 197);
+    font-family: 'Inter';
+    font-size: 14px;
+    line-height: 17px;
+    text-transform: uppercase;
+  }
+  
