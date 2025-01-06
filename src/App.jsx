@@ -7,6 +7,16 @@ import Pagination from './components/Pagination'
 import SubsCounter from './components/SubsCounter'
 import Dropdown from './components/Dropdown'
 import InputText from './components/InputText/InputText'
+import ColorPicker from './components/ColorPicker'
+import ImagePicker from './components/ImagePicker'
+import DatePicker from './components/DatePicker'
+import CreditCardPicker from './components/CreditCardPicker'
+import Card from './components/Card'
+import VerificationBadge from './components/VerificationBadge'
+import TemplateBadge from './components/TemplateBadge'
+import Switch from './components/Switch'
+import Checkbox from './components/Checkbox'
+import RadioButton from './components/RadioButton'
 
 function App() {
 	const handleLeftClick = () => {
@@ -148,6 +158,80 @@ function App() {
 					</div>
 					<div className="d-flex flex-column gap-20">
 						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>Switch</p>
+							<Switch checked={false} label="Test Label"></Switch>
+						</div>
+					</div>
+
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>RadioButton</p>
+							<RadioButton 
+								data-inline="true"
+								options={[
+									{label:'Option 1',value:1},
+									{label:'Option 2',value:2},
+									{label:'Option 3',value:3}
+								]}
+								value={3}
+							></RadioButton>
+						</div>
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}></p>
+							<RadioButton 
+								options={[
+									{label:'Option 1',value:1},
+									{label:'Option 2',value:2},
+									{label:'Option 3',value:3}
+								]}
+								value={3}
+							></RadioButton>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>Checkbox</p>
+							<Checkbox checked={false} label="Test Checkbox"></Checkbox>
+							<Checkbox checked={true} label="Test Checkbox"></Checkbox>
+						</div>
+					</div>
+					
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>ColorPicker</p>
+							<ColorPicker initColorAlpha={.5} initColorHex={'#f00'} onChange={(color=>{console.log('Chosen color',color)})}></ColorPicker>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
 							<p style={{ width: '100px' }}>Subs Counter</p>
 							<SubsCounter
 								currentSubs={200}
@@ -160,6 +244,141 @@ function App() {
 							</SubsCounter>
 						</div>
 					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>ImagePicker</p>
+							<div style={{width:'200px'}}>
+								<ImagePicker onChange={(image)=>{console.log('image',image)}}></ImagePicker>
+							</div>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>DatePicker</p>
+							<div style={{width:'200px'}}>
+								<DatePicker dateFormat='d/m/Y' timeFormat={'H:i'} pickerType='date' onChange={(selection)=>{console.log('selected date',selection)}}></DatePicker>
+							</div>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>TimePicker</p>
+							<div style={{width:'200px'}}>
+								<DatePicker dateFormat='d/m/Y' timeFormat={'H:i'} pickerType={'time'} onChange={(selection)=>{console.log('selected time',selection)}}></DatePicker>
+							</div>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>DateTime</p>
+							<div style={{width:'200px'}}>
+								<DatePicker dateFormat='d/m/Y' timeFormat={'H:i'} pickerType='datetime' onChange={(selection)=>{console.log('selected date-time',selection)}}></DatePicker>
+							</div>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>Credit Card</p>
+							<div style={{width:'200px'}}>
+								<CreditCardPicker></CreditCardPicker>
+							</div>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>Credit Card</p>
+							<div style={{width:'200px'}}>
+								<Card>
+									<h3>test</h3>
+								</Card>
+							</div>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>Verified Badge</p>
+							<div style={{width:'300px',display:'flex'}}>
+								<div style={{width:'150px'}}>
+									<VerificationBadge isVerified={false}></VerificationBadge>
+								</div>
+								<div style={{width:'150px'}}>
+									<VerificationBadge isVerified={true}></VerificationBadge>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>Template Badge</p>
+							<div style={{width:'300px',display:'flex'}}>
+								<div style={{width:'100px'}}>
+									<TemplateBadge></TemplateBadge>
+								</div>
+								<div style={{width:'100px'}}>
+									<TemplateBadge type={'custom'}></TemplateBadge>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					
 				</div>
 				<div className="column">
 					<div className="d-flex flex-column gap-20">

@@ -1,0 +1,55 @@
+/* Base styles for the custom checkbox */
+.custom-checkbox {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    user-select: none;
+  }
+  
+  /* Hide the default checkbox */
+  .custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+  
+  /* Create a custom box to replace the checkbox */
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: rgba(255, 255, 255, 1);
+    border: 2.4px solid rgba(218, 209, 197, 1);
+    border-radius: 5px; /* Slightly rounded corners for the checkbox */
+  }
+  
+  /* Style when the checkbox is checked */
+  .custom-checkbox input:checked ~ .checkmark {
+    background-color: rgba(255, 99, 93, 0.5);
+    border: 1px solid rgba(255, 99, 93, 1);
+  }
+  
+  /* Create the checkmark/indicator (when checked) */
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  
+  /* Show the checkmark when the checkbox is checked */
+  .custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+    left: 8px;
+    top: 3px;
+    width: 7px;
+    height: 14px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(37deg);
+  }
+  

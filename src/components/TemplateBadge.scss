@@ -1,0 +1,20 @@
+.template-badge{
+    padding: 0.5em;
+    border-radius: 4px;
+    width: 90px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter';
+    font-size: 14px;
+    line-height: 17px;;
+    font-weight: 500;
+}
+.template-badge-custom{
+    background: rgba(76, 70, 73, 1);
+    color:white;
+}
+.template-badge-premade{
+    background: rgba(255, 195, 173, 1);
+}

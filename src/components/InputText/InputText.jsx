@@ -3,20 +3,20 @@ import classNames from 'classnames'
 import Icon from '../Icon/Icon'
 import './InputText.scss'
 
-const InputText = ({ value, onChange, placeholder, label, hasError = false, errorMessage = '', disabled, isRequired, icon }) => {
+const InputText = ({ value, onChange, placeholder, label, hasError = false, errorMessage = '', disabled, isRequired, icon, name, className, ...props }) => {
 	const handleInputChange = (e) => {
 		if (onChange) {
-			onChange(e.target.value) // Pass the updated value to the parent
+			onChange(e) // Pass the updated value to the parent
 		}
 	}
 
-	const computedClassName = classNames('input-text', { hasError, disabled })
+	const computedClassName = classNames('input-text', className, { hasError, disabled })
 
 	return (
 		<div className="input-text-wrapper">
 			<div className="input-container">
 				{icon && <Icon name={icon} className="input-icon" />}
-				<input type="text" placeholder={label ? '' : placeholder} value={value} onChange={handleInputChange} className={computedClassName} disabled={disabled} />
+				<input type="text" placeholder={label ? '' : placeholder} value={value} onChange={handleInputChange} className={computedClassName} disabled={disabled} name={name} {...props}/>
 				{label && (
 					<label className={classNames('floating-label', { filled: value || placeholder })}>
 						{isRequired && '*'}
@@ -40,6 +40,7 @@ InputText.propTypes = {
 	onChange: PropTypes.func.isRequired,
 	placeholder: PropTypes.string,
 	label: PropTypes.string,
+	name: PropTypes.string,
 	hasError: PropTypes.bool,
 	errorMessage: PropTypes.string,
 	disabled: PropTypes.bool,

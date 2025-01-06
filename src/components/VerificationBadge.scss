@@ -1,0 +1,23 @@
+.verified-badge{
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgb(218, 209, 197);
+    padding: 0.5em;
+    border-radius: 49px;
+    min-width: 20px;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .badge{
+        border-radius:50%;
+        width: 14px;
+        height: 14px;
+        margin-right: 5px;
+    }
+    .badge-unverified{
+        background: rgba(255, 166, 0, 1);
+    }
+    .badge-verified{
+        background: rgba(153, 234, 15, 1);
+    }
+}
