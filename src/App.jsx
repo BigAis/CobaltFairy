@@ -7,6 +7,7 @@ import Pagination from './components/Pagination'
 import SubsCounter from './components/SubsCounter'
 import Dropdown from './components/Dropdown'
 import InputText from './components/InputText/InputText'
+import Slider from './components/Slider_ck/Slider'
 
 function App() {
 	const handleLeftClick = () => {
@@ -311,6 +312,9 @@ function App() {
 						</div>
 					</div>
 				</div>
+			</div>
+			<div className="main-wrapper d-flex gap-30">
+				<Slider min={0} max={33} defaultValue={0} step={3} />
 			</div>
 		</>
 	)
