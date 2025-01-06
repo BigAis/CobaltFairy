@@ -1,4 +1,5 @@
 import './App.css'
+
 import { useState } from 'react'
 import Button from './components/Button'
 import ButtonGroup from './components/ButtonGroup'
@@ -8,11 +9,15 @@ import Dropdown from './components/Dropdown'
 import InputText from './components/InputText/InputText'
 
 function App() {
-	const [hasError, setHasError] = useState(true)
-
 	const handleLeftClick = () => {
 		alert('Left action triggered!')
 	}
+
+	const [inputValue, setInputValue] = useState('Search Campaign')
+	const handleInputChange = (newValue) => {
+		setInputValue(newValue) // Update the value in state
+	}
+
 	const dropdownOptions = [
 		{ value: 'option1', label: 'Option 1' },
 		{ value: 'option2', label: 'Option 2' },
@@ -264,13 +269,45 @@ function App() {
 						</div>
 					</div>
 				</div>
-			</div>
-
-			<div className="main-wrapper d-flex gap-30" style={{ marginTop: '25px' }}>
 				<div className="column">
 					<div className="flex flex-column gap-20">
 						<div className="flex flex-row gap-10">
-							<InputText placeholder="Enter your name" label="name" hasError={hasError} errorMessage="Name must be at least 3 characters long." />
+							<InputText placeholder="Search Campaign" label="Search Campaign" hasError={false} errorMessage="Name must be at least 3 characters long." />
+							<InputText
+								placeholder="Search Campaign"
+								value={inputValue}
+								onChange={handleInputChange}
+								label="Search Campaign"
+								hasError={false}
+								errorMessage="Name must be at least 3 characters long."
+							/>
+							<InputText placeholder="Search Campaign" label="Search Campaign" hasError={false} errorMessage="Name must be at least 3 characters long." disabled />
+							<InputText
+								placeholder="Search Campaign"
+								value={inputValue}
+								onChange={handleInputChange}
+								label="Search Campaign"
+								hasError={false}
+								errorMessage="Name must be at least 3 characters long."
+								icon={'Envelope'}
+							/>
+							<InputText
+								placeholder="Enter your name"
+								value={inputValue}
+								onChange={handleInputChange}
+								label="Search Campaign"
+								hasError={true}
+								errorMessage="Name must be at least 3 characters long."
+							/>
+							<InputText
+								placeholder="Enter your name"
+								value={inputValue}
+								onChange={handleInputChange}
+								label="Search Campaign"
+								hasError={false}
+								errorMessage="Name must be at least 3 characters long."
+								isRequired
+							/>
 						</div>
 					</div>
 				</div>

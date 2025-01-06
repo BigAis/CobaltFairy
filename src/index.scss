@@ -79,6 +79,10 @@ body {
 	display: flex;
 }
 
+.gap-5 {
+	gap: 5px;
+}
+
 .gap-10 {
 	gap: 10px;
 }
@@ -97,5 +101,5 @@ body {
 
 .flex-row {
 	flex-direction: row;
-	align-items:center;
+	align-items: center;
 }

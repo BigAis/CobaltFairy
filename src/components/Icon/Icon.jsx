@@ -19,6 +19,7 @@ const Icon = ({ name, size, className }) => {
 Icon.propTypes = {
 	name: PropTypes.string.isRequired,
 	size: PropTypes.number,
+	rightIcon: PropTypes.bool,
 	className: PropTypes.string,
 }
 

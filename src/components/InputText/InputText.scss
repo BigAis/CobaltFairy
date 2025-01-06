@@ -5,6 +5,15 @@
 	.input-container {
 		display: flex;
 		flex-direction: column;
+
+		.input-icon {
+			position: absolute;
+			right: 16px;
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 16px;
+			pointer-events: none;
+		}
 	}
 
 	.input-text {
@@ -26,6 +35,11 @@
 
 		&.hasError {
 			border: 2px solid rgba(255, 166, 0, 1);
+		}
+
+		&.disabled {
+			opacity: 50%;
+			cursor: not-allowed;
 		}
 
 		&:focus + .floating-label,
