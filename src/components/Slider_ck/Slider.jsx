@@ -21,7 +21,7 @@ const Slider = ({ min, max, step, defaultValue, staticTooltip }) => {
 	}
 	useEffect(()=>{
 		const range = rangeRef.current;
-		const left = (((value - min) / (max - min)) * (range.clientWidth - thumbWidth)) + thumbWidth + (thumbWidth/2);
+		const left = (((value - min) / (max - min)) * (range.clientWidth - thumbWidth))  + (thumbWidth/2);
 		setTooltipLeft(left)
 	},[value])
 	return (
