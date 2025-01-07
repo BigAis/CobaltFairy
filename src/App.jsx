@@ -17,6 +17,8 @@ import TemplateBadge from './components/TemplateBadge'
 import Switch from './components/Switch'
 import Checkbox from './components/Checkbox'
 import RadioButton from './components/RadioButton'
+import NotificationBar from './components/NotificationBar/NotificationBar'
+import Slider from './components/Slider_ck/Slider'
 
 function App() {
 	const handleLeftClick = () => {
@@ -33,6 +35,15 @@ function App() {
 		{ value: 'option2', label: 'Option 2' },
 		{ value: 'option3', label: 'Option 3' },
 	]
+
+	const [notifications, setNotifications] = useState([
+		{ id: 1, message: 'This is a default notification.', type: 'default' },
+		{ id: 2, message: 'This is a warning notification.', type: 'warning' },
+	])
+
+	const handleRemoveNotification = (id) => {
+		setNotifications((prev) => prev.filter((n) => n.id !== id))
+	}
 	return (
 		<>
 			<div className="main-wrapper d-flex gap-30">
@@ -408,6 +419,30 @@ function App() {
 							</div>
 						</div>
 					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div className="d-flex flex-column gap-20">
+						<div className="d-flex flex-row gap-10">
+							<p style={{ width: '100px' }}>Template Badge</p>
+							<div style={{ display: 'flex' }}>
+								<div>
+									{notifications.map((notification) => (
+										<NotificationBar
+											key={notification.id}
+											message={notification.message}
+											type={notification.type} // Pass type here
+											onClose={() => handleRemoveNotification(notification.id)} // Handle close
+										/>
+									))}
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div className="column">
 					<div className="d-flex flex-column gap-20">
@@ -559,9 +594,6 @@ function App() {
 						</div>
 					</div>
 				</div>
-			</div>
-			<div className="main-wrapper d-flex gap-30">
-				<Slider min={0} max={33} defaultValue={0} step={3} />
 			</div>
 		</>
 	)
