@@ -595,12 +595,9 @@ function App() {
 					</div>
 				</div>
 			</div>
-<<<<<<< HEAD
-=======
 			<div className="main-wrapper d-flex gap-30" style={{width:'500px'}}>
 				<Slider min={0} max={1500} defaultValue={0} step={100} staticTooltip={false} />
 			</div>
->>>>>>> adfe28f (bugs in datepicker zindex, colorpicker alpha)
 		</>
 	)
 }
