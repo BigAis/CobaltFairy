@@ -55,14 +55,26 @@
 
 	.tooltip {
 		position: absolute;
-		bottom: 30px;
+		width: 60px;
+		margin-top: -60px;
 		transform: translateX(-50%);
-		padding: 5px 10px;
-		background: rgba(255, 195, 173, 1);
+		padding: 5px 0;
+		background: rgb(255, 195, 173);
 		border-radius: 5px;
 		font-size: 14px;
 		color: #000;
 		white-space: nowrap;
 		z-index: 1;
+	}
+	.tooltip:before {
+		content: '';
+		background: rgb(255, 195, 173);
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		top: 13px;
+		transform: rotate(45deg);
+		left: 20px;
+		z-index: -1;
 	}
 }

@@ -232,7 +232,7 @@ function App() {
 						<div className="d-flex flex-row gap-10">
 							<p style={{ width: '100px' }}>ColorPicker</p>
 							<ColorPicker
-								initColorAlpha={0.5}
+								initColorAlpha={1}
 								initColorHex={'#f00'}
 								onChange={(color) => {
 									console.log('Chosen color', color)
@@ -251,7 +251,7 @@ function App() {
 						<div className="d-flex flex-row gap-10">
 							<p style={{ width: '100px' }}>Subs Counter</p>
 							<SubsCounter
-								currentSubs={200}
+								currentSubs={700}
 								subsLimit={1500}
 								onClick={() => {
 									console.log('SubsCounter clicked!')
@@ -595,6 +595,12 @@ function App() {
 					</div>
 				</div>
 			</div>
+<<<<<<< HEAD
+=======
+			<div className="main-wrapper d-flex gap-30" style={{width:'500px'}}>
+				<Slider min={0} max={1500} defaultValue={0} step={100} staticTooltip={false} />
+			</div>
+>>>>>>> adfe28f (bugs in datepicker zindex, colorpicker alpha)
 		</>
 	)
 }
