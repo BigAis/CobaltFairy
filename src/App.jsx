@@ -18,14 +18,14 @@ import Switch from './components/Switch'
 import Checkbox from './components/Checkbox'
 import RadioButton from './components/RadioButton'
 import NotificationBar from './components/NotificationBar/NotificationBar'
-import Slider from './components/Slider_ck/Slider'
 
 function App() {
 	const handleLeftClick = () => {
 		alert('Left action triggered!')
 	}
 
-	const [inputValue, setInputValue] = useState('Search Campaign')
+	const [inputValue, setInputValue] = useState('')
+
 	const handleInputChange = (newValue) => {
 		setInputValue(newValue) // Update the value in state
 	}

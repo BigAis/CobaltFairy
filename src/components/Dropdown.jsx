@@ -17,7 +17,10 @@ const Dropdown = ({ children, options, active = false, inactive = false, disable
 	}
 
 	const handleOptionClick = (option) => {
+		console.log('option is ', option.value)
+		// return
 		setSelectedOption(option)
+
 		setIsOpen(false)
 		if (onOptionSelect) {
 			onOptionSelect(option.value)
@@ -63,7 +66,7 @@ const Dropdown = ({ children, options, active = false, inactive = false, disable
 				<div className="dropdown-right" onClick={toggleDropdown}>
 					{/* Right Section */}
 					{loading && <span className="spinner"></span>}
-					{withDivider ? '' : 'Dropdown'}
+					{withDivider ? '' : selectedOption ? selectedOption.label : children}
 					<span className="dropdown-arrow" style={!withDivider ? { marginLeft: '10px' } : { marginLeft: '0' }}></span>
 				</div>
 			</div>
