@@ -31,6 +31,7 @@
   border: none;
   font-size: 16px;
   font-family: 'Inter', sans-serif;
+  font-weight: 500;
   color: #333;
   cursor: pointer;
   padding: 0;
@@ -151,6 +152,7 @@
 }
 
 .checkbox-text {
+  text-align: left;
   font-weight: 500;
   font-size: 16px;
 }

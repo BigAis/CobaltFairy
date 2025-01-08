@@ -52,10 +52,10 @@ const Register = () => {
 
           <div className="input-row">
             <div className="input-group">
-             <InputText placeholder="Account Name" label="Account Name" hasError={false} errorMessage="Name must be at least 3 characters long." />       
+             <InputText placeholder="Last Name" label="Account Name" hasError={false} errorMessage="Name must be at least 3 characters long." />       
             </div>
             <div className="input-group">
-            <InputText placeholder="Password" type={showPassword ? "text" : "password"}  label="Password" hasError={false} errorMessage="Name must be at least 3 characters long." />       
+            <InputText placeholder="Last Name" type={showPassword ? "text" : "password"}  label="Password" hasError={false} errorMessage="Name must be at least 3 characters long." />       
               <button type="button" className="eye-button"  onClick={togglePassword} aria-label={showPassword ? "Hide password" : "Show password"}>
                 <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M8 10C8.39782 10 8.77936 9.84196 9.06066 9.56066C9.34196 9.27936 9.5 8.89782 9.5 8.5C9.5 8.10218 9.34196 7.72064 9.06066 7.43934C8.77936 7.15804 8.39782 7 8 7C7.60218 7 7.22064 7.15804 6.93934 7.43934C6.65804 7.72064 6.5 8.10218 6.5 8.5C6.5 8.89782 6.65804 9.27936 6.93934 9.56066C7.22064 9.84196 7.60218 10 8 10Z" fill="#100F1C"/>
