@@ -89,6 +89,9 @@
         .campaign-charts{
             justify-content: space-around;
             margin: 2em 0;
+            .stat-wrapper {
+                max-width: 140px;
+            }
         }
         .dashboard-stats{
             width: 100%;
