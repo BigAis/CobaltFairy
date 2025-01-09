@@ -1,29 +1,58 @@
 import React from 'react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './register.scss';
 import InputText from '../../components/InputText/InputText';
 import Checkbox from '../../components/Checkbox';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import Logo from '../../components/Logo/Logo';
+import Icon from '../../components/Icon/Icon';
 
 const Register = () => {
 
  const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState(false);
+  const location = useLocation(); 
+  const data = location.state; 
 
-  const [acceptTerms, setAcceptTerms] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError,setPasswordError] = useState('')
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    accountName: '',
+    password: '',
+  });
+
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [sendNews, setSendNews] = useState(false);
 
-  const togglePassword = () => {
-    setShowPassword(!showPassword);
+  const checkForm = () => {
+    if (!formData.password || formData.password.length < 6) {
+      setPasswordError('Invalid Password')
+      return false;   
+    }
+
+      return true;
   };
 
-  const returnToLogin = () => {
-    navigate('/login')
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (checkForm()) {
+      console.log(checkForm());
+    } else {
+      console.error(checkForm());
+    }
   };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setPasswordError('')
+  };
+  
 
   return (
     <div className="register-wrapper">
@@ -32,7 +61,7 @@ const Register = () => {
 
          <Button 
             className="back-button"
-            onClick={returnToLogin}
+            onClick={() =>{ navigate('/login')}}
             type={'link'} 
             icon="Caret"
             >Back
@@ -41,32 +70,59 @@ const Register = () => {
           <header>
             <h1>Welcome</h1>
             <p>Complete the account for the email</p>
-            <p>user@email.com</p>
+            <p>{data.email}</p>
           </header>
         </div>
 
         <div className="inputs-container">
+        <form onSubmit={handleSubmit}>
           <div className="input-row">
             <div className="input-group">
-              <InputText placeholder="First Name" label="First Name" hasError={false} errorMessage="Name must be at least 3 characters long." />       
+              <InputText 
+                  name="firstName"
+                  placeholder="First Name" 
+                  onChange={handleChange} 
+                  label="First Name"/>       
             </div>
             <div className="input-group">
-             <InputText placeholder="Last Name" label="Last Name" hasError={false} errorMessage="Name must be at least 3 characters long." />       
+             <InputText  
+                name="lastName"  
+                placeholder="Last Name" 
+                onChange={handleChange} 
+                label="Last Name" />       
             </div>
           </div>
 
           <div className="input-row">
             <div className="input-group">
-             <InputText placeholder="Account Name" label="Account Name" hasError={false} errorMessage="Name must be at least 3 characters long." />       
+             <InputText 
+                name="accountName"  
+                placeholder="Account Name" 
+                onChange={handleChange} 
+                label="Account Name"/>       
             </div>
             <div className="input-group">
-            <InputText placeholder="Password" type={showPassword ? "text" : "password"}  label="Password" hasError={false} errorMessage="Name must be at least 3 characters long." />       
-              <button type="button" className="eye-button"  onClick={togglePassword} aria-label={showPassword ? "Hide password" : "Show password"}>
-                <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M8 10C8.39782 10 8.77936 9.84196 9.06066 9.56066C9.34196 9.27936 9.5 8.89782 9.5 8.5C9.5 8.10218 9.34196 7.72064 9.06066 7.43934C8.77936 7.15804 8.39782 7 8 7C7.60218 7 7.22064 7.15804 6.93934 7.43934C6.65804 7.72064 6.5 8.10218 6.5 8.5C6.5 8.89782 6.65804 9.27936 6.93934 9.56066C7.22064 9.84196 7.60218 10 8 10Z" fill="#100F1C"/>
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M1.38 8.78C1.31692 8.5966 1.31692 8.39739 1.38 8.214C1.85638 6.83737 2.75019 5.64356 3.93697 4.79881C5.12375 3.95407 6.54442 3.50044 8.00114 3.5011C9.45786 3.50176 10.8781 3.95667 12.0641 4.8025C13.2501 5.64832 14.1429 6.84294 14.618 8.22C14.6811 8.40339 14.6811 8.6026 14.618 8.786C14.1418 10.163 13.2481 11.3572 12.0612 12.2022C10.8743 13.0472 9.45335 13.501 7.99636 13.5003C6.53938 13.4997 5.11888 13.0446 3.93275 12.1985C2.74661 11.3524 1.85391 10.1574 1.379 8.78H1.38ZM11 8.5C11 9.29565 10.6839 10.0587 10.1213 10.6213C9.55871 11.1839 8.79565 11.5 8 11.5C7.20435 11.5 6.44129 11.1839 5.87868 10.6213C5.31607 10.0587 5 9.29565 5 8.5C5 7.70435 5.31607 6.94129 5.87868 6.37868C6.44129 5.81607 7.20435 5.5 8 5.5C8.79565 5.5 9.55871 5.81607 10.1213 6.37868C10.6839 6.94129 11 7.70435 11 8.5Z" fill="#100F1C"/>
-                </svg>
-              </button>
+            <InputText
+                    className="user-password"
+                    name="password"  
+                    placeholder="password"
+                    onChange={handleChange}
+                    type={showPassword ? "text" : "password"}
+                    label="Password"
+                    hasError={passwordError.length>0}
+                    errorMessage={passwordError}
+            
+                  />
+                  <button
+                    type="button"
+                    className="eye-button"
+                    onClick={() =>{setShowPassword(!showPassword)}}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    <Icon name="Eye" size={25}/>
+                  </button>
             </div>
           </div>
 
@@ -84,8 +140,10 @@ const Register = () => {
               </label>
             </div>
           </div>
-            <Button className="complete-button">Complete</Button>
+            <Button className="complete-button" disabled={!acceptTerms}>Complete</Button>
+            </form>
         </div>
+        
       </Card>
     </div>
   );

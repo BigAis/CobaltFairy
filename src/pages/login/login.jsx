@@ -4,29 +4,38 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Logo from "../../components/Logo/Logo";
 import InputText from "../../components/InputText/InputText";
-import { checkUserExists } from "../../service/api-service";
+import { checkUserExists, checkUserCrendentials } from "../../service/api-service";
 import Checkbox from "../../components/Checkbox";
 import Card from "../../components/Card";
 import Icon from "../../components/Icon/Icon";
+import NotificationBar from "../../components/NotificationBar/NotificationBar";
 
 const LogIn = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordError,setPasswordError] = useState('')
+  const [password, setPassword] = useState("");
   const [emailError,setEmailError] = useState('')
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isValidUser, setIsValidUser] = useState(false);
   const navigate = useNavigate();
 
-  const togglePassword = () => {
-    setShowPassword(!showPassword);
-  };
+	const [notifications, setNotifications] = useState([
+	])
+
+	const handleRemoveNotification = (id) => {
+		setNotifications((prev) => prev.filter((n) => n.id !== id))
+	}
 
   const checkEmail = async () => {
-    if(!email || !email.includes('@') || !email.includes('.')) {
+    setIsLoading(true);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if(!email || !emailRegex.test(email)) {
       setEmailError('Please type a valid email address.');
       return
     }
-    setIsLoading(true);
     try {
       const respone = await checkUserExists(email);
       respone.exists
@@ -38,9 +47,31 @@ const LogIn = () => {
     } finally {
       setIsLoading(false);
     }
-
-    console.log(email);
   };
+
+  const checkValidPassword = async  () => {
+    setIsLoading(true);
+
+    if (!password || password.length < 6) {
+      setPasswordError('Invalid Password')
+      return
+    }
+
+    try {
+      const respone = await checkUserCrendentials(email,password);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error during login:", error);
+      setNotifications([{ id: 1, message: 'Wrong Crendetials.', type: 'warning' }])
+        } finally {
+      setIsLoading(false);
+    }
+
+
+  }
+
+
+
   return (
     <div className="login-wrapper">
       <Logo />
@@ -96,6 +127,25 @@ const LogIn = () => {
                 >Back
                 </Button>
 
+                <div className="d-flex flex-column gap-20">
+                            <div className="d-flex flex-row gap-10">
+                              <p style={{ width: '60px' }}></p>
+                              <div style={{ display: 'flex' }}>
+                                <div>
+                                  {notifications.map((notification) => (
+                                    <NotificationBar
+                                      key={notification.id}
+                                      message={notification.message}
+                                      type={notification.type} 
+                                      onClose={() => handleRemoveNotification(notification.id)} 
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+
               <div className="header-info">
                 <header>
                   <h1>Welcome</h1>
@@ -106,27 +156,32 @@ const LogIn = () => {
 
               <div className="input-rows">
                 <div className="input-groups">
+
                   <InputText
                     className="user-password"
                     placeholder="Password"
                     type={showPassword ? "text" : "password"}
                     label="Password"
-                    hasError={false}
-                    errorMessage="Name must be at least 3 characters long."
+                    hasError={passwordError.length>0}
+                    errorMessage={passwordError}
                     style={{width:'100%'}}
+                    onChange={(e) => {setPassword(e.target.value);setPasswordError('')}}
                   />
                   <button
                     type="button"
                     className="eye-button"
-                    onClick={togglePassword}
+                    onClick={() =>{setShowPassword(!showPassword)}}
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
                   >
                     <Icon name="Eye" size={25}/>
                   </button>
-                </div>
+                  <p className="forgot-password">Forgot Password</p>
+                </div>             
               </div>
+              
+             
 
               <label class="remember-me">
                 <Checkbox
@@ -136,7 +191,10 @@ const LogIn = () => {
                 ></Checkbox>
               </label>
 
-              <Button className="complete-button" onClick={()=>{navigate('/dashboard')}}>Complete</Button>
+              <Button onClick={() => {checkValidPassword()}} className="complete-button" disabled={isLoading} loading={isLoading} type="submit">
+                    Continue
+               </Button>
+               
             </>
           )}
         </div>
