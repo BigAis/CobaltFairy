@@ -199,19 +199,25 @@
     position: absolute;
     right: 8px;
   }
-  
-  .eye-button svg {
-    width: 20px;
-    height: 20px;
-    fill: #666;
-  }
-  
+
   .eye-button:hover svg {
     fill: #007BFF;
   }
   
 .remember-me {
     align-items: l;
+}
+
+.back-button{
+    svg{
+        transform: rotate(180deg);
+    }
+}
+.back-button:hover{
+    color: #FF635D;
+    path{
+        fill: #FF635D;
+    }
 }
 
 

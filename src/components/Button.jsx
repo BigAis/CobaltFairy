@@ -46,7 +46,7 @@ Button.propTypes = {
 	children: PropTypes.node,
 	icon: PropTypes.string,
 	iconSize: PropTypes.number,
-	type: PropTypes.oneOf(['primary', 'secondary', 'action', null]),
+	type: PropTypes.oneOf(['primary', 'secondary', 'action', 'link', null]),
 	hovered: PropTypes.bool,
 	active: PropTypes.bool,
 	inactive: PropTypes.bool,

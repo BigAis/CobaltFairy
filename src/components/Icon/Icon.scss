@@ -1,4 +1,12 @@
 .icon {
 	display: inline-block;
 	vertical-align: middle;
+	path{
+		fill:#100F1C!important;
+	}
+}
+.icon:hover{
+	path{
+		fill:#FF635D!important;
+	}
 }

@@ -28,7 +28,11 @@
   align-items: center;
   gap: 8px;
 }
-
+.back-button{
+  svg{
+      transform: rotate(180deg);
+  }
+}
 .back-logo {
   width: 16px;
   height: 16px;

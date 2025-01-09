@@ -398,7 +398,7 @@ function Desing() {
 					</div>
 					<div className="d-flex flex-column gap-20">
 						<div className="d-flex flex-row gap-10">
-							<p style={{ width: '100px' }}>Credit Card</p>
+							<p style={{ width: '100px' }}>Card</p>
 							<div style={{ width: '200px' }}>
 								<Card>
 									<h3>test</h3>

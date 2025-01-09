@@ -35,6 +35,7 @@
 
 		&.hasError {
 			border: 2px solid rgba(255, 166, 0, 1);
+			
 		}
 
 		&.disabled {
@@ -68,5 +69,8 @@
 		color: rgba(255, 166, 0, 1);
 		font-weight: 500px;
 		line-height: 16.94px;
+		path{
+			fill:rgba(255, 166, 0, 1)!important;
+		}
 	}
 }
