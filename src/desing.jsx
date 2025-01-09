@@ -74,7 +74,7 @@ function Desing() {
 	}
 	return (
 		<>
-			<div className="main-wrapper d-flex gap-30">
+			<div className="main-wrapper d-flex gap-30" style={{padding:'3em'}}>
 				<div className="column">
 					<div className="d-flex flex-column gap-20">
 						<div className="d-flex flex-row gap-10">

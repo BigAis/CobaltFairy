@@ -59,7 +59,7 @@ const Sidemenu = ()=>{
             </div>
             <div className='menu_bottom'>
                 <SubsCounter
-                    currentSubs={700}
+                    currentSubs={500}
                     subsLimit={1500}
                     onClick={() => {
                         console.log('SubsCounter clicked!')

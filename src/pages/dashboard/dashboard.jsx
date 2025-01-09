@@ -135,8 +135,12 @@ const Dashboard = () => {
                             </div>
                             <br></br>
                             <div className="campaign-charts d-flex gap-30">
-                                <Stat stats={subs_stats} hasChart={false} defaultLabel={'Total'} />
-                                <Stat stats={subs_stats} hasChart={false} defaultLabel={'Unsubscribed'} />
+                                <div>
+                                    <Stat stats={subs_stats} hasChart={false} defaultLabel={'Total'} />
+                                </div>
+                                <div>
+                                    <Stat stats={subs_stats} hasChart={false} defaultLabel={'Unsubscribed'} />
+                                </div>
                             </div>
                             <br></br>
                             <Button type={'secondary'}>All Subscribers</Button>
