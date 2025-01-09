@@ -5,6 +5,8 @@ import './register.scss';
 import InputText from '../../components/InputText/InputText';
 import Checkbox from '../../components/Checkbox';
 import Button from '../../components/Button';
+import Card from '../../components/Card';
+import Logo from '../../components/Logo/Logo';
 
 const Register = () => {
 
@@ -25,7 +27,8 @@ const Register = () => {
 
   return (
     <div className="register-wrapper">
-      <div className="container">
+      <Logo/>
+      <Card>
         <button className="back-button" onClick={returnToLogin}>
           <svg width="16" height="17" viewBox="0 0 16 17" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
             <path fillRule="evenodd" clipRule="evenodd" d="M9.78 4.71995C9.92045 4.86058 9.99934 5.0512 9.99934 5.24995C9.99934 5.4487 9.92045 5.63933 9.78 5.77995L7.06 8.49995L9.78 11.22C9.85368 11.2886 9.91279 11.3714 9.95378 11.4634C9.99477 11.5554 10.0168 11.6547 10.0186 11.7554C10.0204 11.8561 10.0018 11.9562 9.96412 12.0495C9.9264 12.1429 9.87025 12.2278 9.79903 12.299C9.72782 12.3702 9.64298 12.4264 9.54959 12.4641C9.45621 12.5018 9.35618 12.5203 9.25547 12.5185C9.15477 12.5168 9.05546 12.4947 8.96346 12.4537C8.87146 12.4127 8.78866 12.3536 8.72 12.28L5.47 9.02995C5.32955 8.88932 5.25066 8.6987 5.25066 8.49995C5.25066 8.3012 5.32955 8.11058 5.47 7.96995L8.72 4.71995C8.86062 4.5795 9.05125 4.50061 9.25 4.50061C9.44875 4.50061 9.63937 4.5795 9.78 4.71995Z"/>
@@ -68,7 +71,7 @@ const Register = () => {
           <div className="checkboxes">
             <div className="checkbox-group">
               <label className='checkbox-text'>
-                <Checkbox checked={acceptTerms} onChange={()=> setAcceptTerms(!acceptTerms)} label=" Accept privacy policy and terms and conditions"></Checkbox>
+                <Checkbox checked={acceptTerms} onChange={()=> setAcceptTerms(!acceptTerms)} label="Accept privacy policy and terms and conditions"></Checkbox>
               </label>
             </div>
 
@@ -81,7 +84,7 @@ const Register = () => {
           </div>
             <Button className="complete-button">Complete</Button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

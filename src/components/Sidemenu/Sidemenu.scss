@@ -1,0 +1,51 @@
+.sidemenu{
+    height: 100vh;;
+    width: 265px;;
+    background: rgba(255, 255, 255, 0.5);
+    border-right: 2px solid rgba(218, 209, 197, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1em 0;
+    justify-content: space-between;
+    padding-bottom:3em;
+
+    .fairymail-logo-container {
+        .fairymail-logo{
+            min-width: 220px;
+        }
+    }
+    .menu_upper, .menu_lower{
+        padding:0 2em;
+        min-width:220px;
+        text-align: left;
+
+        ul{
+            list-style: none;
+            padding:0;
+            li{
+                color:343037;
+                display: flex;
+                align-items: center;
+                margin-bottom:20px;
+            }
+            svg {
+                margin-right:10px;
+                path {
+                    fill: #343037;
+                }
+            }
+
+            li:hover, li.active{
+                color: rgba(255, 76, 73, 1);;
+                cursor:pointer;
+                svg path {
+                    fill:  rgba(255, 76, 73, 1);
+                }
+            }
+        }
+    }
+    .menu_bottom {
+        padding: 0 .5em;
+    }
+}
