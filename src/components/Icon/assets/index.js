@@ -4,11 +4,13 @@ import AlignRight from './align-right.svg?react'
 import Plus from './plus.svg?react'
 import Envelope from './envelope.svg?react'
 import Attention from './attention.svg?react'
+import ArrowDown from './arrow-down.svg?react'
 
 const icons = {
 	AlignCenter,
 	AlignLeft,
 	AlignRight,
+	ArrowDown,
 	Plus,
 	Envelope,
 	Attention,

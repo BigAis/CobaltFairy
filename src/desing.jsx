@@ -19,8 +19,36 @@ import Checkbox from './components/Checkbox'
 import RadioButton from './components/RadioButton'
 import NotificationBar from './components/NotificationBar/NotificationBar'
 import Slider from './components/Slider_ck/Slider'
+import Stat from './components/Stat/Stat'
 
 function Desing() {
+	const stats = [
+		{
+			label: 'Emails Sent',
+			value: '752',
+			percentage: -12,
+			defaultValue: false, // This will be the default selected option
+		},
+		{
+			label: 'Totals Clicks',
+			value: '159',
+			percentage: 17,
+			defaultValue: false,
+		},
+		{
+			label: 'Total Opens',
+			value: '340',
+			percentage: 19,
+			defaultValue: false,
+		},
+		{
+			label: 'Spam',
+			value: '85',
+			percentage: 5,
+			defaultValue: false,
+		},
+	]
+
 	const handleLeftClick = () => {
 		alert('Left action triggered!')
 	}
@@ -494,12 +522,10 @@ function Desing() {
 						</div>
 						<div className="d-flex flex-row gap-10">
 							{/* <p style={{ width: '100px' }}>Dropdown</p> */}
-							<Dropdown withDivider loading options={dropdownOptions}>
+							<Dropdown withDivider options={dropdownOptions}>
 								test
 							</Dropdown>
-							<Dropdown loading options={dropdownOptions}>
-								test
-							</Dropdown>
+							<Dropdown options={dropdownOptions}>test</Dropdown>
 						</div>
 					</div>
 				</div>
@@ -595,8 +621,14 @@ function Desing() {
 					</div>
 				</div>
 			</div>
-			<div className="main-wrapper d-flex gap-30" style={{width:'500px'}}>
+			<div className="main-wrapper d-flex gap-30" style={{ width: '500px' }}>
 				<Slider min={0} max={1500} defaultValue={0} step={100} staticTooltip={false} />
+			</div>
+			<div className="main-wrapper d-flex gap-30" style={{ width: '500px' }}>
+				<Stat stats={stats} hasChart={true} defaultLabel={'Emails Sent'} />
+				<Stat stats={stats} hasChart={true} defaultLabel={'Total Clicks'} />
+				<Stat stats={stats} hasChart={true} defaultLabel={'Total Opens'} />
+				<Stat stats={stats} hasChart={true} defaultLabel={'Spam'} />
 			</div>
 		</>
 	)
