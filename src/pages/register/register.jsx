@@ -41,6 +41,7 @@ const Register = () => {
   const checkForm = () => {
     if (!formData.password || formData.password.length < 6) {
       setPasswordError('Invalid Password')
+      setIsLoading(false);
       return false;   
     }
 
@@ -53,9 +54,16 @@ const Register = () => {
     setIsLoading(true);
     if (checkForm()) {
         try {
-              const respone = await registerUser(formData);
-              navigate("/dashboard");
-            } catch (error) {
+              const response = await registerUser(formData);
+              console.log(response);
+              if (response.data.code == 200) {
+                navigate("/dashboard");
+              } else {
+                if (response.data.code == 400) throw new Error("A user with this email already exists.");
+                else throw new Error("Registration failed. Please try again.");
+              }
+            }
+             catch (error) {
               console.error("Error during Registration:", error);
               alert("Something went wrong during Registration.");
             } finally {

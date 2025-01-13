@@ -37,7 +37,7 @@ export const checkUserExists = async (useremail) => {
     const BASE_URL = 'https://fairymail.cobaltfairy.com/api/register-user';
 
     try{
-      const data = await axios.post(`${BASE_URL}`,{
+      const response = await axios.post(`${BASE_URL}`,{
         "email": user.email,
         "password": user.password,
         "accountName": user.accountName,
@@ -46,8 +46,9 @@ export const checkUserExists = async (useremail) => {
         "newsletter": user.sendNews
     })
 
-      saveDataToLocalStorage(data);
-
+      saveDataToLocalStorage(response);
+      console.log(response)
+      return response;
       }catch(error){
         throw new Error("Error during  request", error);
       }
@@ -61,9 +62,9 @@ export const checkUserExists = async (useremail) => {
     };
 
     const serialized = encodeURIComponent(JSON.stringify(dataToStore));
-    localStorage.setItem('data', serialized);
+    localStorage.setItem('fairymail_session', serialized);
 
-    const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('data')));
+    const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')));
     console.log(unserialized);
 
-  }
+  } 

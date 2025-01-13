@@ -27,6 +27,7 @@ const LogIn = () => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
 	}
 
+
   const checkEmail = async () => {
     setIsLoading(true);
 
@@ -34,6 +35,7 @@ const LogIn = () => {
 
     if(!email || !emailRegex.test(email)) {
       setEmailError('Please type a valid email address.');
+      setIsLoading(false);
       return
     }
     try {
@@ -54,11 +56,13 @@ const LogIn = () => {
 
     if (!password || password.length < 6) {
       setPasswordError('Invalid Password')
+      setIsLoading(false);
+
       return
     }
     try {
       const respone = await checkUserCrendentials(email,password);
-      navigate("/dashboard");
+      navigate("/login/2FA");
     } catch (error) {
       console.error("Error during login:", error);
       setNotifications([{ id: 1, message: 'Wrong Crendetials.', type: 'warning' }])
@@ -74,7 +78,7 @@ const LogIn = () => {
   return (
     <div className="login-wrapper">
       <Logo />
-      <Card>
+      <Card className="card">
         <div className="container">
           {!isValidUser ? (
             <>
@@ -104,7 +108,7 @@ const LogIn = () => {
                   }}
                 >
                   <InputText
-                    onChange={(e) => {setEmail(e.target.value);setEmailError('')}}
+                    onChange={(e) => {setEmail(e.target.value);setEmailError('');setIsLoading(false);}}
                     placeholder="Enter your email"
                     label="Enter your email"
                     hasError={emailError.length>0}
