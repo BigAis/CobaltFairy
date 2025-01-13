@@ -56,7 +56,6 @@ const LogIn = () => {
       setPasswordError('Invalid Password')
       return
     }
-
     try {
       const respone = await checkUserCrendentials(email,password);
       navigate("/dashboard");

@@ -4,7 +4,6 @@ export const checkUserExists = async (useremail) => {
   
   const BASE_URL = 'https://fairymail.cobaltfairy.com/api/check-user-exists';
 
-  console.log("HELLO WORJD" + useremail)
     try {
       const response = await axios.post(`${BASE_URL}`, {
           "email": useremail
@@ -24,14 +23,47 @@ export const checkUserExists = async (useremail) => {
               "identifier": useremail,
               "password": password
           })
-          let serialized = encodeURIComponent(JSON.stringify(data));
-          localStorage.setItem('user',serialized);
 
-          let unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('user')))
-          console.log(unserialized);
+          saveDataToLocalStorage(data);
 
-          localStorage.setItem('jwtToken', data.data.jwt )
         }catch(error){
           throw new Error("Error during  request", error);
         }
     }  
+
+    
+  export const registerUser = async (user) =>{
+
+    const BASE_URL = 'https://fairymail.cobaltfairy.com/api/register-user';
+
+    try{
+      const data = await axios.post(`${BASE_URL}`,{
+        "email": user.email,
+        "password": user.password,
+        "accountName": user.accountName,
+        "firstName": user.firstName,
+        "lastName": user.lastName,
+        "newsletter": user.sendNews
+    })
+
+      saveDataToLocalStorage(data);
+
+      }catch(error){
+        throw new Error("Error during  request", error);
+      }
+  }  
+
+  const saveDataToLocalStorage = (response) =>{
+
+    const dataToStore = {
+      jwt: response.data.jwt,
+      user: response.data.user, 
+    };
+
+    const serialized = encodeURIComponent(JSON.stringify(dataToStore));
+    localStorage.setItem('data', serialized);
+
+    const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('data')));
+    console.log(unserialized);
+
+  }

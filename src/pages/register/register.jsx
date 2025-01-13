@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './register.scss';
 import InputText from '../../components/InputText/InputText';
@@ -8,6 +8,7 @@ import Button from '../../components/Button';
 import Card from '../../components/Card';
 import Logo from '../../components/Logo/Logo';
 import Icon from '../../components/Icon/Icon';
+import { registerUser } from '../../service/api-service';
 
 const Register = () => {
 
@@ -16,17 +17,26 @@ const Register = () => {
   const location = useLocation(); 
   const data = location.state; 
 
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError,setPasswordError] = useState('')
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     accountName: '',
+    email: '',
     password: '',
+    sendNews: false
   });
 
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [sendNews, setSendNews] = useState(false);
+
+  useEffect(() =>{
+    console.log(formData)
+    if (data?.email) {
+      setFormData((prev) => ({ ...prev, email: data.email }));
+    }
+  },[data]) 
 
   const checkForm = () => {
     if (!formData.password || formData.password.length < 6) {
@@ -38,13 +48,23 @@ const Register = () => {
   };
 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     if (checkForm()) {
-      console.log(checkForm());
+        try {
+              const respone = await registerUser(formData);
+              navigate("/dashboard");
+            } catch (error) {
+              console.error("Error during Registration:", error);
+              alert("Something went wrong during Registration.");
+            } finally {
+              setIsLoading(false);
+            }
     } else {
       console.error(checkForm());
     }
+   
   };
 
   const handleChange = (e) => {
@@ -70,7 +90,7 @@ const Register = () => {
           <header>
             <h1>Welcome</h1>
             <p>Complete the account for the email</p>
-            <p>{data.email}</p>
+            <p>{formData.email}</p>
           </header>
         </div>
 
@@ -135,12 +155,11 @@ const Register = () => {
 
             <div className="checkbox-group">
               <label className='checkbox-text'>
-              <Checkbox checked={sendNews} onChange={()=> setSendNews(!sendNews)}  label="Send me news and offers"></Checkbox>
-
+                <Checkbox checked={formData.sendNews} onChange={() =>{setFormData((prev) => ({ ...prev, ['sendNews']: !prev['sendNews'] }))}}  label="Send me news and offers"></Checkbox>
               </label>
             </div>
           </div>
-            <Button className="complete-button" disabled={!acceptTerms}>Complete</Button>
+            <Button className="complete-button" disabled={!acceptTerms || isLoading }  loading={isLoading}>Complete</Button>
             </form>
         </div>
         
