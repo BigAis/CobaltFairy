@@ -1,0 +1,116 @@
+.two-factor-login-component {
+  display: flex;
+  align-items: center;
+  min-height: 80vh;
+  background-color: #FFF1DF;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2em 0;
+
+  
+
+  .input-text-wrapper {
+    .floating-label {
+      top: calc(50% - 8px);
+    }
+    &:focus + .floating-label,
+    &:not(:placeholder-shown) + .floating-label {
+      top: 14px !important;
+    }
+  }
+
+  .card {
+    width: 100%;
+    max-width: 450px;
+    padding: 40px;
+  }
+
+  .code-input-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    position: relative;
+    padding-left: 10px;
+
+    .code-box {
+      width: 65px;
+      height: 50px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+      background: #f9f9f9;
+      transition: border-color 0.3s;
+
+      &:focus,
+      &:hover {
+        border-color: #e45016;
+      }
+    }
+
+    .hidden-input {
+      position: absolute;
+      opacity: 0;
+      width: 240px;
+      height: 50px;
+      cursor: pointer;
+    }
+  }
+
+  .back-button {
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  .complete-button {
+    margin-top: 10px;
+    padding: 12px;
+    background-color: rgba(255, 195, 173, 0.5);
+    color: #333;
+    border: 2px solid #FF635D;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    width: 100%;
+    transition: background-color 0.3s;
+    position: relative; 
+  }
+
+  .complete-button:hover {
+    background-color: rgba(255, 195, 173, 0.8);
+    border-color: #FF2A1E;
+  }
+
+  .change-email {
+    position: absolute;
+    right: 43px; 
+    font-size: 0.9rem; 
+    color: #333; 
+    cursor: pointer;
+    &:hover {
+      color: #e45016; 
+    }
+  }
+
+  h1 {
+    font-family: "Bitter", serif;
+    font-weight: bold;
+    font-size: 32px; 
+    margin-bottom: 10px; 
+    color: #333; 
+  }
+
+  p {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 16px; 
+    margin-top: 0;
+    margin-bottom: 10px; 
+    color: #333; 
+  }
+}

@@ -17,6 +17,7 @@
 		}
     }
     .card{
+       
         width: 100%;
         max-width: 450px;
         padding: 40px;
@@ -245,9 +246,13 @@
 
     .login-wrapper {
         padding: 20px;
-        background-color: #FFF1DF; 
+        background-color: #FFF1DF;
     }
 
+    .card{
+        background-color: #FFF1DF;
+        border: 0;
+    }
     .email-form {
         display: flex;
         flex-direction: column;

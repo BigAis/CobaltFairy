@@ -62,7 +62,7 @@ const LogIn = () => {
     }
     try {
       const respone = await checkUserCrendentials(email,password);
-      navigate("/login/2FA");
+      navigate("/login/2FA", { state: { email } });
     } catch (error) {
       console.error("Error during login:", error);
       setNotifications([{ id: 1, message: 'Wrong Crendetials.', type: 'warning' }])
