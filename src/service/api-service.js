@@ -65,6 +65,5 @@ export const checkUserExists = async (useremail) => {
     localStorage.setItem('fairymail_session', serialized);
 
     const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')));
-    console.log(unserialized);
 
   } 

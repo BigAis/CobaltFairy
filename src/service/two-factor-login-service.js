@@ -27,7 +27,7 @@ export const generate2FA = async () => {
             const jtwToken = fairymail_session.jwt
           try {
             const response = await axios.post(`${BASE_URL}`,  {
-               body:{ confirmationToken: code_2FA  }       
+               confirmationToken: code_2FA      
               },
               {
                 headers: {

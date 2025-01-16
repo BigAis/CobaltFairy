@@ -22,7 +22,7 @@
   .card {
     width: 100%;
     max-width: 450px;
-    padding: 40px;
+    padding: 50px;
   }
 
   .code-input-wrapper {
@@ -88,9 +88,22 @@
 
   .change-email {
     position: absolute;
-    right: 43px; 
+    right: 52px; 
     font-size: 0.9rem; 
     color: #333; 
+    margin-top: 10px;
+    cursor: pointer;
+    &:hover {
+      color: #e45016; 
+    }
+  }
+
+  .resend-code {
+    position: absolute;
+    left: 52px; 
+    font-size: 0.9rem; 
+    color: #333; 
+    margin-top: 10px;
     cursor: pointer;
     &:hover {
       color: #e45016; 
@@ -101,7 +114,6 @@
     font-family: "Bitter", serif;
     font-weight: bold;
     font-size: 32px; 
-    margin-bottom: 10px; 
     color: #333; 
   }
 
@@ -110,7 +122,6 @@
     font-weight: 500;
     font-size: 16px; 
     margin-top: 0;
-    margin-bottom: 10px; 
-    color: #333; 
+    color: #777; 
   }
 }

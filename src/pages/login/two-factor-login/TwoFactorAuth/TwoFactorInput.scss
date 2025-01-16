@@ -1,0 +1,46 @@
+.TwoFactorAuth {
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .inputsContainer {
+    display: flex;
+    justify-content: space-between;
+    width: 108%;
+  }
+
+  .codeInputCellContainer {
+    height: 50px;
+    width: 50px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #DAD1C5;
+    margin: 0 5px;
+    background-color: rgba(255, 255, 255, 0.5);;
+  }
+
+  .codeInputCellContainer.focused {
+    border-color: rgb(218, 30, 30);
+  }
+
+  .codeInputCellContainer span {
+    font-size: 1rem; 
+    color: gray;
+  }
+
+
+
+  .hiddenCodeInput {
+    position: absolute;
+    height: 0;
+    width: 0;
+    opacity: 0;
+  }
+}
