@@ -20,8 +20,7 @@ const LogIn = () => {
   const [isValidUser, setIsValidUser] = useState(false);
   const navigate = useNavigate();
 
-	const [notifications, setNotifications] = useState([
-	])
+	const [notifications, setNotifications] = useState([])
 
 	const handleRemoveNotification = (id) => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
@@ -77,6 +76,16 @@ const LogIn = () => {
 
   return (
     <div className="login-wrapper">
+      <div style={{position:'fixed',left:0,right:0,top:0,background:'white'}}>
+        {notifications.map((notification) => (
+          <NotificationBar
+            key={notification.id}
+            message={notification.message}
+            type={notification.type} 
+            onClose={() => handleRemoveNotification(notification.id)} 
+          />
+        ))}
+      </div>
       <Logo />
       <Card className="card">
         <div className="container">
@@ -129,24 +138,6 @@ const LogIn = () => {
                 icon="Caret"
                 >Back
                 </Button>
-
-                <div className="d-flex flex-column gap-20">
-                            <div className="d-flex flex-row gap-10">
-                              <p style={{ width: '60px' }}></p>
-                              <div style={{ display: 'flex' }}>
-                                <div>
-                                  {notifications.map((notification) => (
-                                    <NotificationBar
-                                      key={notification.id}
-                                      message={notification.message}
-                                      type={notification.type} 
-                                      onClose={() => handleRemoveNotification(notification.id)} 
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
 
 
               <div className="header-info">
