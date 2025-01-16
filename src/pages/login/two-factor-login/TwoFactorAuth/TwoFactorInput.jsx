@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import Icon from '../../../../components/Icon/Icon';
 import './TwoFactorInput.scss';
 
 const CELL_COUNT = 6;
 
-const TwoFactorInput = ({ value, onChange }) => {
+const TwoFactorInput = ({ value, onChange, onIncompleteSubmit }) => {
   const ref = useRef(null);
+  const [isError, setIsError] = useState(false);
 
   const codeDigitsArray = new Array(CELL_COUNT).fill(0);
 
@@ -17,7 +19,9 @@ const TwoFactorInput = ({ value, onChange }) => {
     const isCodeFull = value?.length === CELL_COUNT;
 
     const isFocused = isCurrentDigit || (isLastDigit && isCodeFull);
-    const containerStyle = isFocused
+    const containerStyle = isError
+      ? 'codeInputCellContainer error'
+      : isFocused
       ? 'codeInputCellContainer focused'
       : 'codeInputCellContainer';
 
@@ -33,14 +37,24 @@ const TwoFactorInput = ({ value, onChange }) => {
   };
 
   const handleInputChange = (e) => {
-    const input = e.target.value.replace(/[^0-9]/g, ''); 
+    const input = e.target.value.replace(/[^0-9]/g, '');
     if (input.length <= CELL_COUNT) {
-      onChange(input); 
+      onChange(input);
+      setIsError(false); // Reset error state on input change
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (value.length < CELL_COUNT) {
+        setIsError(true);
+        onIncompleteSubmit(); // Trigger incomplete submission handling
+      }
     }
   };
 
   useEffect(() => {
-    ref.current.focus(); 
+    ref.current.focus();
   }, []);
 
   return (
@@ -51,11 +65,13 @@ const TwoFactorInput = ({ value, onChange }) => {
           ref={ref}
           value={value}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           type="text"
           maxLength={CELL_COUNT}
           className="hiddenCodeInput"
         />
       </div>
+      {isError && <p className="error-message"><Icon name="Attention" size={16} />Please enter all 6 digits.</p>}
     </div>
   );
 };

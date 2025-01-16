@@ -44,7 +44,7 @@ const LogIn = () => {
         : navigate("/register", { state: { email } });
     } catch (error) {
       console.error("Error during login:", error);
-      alert("Something went wrong during login.");
+      setEmailError('Oops... Something Went Wrong.');
     } finally {
       setIsLoading(false);
     }
@@ -147,9 +147,12 @@ const LogIn = () => {
                   <p>{email}</p>
                 </header>
               </div>
-
+              <form onSubmit={(e) => {
+                    e.preventDefault();
+                  }}>
               <div className="input-rows">
                 <div className="input-groups">
+              
 
                   <InputText
                     className="user-password"
@@ -184,11 +187,11 @@ const LogIn = () => {
                   label="Remember Me"
                 ></Checkbox>
               </label>
-
+             
               <Button onClick={() => {checkValidPassword()}} className="complete-button" disabled={isLoading} loading={isLoading} type="submit">
                     Continue
                </Button>
-               
+               </form>
             </>
           )}
         </div>

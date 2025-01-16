@@ -4,17 +4,27 @@ import Card from "../../../components/Card";
 import Button from "../../../components/Button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { generate2FA, verify2FA } from "../../../service/two-factor-login-service";
+import { registerUser } from "../../../service/api-service";
 import TwoFactorInput from "./TwoFactorAuth/TwoFactorInput";
+import NotificationBar from "../../../components/NotificationBar/NotificationBar";
 import "./two-factor-login.scss";
 
 const TwoFactorLogin = () => {
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30); // Timer for resend
+  const [timeLeft, setTimeLeft] = useState(30); 
   const [canResend, setCanResend] = useState(false);
   const location = useLocation();
+  const [notifications, setNotifications] = useState([])
+  
   const data = location.state;
+  const form = location.state?.formData || null; 
+
   const navigate = useNavigate();
+
+  const handleRemoveNotification = (id) => {
+		setNotifications((prev) => prev.filter((n) => n.id !== id))
+	}
 
   useEffect(() => {
     const generateCode = async () => {
@@ -23,7 +33,7 @@ const TwoFactorLogin = () => {
         console.log("Code sent successfully.");
       } catch (error) {
         console.error("Error during generating 2FA:", error);
-        alert("Something went wrong during 2FA.");
+        setNotifications([{ id: 1, message: 'Something went Wrong', type: 'warning' }])
       }
     };
 
@@ -46,8 +56,26 @@ const TwoFactorLogin = () => {
 
   const handleResend = async () => {
     if (!canResend) return;
-    generateCode();
-    
+
+    try {
+      await generate2FA();
+      setNotifications([{ id: 1, message: 'New One-Time Code Send Succesfully.', type: 'default' }])
+      setTimeLeft(30);
+      setCanResend(false);
+      setCode("")
+
+      const timerInterval = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev > 1) return prev - 1;
+          clearInterval(timerInterval);
+          setCanResend(true);
+          return 0;
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("Error during resend:", error);
+      setNotifications([{ id: 1, message: 'Something went Wrong', type: 'warning' }])
+    }
   };
 
   const handleSubmit = async () => {
@@ -55,23 +83,48 @@ const TwoFactorLogin = () => {
       setIsLoading(true);
       try {
         const response = await verify2FA(code);
-        if (response.code !== 200) {
-          throw new Error("Verification failed. Please try again.");
-        }
-        navigate("/dashboard");
+        
+        if (response.code == 400) throw new Error("Wrong Verification code. Please try again.");
+        
+        if(form.length>0 && form != null){
+        try {
+              const response = await registerUser(form);
+              console.log(response);
+              if (response.data.code == 200) {
+                navigate("/dashboard");
+              } else {
+                if (response.data.code == 400) throw new Error("A user with this email already exists.");
+                else throw new Error("Registration failed. Please try again.");
+              }
+            }
+             catch (error) {
+              console.error("Error during Registration:", error);
+              setNotifications([{ id: 1, message: 'Something went Wrong', type: 'warning' }])
+            } finally {
+              setIsLoading(false);
+            }
+          } else navigate("/dashboard");
+
       } catch (error) {
-        console.error("Error during verification:", error);
-        alert("Something went wrong during 2FA.");
+        setNotifications([{ id: 1, message: `${error}`, type: 'warning' }])
       } finally {
         setIsLoading(false);
       }
-    } else {
-      alert("Please enter a 6-digit code.");
-    }
+    } 
   };
 
   return (
     <div className="two-factor-login-component">
+            <div style={{position:'fixed',left:0,right:0,top:0,background:'white'}}>
+              {notifications.map((notification) => (
+                <NotificationBar
+                  key={notification.id}
+                  message={notification.message}
+                  type={notification.type} 
+                  onClose={() => handleRemoveNotification(notification.id)} 
+                />
+              ))}
+            </div>
       <Logo />
       <Card>
         <Button
@@ -86,7 +139,7 @@ const TwoFactorLogin = () => {
         </Button>
         <h1>Enter One-Time Code</h1>
         <p>A one-time code has been sent to:</p>
-        <p>{data?.email ? data?.email : "demo@cobaltfairy.com"}</p>
+        <p>{data?.email}</p>
         <form
           className="email-form"
           onSubmit={(e) => {
@@ -97,9 +150,11 @@ const TwoFactorLogin = () => {
           <TwoFactorInput value={code} onChange={setCode} />
           <Button
             className="complete-button"
-            onClick={handleSubmit}
             disabled={isLoading}
             loading={isLoading}
+            onIncompleteSubmit={() => {
+              console.log("Code is incomplete!"); // Add any logging or analytics here
+            }}
           >
             Complete
           </Button>

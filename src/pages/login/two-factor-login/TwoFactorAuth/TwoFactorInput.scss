@@ -23,8 +23,23 @@
     align-items: center;
     border: 2px solid #DAD1C5;
     margin: 0 5px;
-    background-color: rgba(255, 255, 255, 0.5);;
+    background-color: rgba(255, 255, 255, 0.5);
   }
+
+  .codeInputCellContainer.error {
+    border-color: rgb(255, 166, 0);
+  }
+  
+  .error-message {
+		margin-top: 4px;
+		font-size: 14px;
+		color: rgba(255, 166, 0, 1);
+		font-weight: 500px;
+		line-height: 16.94px;
+		path{
+			fill:rgba(255, 166, 0, 1)!important;
+		}
+	}
 
   .codeInputCellContainer.focused {
     border-color: rgb(218, 30, 30);

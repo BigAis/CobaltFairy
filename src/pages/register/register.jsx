@@ -53,22 +53,7 @@ const Register = () => {
     e.preventDefault();
     setIsLoading(true);
     if (checkForm()) {
-        try {
-              const response = await registerUser(formData);
-              console.log(response);
-              if (response.data.code == 200) {
-                navigate("/dashboard");
-              } else {
-                if (response.data.code == 400) throw new Error("A user with this email already exists.");
-                else throw new Error("Registration failed. Please try again.");
-              }
-            }
-             catch (error) {
-              console.error("Error during Registration:", error);
-              alert("Something went wrong during Registration.");
-            } finally {
-              setIsLoading(false);
-            }
+      navigate("/login/2FA", { state: { formData } });
     } else {
       console.error(checkForm());
     }
