@@ -9,6 +9,7 @@ import Checkbox from "../../components/Checkbox";
 import Card from "../../components/Card";
 import Icon from "../../components/Icon/Icon";
 import NotificationBar from "../../components/NotificationBar/NotificationBar";
+import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const LogIn = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +19,8 @@ const LogIn = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isValidUser, setIsValidUser] = useState(false);
+  const [token, setToken] = useState("");
+  const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
   const navigate = useNavigate();
 
 	const [notifications, setNotifications] = useState([])
@@ -26,6 +29,9 @@ const LogIn = () => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
 	}
 
+  const setTokenFunc = (getToken) => {
+    setToken(getToken);
+  };
 
   const checkEmail = async () => {
     setIsLoading(true);
@@ -60,10 +66,11 @@ const LogIn = () => {
       return
     }
     try {
-      const respone = await checkUserCrendentials(email,password);
+      const respone = await checkUserCrendentials(email, password, token );
       navigate("/login/2FA", { state: { email } });
     } catch (error) {
       console.error("Error during login:", error);
+      setRefreshReCaptcha(!refreshReCaptcha);
       setNotifications([{ id: 1, message: 'Wrong Crendetials.', type: 'warning' }])
         } finally {
       setIsLoading(false);
@@ -75,6 +82,11 @@ const LogIn = () => {
 
 
   return (
+    <GoogleReCaptchaProvider reCaptchaKey={"6LcZZbkqAAAAAKGBvr79Mj42sMIQf86Z7A31xdbo"}>
+    <GoogleReCaptcha className="google-recaptcha-custom-class"
+      onVerify={setTokenFunc}
+      refreshReCaptcha={refreshReCaptcha}
+/>
     <div className="login-wrapper">
       <div style={{position:'fixed',left:0,right:0,top:0,background:'white'}}>
         {notifications.map((notification) => (
@@ -174,7 +186,10 @@ const LogIn = () => {
                   >
                     <Icon name="Eye" size={25}/>
                   </button>
-                  <p className="forgot-password">Forgot Password</p>
+                  <p className="forgot-password"
+                    onClick={()=>{navigate("/login/2FA", { state: { email , changePassword: true} })}}>
+                      Forgot Password
+                  </p>
                 </div>             
               </div>
               
@@ -197,6 +212,7 @@ const LogIn = () => {
         </div>
       </Card>
     </div>
+    </GoogleReCaptchaProvider>
   );
 };
 

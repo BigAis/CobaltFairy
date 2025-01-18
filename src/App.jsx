@@ -4,6 +4,7 @@ import LogIn from './pages/login/login'
 import User from './pages/register/register'
 import Desing from './desing'
 import TwoFactorLogin from './pages/login/two-factor-login/two-factor-login'
+import ResetPassword from './pages/resetPassword/reset-password'
 function App() {
 	return (
 		<div className="App">
@@ -14,6 +15,7 @@ function App() {
 				<Route path="/login/2FA" element={<TwoFactorLogin />} />
 				<Route path="/register" element={<User />} />
 				<Route path="/design" element={<Desing />} />
+				<Route path="/reset-password" element={<ResetPassword/>}/>
 			</Routes>
 		</div>
 	)

@@ -8,7 +8,7 @@ import Button from '../../components/Button';
 import Card from '../../components/Card';
 import Logo from '../../components/Logo/Logo';
 import Icon from '../../components/Icon/Icon';
-import { registerUser } from '../../service/api-service';
+import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const Register = () => {
 
@@ -16,7 +16,8 @@ const Register = () => {
 
   const location = useLocation(); 
   const data = location.state; 
-
+  const [token, setToken] = useState("");
+  const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError,setPasswordError] = useState('')
@@ -38,6 +39,10 @@ const Register = () => {
     }
   },[data]) 
 
+  const setTokenFunc = (getToken) => {
+    setToken(getToken);
+  };
+
   const checkForm = () => {
     if (!formData.password || formData.password.length < 6) {
       setPasswordError('Invalid Password')
@@ -53,7 +58,7 @@ const Register = () => {
     e.preventDefault();
     setIsLoading(true);
     if (checkForm()) {
-      navigate("/login/2FA", { state: { formData } });
+      navigate("/login/2FA", { state: { email: data.email } });
     } else {
       console.error(checkForm());
     }
@@ -68,6 +73,11 @@ const Register = () => {
   
 
   return (
+    <GoogleReCaptchaProvider reCaptchaKey={"6LcZZbkqAAAAAKGBvr79Mj42sMIQf86Z7A31xdbo"}>
+    <GoogleReCaptcha className="google-recaptcha-custom-class"
+      onVerify={setTokenFunc}
+      refreshReCaptcha={refreshReCaptcha}
+/>
     <div className="register-wrapper">
       <Logo/>
       <Card>
@@ -158,6 +168,8 @@ const Register = () => {
         
       </Card>
     </div>
+    </GoogleReCaptchaProvider>
+
   );
 };
 

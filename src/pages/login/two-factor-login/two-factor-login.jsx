@@ -3,8 +3,8 @@ import Logo from "../../../components/Logo/Logo";
 import Card from "../../../components/Card";
 import Button from "../../../components/Button";
 import { useLocation, useNavigate } from "react-router-dom";
-import { generate2FA, verify2FA } from "../../../service/two-factor-login-service";
-import { registerUser } from "../../../service/api-service";
+import { registerUser, generate2FA, verify2FA } from "../../../service/api-service";
+import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
 import TwoFactorInput from "./TwoFactorAuth/TwoFactorInput";
 import NotificationBar from "../../../components/NotificationBar/NotificationBar";
 import "./two-factor-login.scss";
@@ -16,15 +16,22 @@ const TwoFactorLogin = () => {
   const [canResend, setCanResend] = useState(false);
   const location = useLocation();
   const [notifications, setNotifications] = useState([])
+  const [token, setToken] = useState("");
+  const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
   
   const data = location.state;
   const form = location.state?.formData || null; 
+  const changePassword = location.state?.changePassword || false;
 
   const navigate = useNavigate();
 
   const handleRemoveNotification = (id) => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
 	}
+
+  const setTokenFunc = (getToken) => {
+    setToken(getToken);
+  };
 
   useEffect(() => {
     const generateCode = async () => {
@@ -82,29 +89,16 @@ const TwoFactorLogin = () => {
     if (code.length === 6) {
       setIsLoading(true);
       try {
-        const response = await verify2FA(code);
+        const response = await verify2FA(code, token);
         
         if (response.code == 400) throw new Error("Wrong Verification code. Please try again.");
-        
-        if(form.length>0 && form != null){
-        try {
-              const response = await registerUser(form);
-              console.log(response);
-              if (response.data.code == 200) {
-                navigate("/dashboard");
-              } else {
-                if (response.data.code == 400) throw new Error("A user with this email already exists.");
-                else throw new Error("Registration failed. Please try again.");
-              }
-            }
-             catch (error) {
-              console.error("Error during Registration:", error);
-              setNotifications([{ id: 1, message: 'Something went Wrong', type: 'warning' }])
-            } finally {
-              setIsLoading(false);
-            }
-          } else navigate("/dashboard");
 
+        if(form != null && form.length>0 ){
+            registerUser();
+          } else if(data.changePassword = true){
+            navigate("/reset-password", { state: { email: data.email } } );
+          }
+          
       } catch (error) {
         setNotifications([{ id: 1, message: `${error}`, type: 'warning' }])
       } finally {
@@ -113,7 +107,33 @@ const TwoFactorLogin = () => {
     } 
   };
 
+  const registerUser = async () =>{
+    try {
+      const response = await registerUser(form, GoogleAuthtoken);
+      console.log(response);
+      if (response.data.code == 200) {
+        navigate("/dashboard");
+      } else {
+        if (response.data.code == 400) throw new Error("A user with this email already exists.");
+        else throw new Error("Registration failed. Please try again.");
+      }
+    }
+     catch (error) {
+      setRefreshReCaptcha(!refreshReCaptcha);
+      console.error("Error during Registration:", error);
+      setNotifications([{ id: 1, message: 'Something went Wrong', type: 'warning' }])
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
+
+        <GoogleReCaptchaProvider reCaptchaKey={"6LcZZbkqAAAAAKGBvr79Mj42sMIQf86Z7A31xdbo"}>
+        <GoogleReCaptcha className="google-recaptcha-custom-class"
+          onVerify={setTokenFunc}
+          refreshReCaptcha={refreshReCaptcha}
+    />
     <div className="two-factor-login-component">
             <div style={{position:'fixed',left:0,right:0,top:0,background:'white'}}>
               {notifications.map((notification) => (
@@ -181,6 +201,8 @@ const TwoFactorLogin = () => {
         </p>
       </Card>
     </div>
+    </GoogleReCaptchaProvider>
+
   );
 };
 
