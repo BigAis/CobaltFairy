@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Logo from "../../components/Logo/Logo";
 import InputText from "../../components/InputText/InputText";
-import { checkUserExists, checkUserCrendentials } from "../../service/api-service";
+import { checkUserExists, checkUserCrendentials, forgotPassword } from "../../service/api-service";
 import Checkbox from "../../components/Checkbox";
 import Card from "../../components/Card";
 import Icon from "../../components/Icon/Icon";
@@ -72,6 +72,24 @@ const LogIn = () => {
       console.error("Error during login:", error);
       setRefreshReCaptcha(!refreshReCaptcha);
       setNotifications([{ id: 1, message: 'Wrong Crendetials.', type: 'warning' }])
+        } finally {
+      setIsLoading(false);
+    }
+
+
+  }
+
+  const resetPassword = async  () => {
+    setIsLoading(true);
+
+  
+    try {
+      const respone = await forgotPassword(email);
+      navigate("/reset-password", { state: { email } });
+    } catch (error) {
+      console.error("Error during reset-password:", error);
+      setRefreshReCaptcha(!refreshReCaptcha);
+      setNotifications([{ id: 1, message: `${error}`, type: 'warning' }])
         } finally {
       setIsLoading(false);
     }
@@ -187,7 +205,7 @@ const LogIn = () => {
                     <Icon name="Eye" size={25}/>
                   </button>
                   <p className="forgot-password"
-                    onClick={()=>{navigate("/login/2FA", { state: { email , changePassword: true} })}}>
+                    onClick={()=>{resetPassword()}}>
                       Forgot Password
                   </p>
                 </div>             

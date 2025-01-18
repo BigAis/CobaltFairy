@@ -104,20 +104,12 @@ export const checkUserExists = async (useremail) => {
         };
 
 
-     export const forgotPassword = async (email, password) => {
+     export const forgotPassword = async (email) => {
         
-          const fairymail_session = unserializeLocalStorage()
-          const jtwToken = fairymail_session.jwt
         try {
-          const response = await axios.post(`${BASE_URL}//forgot-password`,  {
-            identifier: code_2FA      
-            },
-            {
-              headers: {
-                Authorization:  `Bearer ${jtwToken}`,
-              }
+          const response = await axios.post(`${BASE_URL}/forgot-password`,  {
+            identifier: email    
             });
-          return response.data;
         } catch (error) {
           throw new Error("Error during  request", error);
         }

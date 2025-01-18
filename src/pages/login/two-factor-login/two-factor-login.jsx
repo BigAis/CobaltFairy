@@ -21,7 +21,6 @@ const TwoFactorLogin = () => {
   
   const data = location.state;
   const form = location.state?.formData || null; 
-  const changePassword = location.state?.changePassword || false;
 
   const navigate = useNavigate();
 
@@ -95,8 +94,6 @@ const TwoFactorLogin = () => {
 
         if(form != null && form.length>0 ){
             registerUser();
-          } else if(data.changePassword = true){
-            navigate("/reset-password", { state: { email: data.email } } );
           }
           
       } catch (error) {
@@ -173,7 +170,7 @@ const TwoFactorLogin = () => {
             disabled={isLoading}
             loading={isLoading}
             onIncompleteSubmit={() => {
-              console.log("Code is incomplete!"); // Add any logging or analytics here
+              console.log("Code is incomplete!");
             }}
           >
             Complete
