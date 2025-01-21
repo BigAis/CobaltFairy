@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
+import "./two-factor-login.scss";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { generate2FA, verify2FA } from "../../../service/api-service";
 import Logo from "../../../components/Logo/Logo";
 import Card from "../../../components/Card";
 import Button from "../../../components/Button";
-import { useLocation, useNavigate } from "react-router-dom";
-import { registerUser, generate2FA, verify2FA } from "../../../service/api-service";
-import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
 import TwoFactorInput from "./TwoFactorAuth/TwoFactorInput";
 import NotificationBar from "../../../components/NotificationBar/NotificationBar";
-import "./two-factor-login.scss";
 
 const TwoFactorLogin = () => {
   const [code, setCode] = useState("");
@@ -16,21 +15,15 @@ const TwoFactorLogin = () => {
   const [canResend, setCanResend] = useState(false);
   const location = useLocation();
   const [notifications, setNotifications] = useState([])
-  const [token, setToken] = useState("");
-  const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
   
+  const navigate = useNavigate();
+
   const data = location.state;
   const form = location.state?.formData || null; 
-
-  const navigate = useNavigate();
 
   const handleRemoveNotification = (id) => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
 	}
-
-  const setTokenFunc = (getToken) => {
-    setToken(getToken);
-  };
 
   useEffect(() => {
     const generateCode = async () => {
@@ -106,7 +99,7 @@ const TwoFactorLogin = () => {
 
   const registerUser = async () =>{
     try {
-      const response = await registerUser(form, GoogleAuthtoken);
+      const response = await registerUser(form, GoogleAuthtoken, null);
       console.log(response);
       if (response.data.code == 200) {
         navigate("/dashboard");
@@ -126,11 +119,6 @@ const TwoFactorLogin = () => {
 
   return (
 
-        <GoogleReCaptchaProvider reCaptchaKey={"6LcZZbkqAAAAAKGBvr79Mj42sMIQf86Z7A31xdbo"}>
-        <GoogleReCaptcha className="google-recaptcha-custom-class"
-          onVerify={setTokenFunc}
-          refreshReCaptcha={refreshReCaptcha}
-    />
     <div className="two-factor-login-component">
             <div style={{position:'fixed',left:0,right:0,top:0,background:'white'}}>
               {notifications.map((notification) => (
@@ -198,7 +186,6 @@ const TwoFactorLogin = () => {
         </p>
       </Card>
     </div>
-    </GoogleReCaptchaProvider>
 
   );
 };

@@ -1,15 +1,16 @@
 import "./login.scss";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
+import { checkUserExists, checkUserCrendentials, forgotPassword, googleLogIn } from "../../service/api-service";
+import { useGoogleLogin  } from '@react-oauth/google';
 import Button from "../../components/Button";
 import Logo from "../../components/Logo/Logo";
 import InputText from "../../components/InputText/InputText";
-import { checkUserExists, checkUserCrendentials, forgotPassword } from "../../service/api-service";
 import Checkbox from "../../components/Checkbox";
 import Card from "../../components/Card";
 import Icon from "../../components/Icon/Icon";
 import NotificationBar from "../../components/NotificationBar/NotificationBar";
-import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const LogIn = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,19 +20,15 @@ const LogIn = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isValidUser, setIsValidUser] = useState(false);
-  const [token, setToken] = useState("");
+  const [reCaptchaToken, setReCaptchaToken] = useState("");
   const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
-  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([])
 
-	const [notifications, setNotifications] = useState([])
+  const navigate = useNavigate();
 
 	const handleRemoveNotification = (id) => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
 	}
-
-  const setTokenFunc = (getToken) => {
-    setToken(getToken);
-  };
 
   const checkEmail = async () => {
     setIsLoading(true);
@@ -43,66 +40,73 @@ const LogIn = () => {
       setIsLoading(false);
       return
     }
-    try {
+
       const respone = await checkUserExists(email);
-      respone.exists
-        ? setIsValidUser(true)
-        : navigate("/register", { state: { email } });
-    } catch (error) {
-      console.error("Error during login:", error);
-      setEmailError('Oops... Something Went Wrong.');
-    } finally {
+      console.log(respone)
+      respone ? setIsValidUser(true) : navigate("/register", { state: { email } });
+
       setIsLoading(false);
-    }
+    
   };
 
   const checkValidPassword = async  () => {
-    setIsLoading(true);
+     setIsLoading(true);
 
-    if (!password || password.length < 6) {
-      setPasswordError('Invalid Password')
+      if (!password || password.length < 6) {
+        setPasswordError('Invalid Password')
+        setIsLoading(false);
+        return
+      }
+
+      const respone = await checkUserCrendentials(email, password, reCaptchaToken );
+      if(respone === true){ navigate("/login/2FA", { state: { email } });
+       }else{
+          console.error();
+          setRefreshReCaptcha(!refreshReCaptcha);
+          setNotifications([{ id: 1, message: 'Wrong Crendetials.', type: 'warning' }])
+        }
+
       setIsLoading(false);
-
-      return
-    }
-    try {
-      const respone = await checkUserCrendentials(email, password, token );
-      navigate("/login/2FA", { state: { email } });
-    } catch (error) {
-      console.error("Error during login:", error);
-      setRefreshReCaptcha(!refreshReCaptcha);
-      setNotifications([{ id: 1, message: 'Wrong Crendetials.', type: 'warning' }])
-        } finally {
-      setIsLoading(false);
-    }
-
-
-  }
+  };
 
   const resetPassword = async  () => {
     setIsLoading(true);
-
-  
-    try {
+    
       const respone = await forgotPassword(email);
-      navigate("/reset-password", { state: { email } });
-    } catch (error) {
-      console.error("Error during reset-password:", error);
-      setRefreshReCaptcha(!refreshReCaptcha);
-      setNotifications([{ id: 1, message: `${error}`, type: 'warning' }])
-        } finally {
-      setIsLoading(false);
-    }
+      if(respone === true){
+        setNotifications([{ id: 1, message: `We've sent you an email with a password reset link, Please check your inbox and follow the instructions.`, type: 'default' }])
+      }else{
+        setNotifications([{ id: 1, message: `${error}`, type: 'warning' }])
+        setRefreshReCaptcha(!refreshReCaptcha);
+      }
+    setIsLoading(false);
+    
+  };
 
+  const login = useGoogleLogin({
+    onSuccess: tokenResponse => googleSignIn(tokenResponse),
+  });
 
-  }
-
-
+    const googleSignIn = async (tokenResponse) => {
+       setIsLoading(true);
+  
+        const respone = await googleLogIn(tokenResponse);
+       
+        if(respone.data.code == 200){
+          navigate("/dashboard")
+        }else if(respone.data.code == 201){
+          navigate("/register", { state: { isGoogleSignIn: true, userData: respone.data.data, googleSignInToken: tokenResponse } })
+        }  
+        setIsLoading(false);
+      
+      
+      
+    };
 
   return (
     <GoogleReCaptchaProvider reCaptchaKey={"6LcZZbkqAAAAAKGBvr79Mj42sMIQf86Z7A31xdbo"}>
     <GoogleReCaptcha className="google-recaptcha-custom-class"
-      onVerify={setTokenFunc}
+      onVerify={setReCaptchaToken}
       refreshReCaptcha={refreshReCaptcha}
 />
     <div className="login-wrapper">
@@ -128,7 +132,8 @@ const LogIn = () => {
                 </header>
               </div>
               <div className="login-options">
-                <button className="google-login-btn">
+                <button className="google-login-btn"
+                  onClick={() => login()}>
                   <img
                     className="google-logo"
                     alt="Google Logo"
@@ -169,21 +174,20 @@ const LogIn = () => {
                 >Back
                 </Button>
 
-
               <div className="header-info">
                 <header>
                   <h1>Welcome</h1>
-                  <p>Complete the account for the email</p>
+                  <p>Type in the password for the account</p>
                   <p>{email}</p>
                 </header>
               </div>
+
               <form onSubmit={(e) => {
                     e.preventDefault();
                   }}>
               <div className="input-rows">
                 <div className="input-groups">
               
-
                   <InputText
                     className="user-password"
                     placeholder="Password"
@@ -194,6 +198,7 @@ const LogIn = () => {
                     style={{width:'100%'}}
                     onChange={(e) => {setPassword(e.target.value);setPasswordError('')}}
                   />
+
                   <button
                     type="button"
                     className="eye-button"
@@ -204,14 +209,14 @@ const LogIn = () => {
                   >
                     <Icon name="Eye" size={25}/>
                   </button>
+
                   <p className="forgot-password"
                     onClick={()=>{resetPassword()}}>
                       Forgot Password
                   </p>
+
                 </div>             
-              </div>
-              
-             
+              </div>           
 
               <label class="remember-me">
                 <Checkbox

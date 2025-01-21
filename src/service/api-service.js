@@ -8,48 +8,59 @@ export const checkUserExists = async (useremail) => {
       const response = await axios.post(`${BASE_URL}/check-user-exists`, {
           "email": useremail
       });
-      return response.data;
-    } catch (error) {
-      throw new Error("Error during  request", error);
-    }
+
+      return response.data.exists;
+      }catch(error){
+        console.error()
+        return false;
+        }
   };
 
-  export const checkUserCrendentials = async (useremail, password, GoogleAuthtoken) =>{
-
+  export const checkUserCrendentials = async (useremail, password, reCaptchaToken) =>{
 
       try{
         const data = await axios.post(`${BASE_URL}/auth/local`,{
               "identifier": useremail,
               "password": password,
-              "authentication": GoogleAuthtoken
+              "authentication": reCaptchaToken
           })
 
           saveDataToLocalStorage(data);
-
+          return true;
         }catch(error){
-          throw new Error("Error during  request", error);
+          console.error()
+          return false;
         }
     }  
 
     
-  export const registerUser = async (user, GoogleAuthtoken) =>{
+  export const registerUser = async (user, reCaptchaToken, googleSignInToken) =>{
+
+
+    const requestBody = {
+      email: user.email,
+      accountName: user.accountName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      newsletter: user.sendNews,
+      authentication: reCaptchaToken,
+    };
+
+    if (googleSignInToken != null) {
+      requestBody.access_token = googleSignInToken; 
+    } else {
+      requestBody.password = user.password; 
+    }
 
     try{
-      const response = await axios.post(`${BASE_URL}/register-user`,{
-        "email": user.email,
-        "password": user.password,
-        "accountName": user.accountName,
-        "firstName": user.firstName,
-        "lastName": user.lastName,
-        "newsletter": user.sendNews,
-        "authentication": GoogleAuthtoken
-    })
+      const response = await axios.post(`${BASE_URL}/register-user`, requestBody)
 
       saveDataToLocalStorage(response);
+
       console.log(response)
-      return response;
+      return true;
       }catch(error){
-        throw new Error("Error during  request", error);
+        return false
       }
   }  
 
@@ -66,6 +77,11 @@ export const checkUserExists = async (useremail) => {
     const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')));
 
   } 
+
+  const unserializeLocalStorage = () =>{
+    const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')));
+    return unserialized;
+} 
 
   export const generate2FA = async () => {
     
@@ -105,19 +121,29 @@ export const checkUserExists = async (useremail) => {
 
 
      export const forgotPassword = async (email) => {
-        
         try {
           const response = await axios.post(`${BASE_URL}/forgot-password`,  {
             identifier: email    
             });
+            return true;
         } catch (error) {
-          throw new Error("Error during  request", error);
+          console.error()
+          return false;
         }
       };
     
+      export const googleLogIn = async (googleAccessToken) => {        
+        try {
+          const response = await axios.post(`${BASE_URL}/google-signin`,  {
+            access_token: googleAccessToken.access_token    
+            });
+           
+            if(response.data.code == 200) saveDataToLocalStorage(response); 
+
+            return response
+        } catch (error) {
+         console.error(error)
+        }
+      };
   
 
-    const unserializeLocalStorage = () =>{
-        const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')));
-        return unserialized;
-    } 

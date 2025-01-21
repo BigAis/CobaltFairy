@@ -1,6 +1,7 @@
 import "./reset-password.scss"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 import Card from "../../components/Card";
 import Logo from "../../components/Logo/Logo";
 import Button from "../../components/Button";
@@ -9,6 +10,7 @@ import InputText from "../../components/InputText/InputText";
 
 const ResetPassword = () => {
 
+    const { id } = useParams();
     const [showPassword1, setShowPassword1] = useState(false);
     const [showPassword2, setShowPassword2] = useState(false);
     const [passwordError,setPasswordError] = useState('')
@@ -21,6 +23,9 @@ const ResetPassword = () => {
     const location = useLocation(); 
     const data = location.state; 
 
+    const handleRemoveNotification = (id) => {
+		setNotifications((prev) => prev.filter((n) => n.id !== id))
+	}
 
     const checkValidPassword = async  () => {
        
@@ -43,7 +48,10 @@ const ResetPassword = () => {
             setIsLoading(false);
             return
           }
-       
+          console.log(password1)
+          console.log(password2)
+
+          console.log(id)
 // Insert API for change pass word
           setIsLoading(false);
       }
@@ -64,7 +72,7 @@ const ResetPassword = () => {
             </Button>
 
             <h1>Reset Password</h1>
-            <p>Change the account password for the email:</p>
+            <p>Change the account password</p>
             <p>{data?.email}</p>       
             <form onSubmit={(e) => {
                     e.preventDefault();

@@ -1,26 +1,24 @@
-import React from 'react';
+import './register.scss';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import './register.scss';
+import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
+import { registerUser } from '../../service/api-service';
 import InputText from '../../components/InputText/InputText';
 import Checkbox from '../../components/Checkbox';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import Logo from '../../components/Logo/Logo';
 import Icon from '../../components/Icon/Icon';
-import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const Register = () => {
 
- const navigate = useNavigate();
-
-  const location = useLocation(); 
-  const data = location.state; 
-  const [token, setToken] = useState("");
+  const [reCaptchaToken, setReCaptchaToken] = useState("");
   const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleSignIn, setIsGoogleSignIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError,setPasswordError] = useState('')
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -30,26 +28,38 @@ const Register = () => {
     sendNews: false
   });
 
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation(); 
+  const data = location.state; 
 
   useEffect(() =>{
-    console.log(formData)
+
+    console.log(data)
+
+    if( data?.isGoogleSignIn){
+      console.log("pass")
+
+      setIsGoogleSignIn(true);
+      setFormData((prev) => ({ ...prev, email: data.userData.email }));
+      setFormData((prev) => ({ ...prev, lastName: data.userData.last_name }));
+      setFormData((prev) => ({ ...prev, firstName: data.userData.first_name }));
+    }
+
     if (data?.email) {
       setFormData((prev) => ({ ...prev, email: data.email }));
     }
+
+    console.log(formData)
   },[data]) 
 
-  const setTokenFunc = (getToken) => {
-    setToken(getToken);
-  };
-
   const checkForm = () => {
+    if(isGoogleSignIn) return true
+
     if (!formData.password || formData.password.length < 6) {
       setPasswordError('Invalid Password')
       setIsLoading(false);
       return false;   
     }
-
       return true;
   };
 
@@ -57,11 +67,21 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    if (checkForm()) {
-      navigate("/login/2FA", { state: { email: data.email } });
-    } else {
-      console.error(checkForm());
-    }
+
+      if(isGoogleSignIn){
+          const response = await registerUser(form, GoogleAuthtoken, data.googleSignInToken);
+
+          if (response) {
+            navigate("/dashboard");
+          } else {
+             setRefreshReCaptcha(!refreshReCaptcha);
+             console.error("Error during Registration:", error);
+             setNotifications([{ id: 1, message: 'Something went Wrong', type: 'warning' }]);
+          }
+
+      }else if(checkForm()){
+          navigate("/login/2FA", { state: { email: data.email } });
+      }else setNotifications([{ id: 1, message: 'Something went Wrong', type: 'warning' }]);
    
   };
 
@@ -75,7 +95,7 @@ const Register = () => {
   return (
     <GoogleReCaptchaProvider reCaptchaKey={"6LcZZbkqAAAAAKGBvr79Mj42sMIQf86Z7A31xdbo"}>
     <GoogleReCaptcha className="google-recaptcha-custom-class"
-      onVerify={setTokenFunc}
+      onVerify={setReCaptchaToken}
       refreshReCaptcha={refreshReCaptcha}
 />
     <div className="register-wrapper">
@@ -103,6 +123,7 @@ const Register = () => {
             <div className="input-group">
               <InputText 
                   name="firstName"
+                  value={formData.firstName}
                   placeholder="First Name" 
                   onChange={handleChange} 
                   label="First Name"/>       
@@ -110,6 +131,7 @@ const Register = () => {
             <div className="input-group">
              <InputText  
                 name="lastName"  
+                value={formData.lastName}
                 placeholder="Last Name" 
                 onChange={handleChange} 
                 label="Last Name" />       
@@ -124,6 +146,7 @@ const Register = () => {
                 onChange={handleChange} 
                 label="Account Name"/>       
             </div>
+            {!isGoogleSignIn &&
             <div className="input-group">
             <InputText
                     className="user-password"
@@ -147,6 +170,7 @@ const Register = () => {
                     <Icon name="Eye" size={25}/>
                   </button>
             </div>
+            }
           </div>
 
           <div className="checkboxes">

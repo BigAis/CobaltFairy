@@ -15,7 +15,7 @@ function App() {
 				<Route path="/login/2FA" element={<TwoFactorLogin />} />
 				<Route path="/register" element={<User />} />
 				<Route path="/design" element={<Desing />} />
-				<Route path="/reset-password" element={<ResetPassword/>}/>
+				<Route path="/reset-password/:id" element={<ResetPassword/>}/>
 			</Routes>
 		</div>
 	)
