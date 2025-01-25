@@ -109,6 +109,8 @@ const LogIn = () => {
       onVerify={setReCaptchaToken}
       refreshReCaptcha={refreshReCaptcha}
 />
+
+<div className="login-component">
     <div className="login-wrapper">
       <div style={{position:'fixed',left:0,right:0,top:0,background:'white'}}>
         {notifications.map((notification) => (
@@ -234,6 +236,7 @@ const LogIn = () => {
           )}
         </div>
       </Card>
+    </div>
     </div>
     </GoogleReCaptchaProvider>
   );

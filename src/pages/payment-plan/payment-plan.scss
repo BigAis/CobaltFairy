@@ -1,0 +1,246 @@
+.payment-plan-component {
+    display: flex;
+    align-items: center;
+    min-height: 80vh;
+    background-color: #FFF1DF;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2em 0;
+  
+    .text-slider-button {
+      width: 1044px; // Consistent width for all content
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5em;
+      padding-top: 100px;
+
+  
+      .choose-plan-text {
+        font-family: 'Bitter', serif;
+        font-weight: 800;
+        font-size: 64px;
+        line-height: 1.2;
+        color: #000;
+        text-align: left;
+      }
+  
+      .subscibers-text {
+        font-family: 'Bitter', serif;
+        font-weight: 500;
+        font-size: 24px;
+        line-height: 1.2;
+        color: #000;
+        text-align: left;
+      }
+  
+      .button-group-container {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+  
+        .button-group {
+          text-align: left;
+          width: auto;
+        }
+  
+        p {
+          font-size: 16px;
+          margin: 0;
+          text-align: left;
+          font-family: "Inter", sans-serif;
+          font-weight: 500;
+          color: #777;
+        }
+      }
+
+      .card.disabled {
+        opacity: 0.5; /* Makes the card look grayed out */
+        pointer-events: none; /* Disables interaction with the card */
+    }
+  
+      .card-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5em;
+        width: 100%; /* Use full width of the container */
+  
+        .card {
+          flex: 1; /* Equal width for all three cards */
+          max-width: calc(33.33% - 1em); /* Take up one-third of the width with gap considered */
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+          padding: 1em;
+
+
+          
+          .disabled {
+            opacity: 0.5; /* Makes the card look grayed out */
+            pointer-events: none; /* Disables interaction with the card */
+        }
+          .perk-buttons {
+             button {
+                width: 100%; /* Buttons inside custom-contact-us will match this style */
+                text-align: center; /* Centers the text inside the button */
+                max-width: 200px; /* Optional: Set a maximum width to prevent excessive scaling */
+                min-width: 200px; /* Optional: Ensure all buttons have a minimum consistent width */
+                margin: 3px;
+
+            }
+  
+        }
+          
+        }
+  
+        .full-width-card {
+          flex: 1 0 100%; /* Take up full width */
+          max-width: 100%; /* Ensure the card doesn't exceed container width */
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+          padding: 1em;
+  
+          /* Ensure horizontal layout for child elements */
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between; /* Space out the elements evenly */
+          align-items: flex-start; /* Align items at the top */
+  
+          .custom-plan-card,
+          .custom-perk-card,
+          .custom-contact-us {
+            margin: 0 1em; /* Add spacing between the sections */
+            text-align: center; /* Center text in each section */
+
+            
+
+          }
+  
+          .custom-plan-card {
+              padding-top: 10px;
+
+            h1 {
+              font-size: 24px;
+              font-weight: bold;
+              font-family: 'Bitter', serif;
+              font-size: 24px;
+
+            }
+  
+            p {
+              font-size: 16px;
+              margin: 0;
+              text-align: center;
+              font-family: 'Bitter', serif;
+              font-weight: 700;
+              color: #777;
+            }
+          }
+  
+          .custom-perk-card {
+            text-align: left; /* Align perks to the left */
+            p {
+              font-size: 16px;
+              margin: 0.5em 0;
+            }
+          }
+  
+          .custom-contact-us {
+            h1 {
+              font-size: 24px;
+              font-weight: bold;
+            }
+            .custom-text{
+              font-size: 36px;
+              text-align: center;
+              font-family: 'Bitter', serif;
+              font-weight: 700;
+
+            }
+  
+            button {
+              width: 100%;
+            }
+          }
+        }
+  
+        .breakpoint-or {
+          display: flex;
+          align-items: center;
+          width: 93%;
+          margin: 20px 0;
+          padding-left: 24px;
+  
+          &::after,
+          &::before {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background-color: #DAD1C5;
+          }
+        }
+
+        .check-mark{
+              path{
+                fill:#FF635D!important;
+            }
+        }
+        .benefit-checks{
+            text-align: left;
+            margin-left: 26px;
+            gap: 1.5em;
+            line-height: 2;
+            font-family: "Inter", sans-serif;
+            font-weight: 500;
+            font-size: 16px;
+            color: #343037;
+
+        } 
+
+        h3{
+            text-align: left;
+            font-family: "Inter", sans-serif;
+            margin-left: 16px;
+
+        }
+
+        .free-try-text{
+          font-size: 16px;
+          margin: 0;
+          text-align: center;
+          font-family: 'Bitter', serif;
+          font-weight: 700;
+          color: #777;
+          padding-top: 15px;
+          padding-bottom: 25px;
+        }
+
+        .price-text{
+          font-family: 'Bitter', serif;
+          padding-bottom: 10px;
+          padding-top: 10px;
+        }
+
+        .tag-text{
+          font-size: 16px;
+          margin: 0;
+          text-align: center;
+          font-family: 'Bitter', serif;
+          font-weight: 700;
+          color: #777;
+
+        }
+  
+        .plan-text{
+          font-size: 24px;
+          margin: 0;
+          text-align: center;
+          font-family: 'Bitter', serif;
+          font-weight: 700;
+          color: #333;
+        }
+
+
+      }
+    }
+  }
+  

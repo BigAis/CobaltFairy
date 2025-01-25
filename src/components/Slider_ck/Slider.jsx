@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect,  useState, useRef } from 'react'
 import './Slider.scss'
 import PropTypes from 'prop-types'
 
-const Slider = ({ min, max, step, defaultValue, staticTooltip }) => {
+const Slider = ({ min, max, step, onChange, defaultValue, staticTooltip }) => {
 	const [value, setValue] = useState(defaultValue)
 	const [tooltipLeft, setTooltipLeft] = useState(0)
 	const [showTooltip, setShowTooltip] = useState(true)
@@ -11,6 +11,7 @@ const Slider = ({ min, max, step, defaultValue, staticTooltip }) => {
 	const thumbWidth = 20
 	const handleChange = (e) => {
 		setValue(e.target.value)
+		onChange(e.target.value)
 	}
 	const handleMouseOver = (e) => {
 		setShowTooltip(true)

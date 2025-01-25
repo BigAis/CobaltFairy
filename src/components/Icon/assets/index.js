@@ -19,6 +19,8 @@ import ArrowDown from './arrow-down.svg?react'
 
 import Caret from './caret.svg?react'
 import Eye from './eye.svg?react'
+import Check from './check.svg?react'
+import User from './user.svg?react'
 
 
 const icons = {
@@ -41,7 +43,9 @@ const icons = {
 	ReferAFriend,
 	Contacts,
 	Caret,
-	Eye
+	Eye,
+	Check,
+	User
 }
 
 export default icons
