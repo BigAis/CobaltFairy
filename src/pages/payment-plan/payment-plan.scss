@@ -8,7 +8,7 @@
     padding: 2em 0;
   
     .text-slider-button {
-      width: 1044px; // Consistent width for all content
+      width: 1044px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -55,19 +55,19 @@
       }
 
       .card.disabled {
-        opacity: 0.5; /* Makes the card look grayed out */
-        pointer-events: none; /* Disables interaction with the card */
+        opacity: 0.5;
+        pointer-events: none;
     }
   
       .card-section {
         display: flex;
         flex-wrap: wrap;
         gap: 1.5em;
-        width: 100%; /* Use full width of the container */
+        width: 100%;
   
         .card {
-          flex: 1; /* Equal width for all three cards */
-          max-width: calc(33.33% - 1em); /* Take up one-third of the width with gap considered */
+          flex: 1;
+          max-width: calc(33.33% - 1em);
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           border-radius: 8px;
           padding: 1em;
@@ -75,15 +75,15 @@
 
           
           .disabled {
-            opacity: 0.5; /* Makes the card look grayed out */
-            pointer-events: none; /* Disables interaction with the card */
+            opacity: 0.5;
+            pointer-events: none;
         }
           .perk-buttons {
              button {
-                width: 100%; /* Buttons inside custom-contact-us will match this style */
-                text-align: center; /* Centers the text inside the button */
-                max-width: 200px; /* Optional: Set a maximum width to prevent excessive scaling */
-                min-width: 200px; /* Optional: Ensure all buttons have a minimum consistent width */
+                width: 100%; 
+                text-align: center; 
+                max-width: 200px; 
+                min-width: 200px; 
                 margin: 3px;
 
             }
@@ -93,23 +93,22 @@
         }
   
         .full-width-card {
-          flex: 1 0 100%; /* Take up full width */
-          max-width: 100%; /* Ensure the card doesn't exceed container width */
+          flex: 1 0 100%; 
+          max-width: 100%;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           border-radius: 8px;
           padding: 1em;
   
-          /* Ensure horizontal layout for child elements */
           display: flex;
           flex-direction: row;
-          justify-content: space-between; /* Space out the elements evenly */
-          align-items: flex-start; /* Align items at the top */
+          justify-content: space-between;
+          align-items: flex-start;
   
           .custom-plan-card,
           .custom-perk-card,
           .custom-contact-us {
-            margin: 0 1em; /* Add spacing between the sections */
-            text-align: center; /* Center text in each section */
+            margin: 0 1em;
+            text-align: center;
 
             
 
@@ -137,7 +136,7 @@
           }
   
           .custom-perk-card {
-            text-align: left; /* Align perks to the left */
+            text-align: left;
             p {
               font-size: 16px;
               margin: 0.5em 0;
