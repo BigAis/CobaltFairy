@@ -11,6 +11,7 @@ import Stat from '../../components/Stat/Stat'
 import ButtonGroup from '../../components/ButtonGroup'
 import './campaigns.scss'
 import InputText from '../../components/InputText/InputText'
+import PageHeader from '../../components/PageHeader/PageHeader'
 
 const account = {
 	name: 'Cobalt Fairy',
@@ -69,28 +70,10 @@ const subs_stats = [
 const Campaigns = () => {
 	return (
 		<>
-			<div className="dashboard-wrapper">
+			<div className="fm-page-wrapper">
 				<Sidemenu />
-				<div className="dashboard-container">
-					<div className="dashboard-head">
-						<Card className="account-info-card">
-							<div className="account-info">
-								<div>
-									<h4>{account.name}</h4>
-									<span>{account.plan}</span>
-								</div>
-								<Icon name="Caret" size={16} />
-							</div>
-						</Card>
-						<div className="user-info">
-							<Card>{getNameInitials(user.name)}</Card>
-							<div className="user">
-								<h4>{user.name}</h4>
-								<span>{user.email}</span>
-							</div>
-							<Icon name="Caret" size={24} />
-						</div>
-					</div>
+				<div className="fm-page-container">
+					<PageHeader user={user} account={account}/>
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
 						<Button icon={'Plus'} type="action">
@@ -105,7 +88,7 @@ const Campaigns = () => {
 									{ value: 'today', label: 'Sent (2)' },
 									{ value: '7days', label: 'Draft (1)' },
 									{ value: '30days', label: 'Outbox (0)' },
-									{ value: 'all', label: 'Tempaltes (4)' },
+									{ value: 'all', label: 'Templates (4)' },
 								]}
 								onChange={(value) => {
 									console.log(value)

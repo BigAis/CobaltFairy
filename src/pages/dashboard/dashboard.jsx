@@ -7,6 +7,7 @@ import Icon from '../../components/Icon/Icon'
 import Button from '../../components/Button'
 import Stat from '../../components/Stat/Stat'
 import ButtonGroup from '../../components/ButtonGroup'
+import PageHeader from '../../components/PageHeader/PageHeader'
 
 const account = {
 	name: 'Cobalt Fairy',
@@ -16,11 +17,7 @@ const user = {
 	name: 'Cobalt Fairy',
 	email: 'cf@fairymail.app',
 }
-const getNameInitials = (name) =>
-	name
-		.split(' ')
-		.map((word) => word[0].toUpperCase())
-		.join('')
+
 const stats = [
 	{
 		label: 'Emails Sent',
@@ -67,25 +64,7 @@ const Dashboard = () => {
 			<div className="dashboard-wrapper">
 				<Sidemenu />
 				<div className="dashboard-container">
-					<div className="dashboard-head">
-						<Card className="account-info-card">
-							<div className="account-info">
-								<div>
-									<h4>{account.name}</h4>
-									<span>{account.plan}</span>
-								</div>
-								<Icon name="Caret" size={16} />
-							</div>
-						</Card>
-						<div className="user-info">
-							<Card>{getNameInitials(user.name)}</Card>
-							<div className="user">
-								<h4>{user.name}</h4>
-								<span>{user.email}</span>
-							</div>
-							<Icon name="Caret" size={24} />
-						</div>
-					</div>
+					<PageHeader user={user} account={account}/>
 					<div className="page-name-container">
 						<div className="page-name">Dashboard</div>
 					</div>
