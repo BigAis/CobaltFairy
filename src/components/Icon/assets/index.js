@@ -22,6 +22,7 @@ import Eye from './eye.svg?react'
 import Check from './check.svg?react'
 import User from './user.svg?react'
 
+import Filters from './filters.svg?react'
 
 const icons = {
 	AlignCenter,
@@ -45,7 +46,8 @@ const icons = {
 	Caret,
 	Eye,
 	Check,
-	User
+	User,
+	Filters,
 }
 
 export default icons

@@ -3,7 +3,7 @@ import classNames from 'classnames'
 import Icon from '../Icon/Icon'
 import './InputText.scss'
 
-const InputText = ({ value, onChange, placeholder, label, hasError = false, errorMessage = '', disabled, isRequired, icon, name, className, ...props }) => {
+const InputText = ({ value, onChange, placeholder, label, hasError = false, errorMessage = '', disabled, isRequired, icon, name, style = {}, className, ...props }) => {
 	const handleInputChange = (e) => {
 		if (onChange) {
 			onChange(e) // Pass the updated value to the parent
@@ -13,10 +13,10 @@ const InputText = ({ value, onChange, placeholder, label, hasError = false, erro
 	const computedClassName = classNames('input-text', className, { hasError, disabled })
 
 	return (
-		<div className="input-text-wrapper">
+		<div className="input-text-wrapper" style={style}>
 			<div className="input-container">
 				{icon && <Icon name={icon} className="input-icon" />}
-				<input type="text" placeholder={label ? '' : placeholder} value={value} onChange={handleInputChange} className={computedClassName} disabled={disabled} name={name} {...props}/>
+				<input type="text" placeholder={label ? '' : placeholder} value={value} onChange={handleInputChange} className={computedClassName} disabled={disabled} name={name} {...props} />
 				{label && (
 					<label className={classNames('floating-label', { filled: value || placeholder })}>
 						{isRequired && '*'}
@@ -46,6 +46,7 @@ InputText.propTypes = {
 	disabled: PropTypes.bool,
 	isRequired: PropTypes.bool,
 	icon: PropTypes.string,
+	style: PropTypes.object,
 }
 
 export default InputText

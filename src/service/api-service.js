@@ -1,149 +1,142 @@
-import axios from 'axios';
+import axios from 'axios'
 
 const BASE_URL = 'https://fairymail.cobaltfairy.com/api'
 export const checkUserExists = async (useremail) => {
-  
+	try {
+		const response = await axios.post(`${BASE_URL}/check-user-exists`, {
+			email: useremail,
+		})
 
-    try {
-      const response = await axios.post(`${BASE_URL}/check-user-exists`, {
-          "email": useremail
-      });
+		return response.data.exists
+	} catch (error) {
+		console.error()
+		return false
+	}
+}
 
-      return response.data.exists;
-      }catch(error){
-        console.error()
-        return false;
-        }
-  };
+export const checkUserCrendentials = async (useremail, password, reCaptchaToken) => {
+	try {
+		const data = await axios.post(`${BASE_URL}/auth/local`, {
+			identifier: useremail,
+			password: password,
+			authentication: reCaptchaToken,
+		})
 
-  export const checkUserCrendentials = async (useremail, password, reCaptchaToken) =>{
+		saveDataToLocalStorage(data)
+		return true
+	} catch (error) {
+		console.error()
+		return false
+	}
+}
 
-      try{
-        const data = await axios.post(`${BASE_URL}/auth/local`,{
-              "identifier": useremail,
-              "password": password,
-              "authentication": reCaptchaToken
-          })
+export const registerUser = async (user, reCaptchaToken, googleSignInToken) => {
+	const requestBody = {
+		email: user.email,
+		accountName: user.accountName,
+		firstName: user.firstName,
+		lastName: user.lastName,
+		newsletter: user.sendNews,
+		authentication: reCaptchaToken,
+	}
 
-          saveDataToLocalStorage(data);
-          return true;
-        }catch(error){
-          console.error()
-          return false;
-        }
-    }  
+	if (googleSignInToken != null) {
+		requestBody.access_token = googleSignInToken
+	} else {
+		requestBody.password = user.password
+	}
 
-    
-  export const registerUser = async (user, reCaptchaToken, googleSignInToken) =>{
+	try {
+		const response = await axios.post(`${BASE_URL}/register-user`, requestBody)
 
+		saveDataToLocalStorage(response)
 
-    const requestBody = {
-      email: user.email,
-      accountName: user.accountName,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      newsletter: user.sendNews,
-      authentication: reCaptchaToken,
-    };
+		console.log(response)
+		return true
+	} catch (error) {
+		return false
+	}
+}
 
-    if (googleSignInToken != null) {
-      requestBody.access_token = googleSignInToken; 
-    } else {
-      requestBody.password = user.password; 
-    }
+const saveDataToLocalStorage = (response) => {
+	const dataToStore = {
+		jwt: response.data.jwt,
+		user: response.data.user,
+	}
 
-    try{
-      const response = await axios.post(`${BASE_URL}/register-user`, requestBody)
+	const serialized = encodeURIComponent(JSON.stringify(dataToStore))
+	localStorage.setItem('fairymail_session', serialized)
 
-      saveDataToLocalStorage(response);
+	const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')))
+}
 
-      console.log(response)
-      return true;
-      }catch(error){
-        return false
-      }
-  }  
+const unserializeLocalStorage = () => {
+	const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')))
+	return unserialized
+}
 
-  const saveDataToLocalStorage = (response) =>{
+export const generate2FA = async () => {
+	const fairymail_session = unserializeLocalStorage()
+	const jtwToken = fairymail_session.jwt
+	try {
+		const response = await axios.post(
+			`${BASE_URL}/generate-2fa`,
+			{},
+			{
+				headers: {
+					Authorization: `Bearer ${jtwToken}`,
+				},
+			}
+		)
+		return response
+	} catch (error) {
+		throw new Error('Error during  request', error)
+	}
+}
 
-    const dataToStore = {
-      jwt: response.data.jwt,
-      user: response.data.user, 
-    };
+export const verify2FA = async (code_2FA) => {
+	const fairymail_session = unserializeLocalStorage()
+	const jtwToken = fairymail_session.jwt
+	try {
+		const response = await axios.post(
+			`${BASE_URL}/verify-2fa`,
+			{
+				confirmationToken: code_2FA,
+			},
+			{
+				headers: {
+					Authorization: `Bearer ${jtwToken}`,
+				},
+			}
+		)
+		return response.data
+	} catch (error) {
+		throw new Error('Error during  request', error)
+	}
+}
 
-    const serialized = encodeURIComponent(JSON.stringify(dataToStore));
-    localStorage.setItem('fairymail_session', serialized);
+export const forgotPassword = async (email) => {
+	try {
+		const response = await axios.post(`${BASE_URL}/forgot-password`, {
+			identifier: email,
+		})
+		return true
+	} catch (error) {
+		console.error()
+		return false
+	}
+}
 
-    const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')));
+export const googleLogIn = async (googleAccessToken) => {
+	try {
+		const response = await axios.post(`${BASE_URL}/google-signin`, {
+			access_token: googleAccessToken.access_token,
+		})
 
-  } 
+		if (response.data.code == 200) saveDataToLocalStorage(response)
 
-  const unserializeLocalStorage = () =>{
-    const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')));
-    return unserialized;
-} 
-
-  export const generate2FA = async () => {
-    
-        const fairymail_session = unserializeLocalStorage()
-        const jtwToken = fairymail_session.jwt
-      try {
-        const response = await axios.post(`${BASE_URL}/generate-2fa`,{}, {
-            headers: {
-              Authorization: `Bearer ${jtwToken}`,
-            },
-          });
-        return response;
-
-      } catch (error) {
-        throw new Error("Error during  request", error);
-      }
-    };
-
-    export const verify2FA = async (code_2FA) => {
-        
-            const fairymail_session = unserializeLocalStorage()
-            const jtwToken = fairymail_session.jwt
-          try {
-            const response = await axios.post(`${BASE_URL}/verify-2fa`,  {
-               confirmationToken: code_2FA      
-              },
-              {
-                headers: {
-                  Authorization:  `Bearer ${jtwToken}`,
-                }
-              });
-            return response.data;
-          } catch (error) {
-            throw new Error("Error during  request", error);
-          }
-        };
-
-
-     export const forgotPassword = async (email) => {
-        try {
-          const response = await axios.post(`${BASE_URL}/forgot-password`,  {
-            identifier: email    
-            });
-            return true;
-        } catch (error) {
-          console.error()
-          return false;
-        }
-      };
-    
-      export const googleLogIn = async (googleAccessToken) => {        
-        try {
-          const response = await axios.post(`${BASE_URL}/google-signin`,  {
-            access_token: googleAccessToken.access_token    
-            });
-           
-            if(response.data.code == 200) saveDataToLocalStorage(response); 
-
-            return response
-        } catch (error) {
-         console.error(error)
-        }
-      };
-  
-
+		return response
+	} catch (error) {
+		console.error(error)
+	}
+}
