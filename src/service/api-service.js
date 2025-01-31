@@ -140,3 +140,12 @@ export const googleLogIn = async (googleAccessToken) => {
 		console.error(error)
 	}
 }
+
+export const getPaymentPlans = async () => {
+	try {
+		const response = await axios.get(`${BASE_URL}/payment-plans`)
+		return response.data
+	} catch (error) {
+		console.error(error)
+	}
+}

@@ -16,7 +16,7 @@ import Team from './team.svg?react'
 import ReferAFriend from './referafriend.svg?react'
 import Contacts from './contacts.svg?react'
 import ArrowDown from './arrow-down.svg?react'
-
+import Close from './close.svg?react'
 import Caret from './caret.svg?react'
 import Eye from './eye.svg?react'
 import Check from './check.svg?react'
@@ -48,6 +48,7 @@ const icons = {
 	Check,
 	User,
 	Filters,
+	Close
 }
 
 export default icons
