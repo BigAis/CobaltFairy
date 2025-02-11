@@ -81,13 +81,14 @@ const TwoFactorLogin = () => {
     if (code.length === 6) {
       setIsLoading(true);
       try {
-        const response = await verify2FA(code, token);
+        const response = await verify2FA(code);
         
         if (response.code == 400) throw new Error("Wrong Verification code. Please try again.");
 
         if(form != null && form.length>0 ){
             registerUser();
-          }
+          } else navigate("/dashboard")
+
           
       } catch (error) {
         setNotifications([{ id: 1, message: `${error}`, type: 'warning' }])

@@ -1,4 +1,4 @@
-import {React} from 'react'
+import React, { useState, useEffect } from 'react'
 import './Sidemenu.scss'
 import Logo from '../Logo/Logo'
 import SubsCounter from '../SubsCounter'
@@ -21,10 +21,29 @@ const menu_items_lower = [
 ]
 
 const Sidemenu = ()=>{
+    
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [menuOpen, setMenuOpen] = useState(false);
+    
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+    
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
     return (
         <>
-        <div className='sidemenu'>
-            <Logo/>
+        <div className={`sidemenu ${isMobile ? 'mobile' : ''} ${menuOpen ? 'open' : ''}`}>
+                {isMobile && (
+                    <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+                        ☰
+                    </button>
+                )}
+                
+                <Logo/>
 
             <div className='menu_upper'>
                 <ul>
@@ -77,4 +96,4 @@ const Sidemenu = ()=>{
     )
 }
 
-export default Sidemenu;
+export default Sidemenu

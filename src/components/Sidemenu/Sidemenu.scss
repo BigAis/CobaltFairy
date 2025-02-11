@@ -11,11 +11,7 @@
     justify-content: space-between;
     padding-bottom:3em;
 
-    .fairymail-logo-container {
-        .fairymail-logo{
-            min-width: 220px;
-        }
-    }
+
     .menu_upper, .menu_lower{
         padding:0 2em;
         min-width:220px;
@@ -49,5 +45,64 @@
     }
     .menu_bottom {
         padding: 0 .5em;
+    }
+
+    @media (max-width: 768px) {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        min-height: unset;
+        background: rgba(255, 255, 255,1);
+        border-bottom: 2px solid rgba(218, 209, 197, 1);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0.5em 1em;
+        justify-content: space-between;
+        z-index: 1000;
+
+
+        .fairymail-logo-container {
+            display: flex;
+            justify-content: center;  
+            align-items: center;     
+            flex-grow: 1;            
+            text-align: center;
+        }
+
+        .menu_upper, .menu_lower {
+            display: none;
+        }
+
+        
+        .menu_bottom {
+            display: none;
+        }
+
+        &.open {
+            flex-direction: column;
+            height: auto;
+            position: absolute;
+            background: (255, 255, 255, 1);
+            width: 100%;
+            padding-bottom: 1em;
+
+            .menu_upper, .menu_lower, .menu_bottom {
+                display: block;
+            }
+
+            .fairymail-logo-container {
+                display: none; 
+            }
+        }
+
+        .menu-toggle {
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
     }
 }

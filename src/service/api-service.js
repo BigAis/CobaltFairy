@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { jwtDecode } from 'jwt-decode'
 
 const BASE_URL = 'https://fairymail.cobaltfairy.com/api'
 export const checkUserExists = async (useremail) => {
@@ -147,5 +148,19 @@ export const getPaymentPlans = async () => {
 		return response.data
 	} catch (error) {
 		console.error(error)
+	}
+}
+
+export const isJwtTokenExpired =  (jwtToken) => {
+
+	if (!jwtToken) return true;
+
+	try {
+		const decodedToken = jwtDecode(jwtToken);
+		const currentTime = Date.now() / 1000;
+		return decodedToken.exp < currentTime;
+	} catch (error) {
+		console.error('Error decoding token:', error);
+		return true;
 	}
 }

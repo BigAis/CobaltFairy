@@ -124,7 +124,7 @@ const Subscribers = () => {
 			<div className="fm-page-wrapper">
 				<Sidemenu />
 				<div className="fm-page-container">
-					<PageHeader user={user} account={account}/>
+					{/* <PageHeader user={user} account={account}/> */}
 					<div className="page-name-container">
 						<div className="page-name">Subsribers</div>
 						<Button icon={'Plus'} type="action">
@@ -132,7 +132,7 @@ const Subscribers = () => {
 						</Button>
 					</div>
 					<div className="filters-container">
-						<div className="row">
+						<div className="button-group-wrapper">
 							<ButtonGroup
 								options={[
 									{ label: 'All Subscribers (524)' },
@@ -149,17 +149,18 @@ const Subscribers = () => {
 								}}
 							></ButtonGroup>
 						</div>
-						<div className="row d-flex content-space-between">
+						<div className="input-text-container">
 							<InputText style={{ width: '85%' }} placeholder="Search Subscribers" label="Search Subscribers" hasError={false} errorMessage="Name must be at least 3 characters long." />
-							<Button type="secondary" icon={'Filters'}>
-								Filters
-							</Button>
 						</div>
+
+						<Button type="secondary" icon={'Filters'} className="button-filters">
+						Filters
+						</Button>
 					</div>
 
-                    <div className="">
+                    {/* <div className="subscribers">
                         <SubscribersTable subscribers={subscribers} />
-					</div>
+					</div> */}
 				</div>
 			</div>
 		</>
