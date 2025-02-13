@@ -18,7 +18,9 @@ function App() {
     useEffect(() => {
         const fairymail_session = localStorage.getItem('fairymail_session');
 
-        if (fairymail_session) {
+        if(!fairymail_session) navigate('/login');
+
+        if (fairymail_session && fairymail_session?.length>0) {
             const userData = JSON.parse(decodeURIComponent(fairymail_session));
             if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
                 localStorage.removeItem('fairymail_session');

@@ -27,8 +27,7 @@ const LogIn = () => {
   const navigate = useNavigate();
 
   useEffect(() =>{
-    if(isUserLoggedIn)
-      navigate("/dashboard")
+    if(isUserLoggedIn()) navigate("/dashboard")
   },)
 
 	const handleRemoveNotification = (id) => {

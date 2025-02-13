@@ -34,8 +34,8 @@ const Register = () => {
 
   useEffect(() =>{
 
-    if(isUserLoggedIn) navigate("/dashboard")
-
+    if(isUserLoggedIn()) navigate("/dashboard")
+      
     console.log(data)
 
     if( data?.isGoogleSignIn){
