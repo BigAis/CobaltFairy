@@ -2,7 +2,7 @@ import './register.scss';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
-import { registerUser } from '../../service/api-service';
+import { registerUser, isUserLoggedIn } from '../../service/api-service';
 import InputText from '../../components/InputText/InputText';
 import Checkbox from '../../components/Checkbox';
 import Button from '../../components/Button';
@@ -33,6 +33,8 @@ const Register = () => {
   const data = location.state; 
 
   useEffect(() =>{
+
+    if(isUserLoggedIn) navigate("/dashboard")
 
     console.log(data)
 

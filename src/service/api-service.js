@@ -164,3 +164,15 @@ export const isJwtTokenExpired =  (jwtToken) => {
 		return true;
 	}
 }
+
+export const isUserLoggedIn = () => {
+
+	const fairymail_session = localStorage.getItem('fairymail_session');
+
+	if (fairymail_session) {
+		const userData = JSON.parse(decodeURIComponent(fairymail_session));
+		if (userData.jwt && !isJwtTokenExpired(userData.jwt)) return true
+	}
+	return false
+}
+	

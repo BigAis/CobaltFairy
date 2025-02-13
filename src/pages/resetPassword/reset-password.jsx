@@ -2,6 +2,7 @@ import "./reset-password.scss"
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useParams } from "react-router-dom";
+import { isUserLoggedIn } from "../../service/api-service";
 import Card from "../../components/Card";
 import Logo from "../../components/Logo/Logo";
 import Button from "../../components/Button";
@@ -22,6 +23,11 @@ const ResetPassword = () => {
     const navigate = useNavigate();
     const location = useLocation(); 
     const data = location.state; 
+
+    useEffect(() =>{
+        if(!isUserLoggedIn)
+          navigate("/dashboard")
+      },)
 
     const handleRemoveNotification = (id) => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))

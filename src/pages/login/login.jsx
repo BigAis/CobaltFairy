@@ -1,8 +1,8 @@
 import "./login.scss";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
-import { checkUserExists, checkUserCrendentials, forgotPassword, googleLogIn } from "../../service/api-service";
+import { checkUserExists, checkUserCrendentials, forgotPassword, googleLogIn, isUserLoggedIn } from "../../service/api-service";
 import { useGoogleLogin  } from '@react-oauth/google';
 import Button from "../../components/Button";
 import Logo from "../../components/Logo/Logo";
@@ -25,6 +25,11 @@ const LogIn = () => {
   const [notifications, setNotifications] = useState([])
 
   const navigate = useNavigate();
+
+  useEffect(() =>{
+    if(isUserLoggedIn)
+      navigate("/dashboard")
+  },)
 
 	const handleRemoveNotification = (id) => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
