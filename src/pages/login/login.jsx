@@ -27,14 +27,8 @@ const LogIn = () => {
 	const navigate = useNavigate()
 
 	useEffect(() => {
-		// if (isUserLoggedIn) navigate('/dashboard') // this is not working because isUserLoggedIn is a function
-
-		//ckesisis fix
-		if (isUserLoggedIn()) {
-			navigate('/dashboard')
-		}
-		//ckesisis fix
-	}, [])
+		if (isUserLoggedIn()) navigate('/dashboard')
+	})
 
 	const handleRemoveNotification = (id) => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
