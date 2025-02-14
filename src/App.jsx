@@ -12,37 +12,39 @@ import Campaigns from './pages/campaigns/Campaigns'
 import Subscribers from './pages/subscribers/subscribers'
 
 function App() {
-    const navigate = useNavigate();
-    const location = useLocation();
+	const navigate = useNavigate()
+	const location = useLocation()
 
-    useEffect(() => {
-        const fairymail_session = localStorage.getItem('fairymail_session');
+	useEffect(() => {
+		const fairymail_session = localStorage.getItem('fairymail_session')
+		//ckesisis fix
+		if (!fairymail_session) navigate('/login')
+		//ckesisis fix
+		if (fairymail_session) {
+			const userData = JSON.parse(decodeURIComponent(fairymail_session))
+			if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
+				localStorage.removeItem('fairymail_session')
+				navigate('/login')
+			}
+		}
+	}, [navigate])
 
-        if (fairymail_session) {
-            const userData = JSON.parse(decodeURIComponent(fairymail_session));
-            if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
-                localStorage.removeItem('fairymail_session');
-                navigate('/login');
-            }
-        }
-    }, [navigate]);
-
-    return (
-        <div className="App">
-            <Routes>
-                <Route path="/" element={<Navigate to={localStorage.getItem('fairymail_session') ? "/dashboard" : "/login"} />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/login" element={<LogIn />} />
-                <Route path="/login/2FA" element={<TwoFactorLogin />} />
-                <Route path="/register" element={<User />} />
-                <Route path="/design" element={<Desing />} />
-                <Route path="/reset-password/:id" element={<ResetPassword />} />
-                <Route path="/payment-plan" element={<PaymentPlan />} />
-                <Route path="/campaigns" element={<Campaigns />} />
-                <Route path="/subscribers" element={<Subscribers />} />
-            </Routes>
-        </div>
-    );
+	return (
+		<div className="App">
+			<Routes>
+				<Route path="/" element={<Navigate to={localStorage.getItem('fairymail_session') ? '/dashboard' : '/login'} />} />
+				<Route path="/dashboard" element={<Dashboard />} />
+				<Route path="/login" element={<LogIn />} />
+				<Route path="/login/2FA" element={<TwoFactorLogin />} />
+				<Route path="/register" element={<User />} />
+				<Route path="/design" element={<Desing />} />
+				<Route path="/reset-password/:id" element={<ResetPassword />} />
+				<Route path="/payment-plan" element={<PaymentPlan />} />
+				<Route path="/campaigns" element={<Campaigns />} />
+				<Route path="/subscribers" element={<Subscribers />} />
+			</Routes>
+		</div>
+	)
 }
 
-export default App;
+export default App

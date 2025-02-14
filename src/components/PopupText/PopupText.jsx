@@ -1,0 +1,94 @@
+import React, { useState, useEffect } from 'react'
+import ReactDOM from 'react-dom'
+import PropTypes from 'prop-types'
+import classNames from 'classnames'
+import './PopupText.scss' // Import external SCSS file
+import Button from '../Button'
+
+const PopupText = ({
+	text,
+	icon,
+	focusCancel = false,
+	showConfirmButton = true,
+	showDenyButton = false,
+	showCancelButton = true,
+	confirmButtonText = 'OK',
+	denyButtonText = 'Deny',
+	cancelButtonText = 'Cancel',
+	onConfirm = () => {},
+	onDeny = () => {},
+	onCancel = () => {},
+}) => {
+	useEffect(() => {
+		if (focusCancel) {
+			setTimeout(() => {
+				document.getElementById('popup-cancel')?.focus()
+			}, 100)
+		}
+	}, [focusCancel])
+
+	return (
+		<div className="popup-overlay">
+			<div className="popup-container">
+				{icon && <div className={classNames('popup-icon', `popup-${icon}`)} />}
+				<p className="popup-text">{text}</p>
+				<div className="popup-buttons">
+					{showDenyButton && (
+						<button className="popup-deny" onClick={onDeny}>
+							{denyButtonText}
+						</button>
+					)}
+					{showCancelButton && (
+						<>
+							<Button type="secondary" onClick={onCancel} className="popup-cancel" id="popup-cancel">
+								{cancelButtonText}
+							</Button>
+						</>
+					)}
+					{showConfirmButton && (
+						<>
+							<Button onClick={onConfirm} className="popup-confirm">
+								{confirmButtonText}
+							</Button>
+						</>
+					)}
+				</div>
+			</div>
+		</div>
+	)
+}
+
+PopupText.propTypes = {
+	text: PropTypes.string.isRequired,
+	icon: PropTypes.oneOf(['question', 'success', 'error', 'warning', 'info']),
+	focusCancel: PropTypes.bool,
+	showConfirmButton: PropTypes.bool,
+	showDenyButton: PropTypes.bool,
+	showCancelButton: PropTypes.bool,
+	confirmButtonText: PropTypes.string,
+	denyButtonText: PropTypes.string,
+	cancelButtonText: PropTypes.string,
+	onConfirm: PropTypes.func,
+	onDeny: PropTypes.func,
+	onCancel: PropTypes.func,
+}
+
+PopupText.fire = (options) => {
+	return new Promise((resolve) => {
+		const div = document.createElement('div')
+		document.body.appendChild(div)
+
+		const handleClose = (action) => {
+			ReactDOM.unmountComponentAtNode(div)
+			document.body.removeChild(div)
+			resolve(action)
+		}
+
+		ReactDOM.render(
+			<PopupText {...options} onConfirm={() => handleClose({ isConfirmed: true })} onDeny={() => handleClose({ isDenied: true })} onCancel={() => handleClose({ isCancelled: true })} />,
+			div
+		)
+	})
+}
+
+export default PopupText
