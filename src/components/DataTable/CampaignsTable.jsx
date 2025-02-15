@@ -21,6 +21,7 @@ const CampaignsTable = ({ campaigns }) => {
 
 	const handlePageChange = (page) => {
 		setCurrentPage(page)
+		setSelectedCampaigns([])
 	}
 
 	const dropdownOptions = [
@@ -136,7 +137,6 @@ const CampaignsTable = ({ campaigns }) => {
 	}, [selectedCampaigns])
 
 	const actionsBodyTemplate = (rowData) => {
-		console.log('rowdata is : ', rowData)
 		return (
 			<div>
 				<Dropdown withDivider={true} icon={'Plus'} options={dropdownOptions} onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, rowData)} onLeftClick={handleLeftClick}>
@@ -146,10 +146,26 @@ const CampaignsTable = ({ campaigns }) => {
 		)
 	}
 
+	const openBodyTemplate = (rowData) => {
+		const totalOpens = rowData.type === 'absplit' ? (rowData.stats?.o || 0) + (rowData.stats?.ob || 0) : rowData.stats?.o || 0
+
+		return <>{totalOpens}</>
+	}
+
+	const clickBodyTemplate = (rowData) => {
+		const totalOpens = rowData.type === 'absplit' ? (rowData.stats?.c || 0) + (rowData.stats?.cb || 0) : rowData.stats?.c || 0
+
+		return <>{totalOpens}</>
+	}
+
+	const typeBodyTemplate = (rowData) => {
+		return rowData.type === 'absplit' ? 'A/B Split' : 'Normal'
+	}
+
 	return (
 		// <div>
 		<>
-			<DataTable value={paginatedData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
+			<DataTable value={paginatedData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
 				<Column
 					body={(rowData) => (
 						<div style={{ position: 'relative' }}>
@@ -161,7 +177,7 @@ const CampaignsTable = ({ campaigns }) => {
 										if (e) {
 											setSelectedCampaigns((prev) => [...prev, rowData])
 										} else {
-											setSelectedCampaigns((prev) => prev.filter((campaign) => campaign.name !== rowData.name))
+											setSelectedCampaigns((prev) => prev.filter((campaign) => campaign.id !== rowData.id))
 										}
 									}}
 								/>
@@ -186,9 +202,9 @@ const CampaignsTable = ({ campaigns }) => {
 				/>
 				<Column field="name" header="Name" />
 				<Column field="recipients" header="Recipients" />
-				<Column field="opens" header="Opens" />
-				<Column field="clicks" header="Clicks" />
-				<Column field="type" header="Type" />
+				<Column field="stats.o" body={openBodyTemplate} header="Opens" />
+				<Column field="clicks" body={clickBodyTemplate} header="Clicks" />
+				<Column field="type" body={typeBodyTemplate} header="Type" />
 				<Column field="date" header="Date" />
 				<Column header="Actions" body={actionsBodyTemplate} />
 			</DataTable>

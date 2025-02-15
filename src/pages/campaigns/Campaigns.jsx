@@ -2492,22 +2492,23 @@ const Campaigns = () => {
 
 	const [user2, setUser2] = useState()
 
-	const [filteredCampaigns, setFilteredCampaigns] = useState([])
-	const campaignsTableData = filteredCampaigns.map((campaign) => {
-		return {
-			image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
-			name: campaign.name,
-			recipients: campaign.recipients,
-			opens: campaign?.stats?.o,
-			clicks: campaign?.stats?.c,
-			type: campaign.type === 'absplit' ? 'AB Split' : 'Normal',
-			date: campaign.date,
-			actions: campaign.actions,
-			uuid: campaign.uuid,
-			account: campaign?.account?.id,
-			recp_groups: [...campaign.recp_groups],
-		}
-	})
+	// const [filteredCampaigns, setFilteredCampaigns] = useState([])
+	// const campaignsTableData = filteredCampaigns.map((campaign) => {
+	// 	return {
+	// 		image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
+	// 		name: campaign.name,
+	// 		recipients: campaign.recipients,
+	// 		stats: campaign?.stats,
+	// 		opens: campaign?.stats?.o,
+	// 		clicks: campaign?.stats?.c,
+	// 		type: campaign.type === 'absplit' ? 'AB Split' : 'Normal',
+	// 		date: campaign.date,
+	// 		actions: campaign.actions,
+	// 		uuid: campaign.uuid,
+	// 		account: campaign?.account?.id,
+	// 		recp_groups: [...campaign.recp_groups],
+	// 	}
+	// })
 
 	const totalCampaignsSent = campaigns.filter((campaign) => campaign.status === 'sent').length
 	const totalCampaignsDraft = campaigns.filter((campaign) => campaign.status === 'draft').length
@@ -2528,8 +2529,15 @@ const Campaigns = () => {
 	}, [account])
 
 	useEffect(() => {
-		setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'sent'))
-	}, [campaigns])
+		console.log('meta from useEffect are : ', meta)
+		// console.log(
+		// 	'campaigns sent from useEffect are : ',
+		// 	campaigns.filter((cmp) => {
+		// 		console.log('cmp.status inside filter', cmp.status)
+		// 		return cmp.status === 'draft'
+		// 	})
+		// )
+	}, [meta])
 
 	const updateSearchTerm = async (search) => {
 		setSearchTerm(search)
@@ -2579,8 +2587,15 @@ const Campaigns = () => {
 				`fairymailer/getCampaigns?filters[account]=${account.id}&sort[sent_at]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
 				user2.jwt
 			)
-			console.log('cmps', resp)
-			setCampaigns(resp.data.data)
+			console.log('cmps from getCampaigns ', resp)
+			setCampaigns(
+				resp.data.data.map((item) => ({
+					...item,
+					image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
+				}))
+			)
+
+			setMeta(resp.data.meta)
 		} catch (error) {
 			console.error(error)
 		}
@@ -2603,7 +2618,7 @@ const Campaigns = () => {
 							<ButtonGroup
 								value="sent"
 								options={[
-									{ value: 'sent', label: `Sent (${totalCampaignsSent})` },
+									{ value: 'sent', label: `Sent (${campaigns.filter((campaign) => campaign.status === 'sent').length})` },
 									{ value: 'draft', label: `Draft (${totalCampaignsDraft})` },
 									{ value: 'outbox', label: `Outbox(${totalCampaignsOutBox})` },
 									// { value: 'all', label: 'Templates (4)' },
@@ -2613,15 +2628,15 @@ const Campaigns = () => {
 									switch (value) {
 										case 'sent':
 											setSelectedCampaignType('sent')
-											setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'sent'))
+											// setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'sent'))
 											break
 										case 'draft':
 											setSelectedCampaignType('draft')
-											setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'draft'))
+											// setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'draft'))
 											break
 										case 'outbox':
 											setSelectedCampaignType('outbox')
-											setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'outbox'))
+											// setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'outbox'))
 											break
 									}
 								}}
@@ -2643,7 +2658,7 @@ const Campaigns = () => {
 					</div>
 
 					<div className="">
-						<CampaignsTable campaigns={campaignsTableData} />
+						<CampaignsTable campaigns={campaigns.filter((campaign) => campaign.status === selectedCampaignType)} />
 					</div>
 				</div>
 			</div>
