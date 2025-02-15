@@ -9,6 +9,7 @@ import TwoFactorLogin from './pages/login/two-factor-login/two-factor-login'
 import ResetPassword from './pages/resetPassword/reset-password'
 import PaymentPlan from './pages/payment-plan/payment-plan'
 import Campaigns from './pages/campaigns/Campaigns'
+import EditCampaign from './pages/campaigns/EditCampaign'
 import Subscribers from './pages/subscribers/subscribers'
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
 				<Route path="/reset-password/:id" element={<ResetPassword />} />
 				<Route path="/payment-plan" element={<PaymentPlan />} />
 				<Route path="/campaigns" element={<Campaigns />} />
+				<Route path="/campaigns/edit/:uuid" element={<EditCampaign />} />
 				<Route path="/subscribers" element={<Subscribers />} />
 			</Routes>
 		</div>
