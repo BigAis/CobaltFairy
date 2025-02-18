@@ -10,6 +10,7 @@ import ResetPassword from './pages/resetPassword/reset-password'
 import PaymentPlan from './pages/payment-plan/payment-plan'
 import Campaigns from './pages/campaigns/Campaigns'
 import Subscribers from './pages/subscribers/subscribers'
+import Integrations from './pages/integrations/integrations'
 
 function App() {
     const navigate = useNavigate();
@@ -42,6 +43,8 @@ function App() {
                 <Route path="/payment-plan" element={<PaymentPlan />} />
                 <Route path="/campaigns" element={<Campaigns />} />
                 <Route path="/subscribers" element={<Subscribers />} />
+                <Route path="/integrations" element={<Integrations />} />
+
             </Routes>
         </div>
     );
