@@ -151,30 +151,87 @@ export const getPaymentPlans = async () => {
 	}
 }
 
-export const isJwtTokenExpired =  (jwtToken) => {
-
-	if (!jwtToken) return true;
+export const isJwtTokenExpired = (jwtToken) => {
+	if (!jwtToken) return true
 
 	try {
-		const decodedToken = jwtDecode(jwtToken);
-		const currentTime = Date.now() / 1000;
-		return decodedToken.exp < currentTime;
+		const decodedToken = jwtDecode(jwtToken)
+		const currentTime = Date.now() / 1000
+		return decodedToken.exp < currentTime
 	} catch (error) {
-		console.error('Error decoding token:', error);
-		return true;
+		console.error('Error decoding token:', error)
+		return true
 	}
 }
 
 export const isUserLoggedIn = () => {
+	const fairymail_session = localStorage.getItem('fairymail_session')
 
-	const fairymail_session = localStorage.getItem('fairymail_session');
+	if (fairymail_session) {
+		const userData = JSON.parse(decodeURIComponent(fairymail_session))
+		if (fairymail_session == null) return false
 
-	if(fairymail_session == null) return false
-
-	console.log(fairymail_session)
-	if (fairymail_session != null && fairymail_session.length>0) {
-		const userData = JSON.parse(decodeURIComponent(fairymail_session));
-		if (userData.jwt && !isJwtTokenExpired(userData.jwt)) return true
+		console.log(fairymail_session)
+		if (fairymail_session != null && fairymail_session.length > 0) {
+			const userData = JSON.parse(decodeURIComponent(fairymail_session))
+			if (userData.jwt && !isJwtTokenExpired(userData.jwt)) return true
+		}
 	}
 }
-	
+
+const ApiService = {
+	get_external: (endpoint) => {
+		const url = `${endpoint}`
+		return axios.get(url)
+	},
+	post_external: (endpoint, data) => {
+		const url = `${endpoint}`
+		return axios.post(url, data)
+	},
+	get: (endpoint, jwt) => {
+		const url = `${BASE_URL}/${endpoint}`
+		return axios.get(url, {
+			headers: {
+				Authorization: 'Bearer ' + jwt,
+			},
+		})
+	},
+	post: (endpoint, data, jwt, headers = null) => {
+		const url = `${BASE_URL}/${endpoint}`
+		return axios.post(url, data, {
+			headers: headers
+				? headers
+				: {
+						Authorization: 'Bearer ' + jwt,
+				  },
+		})
+	},
+	login: (credentials) => {
+		credentials.identifier = credentials.username
+		const url = `${BASE_URL}/auth/local/`
+		console.log(url, credentials)
+		return axios.post(url, credentials, {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+	},
+	put: (endpoint, data, jwt) => {
+		const url = `${BASE_URL}/${endpoint}`
+		return axios.put(url, data, {
+			headers: {
+				Authorization: 'Bearer ' + jwt,
+			},
+		})
+	},
+	delete: (endpoint, jwt) => {
+		const url = `${BASE_URL}/${endpoint}`
+		return axios.delete(url, {
+			headers: {
+				Authorization: 'Bearer ' + jwt,
+			},
+		})
+	},
+}
+
+export { ApiService }
