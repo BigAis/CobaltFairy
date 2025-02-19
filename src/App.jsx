@@ -43,7 +43,9 @@ function App() {
                 <Route path="/reset-password/:id" element={<ResetPassword />} />
                 <Route path="/payment-plan" element={<PaymentPlan />} />
                 <Route path="/campaigns" element={<Campaigns />} />
+				<Route path="/campaigns:id" element={<EditCampaign/>}/>
                 <Route path="/subscribers" element={<Subscribers />} />
+				<Route path="/integrations" element={<Integrations />} />
             </Routes>
         </div>
     );
