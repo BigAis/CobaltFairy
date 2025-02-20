@@ -4,6 +4,7 @@ import Logo from '../Logo/Logo'
 import SubsCounter from '../SubsCounter'
 import Button from '../Button'
 import Icon from '../Icon/Icon'
+import { useNavigate } from 'react-router-dom'
 
 const menu_items_upper = [
     {label:'Dashboard',path:'/',icon:'Dashboard'},
@@ -21,7 +22,7 @@ const menu_items_lower = [
 ]
 
 const Sidemenu = ()=>{
-    
+    const navigate = useNavigate();
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [menuOpen, setMenuOpen] = useState(false);
     
@@ -50,7 +51,7 @@ const Sidemenu = ()=>{
                     {menu_items_upper.map(item=>{
                         return (
                             <>
-                                <li>
+                                <li onClick={()=>{navigate(item.path)}}>
                                     <Icon name={item.icon}></Icon>
                                     <a className='menu-entry'>{item.label}</a>
                                 </li>

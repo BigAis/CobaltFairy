@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext } from 'react'
 import { useUser } from './UserContext'
 import { ApiService } from '../service/api-service'
+import User  from '../service/User'
 
 const AccountContext = createContext()
 
@@ -16,7 +17,12 @@ export const AccountProvider = ({ children }) => {
 		if (!user || !user.jwt) return
 		const getAccount = async () => {
 			try {
-				const account = (await ApiService.get(`fairymailer/getAccount`, user.jwt)).data.user.account
+				let resp = (await ApiService.get(`fairymailer/getAccount`, user.jwt))
+				console.log('respppp',resp.data)
+				User.setAccounts(resp.data.user.accounts)
+				const account = resp.data.user.account
+				account.payment_plan = resp.data.account.payment_plan
+				console.log('set account',account)
 				setAccount(account)
 			} catch (error) {
 				setError(error)
@@ -24,7 +30,6 @@ export const AccountProvider = ({ children }) => {
 				setLoading(false)
 			}
 		}
-
 		getAccount()
 	}, [user])
 

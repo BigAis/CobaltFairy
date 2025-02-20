@@ -1,10 +1,10 @@
 import { React } from 'react'
 import './Logo.scss'
 
-const Logo = () => {
+const Logo = ({style}) => {
     return (
         <>
-            <div className='fairymail-logo-container'>
+            <div className='fairymail-logo-container' style={style}>
                 <div className='fairymail-logo'></div>    
             </div>
         </>

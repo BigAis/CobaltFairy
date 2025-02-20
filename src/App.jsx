@@ -12,6 +12,7 @@ import Campaigns from './pages/campaigns/Campaigns'
 import EditCampaign from './pages/campaigns/EditCampaign'
 import Subscribers from './pages/subscribers/subscribers'
 import Integrations from './pages/integrations/integrations'
+import AccountPicker from './pages/accountPicker/accountPicker'
 
 function App() {
 	const navigate = useNavigate()
@@ -46,6 +47,7 @@ function App() {
 				<Route path="/campaigns:id" element={<EditCampaign/>}/>
                 <Route path="/subscribers" element={<Subscribers />} />
 				<Route path="/integrations" element={<Integrations />} />
+				<Route path="/choose-account" element={<AccountPicker />} />
             </Routes>
         </div>
     );
