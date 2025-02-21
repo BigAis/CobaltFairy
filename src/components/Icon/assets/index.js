@@ -21,6 +21,7 @@ import Caret from './caret.svg?react'
 import Eye from './eye.svg?react'
 import Check from './check.svg?react'
 import User from './user.svg?react'
+import Clock from './clock.svg?react'
 
 import Filters from './filters.svg?react'
 
@@ -30,6 +31,7 @@ const icons = {
 	AlignRight,
 	ArrowDown,
 	Plus,
+	Clock,
 	Envelope,
 	Attention,
 	Dashboard,
@@ -48,7 +50,7 @@ const icons = {
 	Check,
 	User,
 	Filters,
-	Close
+	Close,
 }
 
 export default icons

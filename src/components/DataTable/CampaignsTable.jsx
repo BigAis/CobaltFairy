@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
-import { Button } from 'primereact/button'
 import 'primereact/resources/themes/lara-light-indigo/theme.css'
 import './DataTable.scss'
 import Pagination from '../Pagination'

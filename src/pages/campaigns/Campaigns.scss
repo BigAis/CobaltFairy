@@ -34,4 +34,38 @@
 .campaing-stats-card-item-header {
 	display: flex;
 	justify-content: space-between;
+	margin-bottom: 4px;
+}
+
+div.campaing-stats-card-item p.stat-number {
+	font-size: 32px;
+	font-weight: 600;
+}
+
+.stats-container .stat-heading {
+	font-family: 'Bitter', serif;
+	font-size: 24px;
+	font-weight: 600;
+	margin-bottom: 24px;
+	text-align: left;
+}
+
+.page-sent-at {
+	color: rgba(136, 125, 118, 1);
+	font-size: 14px;
+	text-align: left;
+}
+
+.page-sent-at .icon path {
+	fill: rgba(136, 125, 118, 1) !important;
+}
+
+.campaing-stats-card-item-header {
+	font-size: 14px;
+	font-weight: 500;
+	color: rgba(136, 125, 118, 1);
+}
+
+p.stat-table-heading {
+	color: rgba(136, 125, 118, 1);
 }

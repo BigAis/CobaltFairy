@@ -89,6 +89,10 @@ body {
 	align-items: center;
 }
 
+.align-items-center {
+	align-items: center;
+}
+
 .content-space-between {
 	justify-content: space-between;
 }
@@ -119,4 +123,19 @@ body {
 
 .w-100 {
 	width: 100%;
+}
+
+.mt10 {
+	margin-top: 10px;
+}
+
+.mt20 {
+	margin-top: 20px;
+}
+
+.mb10 {
+	margin-bottom: 10px;
+}
+.mb20 {
+	margin-bottom: 20px;
 }

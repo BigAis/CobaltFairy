@@ -5,7 +5,7 @@ import './Icon.scss'
 
 console.log('icons are : ', icons)
 
-const Icon = ({ name, size, className }) => {
+const Icon = ({ name, size, className, style }) => {
 	const IconComponent = icons[name]
 
 	if (!IconComponent) {
@@ -13,7 +13,7 @@ const Icon = ({ name, size, className }) => {
 		return null
 	}
 
-	return <IconComponent className={classNames('icon', className)} style={size && { width: `${size}px`, height: `${size}px` }} />
+	return <IconComponent className={classNames('icon', className)} style={size && { width: `${size}px`, height: `${size}px`, ...style }} />
 }
 
 Icon.propTypes = {
@@ -21,6 +21,7 @@ Icon.propTypes = {
 	size: PropTypes.number,
 	rightIcon: PropTypes.bool,
 	className: PropTypes.string,
+	style: PropTypes.object,
 }
 
 Icon.defaultProps = {
