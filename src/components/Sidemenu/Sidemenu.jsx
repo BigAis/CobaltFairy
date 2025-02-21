@@ -4,6 +4,7 @@ import Logo from '../Logo/Logo'
 import SubsCounter from '../SubsCounter'
 import Button from '../Button'
 import Icon from '../Icon/Icon'
+import { useNavigate } from 'react-router-dom'
 
 const menu_items_upper = [
 	{ label: 'Dashboard', path: '/', icon: 'Dashboard' },
@@ -21,6 +22,7 @@ const menu_items_lower = [
 ]
 
 const Sidemenu = () => {
+	const navigate = useNavigate()
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 	const [menuOpen, setMenuOpen] = useState(false)
 
@@ -36,54 +38,60 @@ const Sidemenu = () => {
 	return (
 		<>
 			<div className={`sidemenu ${isMobile ? 'mobile' : ''} ${menuOpen ? 'open' : ''}`}>
-				{isMobile && (
-					<button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-						☰
-					</button>
-				)}
+				<div className="sidemenu-inner">
+					{isMobile && (
+						<button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+							☰
+						</button>
+					)}
 
-				<Logo />
+					<Logo />
 
-				<div className="menu_upper">
-					<ul>
-						{menu_items_upper.map((item) => {
-							return (
-								<>
-									<li>
-										<Icon name={item.icon}></Icon>
-										<a className="menu-entry">{item.label}</a>
-									</li>
-								</>
-							)
-						})}
-					</ul>
-				</div>
-				<div className="menu_lower">
-					<ul>
-						{menu_items_lower.map((item) => {
-							return (
-								<>
-									<li>
-										<Icon name={item.icon}></Icon>
-										<a className="menu-entry">{item.label}</a>
-									</li>
-								</>
-							)
-						})}
-					</ul>
-				</div>
-				<div className="menu_bottom">
-					<SubsCounter
-						currentSubs={500}
-						subsLimit={1500}
-						onClick={() => {
-							console.log('SubsCounter clicked!')
-						}}
-					>
-						{' '}
-					</SubsCounter>
-					<br></br>
-					<Button style={{ width: '100%' }}>+ Create</Button>
+					<div className="menu_upper">
+						<ul>
+							{menu_items_upper.map((item) => {
+								return (
+									<>
+										<li
+											onClick={() => {
+												navigate(item.path)
+											}}
+										>
+											<Icon name={item.icon}></Icon>
+											<a className="menu-entry">{item.label}</a>
+										</li>
+									</>
+								)
+							})}
+						</ul>
+					</div>
+					<div className="menu_lower">
+						<ul>
+							{menu_items_lower.map((item) => {
+								return (
+									<>
+										<li>
+											<Icon name={item.icon}></Icon>
+											<a className="menu-entry">{item.label}</a>
+										</li>
+									</>
+								)
+							})}
+						</ul>
+					</div>
+					<div className="menu_bottom">
+						<SubsCounter
+							currentSubs={500}
+							subsLimit={1500}
+							onClick={() => {
+								console.log('SubsCounter clicked!')
+							}}
+						>
+							{' '}
+						</SubsCounter>
+						<br></br>
+						<Button style={{ width: '100%' }}>+ Create</Button>
+					</div>
 				</div>
 			</div>
 		</>

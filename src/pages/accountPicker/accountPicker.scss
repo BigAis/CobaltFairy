@@ -1,0 +1,55 @@
+.accountPicker-container{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .fairymail-logo-container{
+        margin-top: 20px;
+    }
+    h3.accountPicker-header{
+        margin-top:12vh;
+        font-size: 32px;
+        font-family: 'Bitter';
+        font-weight:700;
+    }
+    .accounts-container{
+        margin-top:30px;
+        columns:2;            
+        .account-info-card {
+            margin-bottom:10px;
+            min-width: 300px;
+            text-align: left;;
+			padding: 1em;
+			font-family: 'Inter';
+			line-height: 19px;
+			align-items: center;
+			display: flex;
+            cursor: pointer;
+			.account-info {
+				display: flex;
+				min-width: 200px;
+				text-align: left;
+				justify-content: space-between;
+				align-items: center;
+				h4 {
+					font-size: 16px;
+					font-weight: 500;
+				}
+				span {
+					font-size: 14px;
+					font-weight: normal;
+				}
+				svg path {
+					fill: black;
+				}
+			}
+			.account-info:hover {
+				cursor: pointer;
+				svg {
+					transform: scale(1.3);
+				}
+			}
+		}
+    }
+}

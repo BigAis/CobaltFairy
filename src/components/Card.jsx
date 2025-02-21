@@ -9,7 +9,7 @@ const computedClassName = classNames('card' , className)
 
     return (
         <>
-            <div className={computedClassName}>
+            <div className={computedClassName} style={props?.style} onClick={onClick}>
                 {children}
             </div>
         </>

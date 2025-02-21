@@ -1,0 +1,70 @@
+.integrations-table-container{
+
+    .integrations-container {
+        text-align: center;
+        background-color: #fdf4e6;
+        padding: 20px;
+    }
+
+    .integrations-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .integrations-subtitle {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .integrations-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        justify-content: center;
+        padding: 20px 0;
+    }
+
+    .integration-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .integration-icon {
+        max-width: 80px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .integration-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+
+    .integration-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 15px;
+    }
+
+    .integration-add-button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+        .integrations-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+}

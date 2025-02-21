@@ -1,6 +1,6 @@
 import './dashboard.scss'
 import '../../fullpage.scss'
-import { React } from 'react'
+import { React, useEffect, useState } from 'react'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
@@ -8,63 +8,57 @@ import Button from '../../components/Button'
 import Stat from '../../components/Stat/Stat'
 import ButtonGroup from '../../components/ButtonGroup'
 import PageHeader from '../../components/PageHeader/PageHeader'
+import { useAccount } from '../../context/AccountContext'
+import { ApiService } from '../../service/api-service'
 
-const account = {
-	name: 'Cobalt Fairy',
-	plan: 'Free Plan',
-}
-const user = {
-	name: 'Cobalt Fairy',
-	email: 'cf@fairymail.app',
-}
-
-const stats = [
-	{
-		label: 'Emails Sent',
-		value: '752',
-		percentage: -12,
-		defaultValue: false, // This will be the default selected option
-	},
-	{
-		label: 'Totals Clicks',
-		value: '159',
-		percentage: 17,
-		defaultValue: false,
-	},
-	{
-		label: 'Total Opens',
-		value: '340',
-		percentage: 19,
-		defaultValue: false,
-	},
-	{
-		label: 'Spam',
-		value: '85',
-		percentage: 5,
-		defaultValue: false,
-	},
-]
-const subs_stats = [
-	{
-		label: 'Total',
-		value: '752',
-		default: false,
-		percentage: 5,
-	},
-	{
-		label: 'Unsubscribed',
-		value: '159',
-		default: true,
-		percentage: 5,
-	},
-]
 const Dashboard = () => {
+	const { user, account, loading, error } = useAccount()
+	const [ statsData, setStatsData ] = useState({});
+	const [ statsKey, setStatsKey ] = useState('all');
+	const [ stats, setStats ] = useState([]); //[{label: 'Emails Sent',defaultValue: false},{label: 'Totals Clicks', defaultValue: false, }, {label: 'Total Opens',defaultValue: false,},{label: 'Spam',defaultValue: false}]
+	const loadStats = async ()=>{
+		if(!user) return;
+		let stats = await ApiService.get('fairymailer/dashboard-stats',user.jwt);
+		console.log('stats',stats.data);
+		setStatsData(stats.data);
+	}
+	const createStatsMetrics = ()=>{
+		let key = statsKey;
+		if(!key || !statsData || !statsData[key]) return;
+		let data = [];
+			data.push({label:'Emails Sent', defaultValue:false, value: statsData[key].emails, percentage:0})
+			data.push({label:'Total Opens', defaultValue:false, value: statsData[key].opens, percentage:0})
+			data.push({label:'Total Clicks', defaultValue:false, value: statsData[key].clicks, percentage:0})
+			data.push({label:'Spam', defaultValue:false, value: 0, percentage:0})
+			console.log('stats data',data)
+		setStats(data)
+	}
+	useEffect(()=>{
+		createStatsMetrics()
+	},[statsData, statsKey])
+	useEffect(()=>{
+		loadStats();
+	},[user])
+	const subs_stats = [
+		{
+			label: 'Total',
+			value: '752',
+			default: false,
+			percentage: 5,
+		},
+		{
+			label: 'Unsubscribed',
+			value: '159',
+			default: true,
+			percentage: 5,
+		},
+	]
 	return (
 		<>
 			<div className="dashboard-wrapper">
 				<Sidemenu />
 				<div className="dashboard-container">
-					<PageHeader user={user} account={account}/>
+					<PageHeader/>
 					<div className="page-name-container">
 						<div className="page-name">Dashboard</div>
 					</div>
@@ -75,12 +69,12 @@ const Dashboard = () => {
 								value="today"
 								options={[
 									{ value: 'today', label: 'Today' },
-									{ value: '7days', label: '7 Days' },
-									{ value: '30days', label: '30 Days' },
+									{ value: 'd7', label: '7 Days' },
+									{ value: 'd30', label: '30 Days' },
 									{ value: 'all', label: 'All' },
 								]}
 								onChange={(value) => {
-									console.log(value)
+									setStatsKey(value);
 								}}
 							></ButtonGroup>
 						</div>
@@ -115,7 +109,7 @@ const Dashboard = () => {
 									value="today"
 									options={[
 										{ value: 'today', label: 'Today' },
-										{ value: '7days', label: '7 Days' },
+										{ value: 'd7', label: '7 Days' },
 										{ value: 'all', label: 'All' },
 									]}
 									onChange={(value) => {

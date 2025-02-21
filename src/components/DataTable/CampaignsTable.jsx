@@ -10,7 +10,7 @@ import Checkbox from '../Checkbox'
 import PopupText from '../../components/PopupText/PopupText'
 import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
-import { v4 as uuidv4 } from 'uuid'
+// import { v4 as uuidv4 } from 'uuid'
 
 const CampaignsTable = ({ campaigns }) => {
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])

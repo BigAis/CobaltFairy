@@ -1,0 +1,80 @@
+.integrations-component{
+    .page-name{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .integrations-container {
+        text-align: center;
+        background-color: #fdf4e6;
+        padding: 20px;
+    }
+
+    .integrations-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        margin-top: 10px;
+        text-align: left;
+    }
+
+    .integrations-subtitle {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .integrations-grid, .selected-integrations {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        justify-content: center;
+        padding: 20px 0;
+    }
+
+    .integration-card, .selected-integration-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: fill;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 272px;
+        width: 100%;
+    }
+
+    .integration-icon {
+        max-width: 80px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .integration-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+
+    .integration-description {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 15px;
+    }
+
+    .integration-add-button, .integration-remove-button, .integration-edit-button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        margin: 5px;
+    }
+
+    @media (max-width: 768px) {
+        .integrations-grid, .selected-integrations {
+            grid-template-columns: 1fr;
+        }
+    }
+}
