@@ -89,12 +89,20 @@ body {
 	align-items: center;
 }
 
+.flex-1 {
+	flex: 1;
+}
+
 .align-items-center {
 	align-items: center;
 }
 
 .content-space-between {
 	justify-content: space-between;
+}
+
+.justify-content-center {
+	justify-content: center;
 }
 
 .gap-5 {
@@ -121,6 +129,20 @@ body {
 	gap: 50px;
 }
 
+.w-50 {
+	width: 50%;
+}
+.w-75 {
+	width: 75%;
+}
+
+.w-85 {
+	width: 85%;
+}
+
+.w-90 {
+	width: 90%;
+}
 .w-100 {
 	width: 100%;
 }
@@ -138,4 +160,12 @@ body {
 }
 .mb20 {
 	margin-bottom: 20px;
+}
+
+.mr10 {
+	margin-right: 10px;
+}
+
+.mr20 {
+	margin-right: 20px;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
 import 'primereact/resources/themes/lara-light-indigo/theme.css'
@@ -14,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid'
 const CampaignsTable = ({ campaigns }) => {
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 	const user = User.get()
+	const navigate = useNavigate()
 
 	const [currentPage, setCurrentPage] = useState(1)
 	const rowsPerPage = 5
@@ -109,6 +111,11 @@ const CampaignsTable = ({ campaigns }) => {
 		console.log('rowdata2 is : ', rowData)
 
 		switch (selectedValue) {
+			case 'overview_cmp':
+				console.log('Overview action triggered')
+				navigate(`/campaigns/edit/${rowData.uuid}`)
+				// Implement overview logic here
+				break
 			case 'edit':
 				console.log('Edit action triggered')
 				// Implement edit logic here

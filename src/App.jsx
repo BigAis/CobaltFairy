@@ -11,6 +11,7 @@ import PaymentPlan from './pages/payment-plan/payment-plan'
 import Campaigns from './pages/campaigns/Campaigns'
 import EditCampaign from './pages/campaigns/EditCampaign'
 import Subscribers from './pages/subscribers/subscribers'
+import NewCampaign from './pages/campaigns/NewCampaign'
 
 function App() {
 	const navigate = useNavigate()
@@ -42,6 +43,7 @@ function App() {
 				<Route path="/reset-password/:id" element={<ResetPassword />} />
 				<Route path="/payment-plan" element={<PaymentPlan />} />
 				<Route path="/campaigns" element={<Campaigns />} />
+				<Route path="/campaigns/new" element={<NewCampaign />} />
 				<Route path="/campaigns/edit/:uuid" element={<EditCampaign />} />
 				<Route path="/subscribers" element={<Subscribers />} />
 			</Routes>

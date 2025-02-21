@@ -69,3 +69,66 @@ div.campaing-stats-card-item p.stat-number {
 p.stat-table-heading {
 	color: rgba(136, 125, 118, 1);
 }
+
+div.campaign-preview-title {
+	border: 2px solid rgba(218, 209, 197, 1);
+	border-radius: 8px 8px 0px 0px;
+	padding: 10px;
+	text-align: left;
+	border-bottom: none;
+	background-color: #fff8ef;
+}
+
+div.campaign-preview-first-row {
+	border: 2px solid rgba(218, 209, 197, 1);
+	padding: 20px 10px;
+	background-color: #fff8ef;
+	border-bottom: none;
+}
+
+div.campaign-preview-second-row,
+div.campaign-preview-third-row {
+	border: 2px solid rgba(218, 209, 197, 1);
+	padding: 20px 10px;
+	background-color: #fff8ef;
+}
+
+div.campaign-preview-first-row .skeleton-1,
+div.campaign-preview-third-row .skeleton-1 {
+	height: 15px;
+	width: 150px;
+	background-color: rgba(218, 209, 197, 1);
+	border-radius: 8px;
+}
+
+div.campaign-preview-first-row .skeleton-2,
+div.campaign-preview-third-row .skeleton-2 {
+	height: 15px;
+	width: 300px;
+	background-color: rgba(218, 209, 197, 0.5);
+	border-radius: 8px;
+	margin-top: 10px;
+}
+
+div.campaign-preview-third-row {
+	border-top: none;
+	border-radius: 0px 0px 8px 8px;
+}
+
+div.campaign-preview-active-row {
+	border-radius: 8px;
+	background-color: #ffffff;
+	text-align: left;
+	padding-left: 2.25rem;
+}
+
+.new-campaign-left .campaign-title {
+	text-align: left;
+	font-size: 32px;
+	font-family: 'Bitter', serif;
+	font-weight: 700;
+}
+.fm-content-wrapper {
+	height: 100vh;
+	min-width: 1170px;
+}
