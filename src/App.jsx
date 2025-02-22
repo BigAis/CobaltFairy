@@ -13,6 +13,8 @@ import EditCampaign from './pages/campaigns/EditCampaign'
 import Subscribers from './pages/subscribers/subscribers'
 import NewCampaign from './pages/campaigns/NewCampaign'
 import Integrations from './pages/integrations/integrations'
+import Automations from './pages/automations/automations'
+import EditAutomation from './pages/automations/edit-automation'
 import AccountPicker from './pages/accountPicker/accountPicker'
 
 function App() {
@@ -50,10 +52,13 @@ function App() {
 				<Route path="/campaigns/edit/:uuid" element={<EditCampaign />} />
 				<Route path="/subscribers" element={<Subscribers />} />
 				<Route path="/integrations" element={<Integrations />} />
+				<Route path="/automations" element={<Automations />} />
+				<Route path="/automations/:autId" element={<EditAutomation />} />
 				<Route path="/choose-account" element={<AccountPicker />} />
-			</Routes>
-		</div>
-	)
+				<Route path="/stats" element={<Dashboard />} />
+            </Routes>
+        </div>
+    );
 }
 
 export default App

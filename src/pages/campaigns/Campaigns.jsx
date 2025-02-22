@@ -2595,7 +2595,7 @@ const Campaigns = () => {
 			setCampaigns(
 				resp.data.data.map((item) => ({
 					...item,
-					image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
+					image: "/images/cmp.png",
 				}))
 			)
 
@@ -2662,7 +2662,7 @@ const Campaigns = () => {
 					</div>
 
 					<div className="">
-						<CampaignsTable campaigns={campaigns.filter((campaign) => campaign.status === selectedCampaignType)} />
+						<CampaignsTable campaigns={campaigns.filter((campaign) => campaign.status === selectedCampaignType)} dashboardPreviewOnly={false} />
 					</div>
 				</div>
 			</div>

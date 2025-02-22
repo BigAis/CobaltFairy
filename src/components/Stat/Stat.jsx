@@ -33,7 +33,7 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 
 	const computedClassName = classNames('stat-wrapper', className)
 
-	const chartData = selectedOption && selectedOption.value ? {
+	const chartData = selectedOption && parseFloat(selectedOption.value)>=0 ? {
 		labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
 		datasets: [
 			{
@@ -94,7 +94,13 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 			},
 		},
 	}
-	useEffect(()=>{},[])
+	useEffect(()=>{
+		for(const ss of stats){
+			if(ss.label===defaultLabel){
+				setSelectedOption(ss)
+			}
+		}
+	},[stats])
 	return (
 		<div className={computedClassName}>
 			<div className="stat-select" onClick={toggleDropdown}>
@@ -115,7 +121,7 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 			)}
 
 			<div>
-				{selectedOption && selectedOption.value ? (<p className="stat-value">{formatNumber(selectedOption.value)}</p>) : (<Skeleton style={{minHeight:'40px'}}/>)}
+				{selectedOption &&  parseFloat(selectedOption.value)>=0 ? (<p className="stat-value">{formatNumber(selectedOption.value)}</p>) : (<Skeleton style={{minHeight:'40px'}}/>)}
 			</div>
 			{hasChart && (
 				<div>

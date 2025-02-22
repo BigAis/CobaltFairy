@@ -8,9 +8,9 @@ import Pagination from '../Pagination'
 import Dropdown from '../Dropdown'
 import Checkbox from '../Checkbox'
 
-const SubscribersTable = ({ subscribers }) => {
+const GroupsTable = ({ groups }) => {
 
-    const [selectedSubscribers, setSelectedSubscribers] = useState([])
+    const [selectedGroups, setSelectedGroups] = useState([])
 
     const [currentPage, setCurrentPage] = useState(1)
     const rowsPerPage = 20
@@ -30,11 +30,11 @@ const SubscribersTable = ({ subscribers }) => {
 
     const startIndex = (currentPage - 1) * rowsPerPage
     const endIndex = startIndex + rowsPerPage
-    const paginatedData = subscribers.slice(startIndex, endIndex)
+    const paginatedData = groups.slice(startIndex, endIndex)
 
     useEffect(() => {
-        console.log('selected subscribers : ', selectedSubscribers)
-    }, [selectedSubscribers])
+
+    }, [selectedGroups])
 
     const actionsBodyTemplate = () => {
         return (
@@ -49,19 +49,19 @@ const SubscribersTable = ({ subscribers }) => {
     return (
         // <div>
         <>
-            <DataTable value={paginatedData} paginator={false} selection={selectedSubscribers} onSelectionChange={(e) => setSelectedSubscribers(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
+            <DataTable value={paginatedData} paginator={false} selection={selectedGroups} onSelectionChange={(e) => setSelectedGroups(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
                 <Column
                     body={(rowData) => (
                         <div style={{ position: 'relative' }}>
                             {/* Checkbox in the Top-Left Corner */}
                             <div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
                                 <Checkbox
-                                    checked={selectedSubscribers.some((subscribers) => subscribers.name === rowData.name)}
+                                    checked={selectedGroups.some((subscribers) => subscribers.name === rowData.name)}
                                     onChange={(e) => {
                                         if (e) {
-                                            setSelectedSubscribers((prev) => [...prev, rowData])
+                                            setSelectedGroups((prev) => [...prev, rowData])
                                         } else {
-                                            setSelectedSubscribers((prev) => prev.filter((subscribers) => subscribers.name !== rowData.name))
+                                            setSelectedGroups((prev) => prev.filter((subscribers) => subscribers.name !== rowData.name))
                                         }
                                     }}
                                 />
@@ -70,12 +70,12 @@ const SubscribersTable = ({ subscribers }) => {
                     )}
                     header={() => (
                         <Checkbox
-                            checked={selectedSubscribers.length === paginatedData.length && selectedSubscribers.length > 0}
+                            checked={selectedGroups.length === paginatedData.length && selectedGroups.length > 0}
                             onChange={(e) => {
                                 if (e) {
-                                    setSelectedSubscribers([...paginatedData])
+                                    setSelectedGroups([...paginatedData])
                                 } else {
-                                    setSelectedSubscribers([])
+                                    setSelectedGroups([])
                                 }
                             }}
                         />
@@ -83,17 +83,15 @@ const SubscribersTable = ({ subscribers }) => {
                     headerStyle={{ width: '80px' }}
                 />
                 <Column field="name" header="Name" />
-                <Column field="email" header="Email" />
-                <Column field="emailSent" header="Email Sent" />
-                <Column field="emailOpens" header="Email Opens" />
-                <Column field="emailClicks" header="Email Clicks" />
-                <Column field="createdAt" header="Subscribed" />
+                <Column field="click_rate" header="Subscribers" />
+                <Column field="open_rate" header="Opens" />
+                <Column field="click_rate" header="Click" />
                 <Column header="Actions" body={actionsBodyTemplate} />
             </DataTable>
-            <Pagination currentPage={1} totalResults={subscribers.length} resultsPerPage={10} onChange={handlePageChange} />
+            <Pagination currentPage={1} totalResults={groups.length} resultsPerPage={20} onChange={handlePageChange} />
             {/* </div> */}
         </>
     )
 }
 
-export default SubscribersTable
+export default GroupsTable

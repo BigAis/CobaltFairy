@@ -10,6 +10,8 @@ import Logo from '../../components/Logo/Logo'
 import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
 import { useNavigate } from 'react-router-dom'
+import PopupText from '../../components/PopupText/PopupText'
+
 
 const AccountPicker = ()=>{
     const navigate = useNavigate();
@@ -23,7 +25,17 @@ const AccountPicker = ()=>{
     useEffect(()=>{
         setAccounts(User.getAccounts())
     },[])
-    console.log('accounts',accounts)
+    
+    const notReadyYet = async ()=>{
+        const result = await PopupText.fire({
+            icon: 'warning',
+            text: 'This action is not possible yet (staging version)',
+            showConfirmButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Ok',
+        })
+    }
+
     return (
         <div className="accountPicker-container">
             <Logo style={{}}/>
@@ -32,18 +44,23 @@ const AccountPicker = ()=>{
                 <div className='accounts-container'>
                     {accounts.map((account)=>{
                         return (
-                            <Card className="account-info-card" onClick={()=>{chooseAccount(account.id)}}>
+                            <Card className="account-info-card" >
                                 <div className="account-info" >
-                                    <div>
+                                    <div onClick={()=>{chooseAccount(account.id)}}>
                                         <h4>{account?.name}</h4>
                                         <span>{account?.payment_plan?.name || 'Free Plan'}</span>
                                     </div>
-                                    <Icon name="Close"></Icon>
+                                    <div className='buttons'>
+                                        <Icon onClick={notReadyYet} name="Pencil"></Icon>
+                                        <Icon onClick={notReadyYet} name="CloseCircle"></Icon>
+                                    </div>
                                 </div>
                             </Card>
                         )
                     })}
                 </div>
+                <Button icon={'Plus'} style={{margin:'30px auto'}}>Add Account</Button>
+                <p style={{minHeight:'5vh'}}></p>
         </div>
     );
 };

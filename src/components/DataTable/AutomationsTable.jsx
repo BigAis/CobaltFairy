@@ -7,11 +7,12 @@ import './DataTable.scss'
 import Pagination from '../Pagination'
 import Dropdown from '../Dropdown'
 import Checkbox from '../Checkbox'
+import Switch from '../Switch'
+import { useNavigate } from 'react-router-dom'
+const AutomationsTable = ({ automations }) => {
 
-const SubscribersTable = ({ subscribers }) => {
-
-    const [selectedSubscribers, setSelectedSubscribers] = useState([])
-
+    const [selectedAutomations, setSelectedAutomations] = useState([])
+    const navigate = useNavigate()
     const [currentPage, setCurrentPage] = useState(1)
     const rowsPerPage = 20
 
@@ -24,24 +25,31 @@ const SubscribersTable = ({ subscribers }) => {
         { value: 'option2', label: 'Option 2' },
         { value: 'option3', label: 'Option 3' },
     ]
-    const handleLeftClick = () => {
-        alert('Left action triggered!')
+    const handleLeftClick = (item) => {
+        navigate('/automations/'+item.uuid)
     }
 
     const startIndex = (currentPage - 1) * rowsPerPage
     const endIndex = startIndex + rowsPerPage
-    const paginatedData = subscribers.slice(startIndex, endIndex)
+    const paginatedData = automations.slice(startIndex, endIndex)
 
     useEffect(() => {
-        console.log('selected subscribers : ', selectedSubscribers)
-    }, [selectedSubscribers])
 
-    const actionsBodyTemplate = () => {
+    }, [selectedAutomations])
+
+    const actionsBodyTemplate = (item) => {
         return (
             <div>
-                <Dropdown withDivider={true} icon={'Plus'} options={dropdownOptions} onLeftClick={handleLeftClick}>
+                <Dropdown withDivider={true} icon={'Plus'} options={dropdownOptions} onLeftClick={()=>{handleLeftClick(item)}}>
                     Edit
                 </Dropdown>
+            </div>
+        )
+    }
+    const enabledSwitchTemplate = (item) => {
+        return (
+            <div>
+                <Switch checked={item.active} onChange={()=>{item.active=!item.active}}></Switch>
             </div>
         )
     }
@@ -49,19 +57,19 @@ const SubscribersTable = ({ subscribers }) => {
     return (
         // <div>
         <>
-            <DataTable value={paginatedData} paginator={false} selection={selectedSubscribers} onSelectionChange={(e) => setSelectedSubscribers(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
+            <DataTable value={paginatedData} paginator={false} selection={selectedAutomations} onSelectionChange={(e) => setSelectedAutomations(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
                 <Column
                     body={(rowData) => (
                         <div style={{ position: 'relative' }}>
                             {/* Checkbox in the Top-Left Corner */}
                             <div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
                                 <Checkbox
-                                    checked={selectedSubscribers.some((subscribers) => subscribers.name === rowData.name)}
+                                    checked={selectedAutomations.some((subscribers) => subscribers.name === rowData.name)}
                                     onChange={(e) => {
                                         if (e) {
-                                            setSelectedSubscribers((prev) => [...prev, rowData])
+                                            setSelectedAutomations((prev) => [...prev, rowData])
                                         } else {
-                                            setSelectedSubscribers((prev) => prev.filter((subscribers) => subscribers.name !== rowData.name))
+                                            setSelectedAutomations((prev) => prev.filter((subscribers) => subscribers.name !== rowData.name))
                                         }
                                     }}
                                 />
@@ -70,30 +78,30 @@ const SubscribersTable = ({ subscribers }) => {
                     )}
                     header={() => (
                         <Checkbox
-                            checked={selectedSubscribers.length === paginatedData.length && selectedSubscribers.length > 0}
+                            checked={selectedAutomations.length === paginatedData.length && selectedAutomations.length > 0}
                             onChange={(e) => {
                                 if (e) {
-                                    setSelectedSubscribers([...paginatedData])
+                                    setSelectedAutomations([...paginatedData])
                                 } else {
-                                    setSelectedSubscribers([])
+                                    setSelectedAutomations([])
                                 }
                             }}
                         />
                     )}
                     headerStyle={{ width: '80px' }}
                 />
-                <Column field="name" header="Name" />
-                <Column field="email" header="Email" />
-                <Column field="emailSent" header="Email Sent" />
-                <Column field="emailOpens" header="Email Opens" />
-                <Column field="emailClicks" header="Email Clicks" />
-                <Column field="createdAt" header="Subscribed" />
+                <Column field="name" header="Description" />
+                <Column field="createdAt" header="Created" />
+                <Column field="open_rate" header="Emails" />
+                <Column field="open_rate" header="Opens" />
+                <Column field="click_rate" header="Clicks" />
+                <Column header="Status" body={enabledSwitchTemplate} />
                 <Column header="Actions" body={actionsBodyTemplate} />
             </DataTable>
-            <Pagination currentPage={1} totalResults={subscribers.length} resultsPerPage={10} onChange={handlePageChange} />
+            <Pagination currentPage={1} totalResults={automations.length} resultsPerPage={20} onChange={handlePageChange} />
             {/* </div> */}
         </>
     )
 }
 
-export default SubscribersTable
+export default AutomationsTable

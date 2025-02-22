@@ -12,7 +12,7 @@ import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
 // import { v4 as uuidv4 } from 'uuid'
 
-const CampaignsTable = ({ campaigns }) => {
+const CampaignsTable = ({ campaigns, dashboardPreviewOnly=false }) => {
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 	const user = User.get()
 	const navigate = useNavigate()
@@ -171,25 +171,65 @@ const CampaignsTable = ({ campaigns }) => {
 	return (
 		// <div>
 		<>
-			<DataTable value={paginatedData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
+			{!dashboardPreviewOnly ? (
+				<DataTable value={paginatedData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
+					<Column
+						body={(rowData) => (
+							<div style={{ position: 'relative' }}>
+								{/* Checkbox in the Top-Left Corner */}
+								<div style={{ position: 'absolute', top: '10px', left: '5px' }}>
+									<Checkbox
+										checked={selectedCampaigns.some((campaign) => campaign.name === rowData.name)}
+										onChange={(e) => {
+											if (e) {
+												setSelectedCampaigns((prev) => [...prev, rowData])
+											} else {
+												setSelectedCampaigns((prev) => prev.filter((campaign) => campaign.id !== rowData.id))
+											}
+										}}
+									/>
+								</div>
+								{/* Image */}
+								{rowData.image ? (
+									<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+								) : (
+									<img src={'images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+								)}
+							</div>
+						)}
+						header={() => (
+							<Checkbox
+								checked={selectedCampaigns.length === paginatedData.length && selectedCampaigns.length > 0}
+								onChange={(e) => {
+									if (e) {
+										setSelectedCampaigns([...paginatedData])
+									} else {
+										setSelectedCampaigns([])
+									}
+								}}
+							/>
+						)}
+						headerStyle={{ width: '80px' }}
+					/>
+					<Column field="name" header="Name" />
+					<Column field="recipients" header="Recipients" />
+					<Column field="stats.o" body={openBodyTemplate} header="Opens" />
+					<Column field="clicks" body={clickBodyTemplate} header="Clicks" />
+					<Column field="type" body={typeBodyTemplate} header="Type" />
+					<Column field="date" header="Date" />
+					<Column header="Actions" body={actionsBodyTemplate} />
+				</DataTable>		
+			) : (
+<DataTable value={paginatedData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
 				<Column
 					body={(rowData) => (
 						<div style={{ position: 'relative' }}>
-							{/* Checkbox in the Top-Left Corner */}
-							<div style={{ position: 'absolute', top: '10px', left: '5px' }}>
-								<Checkbox
-									checked={selectedCampaigns.some((campaign) => campaign.name === rowData.name)}
-									onChange={(e) => {
-										if (e) {
-											setSelectedCampaigns((prev) => [...prev, rowData])
-										} else {
-											setSelectedCampaigns((prev) => prev.filter((campaign) => campaign.id !== rowData.id))
-										}
-									}}
-								/>
-							</div>
 							{/* Image */}
-							<img src={rowData.image} alt={rowData.name} style={{ width: '88px', height: '88px' }} />
+							{rowData.image ? (
+								<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+							) : (
+								<img src={'images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+							)}
 						</div>
 					)}
 					header={() => (
@@ -208,12 +248,8 @@ const CampaignsTable = ({ campaigns }) => {
 				/>
 				<Column field="name" header="Name" />
 				<Column field="recipients" header="Recipients" />
-				<Column field="stats.o" body={openBodyTemplate} header="Opens" />
-				<Column field="clicks" body={clickBodyTemplate} header="Clicks" />
-				<Column field="type" body={typeBodyTemplate} header="Type" />
-				<Column field="date" header="Date" />
-				<Column header="Actions" body={actionsBodyTemplate} />
-			</DataTable>
+				</DataTable>
+			)}
 			<Pagination currentPage={1} totalResults={campaigns.length} resultsPerPage={10} onChange={handlePageChange} />
 			{/* </div> */}
 		</>
