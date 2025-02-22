@@ -13,7 +13,7 @@ const SubscribersTable = ({ subscribers }) => {
     const [selectedSubscribers, setSelectedSubscribers] = useState([])
 
     const [currentPage, setCurrentPage] = useState(1)
-    const rowsPerPage = 5
+    const rowsPerPage = 20
 
     const handlePageChange = (page) => {
         setCurrentPage(page)
@@ -49,12 +49,12 @@ const SubscribersTable = ({ subscribers }) => {
     return (
         // <div>
         <>
-            <DataTable value={paginatedData} paginator={false} selection={selectedSubscribers} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
+            <DataTable value={paginatedData} paginator={false} selection={selectedSubscribers} onSelectionChange={(e) => setSelectedSubscribers(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
                 <Column
                     body={(rowData) => (
                         <div style={{ position: 'relative' }}>
                             {/* Checkbox in the Top-Left Corner */}
-                            <div style={{ position: 'absolute', top: '10px', left: '5px' }}>
+                            <div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
                                 <Checkbox
                                     checked={selectedSubscribers.some((subscribers) => subscribers.name === rowData.name)}
                                     onChange={(e) => {
@@ -82,13 +82,12 @@ const SubscribersTable = ({ subscribers }) => {
                     )}
                     headerStyle={{ width: '80px' }}
                 />
-                <Column field="firstName" header="First Name" />
-                <Column field="lastName" header="Last Name" />
+                <Column field="name" header="Name" />
                 <Column field="email" header="Email" />
                 <Column field="emailSent" header="Email Sent" />
                 <Column field="emailOpens" header="Email Opens" />
                 <Column field="emailClicks" header="Email Clicks" />
-                <Column field="subscribed" header="Subscribed" />
+                <Column field="createdAt" header="Subscribed" />
                 <Column header="Actions" body={actionsBodyTemplate} />
             </DataTable>
             <Pagination currentPage={1} totalResults={subscribers.length} resultsPerPage={10} onChange={handlePageChange} />

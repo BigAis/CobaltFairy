@@ -96,7 +96,7 @@ const LogIn = () => {
 		const respone = await googleLogIn(tokenResponse)
 
 		if (respone.data.code == 200) {
-			navigate('/dashboard')
+			window.location.href="/dashboard"
 		} else if (respone.data.code == 201) {
 			navigate('/register', { state: { isGoogleSignIn: true, userData: respone.data.data, googleSignInToken: tokenResponse } })
 		}

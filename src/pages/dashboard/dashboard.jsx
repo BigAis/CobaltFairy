@@ -10,49 +10,112 @@ import ButtonGroup from '../../components/ButtonGroup'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
-
+import CampaignsTable from '../../components/DataTable/CampaignsTable'
+import { useNavigate } from 'react-router-dom'
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
+import { Line } from 'react-chartjs-2'
 const Dashboard = () => {
+	const navigate = useNavigate();
 	const { user, account, loading, error } = useAccount()
 	const [ statsData, setStatsData ] = useState({});
-	const [ statsKey, setStatsKey ] = useState('all');
-	const [ stats, setStats ] = useState([]); //[{label: 'Emails Sent',defaultValue: false},{label: 'Totals Clicks', defaultValue: false, }, {label: 'Total Opens',defaultValue: false,},{label: 'Spam',defaultValue: false}]
+	const [ statsKey, setStatsKey ] = useState('d7');
+	const [ subsStats, setSubsStats ] = useState(null);
+	const [ subsStatsKey, setSubsStatsKey ] = useState('d7');
+	const [ latestCampaigns, setLatestCampaigns ] = useState([{},{},{},{}]);
+	const [ stats, setStats ] = useState([]);
+
+	const isPositive=true
+	const subsChartData = {
+		labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+		datasets: [
+			{
+				data: [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4],
+				borderColor: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
+				borderWidth: 3,
+				tension: 0.4,
+				pointRadius: 0,
+				fill: true,
+			},
+			{
+				data: [1, 1.5, 2, 1.5, 2, 1.5, 1, 2.7, 2, 3, 3.5, 2, 1.8, 1.5, 1.7, 2.3, 0.5, 2.5, 1, 0.5, 4],
+				borderColor: !isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
+				borderWidth: 3,
+				tension: 0.4,
+				pointRadius: 0,
+				fill: true,
+			},
+		],
+	}
+	const subsChartOptions = {
+		responsive: true,
+		maintainAspectRatio: false,
+		plugins: {
+			legend: {
+				display: false,
+			},
+			tooltip: {
+				enabled: false,
+			},
+		},
+		scales: {
+			x: {
+				display: false,
+			},
+			y: {
+				display: false,
+				min: 0,
+			},
+		},
+		elements: {
+			line: {
+				tension: 1,
+			},
+		},
+	}
+
 	const loadStats = async ()=>{
 		if(!user) return;
 		let stats = await ApiService.get('fairymailer/dashboard-stats',user.jwt);
 		console.log('stats',stats.data);
 		setStatsData(stats.data);
+		let resp = await ApiService.get(
+					`fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
+					user.jwt
+				)
+		setLatestCampaigns(resp.data.data)
 	}
 	const createStatsMetrics = ()=>{
 		let key = statsKey;
 		if(!key || !statsData || !statsData[key]) return;
 		let data = [];
-			data.push({label:'Emails Sent', defaultValue:false, value: statsData[key].emails, percentage:0})
-			data.push({label:'Total Opens', defaultValue:false, value: statsData[key].opens, percentage:0})
-			data.push({label:'Total Clicks', defaultValue:false, value: statsData[key].clicks, percentage:0})
-			data.push({label:'Spam', defaultValue:false, value: 0, percentage:0})
-			console.log('stats data',data)
+		data.push({label:'Emails Sent', defaultValue:false, value: statsData[key].emails, percentage:0})
+		data.push({label:'Total Opens', defaultValue:false, value: statsData[key].opens, percentage:0})
+		data.push({label:'Total Clicks', defaultValue:false, value: statsData[key].clicks, percentage:0})
+		data.push({label:'Spam', defaultValue:false, value: 0, percentage:0})
+		console.log('stats data',data)
 		setStats(data)
+	}
+	const createSubsStatsMetrics = ()=>{
+		let key = statsKey;
+		if(!key || !statsData || !statsData[key]) {console.log(statsData,key);return}
+		let data = [];
+		data.push({label:'Total', defaultValue:false, value: statsData[key].subs_count, percentage:0})
+		data.push({label:'Unsubscribed', defaultValue:false, value: statsData[key].unsubs, percentage:0})
+		setSubsStats(data)
+		console.log(data)
 	}
 	useEffect(()=>{
 		createStatsMetrics()
 	},[statsData, statsKey])
 	useEffect(()=>{
+		createSubsStatsMetrics()
+	},[statsData, subsStatsKey])
+
+	useEffect(()=>{
 		loadStats();
 	},[user])
-	const subs_stats = [
-		{
-			label: 'Total',
-			value: '752',
-			default: false,
-			percentage: 5,
-		},
-		{
-			label: 'Unsubscribed',
-			value: '159',
-			default: true,
-			percentage: 5,
-		},
-	]
+
+
 	return (
 		<>
 			<div className="dashboard-wrapper">
@@ -66,7 +129,7 @@ const Dashboard = () => {
 						<div className="stats-head">
 							<span className="stats-title">Campaigns</span>
 							<ButtonGroup
-								value="today"
+								value="d7"
 								options={[
 									{ value: 'today', label: 'Today' },
 									{ value: 'd7', label: '7 Days' },
@@ -80,10 +143,14 @@ const Dashboard = () => {
 						</div>
 						<div>
 							<div className="campaign-charts d-flex gap-30">
-								<Stat stats={stats} hasChart={true} defaultLabel={'Emails Sent'} />
-								<Stat stats={stats} hasChart={true} defaultLabel={'Total Clicks'} />
-								<Stat stats={stats} hasChart={true} defaultLabel={'Total Opens'} />
-								<Stat stats={stats} hasChart={true} defaultLabel={'Spam'} />
+								{stats && (
+									<>
+										<Stat stats={stats} hasChart={true} defaultLabel={'Emails Sent'} />
+										<Stat stats={stats} hasChart={true} defaultLabel={'Total Clicks'} />
+										<Stat stats={stats} hasChart={true} defaultLabel={'Total Opens'} />
+										<Stat stats={stats} hasChart={true} defaultLabel={'Spam'} />
+									</>
+								)}
 							</div>
 						</div>
 					</Card>
@@ -113,39 +180,38 @@ const Dashboard = () => {
 										{ value: 'all', label: 'All' },
 									]}
 									onChange={(value) => {
-										console.log(value)
+										setSubsStatsKey(value);
 									}}
 								></ButtonGroup>
 							</div>
 							<br></br>
 							<div className="campaign-charts d-flex gap-30">
-								<div>
-									<Stat stats={subs_stats} hasChart={false} defaultLabel={'Total'} />
-								</div>
-								<div>
-									<Stat stats={subs_stats} hasChart={false} defaultLabel={'Unsubscribed'} />
-								</div>
+								{subsStats && (
+									<>
+									<div>
+										<Stat stats={subsStats} hasChart={false} defaultLabel={'Total'} />
+									</div>
+									<div>
+										<Stat stats={subsStats} hasChart={false} defaultLabel={'Unsubscribed'} />
+									</div>
+									</>
+								)}
 							</div>
 							<br></br>
-							<Button type={'secondary'}>All Subscribers</Button>
+							<div style={{ height: '350px' }}>
+								<Line data={subsChartData} options={subsChartOptions} />
+							</div>
+							<br></br>
+							<Button type={'secondary'} onClick={()=>{navigate('/subscribers')}}>All Subscribers</Button>
 						</Card>
 						<Card className="subscribers-stats">
 							<div className="stats-head">
 								<span className="stats-title">Latest Campaigns</span>
-								<ButtonGroup
-									value="today"
-									options={[
-										{ value: 'today', label: 'Today' },
-										{ value: '7days', label: '7 Days' },
-										{ value: 'all', label: 'All' },
-									]}
-									onChange={(value) => {
-										console.log(value)
-									}}
-								></ButtonGroup>
 							</div>
 							<br></br>
-							<Button type={'secondary'}>All Campaigns</Button>
+							<CampaignsTable campaigns={latestCampaigns.filter((campaign) => campaign.status ===  'sent')} dashboardPreviewOnly={true} />
+							<br></br>
+							<Button type={'secondary'} onClick={()=>{navigate('/campaigns')}}>All Campaigns</Button>
 						</Card>
 					</div>
 				</div>

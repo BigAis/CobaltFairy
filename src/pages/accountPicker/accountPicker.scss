@@ -25,13 +25,16 @@
 			line-height: 19px;
 			align-items: center;
 			display: flex;
-            cursor: pointer;
 			.account-info {
 				display: flex;
 				min-width: 200px;
+                width: 100%;
 				text-align: left;
 				justify-content: space-between;
 				align-items: center;
+                div{
+                    cursor: pointer;
+                }
 				h4 {
 					font-size: 16px;
 					font-weight: 500;
@@ -44,12 +47,21 @@
 					fill: black;
 				}
 			}
-			.account-info:hover {
+			.account-info {
 				cursor: pointer;
-				svg {
-					transform: scale(1.3);
+                svg{
+                    margin-right:10px;
+                    transform: scale(1.2);
+                }
+				svg:hover {
+					transform: scale(1.4);
 				}
 			}
 		}
+    }
+    @media(max-width:768px){
+        .accounts-container{
+            columns:1;   
+        }
     }
 }

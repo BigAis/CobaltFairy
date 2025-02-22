@@ -1,6 +1,5 @@
 .sidemenu{
     width: 265px;
-    height: 100%;
     min-height: 100vh;
     background: rgba(255, 255, 255, 0.5);
     border-right: 2px solid rgba(218, 209, 197, 1);
@@ -11,8 +10,16 @@
     justify-content: space-between;
     padding-bottom:3em;
 
-
-    .menu_upper, .menu_lower{
+    .sidemenu-inner{
+        width: 265px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1em 0;
+        justify-content: space-between;
+        padding-bottom:3em;
+        .menu_upper, .menu_lower{
         padding:0 2em;
         min-width:220px;
         text-align: left;
@@ -107,4 +114,8 @@
             cursor: pointer;
         }
     }
+    }
+
+
+    
 }
