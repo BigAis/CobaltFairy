@@ -34,7 +34,8 @@
     "react-input-mask": "^2.0.4",
     "react-loading-skeleton": "^3.5.0",
     "react-router-dom": "^7.1.1",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

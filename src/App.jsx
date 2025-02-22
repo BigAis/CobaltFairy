@@ -46,6 +46,7 @@ function App() {
 				<Route path="/payment-plan" element={<PaymentPlan />} />
 				<Route path="/campaigns" element={<Campaigns />} />
 				<Route path="/campaigns/new" element={<NewCampaign />} />
+				<Route path="/campaigns/new/:uuid" element={<NewCampaign />} />
 				<Route path="/campaigns/edit/:uuid" element={<EditCampaign />} />
 				<Route path="/subscribers" element={<Subscribers />} />
 				<Route path="/integrations" element={<Integrations />} />
