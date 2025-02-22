@@ -14,10 +14,10 @@ import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import AutomationsTable from '../../components/DataTable/AutomationsTable'
 
-
 const Automations = ()=>{
     const {user, account} = useAccount(); 
     const [automations,setAutomations] = useState([]);
+    
 
     const loadData = async () =>{
         let resp = await ApiService.get('fairymailer/getAutomations?sort[0]=createdAt:desc&pagination[pageSize]=1000&pagination[page]=1&',user.jwt)
@@ -50,7 +50,7 @@ const Automations = ()=>{
 					</div>
 
 					<div className="groups">
-							<AutomationsTable automations={automations} />
+							{automations && automations.length>0 && <AutomationsTable incomingAutomations={automations} />}
                     </div>
 
 				</div>

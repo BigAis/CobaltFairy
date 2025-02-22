@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
-import { isJwtTokenExpired } from './service/api-service'
+import { ApiService, isJwtTokenExpired } from './service/api-service'
 import Dashboard from './pages/dashboard/dashboard'
 import LogIn from './pages/login/login'
 import User from './pages/register/register'
@@ -16,10 +16,12 @@ import Integrations from './pages/integrations/integrations'
 import Automations from './pages/automations/automations'
 import EditAutomation from './pages/automations/edit-automation'
 import AccountPicker from './pages/accountPicker/accountPicker'
+import FlowEditor from './pages/automations/FlowEditor'
 
 function App() {
 	const navigate = useNavigate()
 	const location = useLocation()
+
 
 	useEffect(() => {
 		const fairymail_session = localStorage.getItem('fairymail_session')
@@ -54,6 +56,7 @@ function App() {
 				<Route path="/integrations" element={<Integrations />} />
 				<Route path="/automations" element={<Automations />} />
 				<Route path="/automations/:autId" element={<EditAutomation />} />
+				<Route path="/automations/editor/:autId" element={<FlowEditor />} />
 				<Route path="/choose-account" element={<AccountPicker />} />
 				<Route path="/stats" element={<Dashboard />} />
 			</Routes>

@@ -28,7 +28,7 @@ const LogIn = () => {
 
 	useEffect(() => {
 		if (isUserLoggedIn()) navigate('/dashboard')
-	})
+	},[])
 
 	const handleRemoveNotification = (id) => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
@@ -61,8 +61,8 @@ const LogIn = () => {
 			return
 		}
 
-		const respone = await checkUserCrendentials(email, password, reCaptchaToken)
-		if (respone === true) {
+		const response = await checkUserCrendentials(email, password, reCaptchaToken)
+		if (response === true) {
 			navigate('/login/2FA', { state: { email } })
 		} else {
 			console.error()
