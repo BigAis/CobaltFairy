@@ -7,6 +7,7 @@ import Button from '../Button'
 
 const PopupText = ({
 	text,
+	html,
 	icon,
 	focusCancel = false,
 	showConfirmButton = true,
@@ -31,7 +32,7 @@ const PopupText = ({
 		<div className="popup-overlay">
 			<div className="popup-container">
 				{icon && <div className={classNames('popup-icon', `popup-${icon}`)} />}
-				<p className="popup-text">{text}</p>
+				{html ? <div className="popup-html">{html}</div> : <p className="popup-text">{text}</p>}
 				<div className="popup-buttons">
 					{showDenyButton && (
 						<button className="popup-deny" onClick={onDeny}>
@@ -60,6 +61,7 @@ const PopupText = ({
 
 PopupText.propTypes = {
 	text: PropTypes.string.isRequired,
+	html: PropTypes.node,
 	icon: PropTypes.oneOf(['question', 'success', 'error', 'warning', 'info']),
 	focusCancel: PropTypes.bool,
 	showConfirmButton: PropTypes.bool,

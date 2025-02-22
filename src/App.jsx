@@ -56,9 +56,9 @@ function App() {
 				<Route path="/automations/:autId" element={<EditAutomation />} />
 				<Route path="/choose-account" element={<AccountPicker />} />
 				<Route path="/stats" element={<Dashboard />} />
-            </Routes>
-        </div>
-    );
+			</Routes>
+		</div>
+	)
 }
 
 export default App
