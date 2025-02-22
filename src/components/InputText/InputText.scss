@@ -1,8 +1,8 @@
 .input-text-wrapper {
 	position: relative;
-	margin-bottom: .5rem;
+	margin-bottom: 0.5rem;
 
-	.input-container { 
+	.input-container {
 		display: flex;
 		flex-direction: column;
 
@@ -12,7 +12,7 @@
 			top: 50%;
 			transform: translateY(-50%);
 			font-size: 16px;
-			pointer-events: none;
+			// pointer-events: none;
 		}
 	}
 
@@ -35,7 +35,6 @@
 
 		&.hasError {
 			border: 2px solid rgba(255, 166, 0, 1);
-			
 		}
 
 		&.disabled {
@@ -69,8 +68,8 @@
 		color: rgba(255, 166, 0, 1);
 		font-weight: 500px;
 		line-height: 16.94px;
-		path{
-			fill:rgba(255, 166, 0, 1)!important;
+		path {
+			fill: rgba(255, 166, 0, 1) !important;
 		}
 	}
 }

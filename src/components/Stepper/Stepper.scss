@@ -1,0 +1,41 @@
+.stepper-container {
+	display: flex;
+	min-width: 450px;
+	margin: 0 auto;
+	position: relative;
+	.circle {
+		position: relative;
+		font-size: 14px;
+		font-family: 'Inter';
+		font-weight: 500;
+		border-radius: 50%;
+		padding: 10px 17px;
+		margin: 0 70px;
+		margin-top: 5px;
+		border: 2px solid rgba(218, 209, 197, 1);
+		background: rgba(255, 255, 255, 0.15);
+	}
+	.circle:after {
+		content: '';
+		background: #dad1c5;
+		width: 100px;
+		position: absolute;
+		height: 2px;
+		right: -120px;
+		top: 20px;
+	}
+	.circle:last-of-type:after {
+		content: none;
+	}
+	.circle.active {
+		background: white;
+	}
+	.label {
+		position: absolute;
+		font-family: 'Inter';
+		font-size: 15px;
+		min-width: 140px;
+		left: -45px;
+		top: 50px;
+	}
+}

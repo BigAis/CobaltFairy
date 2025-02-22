@@ -128,7 +128,9 @@ div.campaign-preview-active-row {
 	font-family: 'Bitter', serif;
 	font-weight: 700;
 }
-.fm-content-wrapper {
+.fm-content-outer-wrapper {
 	height: 100vh;
+}
+.fm-content-wrapper {
 	min-width: 1170px;
 }

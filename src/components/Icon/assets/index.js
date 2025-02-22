@@ -22,6 +22,7 @@ import Eye from './eye.svg?react'
 import Check from './check.svg?react'
 import User from './user.svg?react'
 import Clock from './clock.svg?react'
+import Emoji from './emoji.svg?react'
 
 import Filters from './filters.svg?react'
 
@@ -32,6 +33,7 @@ const icons = {
 	ArrowDown,
 	Plus,
 	Clock,
+	Emoji,
 	Envelope,
 	Attention,
 	Dashboard,

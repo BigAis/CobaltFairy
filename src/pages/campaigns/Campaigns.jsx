@@ -3,6 +3,7 @@ import '../dashboard/dashboard.scss'
 import '../../fullpage.scss'
 
 import { React, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
@@ -15,6 +16,7 @@ import PageHeader from '../../components/PageHeader/PageHeader'
 import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
 import PopupText from '../../components/PopupText/PopupText'
+import { use } from 'react'
 
 const account = {
 	name: 'Cobalt Fairy',
@@ -2474,6 +2476,8 @@ const campaigns2 = [
 ]
 
 const Campaigns = () => {
+	const navigate = useNavigate()
+
 	const [campaigns1, setCampaigns1] = useState([])
 	const [account, setAccount] = useState({})
 	const [searchTerm, setSearchTerm] = useState('')
@@ -2609,7 +2613,7 @@ const Campaigns = () => {
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
-						<Button icon={'Plus'} type="action">
+						<Button icon={'Plus'} type="action" onClick={() => navigate('/campaigns/new')}>
 							New Campaign
 						</Button>
 					</div>
