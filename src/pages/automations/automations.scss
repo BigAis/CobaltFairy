@@ -1,0 +1,18 @@
+.edit-automation-wrapper{
+    display: flex;
+    flex-direction: column;;
+    .edit-automation-header{
+        width:100%;
+        margin-top:10px;
+        justify-content: center;
+        display: flex;
+    }   
+    .edit-automation-body{
+        margin-top:80px;
+        h3{
+            font-family: 'Bitter';
+            font-size: 32px;;
+        }
+    }
+
+}
