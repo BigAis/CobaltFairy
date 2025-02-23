@@ -18,16 +18,47 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 	const [showAddPopover, setShowAddPopover] = useState(-1)
 
 	const handleAdd = (type, position = 0) => {
-		setShowAddPopover(-1)
-		onAdd(type, node.id, position)
-	}
-
-	const showPopover = (type = 0) => {
-		setShowAddPopover(type)
+		if(type.includes('-')){
+			let subtype = type.split('-');
+			console.log('subtype',subtype)
+			switch(subtype[0]){
+				case "action": 
+				type='action';
+					switch(subtype[1]){
+						case "copy": onAdd(type, node.id, position,'copy-to-group'); break;
+						case "move": onAdd(type, node.id, position,'move-to-group'); break;
+						case "remove": onAdd(type, node.id, position,'remove-from-group'); break;
+						case "unsubscribe": onAdd(type, node.id, position,'unsubscribe'); break;
+					}
+				break;
+			}
+		}else[
+			onAdd(type, node.id, position)
+		]
 	}
 
 	const handleRemove = () => {
 		removeNode(node.id)
+	}
+
+	const getTplIdLinks = (nodeId) => {
+		let links = []
+		const tplId = nodes.filter((node) => node.id === nodeId)[0]?.data?.tplId
+		let templates = data.templates;
+		if (templates.length > 0 && tplId) {
+			const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
+			const templateLinks = extractLinksFromCampaignDesign(tplDesign.components)
+			if (templateLinks.length > 0) {
+				templateLinks.forEach((ll) => {
+					if (!links.includes(ll)) links.push(ll)
+				})
+			}
+			links = links.map((link) => ({
+				value: link,
+				label: link,
+			}))
+		}
+		return links
 	}
 
 	const closestCondition = (nodeId, keymap) => {
@@ -67,36 +98,29 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 			]
 
 			content = (
-				<li className="d-flex flex-column align-items-center automation-node-item" data-nodeid={node.id} onClick={onSelect}>
+				<li className="d-flex flex-column align-items-center automation-node-item" data-nodeid={node.id} onClick={()=>{onSelect(node)}}>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
 						<Card className="automation-node-content" style={{ padding: '1.5rem 2.5rem' }}>
 							<h4 className='node-type'>{triggerOptions.find((option) => option.value === node.name).label}</h4>
-							<br></br>
-							{node?.meta && node?.meta.label ? (
-								<>
-									<br></br>
-									<p style={{ width: '100%', textAlign: 'center', margin: 0, fontWeight: 'bold' }}>{node?.meta.label}</p>
-								</>
-							) : (
-								(
-									<Dropdown icon={'Plus'} options={data.groups} onOptionSelect={(value)=>{handleAdditionalChange(data.groups.filter(g=>g.value==value))}}>
-										Select a group
-									</Dropdown>
-								)
-							)}
+							<Dropdown icon={'Plus'} options={data.groups} onOptionSelect={(value)=>{handleAdditionalChange(data.groups.filter(g=>g.value==value))}}>
+								{node.meta && node.meta.label ? node.meta.label : 'Select a group'}
+							</Dropdown>
 						</Card>
 					</div>
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					<NodeTypeSelector
-						shown={showAddPopover == 0}
-						onSelected={handleAdd}
-						onDismissed={() => {
-							setShowAddPopover(-1)
-						}}
-					/>
+					{!node.output || !node.output[0] || !node.output[0].id ? (
+							<Card 
+								style={{padding:'1em',minHeight:0, border:'2px dashed #dad1c5', minWidth:'80px'}} 
+								onDragOver={(e)=>{e.preventDefault()}}
+								onDrop={(e)=>{
+									e.preventDefault();
+									const type = e.dataTransfer.getData('text/plain');
+									handleAdd(type)
+							}} > <Icon name="Plus"/></Card>
+					) : ('')}
 				</li>
 			)
 			break
@@ -106,9 +130,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					className="d-flex flex-column align-items-center automation-node-item"
 					style={{ minWidth: '240px' }}
 					data-nodeid={node.id}
-					onClick={(e) => {
-						onSelect(e)
-					}}
+					onClick={()=>{onSelect(node)}}
 				>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
@@ -123,16 +145,17 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									style={{width:'350px'}}
 									options={data.templates.map(t=>{return {label:t.attributes.name, value:t.id}})}
 									onOptionSelect={(v)=>{
-										onUpdate({...node,templateName: data.templates.filter(t=>t.id==v)[0].attributes.name, data: { ...node.data, tplId: v }})
-										
-									}}> Select a template
+										node = {...node,templateName: data.templates.filter(t=>t.id==v)[0].attributes.name, data: { ...node.data, tplId: v }}
+										onUpdate(node)
+									}}> {node.meta && node.meta.label ? node.meta.label : 'Select a template'}
 								</Dropdown>
 								<InputText 
 									type="text"
 									style={{marginTop:'10px', minWidth:'350px', marginRight:'10px'}}
 									label="Subject"
 									onChange={(e)=>{
-										onUpdate({...node, data: { ...node.data, emailSubject: e.target.value }})
+										node = {...node, name:node.type, data: { ...node.data, emailSubject: e.target.value }}
+										onUpdate(node)
 									}}
 								/>
 							</div>
@@ -141,13 +164,16 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					<NodeTypeSelector
-						shown={showAddPopover == 0}
-						onSelected={handleAdd}
-						onDismissed={() => {
-							setShowAddPopover(-1)
-						}}
-					/>
+					{!node.output || !node.output[0] || !node.output[0].id ? (
+							<Card 
+								style={{padding:'1em',minHeight:0, border:'2px dashed #dad1c5', minWidth:'80px'}} 
+								onDragOver={(e)=>{e.preventDefault()}}
+								onDrop={(e)=>{
+									e.preventDefault();
+									const type = e.dataTransfer.getData('text/plain');
+									handleAdd(type)
+							}} > <Icon name="Plus"/></Card>
+					) : ('')}
 				</li>
 			)
 			break
@@ -160,7 +186,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 			]
 
 			content = (
-				<li className="d-flex flex-column align-items-center automation-node-item" data-nodeid={node.id} onClick={onSelect} style={{ minWidth: '200px' }}>
+				<li className="d-flex flex-column align-items-center automation-node-item" data-nodeid={node.id} onClick={()=>{onSelect(node)}} style={{ minWidth: '200px' }}>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
 						<Icon name="Close" className="close"  onClick={handleRemove}/>
@@ -169,35 +195,44 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 							{ ("copy-to-group" == node?.name || "move-to-group" == node?.name) && (
 								<Dropdown
 									style={{minWidth:'270px'}}
-									onOptionSelect={()=>{}}
+									onOptionSelect={(v,l)=>{
+										node = {...node,data:{group:[v]},meta:{label:l}}
+										onUpdate(node)
+									}}
 									options={data.groups}
-								>Choose destination group</Dropdown>
+								>{node.meta && node.meta.label ? node.meta.label : 'Choose destination group'}</Dropdown>
 							)}
 							{ ("remove-from-group" == node?.name) && (
 								<Dropdown
 									style={{minWidth:'270px'}}
-									onOptionSelect={()=>{}}
+									onOptionSelect={(v,l)=>{
+										node = {...node,data:{group:[v]},meta:{label:l}}
+										onUpdate(node)
+									}}
 									options={data.groups}
-								>Choose group to remove</Dropdown>
+								>{node.meta && node.meta.label ? node.meta.label : 'Choose group to remove'}</Dropdown>
 							)}
 						</Card>
 					</div>
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					<NodeTypeSelector
-						shown={showAddPopover == 0}
-						onSelected={handleAdd}
-						onDismissed={() => {
-							setShowAddPopover(-1)
-						}}
-					/>
+					{!node.output || !node.output[0] || !node.output[0].id ? (
+							<Card 
+								style={{padding:'1em',minHeight:0, border:'2px dashed #dad1c5', minWidth:'80px'}} 
+								onDragOver={(e)=>{e.preventDefault()}}
+								onDrop={(e)=>{
+									e.preventDefault();
+									const type = e.dataTransfer.getData('text/plain');
+									handleAdd(type)
+							}} > <Icon name="Plus"/></Card>
+					) : ('')}
 				</li>
 			)
 			break
 		case 'delay':
 			content = (
-				<li className="d-flex flex-column align-items-center automation-node-item" data-nodeid={node.id} onClick={onSelect} style={{ minWidth: '200px' }}>
+				<li className="d-flex flex-column align-items-center automation-node-item" data-nodeid={node.id} onClick={()=>{onSelect(node)}}style={{ minWidth: '200px' }}>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
 						<Icon name="Close" className="close"  onClick={handleRemove}/>
@@ -212,7 +247,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									style={{marginTop:'10px', width:'140px', marginRight:'10px'}}
 									label="Delay"
 									onChange={(e)=>{
-										onUpdate({...node,data:{...node.data,delay:e.target.value}})
+										onUpdate({...node,data:{...node.data,delay:[e.target.value]}})
 									}}
 								/>
 								<Dropdown
@@ -227,8 +262,9 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											value: 'hours',
 										},
 									]}
-								 onOptionSelect={(v)=>{
-									onUpdate({...node,data:{...node.data,delayValue:v}})
+								 onOptionSelect={(v,l)=>{
+									node = {...node,name:node.type,data:{...node.data,delayValue:[v],meta:{label:l}}}
+									onUpdate(node)
 								 }}> Select delay type 
 								</Dropdown>
 								
@@ -238,27 +274,30 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					<NodeTypeSelector
-						shown={showAddPopover == 0}
-						onSelected={handleAdd}
-						onDismissed={() => {
-							setShowAddPopover(-1)
-						}}
-					/>
+					{!node.output || !node.output[0] || !node.output[0].id ? (
+							<Card 
+								style={{padding:'1em',minHeight:0, border:'2px dashed #dad1c5', minWidth:'80px'}} 
+								onDragOver={(e)=>{e.preventDefault()}}
+								onDrop={(e)=>{
+									e.preventDefault();
+									const type = e.dataTransfer.getData('text/plain');
+									handleAdd(type)
+							}} > <Icon name="Plus"/></Card>
+					) : ('')}
 				</li>
 			)
 			break
 		case 'condition':
-			// const conditionOptions = [
-			// 	{ value: 'when-user-opens-campaign', label: 'If Subscriber has opened a campaign' },
-			// 	{ value: 'when-user-clicks-link', label: 'If Subscriber has clicked a link' },
-			// ]
-
 			const conditionOptions = [
 				{ value: 'workflow-activity', label: 'Workflow Activity' },
 				{ value: 'cmp-activity', label: 'Campaign Activity' },
 			]
-
+			const workflowConditionOptions = [
+				{ value: 'cmp_open', label: 'was opened' },
+				{ value: 'cmp_not_open', label: 'was not opened' },
+				{ value: 'cmp_link_clicked', label: 'had a specific link clicked' },
+				{ value: 'cmp_link_not_clicked', label: 'had a specific link not clicked' },
+			]
 			let howManyConditions = 0
 			howManyConditions += children && children[0] ? countConditions(children[0], 0) : 0
 			// console.log(node.id, howManyConditions)
@@ -266,61 +305,138 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				<li
 					className="d-flex flex-column align-items-center automation-node-item"
 					data-nodeid={node.id}
-					onClick={(e) => {
-						onSelect(e)
-					}}
+					onClick={()=>{onSelect(node)}}
 					style={{ minWidth: 340 + 2 * howManyConditions * 100 + 'px' }}
 				>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
-						<Icon name="Close" className="close"  onClick={handleRemove}/>
-						<div className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
-							<img src={condition} style={{ width: '30px' }} />
-							<br></br>
-							{node?.name ? conditionOptions.find((option) => option.value === node.name)?.label : 'Select a condition'}
-							{node?.meta && node?.meta?.label ? (
-								<>
-									<br></br>
-									<p style={{ width: '100%', textAlign: 'center', margin: 0, fontWeight: 'bold' }}>{node?.meta.label}</p>
-								</>
-							) : (
-								''
-							)}
-						</div>
+						<Card>
+							<Icon name="Close" className="close"  onClick={handleRemove}/>
+							<div className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
+								<h4 className='node-type'>{node?.name ? conditionOptions.find((option) => option.value === node.name)?.label : 'Select a condition'}</h4>
+								<div style={{display:'flex',flexDirection:'column'}}>
+									<Dropdown 
+										options={conditionOptions}
+										style={{width:'350px'}}
+										onOptionSelect={(v, l)=>{
+											node = {...node,name: v, data: { ...node.data || {}}, meta: {label: l}}
+											onUpdate(node)
+									}}> Select a condition </Dropdown>
+									{node.name && node.name == "cmp-activity" && (
+										<>
+											<Dropdown 
+												options={data.avlCampaigns}
+												style={{width:'350px'}}
+												onOptionSelect={(v,l)=>{
+													node = {...node, data: { ...node.data, cmp: v },meta:{}}
+													onUpdate(node)
+											}}> Select a campaign </Dropdown>
+
+											{ node.data?.cmp && (
+												<>
+													<Dropdown 
+														options={workflowConditionOptions}
+														style={{width:'350px'}}
+														onOptionSelect={(v)=>{
+															node = {...node,data: { ...node.data, trigger: v }}
+															onUpdate(node)
+													}}> Select a trigger </Dropdown>
+													{node.data?.trigger && ['cmp_link_clicked','cmp_link_not_clicked'].includes(node.data?.trigger) && (
+														<>
+															<Dropdown 
+																options={data.cmpLinks}
+																style={{width:'350px', maxWidth:'350px'}}
+																onOptionSelect={(v)=>{
+																	node = {...node,data: { ...node.data, link: v }}
+																	onUpdate(node)
+															}}> Select a link</Dropdown>
+														</>
+													)}
+												</>
+											)}
+
+										</>
+									)}
+									{node.name && node.name == "workflow-activity" && (
+										<>
+											<Dropdown 
+												options={data.workflowCampaigns}
+												style={{width:'350px'}}
+												onOptionSelect={(v)=>{
+													node = {...node, data: { ...node.data, cmp: v }}
+													onUpdate(node)
+											}}> Select a campaign </Dropdown>
+
+											{ node.data?.cmp && (
+												<>
+													<Dropdown 
+														options={workflowConditionOptions}
+														style={{width:'350px'}}
+														onOptionSelect={(v)=>{
+															node = {...node,data: { ...node.data, trigger: v }}
+															onUpdate(node)
+													}}> Select a trigger </Dropdown>
+													{node.data?.trigger && ['cmp_link_clicked','cmp_link_not_clicked'].includes(node.data?.trigger) && (
+														<>
+															<Dropdown 
+																options={getTplIdLinks(node?.data?.email_node_id)}
+																style={{width:'350px', maxWidth:'350px'}}
+																onOptionSelect={(v)=>{
+																	node = {...node,data: { ...node.data, link: v }}
+																	onUpdate(node)
+															}}> Select a link </Dropdown>
+														</>
+													)}
+												</>
+											)}
+
+										</>
+									)}
+									{node.name && node.name=="when-user-opens-campaign" && (
+										<>
+											<Dropdown 
+												options={data.avlCampaigns}
+												style={{width:'350px'}}
+												onOptionSelect={(v)=>{
+													node = {...node, data: { ...node.data, cmp: v }}
+													onUpdate(node)
+											}}> Select a campaign </Dropdown>
+										</>
+									)}
+									{node.name && node.name=="when-user-clicks-link" && (
+										<>
+											<Dropdown 
+												options={data.cmpLinks}
+												style={{width:'350px'}}
+												onOptionSelect={(v)=>{
+													node = {...node, data: { ...node.data, link: v }}
+													onUpdate(node)
+											}}> Select a link </Dropdown>
+										</>
+									)}
+								</div>
+							</div>
+						</Card>
 					</div>
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
-						<div className="automation-node-horizontal-line" style={{ width: 340 + 2 * howManyConditions * 100 + 'px' }} />
+						<div className="automation-node-horizontal-line" style={{ width: 550 + (howManyConditions * 50) + 'px' }} />
 
-						<div className="d-flex flex-row justify-content-between w-100">
-							<div>
+						<div className="d-flex flex-row w-100" style={{justifyContent:'space-between', alignItems:'start'}}>
+							<div  style={{alignItems:'center', display:'flex', flexDirection:'column', marginLeft:'-40px'}}>
 								<div className="automation-node-vertical-line"></div>
-								<button className="automation-btn-success btn-border-secondary" style={{ marginLeft: '-12px' }}>
-									<i className="fa fa-check" />
-								</button>
-								<div className="automation-node-vertical-line"></div>
-								{!node.output || !node.output[0] || !node.output[0].id ? (
-									<button
-										className="border-secondary automation-node-plus-btn"
-										style={{ marginLeft: '-12px' }}
-										onClick={() => {
-											showPopover(0)
-										}}
+								<Card style={{padding:'1em',minHeight:0, border:'2px dashed #dad1c5', minWidth:'80px'}} onDrop={(e)=>{
+									e.preventDefault();
+									const type = e.dataTransfer.getData('text/plain');
+									handleAdd(type)
+									}} 
+									onDragOver={(e)=>{e.preventDefault()}}
 									>
-										+
-									</button>
-								) : (
-									''
-								)}
-								<NodeTypeSelector
-									key={0}
-									shown={showAddPopover == 0}
-									selectedCondition={true}
-									onSelected={handleAdd}
-									onDismissed={() => {
-										setShowAddPopover(-1)
-									}}
-								/>
+									<Icon name="Check"/>
+								</Card>
+								{children && children[0] && children[0].length>0 && (
+									<div className="automation-node-vertical-line"></div>
+								)}								
 								<ul style={{ listStyleType: 'none', display: 'flex', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: 0, padding: 0 }}>
 									{children &&
 										children[0] &&
@@ -328,7 +444,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											let children0 = [0, 1].map((index) => {
 												if (child && child.id) return getChildrenOfCondition(nodes, child.id, index)
 											})
-											if (closestCondition(child.id) == node.id)
+											// if (closestCondition(child.id) == node.id)
 												return (
 													<NodeItem
 														key={child ? child.id : 0}
@@ -350,35 +466,22 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								</ul>
 							</div>
 
-							<div className="d-flex flex-column align-items-end">
+							<div className="d-flex flex-column align-items-end"  style={{alignItems:'center', marginRight:'-40px'}}>
 								<div className="automation-node-vertical-line"></div>
-
-								<button className="automation-btn-danger btn-danger border-secondary " style={{ marginRight: '-12px' }}>
-									<i className="fa fa-times" />
-								</button>
-								<div className="automation-node-vertical-line"></div>
-								{!node.output || !node.output[1] || !node.output[1].id ? (
-									<button
-										className="border-secondary automation-node-plus-btn"
-										style={{ marginRight: '-12px' }}
-										onClick={() => {
-											showPopover(1)
-										}}
+								<Card style={{padding:'1em',minHeight:0, border:'2px dashed #dad1c5', minWidth:'80px'}} onDrop={(e)=>{
+										e.preventDefault();
+										const type = e.dataTransfer.getData('text/plain');
+										handleAdd(type,1)
+										}} 
+										onDragOver={(e)=>{e.preventDefault()}}
 									>
-										+
-									</button>
-								) : (
-									''
+									<Icon name="Close"/>
+								</Card>
+
+								{children && children[1] && children[1].length>0 && (
+									<div className="automation-node-vertical-line"></div>
 								)}
-								<NodeTypeSelector
-									key={1}
-									shown={showAddPopover == 1}
-									selectedCondition={false}
-									onSelected={handleAdd}
-									onDismissed={() => {
-										setShowAddPopover(-1)
-									}}
-								/>
+							
 								<ul style={{ listStyleType: 'none', display: 'flex', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: 0, padding: 0 }}>
 									{children &&
 										children[1] &&
@@ -386,7 +489,8 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											let children1 = [0, 1].map((index) => {
 												if (child && child.id) return getChildrenOfCondition(nodes, child.id, index)
 											})
-											if (closestCondition(child.id) == node.id)
+											console.log('children1',children1)
+											// if (closestCondition(child.id) == node.id)
 												return (
 													<NodeItem
 														key={child ? child.id : 0}

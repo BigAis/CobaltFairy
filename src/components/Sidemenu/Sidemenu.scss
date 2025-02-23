@@ -52,6 +52,12 @@
             }
         }
     }
+
+    .menu_upper li[disabled], .menu_lower li[disabled] {
+        opacity: .4;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
     .menu_bottom {
         padding: 0 .5em;
     }

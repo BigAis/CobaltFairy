@@ -13,11 +13,12 @@ import InputText from '../../components/InputText/InputText'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import AutomationsTable from '../../components/DataTable/AutomationsTable'
+import { useNavigate } from 'react-router-dom'
 
 const Automations = ()=>{
     const {user, account} = useAccount(); 
     const [automations,setAutomations] = useState([]);
-    
+    const navigate = useNavigate();
 
     const loadData = async () =>{
         let resp = await ApiService.get('fairymailer/getAutomations?sort[0]=createdAt:desc&pagination[pageSize]=1000&pagination[page]=1&',user.jwt)
@@ -38,7 +39,7 @@ const Automations = ()=>{
 					<PageHeader user={user} account={account}/>
 					<div className="page-name-container">
 						<div className="page-name">Automations</div>
-						<Button icon={'Plus'} type="action">
+						<Button icon={'Plus'} type="action" onClick={()=>{navigate('/automations/new')}}>
 							Add Automation
 						</Button>
 					</div>

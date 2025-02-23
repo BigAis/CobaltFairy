@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react'
 
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import NodeItem from './NodeItem'
 import { ApiService } from '../../service/api-service'
 import User from '../../service/User'
@@ -17,7 +17,7 @@ import PopupText from '../../components/PopupText/PopupText'
 const FlowEditor = () => {
 	const { autId } = useParams()
 	const automationContainerRef = useRef(null)
-
+	const navigate = useNavigate()
 	const [tab, setTab] = useState('actions')
 	const [data, setData] = useState({})
 	const [groups, setGroups] = useState([])
@@ -51,20 +51,20 @@ const FlowEditor = () => {
 	}, [user,account])
 
 
-	const goToTab = (selectedTab) => setTab(selectedTab)
-
 	const loadData = async (autId) => {
 		let resp = await ApiService.get(`fairymailer/getAutomations?filters[uuid]=${autId}&populate=*`, user.jwt)
 		const loadedNodes = resp.data.data[0].design
+		console.log('loadedNodes',loadedNodes,resp.data)
 		if (loadedNodes && loadedNodes.length > 0) {
 			setNodes(loadedNodes)
+			setHasTrigger(true)
 		}
 		setData(resp.data.data[0])
 	}
 
 	const loadGroups = async () => {
 		let resp = await ApiService.get(`groups?polulate=*&filters[account]=${account.id}&pagination[pageSize]=100`, user.jwt)
-		setGroups(resp.data.data.map((v) => ({ value: v.id, label: v.attributes.name })))
+		setGroups(resp.data.data.map((v) => ({ value: `${v.id}`, label: v.attributes.name })))
 	}
 
 	const loadCampaigns = async () => {
@@ -83,7 +83,7 @@ const FlowEditor = () => {
 			let links = []
 			campaigns.forEach((cmp) => {
 				if (cmp.attributes && cmp.attributes && cmp.attributes.design) {
-					let dsgn = JSON.parse(cmp.attributes.design)
+					let dsgn = cmp.attributes.design
 					let cmplinks = extractLinksFromCampaignDesign(dsgn.components)
 					if (cmplinks.length > 0)
 						cmplinks.forEach((ll) => {
@@ -121,86 +121,26 @@ const FlowEditor = () => {
 		return links
 	}
 
-	const shortenString = (str) => {
-		const maxLength = 50
-		return str.length <= maxLength ? str : `${str.substring(0, Math.floor((maxLength - 3) / 2))} ... ${str.substring(str.length - Math.floor((maxLength - 3) / 2))}`
-	}
-
-	const exportData = () => {
-		console.log('validate nodes are : ', validateNodes())
-
+	const exportData = async (showSuccessMessage=true) => {
 		const isAutomationValid = validateNodes()
-		console.log('isAutomationValid', isAutomationValid)
-
 		if (!isAutomationValid) {
-			mSwal.fire({ icon: 'error', text: 'You have empty actions in your flow. You can delete unwanted actions.' })
+			PopupText.fire({ icon: 'error', text: 'You have empty actions in your flow. You need to delete unwanted actions.', showCancelButton:false})
 			return
 		}
 
-		mSwal.fire({
-			icon: 'info',
-			text: 'Please wait...',
-			didOpen: async () => {
-				Swal.showLoading()
-				let user = await User.get()
-				let newData = { id: data.id, data: { design: nodes, active: data.active } }
-				console.log('new data are : ', newData)
+		let newData = { id: data.id, data: { design: nodes, active: data.active } }
 
-				let resp
-				if (data && data.id > 0) {
-					// resp = await ApiService.put(`automations/${data.id}`, newData, user.jwt)
-					resp = await ApiService.post(`fairymailer/save-automation/`, newData, user.jwt)
-				} else {
-					alert('error')
-				}
-				if (resp?.data?.data?.id) {
-					mSwal.fire({ icon: 'success', timer: 500 })
-				} else {
-					mSwal.fire({ icon: 'error', text: `Failed to save your changes. If this problem persists, contact our support team.` })
-				}
-			},
-		})
-
-		// let dataExport = this.drawflow.export()
-		// let hasTrigger = false
-		// Object.keys(dataExport.drawflow.Home.data).forEach((key) => {
-		// 	if (dataExport.drawflow.Home.data[key].name.includes('when-')) {
-		// 		hasTrigger = true
-		// 	}
-		// })
-		// if (!hasTrigger) {
-		// 	mSwal.fire({ icon: 'error', text: 'You need to add a trigger event first.' })
-		// 	return
-		// }
-		// let invalid = false
-		// Object.keys(dataExport.drawflow.Home.data).forEach((key) => {
-		// 	const nodeData = dataExport.drawflow.Home.data[key].data
-		// 	if (nodeData.group === 'none' || nodeData.template === 'none') invalid = true
-		// })
-		// if (invalid) {
-		// 	mSwal.fire({ icon: 'error', text: 'You have empty actions in your flow. You can delete unwanted actions by right-clicking them.' })
-		// 	return
-		// }
-		// mSwal.fire({
-		// 	icon: 'info',
-		// 	text: 'Please wait...',
-		// 	didOpen: async () => {
-		// 		Swal.showLoading()
-		// 		let user = await User.get()
-		// 		let newData = { data: { design: dataExport, active: data.attributes.active } }
-		// 		let resp
-		// 		if (data && data.id > 0) {
-		// 			resp = await ApiService.put(`automations/${data.id}`, newData, user.jwt)
-		// 		} else {
-		// 			alert('error')
-		// 		}
-		// 		if (resp?.data?.data?.id) {
-		// 			mSwal.fire({ icon: 'success', timer: 500 })
-		// 		} else {
-		// 			mSwal.fire({ icon: 'error', text: `Failed to save your changes. If this problem persists, contact our support team.` })
-		// 		}
-		// 	},
-		// })
+		let resp
+		if (data && data.id > 0) {
+			resp = await ApiService.post(`fairymailer/save-automation/`, newData, user.jwt)
+		} else {
+			PopupText.fire({ icon: 'error', text: 'Failed to save your changes :(', showCancelButton:false})
+		}
+		if (resp?.data?.data?.id) {
+			if(showSuccessMessage) PopupText.fire({ icon: 'success', text: 'You changes are successfully saved!', showCancelButton:false})
+		} else {
+			PopupText.fire({ icon: 'error', text: 'Failed to save your changes. If this problem persists, contact our support team.', showCancelButton:false})
+		}
 	}
 
 	const addNode = (type, input = 0, position = 0, name= "") => {
@@ -227,26 +167,11 @@ const FlowEditor = () => {
 		}, 100) //refresh state, re-render
 	}
 
-	const selectNode = (event) => {
-		const nodeId = event.target.closest('li').dataset.nodeid
-		event.preventDefault()
-		setSelectedNode(
-			nodes.find((node) => {
-				return node.id == nodeId
-			})
-		)
+	const selectNode = (node) => {
+		setSelectedNode(node)
 	}
 
-	const triggerOptions = [
-		{ value: 'when-user-subscribes', label: 'When Subscriber Joins a Group' },
-		{ value: 'when-user-opens-campaign', label: 'When Subscriber Opens a Campaign' },
-		{ value: 'when-user-clicks-link', label: 'When Subscriber Clicks a Link' },
-	]
 
-	const conditionOptions = [
-		{ value: 'when-user-opens-campaign', label: 'If Subscriber has opened a campaign' },
-		{ value: 'when-user-clicks-link', label: 'If Subscriber has clicked a link' },
-	]
 
 	const workflowConditionOptions = [
 		{ value: 'cmp_open', label: 'was opened' },
@@ -284,9 +209,11 @@ const FlowEditor = () => {
 
 	const workflowEmailLinkOptions = getTplIdLinks()
 
-	const conditionOptions2 = [
-		{ value: 'workflow-activity', label: 'Workflow Activity' },
-		{ value: 'cmp-activity', label: 'Campaign Activity' },
+
+
+	const conditionOptions = [
+		{ value: 'when-user-opens-campaign', label: 'If Subscriber has opened a campaign' },
+		{ value: 'when-user-clicks-link', label: 'If Subscriber has clicked a link' },
 	]
 
 	const actionOptions = [
@@ -453,13 +380,15 @@ const FlowEditor = () => {
 				break
 		}
 		console.log(triggerType, selectedValue)
-
-		setSelectedNode((prevNode) => ({
-			...prevNode,
+		let newNode = {...selectedNode,
 			data: { [triggerType]: selectedValue },
 			meta: { label: selectedLabel && selectedLabel[0] ? selectedLabel[0] : '' },
-		}))
-		handleApply()
+		}
+		console.log('new Node',newNode)
+		const updatedNodes = nodes.map((node) => (node.id === selectedNode.id ? { ...newNode } : node))
+		console.log('updatedNodes ',updatedNodes)
+		setNodes(updatedNodes)
+		setSelectedNode(null)
 	}
 	const handleApply = async () => {
 		if (selectedNode) {
@@ -674,7 +603,6 @@ const FlowEditor = () => {
 			}
 		})
 		setExcludeNodes(tmp)
-		// console.log(nodes, excludeNodes)
 	}
 
 	useEffect(() => {
@@ -692,15 +620,6 @@ const FlowEditor = () => {
 			container.scrollLeft = centerPosition
 		}
 	}, [])
-
-	const validationKeys = {
-		type: ['id', 'type', 'name', 'data', 'output'],
-		trigger: ['id', 'type', 'name', 'data', 'output', 'group'],
-		email: ['id', 'type', 'name', 'data', 'output', 'emailSubject', 'tplId'],
-		condition: ['id', 'type', 'name', 'data', 'output', 'cmp'],
-		action: ['id', 'type', 'name', 'data', 'output', 'group'],
-		delay: ['id', 'type', 'name', 'data', 'output', 'delayCount', 'delay'],
-	}
 
 	const validateNode = (node) => {
 		let result = true
@@ -736,15 +655,7 @@ const FlowEditor = () => {
 				} else {
 					switch (node.name) {
 						case 'copy-to-group':
-							if (!node.data.group[0] || !node.data.group.length > 0) {
-								result = false
-							}
-							break
 						case 'move-to-group':
-							if (!node.data.group[0] || !node.data.group.length > 0) {
-								result = false
-							}
-							break
 						case 'remove-from-group':
 							if (!node.data.group[0] || !node.data.group.length > 0) {
 								result = false
@@ -802,7 +713,7 @@ const FlowEditor = () => {
 							// }
 							break
 						case 'cmp-activity':
-							if (!node.data.cmp || !node.data.cmp.length > 0) {
+							if (!node.data.cmp || !node.data.cmp > 0) {
 								result = false
 							}
 
@@ -826,18 +737,16 @@ const FlowEditor = () => {
 			default:
 				break
 		}
-
+		console.log('Validation of',node,result)
 		return result
 	}
 
 	const validateNodes = () => {
 		let result = true
 		nodes.forEach((node) => {
-			console.log('node is : ', node)
-			console.log('validateNode is : ', validateNode(node))
 			if (!validateNode(node)) result = false
 		})
-		console.log('result is ', result)
+		console.log('final validation result is ', result)
 		return result
 	}
 
@@ -847,14 +756,17 @@ const FlowEditor = () => {
 			<div className='header'>
 				<Stepper steps={steps} current={3}/>
 				<div className='buttons'>
-					<Button type="secondary" icon="Save" >Save</Button>
-					<Switch style={{margin:'0 10px'}} label={data && data.active ? 'Automation is running' : 'Automation is stopped'} checked={data && data.active} onChange={(value)=>{
+					<Button type="secondary" icon="Save" onClick={exportData} >Save</Button>
+					<Switch style={{margin:'0 10px'}} label={data && data.active ? 'Automation is running' : 'Automation is stopped'} checked={data?.active} onChange={(value)=>{
 						setData({
 							...data,
 							active: value
 						})
 					}}/>
-					<Button>Done Editing</Button>
+					<Button onClick={async ()=>{
+						await exportData(false);
+						navigate('/automations');
+					}}>Done Editing</Button>
 				</div>
 			</div>
 			<div className='body'>
@@ -870,7 +782,7 @@ const FlowEditor = () => {
 							if (!excludeNodes.includes(node.id))
 								return (
 									<NodeItem
-										onSelect={(e) => selectNode(e)}
+										onSelect={(_node) => selectNode(_node)}
 										key={node.id}
 										node={node}
 										type={node.type}
@@ -880,7 +792,7 @@ const FlowEditor = () => {
 										children={children}
 										getChildrenOfCondition={getChildrenOfCondition}
 										handleAdditionalChange={handleAdditionalChange}
-										data={{groups:groups,avlCampaigns:avlCampaigns,templates:templates,cmpLinks:cmpLinks}}
+										data={{groups,avlCampaigns,workflowCampaigns,templates,cmpLinks}}
 										setSideBarShown={setSideBarShown}
 										onUpdate={(data)=>{
 											console.log('OnUpdate Node: ',data)
@@ -1056,36 +968,7 @@ const FlowEditor = () => {
 
 							{selectedNode && selectedNode.type === 'condition' && (
 								<div style={{ flexGrow: '1' }}>
-									<Select
-										onChange={handleTriggerSelectChange}
-										value={
-											selectedNode.name
-												? {
-														value: selectedNode.name,
-														label: conditionOptions2.find((option) => {
-															return option.value === selectedNode.name
-														})?.label,
-												}
-												: null // Handle the case where `name` is null or undefined
-										}
-										options={conditionOptions2}
-										styles={{
-											option: (provided) => ({
-												...provided,
-												color: 'black',
-											}),
-											control: (provided) => ({
-												...provided,
-												color: 'black',
-											}),
-											singleValue: (provided) => ({
-												...provided,
-												color: 'black',
-											}),
-										}}
-										className="form-control form-control-lg"
-										placeholder="Select a condition"
-									/>
+								
 									{selectedNode.name === 'workflow-activity' && (
 										<>
 											<Select
@@ -1339,19 +1222,19 @@ const FlowEditor = () => {
 									<h5>Actions</h5>
 								</div>
 								<div className='panel'>
-									<Card onClick={()=>{ addNode('delay',0,0); }}> <img src="/images/automations/action_delay.png"/> </Card>
-									<Card onClick={()=>{ addNode('action',0,0,'copy-to-group') }}> <img src="/images/automations/action_copy_group.png"/> </Card>
-									<Card onClick={()=>{ addNode('action',0,0,'remove-from-group')}}> <img src="/images/automations/action_remove_group.png"/> </Card>
-									<Card onClick={()=>{ addNode('email',0,0)}}> <img src="/images/automations/action_template.png"/> </Card>
-									<Card onClick={()=>{ addNode('action',0,0,'move-to-group') }}> <img src="/images/automations/action_move_group.png"/> </Card>
-									<Card onClick={()=>{ }}> <img src="/images/automations/action_unsubscribe.png"/> </Card>
+									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','delay') }}> <img draggable="false" src="/images/automations/action_delay.png"/> </Card>
+									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','action-copy-group') }}> <img draggable="false" src="/images/automations/action_copy_group.png"/> </Card>
+									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','action-remove-group') }}> <img draggable="false" src="/images/automations/action_remove_group.png"/> </Card>
+									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','email') }}> <img draggable="false" src="/images/automations/action_template.png"/> </Card>
+									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','action-move-group') }}> <img draggable="false" src="/images/automations/action_move_group.png"/> </Card>
+									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','action-unsubscribe') }}> <img draggable="false" src="/images/automations/action_unsubscribe.png"/> </Card>
 								</div>
 								<div className='panel-header'>
 									<Icon name={'Caret'}/>
 									<h5>Conditions</h5>
 								</div>
 								<div className='panel'>
-									<Card onClick={()=>{ addNode('condition',0,0) }}> <img src="/images/automations/condition.png"/> </Card>
+									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','condition') }}> <img src="/images/automations/condition.png"/> </Card>
 								</div>
 							</div>
 						</>

@@ -28,10 +28,12 @@ const EditAutomation = ()=>{
     const params = useParams();
     const isEdit = params.autId!=="new";
     const loadData = async()=>{
-        let automationresp = await ApiService.get(`fairymailer/getAutomations?filters[uuid]=${params.autId}&populate=*`, user.jwt)
-        if(automationresp&& automationresp.data){
-            console.log(automationresp.data)
-            setAutomationData(automationresp.data.data[0])
+        if(isEdit){
+            let automationresp = await ApiService.get(`fairymailer/getAutomations?filters[uuid]=${params.autId}&populate=*`, user.jwt)
+            if(automationresp&& automationresp.data){
+                console.log(automationresp.data)
+                setAutomationData(automationresp.data.data[0])
+            }
         }
     }
     const handleNameChange = (e)=>{
@@ -39,13 +41,13 @@ const EditAutomation = ()=>{
         else setAutomationData({...automationData, name:e.target.value})
     }
     const saveAutomation = async ()=>{
-        if(!automationData.name || !automationData.uuid){
+        if(!automationData || !automationData.name || !automationData.uuid){
             PopupText.fire({
                 icon:'warning',
                 text:'Please type a name first',
-                cancelButtonText:'Ok'
+                showCancelButton:false
             })
-            return;
+            return false;
         }
         let resp;
         if(automationData.id){
@@ -54,6 +56,7 @@ const EditAutomation = ()=>{
             resp = await ApiService.post(`automations`,{data:automationData},user.jwt)
         }
         console.log(resp.data);
+        return true
     }
     useEffect(()=>{
         loadData();
@@ -64,26 +67,21 @@ const EditAutomation = ()=>{
                 <Stepper steps={steps} current={1}></Stepper>
             </div>
             <div className='edit-automation-body'>
-                {isEdit ? (
                 <>
-                    <h3>Editing Automation </h3>
+                    <h3> {isEdit ? 'Editing Automation' : 'Add new automation'} </h3>
                     <InputText value={automationData ? automationData.name : ''} label={'Automation name'} onChange={handleNameChange}/>
                     <br></br>
                     <div className='buttons'>
                         <Button type="secondary" onClick={ async ()=>{
-                            await saveAutomation();
-                            navigate('/automations')
+                            let result = await saveAutomation();
+                            if(result) navigate('/automations')
                         }}>Save & back</Button>
                         <Button type="primary" style={{fontSize:'16px'}} onClick={ async ()=>{
-                            await saveAutomation();
+                            let result = await saveAutomation();
                             navigate(`/automations/editor/${automationData.uuid}`)
                         }}>Edit flow</Button>
                     </div>
                 </>
-                    
-                ) : (
-                    <h3>Add new automation</h3>
-                )}
             </div>
 
         </div>

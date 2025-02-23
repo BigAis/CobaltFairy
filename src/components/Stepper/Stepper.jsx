@@ -10,7 +10,7 @@ const Stepper = ({ steps, current, className }) => {
 				{steps.map((s, i) => {
 					return (
 						<>
-							<div className={'circle ' + (i <= current ? 'active' : '')}>
+							<div key={i} className={'circle ' + (i <= current ? 'active' : '')}>
 								{i + 1}
 								<div className={'label ' + (i <= current ? 'active' : '')}>{s.label}</div>
 							</div>

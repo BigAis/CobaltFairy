@@ -12,13 +12,13 @@ const menu_items_upper = [
 	{ label: 'Subscribers', path: '/subscribers', icon: 'Subscribers' },
 	{ label: 'Automations', path: '/automations', icon: 'Automations' },
 	{ label: 'Integrations', path: '/integrations', icon: 'Integrations' },
-	{ label: 'Stats', path: '/stats', icon: 'Stats' },
+	{ label: 'Stats', path: '/stats', icon: 'Stats', disabled: true },
 ]
 const menu_items_lower = [
-	{ label: 'Settings', path: '/settings', icon: 'Settings' },
-	{ label: 'Billing', path: '/billing', icon: 'Billing' },
-	{ label: 'Team', path: '/team', icon: 'Team' },
-	{ label: 'Refer a friend', path: '/refer-a-friend', icon: 'ReferAFriend' },
+	{ label: 'Settings', path: '/settings', icon: 'Settings', disabled: true },
+	{ label: 'Billing', path: '/billing', icon: 'Billing', disabled: true },
+	{ label: 'Team', path: '/team', icon: 'Team', disabled: true },
+	{ label: 'Refer a friend', path: '/refer-a-friend', icon: 'ReferAFriend', disabled: true },
 ]
 
 const Sidemenu = () => {
@@ -56,6 +56,7 @@ const Sidemenu = () => {
 											onClick={() => {
 												navigate(item.path)
 											}}
+											disabled={item.disabled}
 										>
 											<Icon name={item.icon}></Icon>
 											<a className="menu-entry">{item.label}</a>
@@ -70,7 +71,7 @@ const Sidemenu = () => {
 							{menu_items_lower.map((item) => {
 								return (
 									<>
-										<li>
+										<li disabled={item.disabled}>
 											<Icon name={item.icon}></Icon>
 											<a className="menu-entry">{item.label}</a>
 										</li>

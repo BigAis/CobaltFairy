@@ -23,7 +23,7 @@ const Dropdown = ({ children, options, active = false, inactive = false, disable
 
 		setIsOpen(false)
 		if (onOptionSelect) {
-			onOptionSelect(option.value)
+			onOptionSelect(option.value, option.label)
 		}
 	}
 
