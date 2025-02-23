@@ -15,8 +15,12 @@
 .header-box .btn .icon{
     margin:0;
 }
-.icon path, .icon:hover path{
+
+.editor-content .icon path, .icon:hover path{
     fill:none!important;
+}
+button.btn.btn-secondary.savebtn path {
+    fill: black !important;
 }
 .savebtn svg{
     margin-right:5px!important;

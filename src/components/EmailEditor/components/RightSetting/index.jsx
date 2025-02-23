@@ -6,6 +6,7 @@ import { InputNumber, Input } from "antd";
 import StyleSettings from "../StyleSettings";
 import useLayout from "../../utils/useStyleLayout";
 import useTranslation from "../../translation";
+import InputText from "../../../InputText/InputText";
 
 const RightSetting = () => {
   const { currentItem, isDragStart, bodySettings, setBodySettings } = useContext(GlobalContext);
@@ -68,13 +69,14 @@ const RightSetting = () => {
             />
           )}
           <div>
-            <div className="pre_header">{t("pre_header")}</div>
-            <Input
-              className="margin-top-12"
+            {/* <div className="pre_header">{t("pre_header")}</div> */}
+            <InputText
+            label="Pre header"
+              className=""
               value={bodySettings.preHeader}
               onChange={(event) => setBodySettings({ ...bodySettings, preHeader: event.target.value }, "set_body_settings")}
             />
-            <div className="pre_header-desc">{t("pre_header_description")}</div>
+            <div className="pre_header-desc" style={{textAlign:'left'}}>{t("pre_header_description")}</div>
           </div>
         </div>
       </>

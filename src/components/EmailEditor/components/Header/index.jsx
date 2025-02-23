@@ -9,10 +9,14 @@ import { Drawer } from "antd";
 import dataToHtml from "../../utils/dataToHTML";
 import { deepClone } from "../../utils/helpers";
 import Icon from '../../../Icon/Icon'
-import axios from 'axios'
+import { ApiService } from "../../../../service/api-service";
+import { useAccount } from "../../../../context/AccountContext";
+import NotificationBar from '../../../NotificationBar/NotificationBar'
 
-const Header = () => {
+const Header = ({setStep,currentCampaign}) => {
+  const {user, account } = useAccount();
   const { previewMode, setPreviewMode, bodySettings, blockList, actionType, setBlockList, setBodySettings, editorRef } = useContext(GlobalContext);
+  const [notifications,setNotifications] = useState([{id:new Date().getTime()/1000,message:'Email data saved successfully.'}])
   const [modalPreview, setModalPreview] = useState(previewMode);
   const [blockListHistory, setBlockListHistory] = useState({
     histories: [],
@@ -20,28 +24,16 @@ const Header = () => {
   });
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const { histories, index } = blockListHistory;
-
-  const exportHTML = async ()=>{
+  console.log('currentCampaign',currentCampaign)
+  const saveCampaign = async (showConfirmationMsg=true)=>{
     if(editorRef && editorRef.current){
       const html = editorRef.current.exportHtml(['Inter:400,700']);
       const data = editorRef.current.exportData(['Inter:400,700']);
-      console.log(data)
-    //   let sesresp = await axios.post(
-    //     'http://localhost:1337/api/custom/assignSES',
-    //     {
-    //       uuid: 'eedce0fc-9efe-47c6-baff-30935222d91d',
-    //       subject: 'This is a new builder test',
-    //       design: `${html}`,
-    //     },
-    //     {
-    //     headers:{
-    //       'Authorization':'Bearer '+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNzM5MzQ5ODU2LCJleHAiOjE3NDE5NDE4NTZ9.os9dnWSHVuP-Okr8GNSzwFKN3pjYSGAmr3URpFA7r2g'
-    //     }
-    //     }
-    //   )
-    //   console.log('sesresp', sesresp)
-    //   console.log('html', html)
+      let updResp = await ApiService.post(`fairymailer/updateCampaign`,{data:{uuid:currentCampaign.uuid,design:JSON.stringify(data),html}},user.jwt)
+      console.log('updresp',updResp)
+      setNotifications([...notifications,{id:new Date().getTime()/1000,message:'Email data saved successfully.'}])
     }
+    return true
   }
 
 
@@ -103,7 +95,14 @@ const Header = () => {
   return (
     <>
       <div className="header">
-        <div className="header-box">
+        <div className="email-editor-notifications">
+          {notifications.map(n=>{
+            <NotificationBar type="warning" message={n.message} onClose={()=>{
+              setNotifications(notifications.filter(not=>not.id!=n.id))
+            }}/>
+          })}
+        </div>
+        <div className="header-box" style={{textAlign:'left'}}>
           <Button 
           type="secondary" 
           icon="Desktop" 
@@ -139,7 +138,9 @@ const Header = () => {
           ></Button>
         </div>
         <div className="header-box text-center">
-        <Button style={{margin:'0 10px'}} icon="Save" type="secondary" className={'savebtn'}>Save</Button>
+        <Button style={{margin:'0 10px'}} icon="Save" type="secondary" className={'savebtn'} onClick={()=>{
+          saveCampaign();
+        }}>Save</Button>
         <Button style={{margin:'0 10px'}} icon="Export" type="secondary" className={'exportbtn'} onClick={()=>{exportHTML()}}>Export</Button>
         </div>
         <div className="header-box text-right">
@@ -162,7 +163,10 @@ const Header = () => {
             )}
           />
           <Button style={{margin:'0 10px', marginLeft:'20px'}} type="secondary" onClick={openModal}>Preview</Button>
-          <Button style={{margin:'0 10px'}}>Done Editing</Button>
+          <Button style={{margin:'0 10px'}} onClick={ async ()=>{ 
+            let savedData = await saveCampaign();
+            if(savedData) setStep(4)
+           }}>Done Editing</Button>
         </div>
       </div>
 

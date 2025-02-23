@@ -398,9 +398,9 @@ const NewCampaign = () => {
 
 					{step === 3 && (
 						<>
-							<div className="mt70" style={{width:'100%'}}>
+							<div style={{width:'100%', marginTop:'40px'}}>
 								<div className="fm-content-wrapper d-flex gap-50 justify-content-center" style={{width:'100%'}}>
-									<Editor/>
+									<Editor currentCampaign={currentCampaign} setStep={setStep}/>
 								</div>
 							</div>
 						</>

@@ -18,10 +18,12 @@ import dataToHtml from "./utils/dataToHTML";
 import Main from "./components/Main/index";
 import "./assets/App.css";
 
-const EmailEditor = forwardRef(({ defaultBlockList, language = "en", customLanguageLibraries }, ref) => {
+const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = "en", customLanguageLibraries, setStep, currentCampaign}, ref) => {
   const [state, dispatch] = useReducer(reducer, {
     ...defaultState,
-    blockList: defaultBlockList ? defaultBlockList : defaultState.blockList,
+    fontList: fontList ?? [],
+    // bodySettings: bodySettings ?? defaultState.bodySettings,
+    blockList: blockList ?? defaultState.blockList,
     languageLibraries: customLanguageLibraries,
   });
   useImperativeHandle(ref, () => ({
@@ -79,7 +81,7 @@ const EmailEditor = forwardRef(({ defaultBlockList, language = "en", customLangu
         },
       }}
     >
-      <Main language={language} />
+      <Main language={language} setStep={setStep} currentCampaign={currentCampaign}/>
     </GlobalContext.Provider>
   );
 });
