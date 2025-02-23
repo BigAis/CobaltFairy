@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import './Dropdown.scss'
 import './arrow.svg'
 
-const Dropdown = ({ children, options, active = false, inactive = false, disabled = false, loading = null, onOptionSelect = null, withDivider = null, onLeftClick = null, className }) => {
+const Dropdown = ({ children, options, active = false, inactive = false, disabled = false, loading = null, onOptionSelect = null, withDivider = null, onLeftClick = null, className, style }) => {
 	const [isOpen, setIsOpen] = useState(false)
 	const [hovered, setHovered] = useState(false)
 	const [selectedOption, setSelectedOption] = useState(null)
@@ -53,7 +53,7 @@ const Dropdown = ({ children, options, active = false, inactive = false, disable
 	)
 
 	return (
-		<div className="dropdown-wrapper" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} ref={dropdownRef}>
+		<div className="dropdown-wrapper" style={style} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} ref={dropdownRef}>
 			<div className={computedClassName}>
 				{withDivider && (
 					<div className="dropdown-left" onClick={onLeftClick}>

@@ -13,7 +13,7 @@ const Switch = ({ checked, label, onChange, className, ...props }) => {
     }
 
     return (
-        <label className="toggle-switch">
+        <label className="toggle-switch" style={props.style}>
             <input type="checkbox" checked={isChecked} onChange={()=>{
                 onChange(!isChecked)
                 setIsChecked(!isChecked)
