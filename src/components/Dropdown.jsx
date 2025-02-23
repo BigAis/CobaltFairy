@@ -63,7 +63,7 @@ const Dropdown = ({ children, options, active = false, inactive = false, disable
 				)}
 
 				{/* {withDivider && <span className="dropdown-divider"></span>} */}
-				<div className="dropdown-right" onClick={toggleDropdown}>
+				<div style={{ width: !withDivider ? '100%' : '' }} className="dropdown-right" onClick={toggleDropdown}>
 					{/* Right Section */}
 					{loading && <span className="spinner"></span>}
 					{withDivider ? '' : selectedOption ? selectedOption.label : children}

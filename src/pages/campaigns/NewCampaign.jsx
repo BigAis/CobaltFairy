@@ -31,11 +31,29 @@ const NewCampaign = () => {
 	const [subjectB, setSubjectB] = useState('')
 	const [step, setStep] = useState(location.state ? location.state.step : 2)
 	const [groups, setGroups] = useState([])
+	const [campaigns, setCampaigns] = useState([])
+	// const campaignOptions =
+	// 	campaigns.lenght > 0 &&
+	// 	campaigns.map((c) => {
+	// 		c.map((cmp) => {
+	// 			return { value: '' + cmp.id, label: cmp.name }
+	// 		})
+	// 	})
+
+	const [availableLinks, setAvailableLinks] = useState([])
+	const [selectedFilterTrigger, setSelectedFilterTrigger] = useState(null)
+	const [selectedGroup] = useState(null)
 	const [errors, setErrors] = useState({})
 
 	const { user, account } = useAccount()
 	const steps = [{ label: 'Campaigns' }, { label: 'Details' }, { label: 'Design' }, { label: 'Preview' }]
 
+	const filterOptions = [
+		{ label: 'Campaigns', value: 'ocmp' },
+		{ label: 'Links', value: 'link' },
+	]
+
+	//Validation for the first step
 	const validationSchema = Yup.object().shape({
 		subject: Yup.string().trim().required('Subject A is required'),
 		subjectB: abSplit ? Yup.string().trim().required('Subject B is required') : Yup.string().notRequired(),
@@ -43,7 +61,32 @@ const NewCampaign = () => {
 
 	const getCampaign = async (uuid) => {
 		const response = await ApiService.get(`fairymailer/getCampaigns?filters[uuid]=${uuid}&populate=recp_groups`, user.jwt)
-		console.log('response from getcampaign is : ', response.data.data[0])
+		return response
+	}
+
+	//getCampaigns also build the links array for the filter.
+	const getCampaigns = async () => {
+		const response = await ApiService.get('fairymailer/getCampaigns', user.jwt)
+		if (response.data && response.data.data) {
+			//Setting campaigns from response
+			// setCampaigns(
+			// 	response.data.data.map((cmp) => {
+			// 		return { value: '' + cmp.id, label: cmp.name }
+			// 	})
+			// )
+			setCampaigns(response.data.data)
+
+			// Iterate the response and build the available links
+			let links = []
+			response.data.data.map((c) => {
+				if (c.stats && c.stats.l) {
+					Object.keys(c.stats.l).forEach((ll) => {
+						links = [...links, ll]
+					})
+				}
+			})
+			setAvailableLinks(links)
+		}
 		return response
 	}
 
@@ -54,19 +97,10 @@ const NewCampaign = () => {
 			setGroups(
 				resp.data.data
 					? resp.data.data.map((g) => {
-							return { value: g.id, label: g.name }
+							return { value: '' + g.id, label: g.name }
 					  })
 					: []
 			)
-
-			// this.setState({
-			// 	availGroups: resp.data.data
-			// 		? resp.data.data.map((g) => {
-			// 				return { value: g.id, label: g.name }
-			// 		  })
-			// 		: [],
-			// 	meta: resp.data.meta,
-			// })
 		}
 	}
 
@@ -78,19 +112,6 @@ const NewCampaign = () => {
 			setAbSplit(true)
 		}
 	}
-
-	useEffect(() => {
-		if (uuid && user && step === 2) {
-			console.log('there is a uuid')
-			getCampaign(uuid).then((response) => {
-				console.log('respo from useffect', response)
-				if (response && response.data && response.data.data) {
-					setCampaignData(response.data.data[0])
-					setIsEdit(true)
-				}
-			})
-		}
-	}, [uuid, user])
 
 	const handleNext = async () => {
 		try {
@@ -150,11 +171,30 @@ const NewCampaign = () => {
 		console.log('response from sendTestEmail is : ', response)
 	}
 
+	useEffect(() => {
+		if (uuid && user) {
+			if (step === 2) {
+				getCampaign(uuid).then((response) => {
+					if (response && response.data && response.data.data) {
+						setCampaignData(response.data.data[0])
+						setIsEdit(true)
+					}
+				})
+			}
+
+			if (step === 4) {
+				console.log('getting groups ')
+				getGroups()
+				getCampaigns()
+			}
+		}
+	}, [uuid, user, step])
+
 	return (
 		<>
 			<div className="fm-page-wrapper justify-content-center">
 				<div className="fm-content-outer-wrapper d-flex flex-column align-items-center">
-					<Stepper steps={steps} currentStep={step} />
+					<Stepper steps={steps} current={step - 1} />
 
 					{step === 2 && (
 						<>
@@ -176,13 +216,18 @@ const NewCampaign = () => {
 										<div className="d-flex align-items-center gap-5" style={{ marginTop: '-20px' }}>
 											<Icon name={'Plus'} />
 											<p
+												style={{ cursor: 'pointer' }}
 												onClick={() => {
 													PopupText.fire({
 														icon: 'info',
 														html: (
 															<div>
-																<span onClick={() => setSubject((previousSubject) => `${previousSubject} {{name}}`)}>{'{{name}}'}</span>
-																<span onClick={() => setSubject((previousSubject) => `${previousSubject} {{email}}`)}>{'{{email}}'}</span>
+																<span style={{ cursor: 'pointer' }} onClick={() => setSubject((previousSubject) => `${previousSubject} {{name}}`)}>
+																	{'{{name}}'}
+																</span>
+																<span style={{ cursor: 'pointer' }} onClick={() => setSubject((previousSubject) => `${previousSubject} {{email}}`)}>
+																	{'{{email}}'}
+																</span>
 															</div>
 														),
 													})
@@ -205,13 +250,18 @@ const NewCampaign = () => {
 												<div className="d-flex align-items-center" style={{ marginTop: '-20px' }}>
 													<Icon name={'Plus'} />
 													<p
+														style={{ cursor: 'pointer' }}
 														onClick={() => {
 															PopupText.fire({
 																icon: 'info',
 																html: (
 																	<div>
-																		<span onClick={() => setSubjectB((previousSubject) => `${previousSubject} {{name}}`)}>{'{{name}}'}</span>
-																		<span onClick={() => setSubjectB((previousSubject) => `${previousSubject} {{email}}`)}>{'{{email}}'}</span>
+																		<span style={{ cursor: 'pointer' }} onClick={() => setSubjectB((previousSubject) => `${previousSubject} {{name}}`)}>
+																			{'{{name}}'}
+																		</span>
+																		<span style={{ cursor: 'pointer' }} onClick={() => setSubjectB((previousSubject) => `${previousSubject} {{email}}`)}>
+																			{'{{email}}'}
+																		</span>
 																	</div>
 																),
 															})
@@ -294,8 +344,14 @@ const NewCampaign = () => {
 									</div>
 								</div>
 								<div className="d-flex flex-column align-items-left">
-									<Dropdown withDivider={true} icon={'Plus'}></Dropdown>
+									<Dropdown options={groups} withDivider={false} icon={'Plus'} />
 									<p>+ Add Filtering</p>
+								</div>
+								<div className="d-flex ">
+									<Dropdown options={filterOptions} onOptionSelect={(option) => setSelectedFilterTrigger(option)} withDivider={false} icon={'Plus'} />
+									<Dropdown options={selectedFilterTrigger === 'ocmp' ? campaignOptions : availableLinks} withDivider={false} icon={'Plus'} />
+									<Dropdown options={groups} withDivider={false} icon={'Plus'} />
+									<Button icon="Close" />
 								</div>
 								<div className="d-flex flex-column align-items-left">
 									<Switch label={'Schedule Campaign'}></Switch>
