@@ -11,13 +11,12 @@ import InputText from '../../components/InputText/InputText'
 import Button from '../../components/Button'
 import Stepper from '../../components/Stepper/Stepper'
 import PopupText from '../../components/PopupText/PopupText'
-
-import * as Yup from 'yup'
-import { set } from 'date-fns'
-import { ca } from 'date-fns/locale'
 import Dropdown from '../../components/Dropdown'
 import Switch from '../../components/Switch'
 import DatePicker from '../../components/DatePicker'
+import RcpFilter from './RcpFilters'
+
+import * as Yup from 'yup'
 
 const NewCampaign = () => {
 	const { uuid } = useParams()
@@ -25,25 +24,27 @@ const NewCampaign = () => {
 	const location = useLocation()
 
 	const [isEdit, setIsEdit] = useState(false)
-	const [abSplit, setAbSplit] = useState(false)
-	const [campaignName, setCampaignName] = useState('')
-	const [subject, setSubject] = useState('')
-	const [subjectB, setSubjectB] = useState('')
+
+	const [currentCampaign, setCurrentCampaign] = useState({
+		name: '',
+		subject: '',
+		subject_b: '',
+		status: 'draft',
+		type: 'basic',
+	})
+
+	// const [campaignName, setCampaignName] = useState('')
+	// const [subject, setSubject] = useState('')
+	// const [subjectB, setSubjectB] = useState('')
 	const [step, setStep] = useState(location.state ? location.state.step : 2)
 	const [groups, setGroups] = useState([])
 	const [campaigns, setCampaigns] = useState([])
-	// const campaignOptions =
-	// 	campaigns.lenght > 0 &&
-	// 	campaigns.map((c) => {
-	// 		c.map((cmp) => {
-	// 			return { value: '' + cmp.id, label: cmp.name }
-	// 		})
-	// 	})
-
 	const [availableLinks, setAvailableLinks] = useState([])
 	const [selectedFilterTrigger, setSelectedFilterTrigger] = useState(null)
 	const [selectedGroup] = useState(null)
 	const [errors, setErrors] = useState({})
+
+	const [abSplit, setAbSplit] = useState((currentCampaign?.type === 'absplit' ? true : false) || false)
 
 	const { user, account } = useAccount()
 	const steps = [{ label: 'Campaigns' }, { label: 'Details' }, { label: 'Design' }, { label: 'Preview' }]
@@ -53,6 +54,24 @@ const NewCampaign = () => {
 		{ label: 'Links', value: 'link' },
 	]
 
+	const campaignOptions =
+		campaigns.length > 0
+			? campaigns.map((cmp) => {
+					return { value: cmp.id, label: cmp.name }
+			  })
+			: []
+
+	const actionOptions =
+		selectedFilterTrigger === 'ocmp'
+			? [
+					{ label: 'Was Opened', value: 'ocmp' },
+					{ label: 'Was Not Opened', value: 'link' },
+			  ]
+			: [
+					{ label: 'Was Clicked', value: 'ocmp' },
+					{ label: 'Was Not Clicked', value: 'link' },
+			  ]
+
 	//Validation for the first step
 	const validationSchema = Yup.object().shape({
 		subject: Yup.string().trim().required('Subject A is required'),
@@ -61,6 +80,7 @@ const NewCampaign = () => {
 
 	const getCampaign = async (uuid) => {
 		const response = await ApiService.get(`fairymailer/getCampaigns?filters[uuid]=${uuid}&populate=recp_groups`, user.jwt)
+		setCurrentCampaign(response.data.data[0])
 		return response
 	}
 
@@ -85,7 +105,13 @@ const NewCampaign = () => {
 					})
 				}
 			})
-			setAvailableLinks(links)
+			console.log('link are : ', links)
+
+			setAvailableLinks(
+				links.map((l) => {
+					return { label: `${l}`, value: l }
+				})
+			)
 		}
 		return response
 	}
@@ -105,40 +131,30 @@ const NewCampaign = () => {
 	}
 
 	const setCampaignData = (campaignData) => {
-		setSubject(campaignData.subject)
-		setCampaignName(campaignData.name)
+		// setSubject(campaignData.subject)
+		// setCampaignName(campaignData.name)
 		if (campaignData.type === 'absplit') {
-			setSubjectB(campaignData.subject_b)
+			// setSubjectB(campaignData.subject_b)
 			setAbSplit(true)
 		}
 	}
 
 	const handleNext = async () => {
 		try {
-			await validationSchema.validate({ subject, subjectB }, { abortEarly: false })
+			await validationSchema.validate({ subject: currentCampaign.subject, subjectB: currentCampaign.subject_b }, { abortEarly: false })
 			setErrors({})
 
-			console.log('Proceeding to next step...')
-			console.log('User is : ', user)
-			console.log('Account is : ', account)
-
 			const campaignData = {
-				name: campaignName,
+				...currentCampaign,
 				account: account.id,
-				subject,
-				subject_b: subjectB,
-				type: abSplit ? 'absplit' : 'basic',
-				status: 'draft',
 			}
 
 			if (isEdit) {
-				console.log('is edit', campaignData)
 				campaignData.udid = uuid
 				const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData }, user.jwt)
 				console.log('response is : ', response)
 				if (response && response.data && response.data.code === 200) {
-					console.log('asdadsadas')
-					navigate(`/campaigns/new/${campaignData.udid}`)
+					navigate(`/campaigns/edit/${campaignData.udid}`)
 					setStep(step + 2)
 				}
 			} else {
@@ -148,11 +164,12 @@ const NewCampaign = () => {
 				const response = await ApiService.post('fairymailer/createCampaign', { data: campaignData }, user.jwt)
 				console.log('response is : ', response)
 				if (response && response.data && response.data.code === 200) {
-					navigate(`/campaigns/new/${campaignData.udid}`)
+					navigate(`/campaigns/edit/${campaignData.udid}`)
 					setStep(step + 2)
 				}
 			}
 		} catch (err) {
+			console.log('error is : ', err)
 			const newErrors = {}
 			err.inner.forEach((error) => {
 				newErrors[error.path] = error.message
@@ -171,6 +188,48 @@ const NewCampaign = () => {
 		console.log('response from sendTestEmail is : ', response)
 	}
 
+	const updateRecpFilter = (id, filter) => {
+		setCurrentCampaign((prevCampaign) => {
+			// Create a new copy of the $and array
+			const updatedFilters = [...prevCampaign.recp_filters.$and]
+
+			// Update the specific filter at the given id with the new filter
+			updatedFilters[id] = filter
+
+			return {
+				...prevCampaign,
+				recp_filters: {
+					...prevCampaign.recp_filters,
+					$and: updatedFilters, // Update the $and array inside recp_filters
+				},
+			}
+		})
+	}
+
+	const handleDeleteRecpFilter = (id) => {
+		setCurrentCampaign((prevCampaign) => ({
+			...prevCampaign,
+			recp_filters: {
+				...prevCampaign.recp_filters,
+				$and: prevCampaign.recp_filters.$and.filter((_, index) => index !== id),
+			},
+		}))
+	}
+
+	const addRecpFilter = () => {
+		setCurrentCampaign((prevCampaign) => ({
+			...prevCampaign,
+			recp_filters: {
+				...prevCampaign.recp_filters,
+				$and: [...(prevCampaign.recp_filters?.$and || []), { $or: [] }], // Ensure $and exists before spreading
+			},
+		}))
+	}
+
+	useEffect(() => {
+		setCurrentCampaign({ ...currentCampaign, type: abSplit ? 'absplit' : 'basic' })
+	}, [abSplit])
+
 	useEffect(() => {
 		if (uuid && user) {
 			if (step === 2) {
@@ -180,10 +239,7 @@ const NewCampaign = () => {
 						setIsEdit(true)
 					}
 				})
-			}
 
-			if (step === 4) {
-				console.log('getting groups ')
 				getGroups()
 				getCampaigns()
 			}
@@ -202,12 +258,12 @@ const NewCampaign = () => {
 								<div className="fm-content-wrapper d-flex gap-50 justify-content-center">
 									<div className="new-campaign-left flex-1 d-flex flex-column gap-20">
 										<h1 className="campaign-title">Campaign Details</h1>
-										<InputText value={campaignName} label={'Campaign Title'} onChange={(e) => setCampaignName(e.target.value)} />
+										<InputText value={currentCampaign?.name} label={'Campaign Title'} onChange={(e) => setCurrentCampaign({ ...currentCampaign, name: e.target.value })} />
 										<InputText
 											label="Subject"
 											icon="Emoji"
-											value={subject}
-											onChange={(e) => setSubject(e.target.value)}
+											value={currentCampaign?.subject}
+											onChange={(e) => setCurrentCampaign({ ...currentCampaign, subject: e.target.value })}
 											emojiPicker={true}
 											hasError={!!errors.subject}
 											errorMessage={errors.subject}
@@ -222,10 +278,26 @@ const NewCampaign = () => {
 														icon: 'info',
 														html: (
 															<div>
-																<span style={{ cursor: 'pointer' }} onClick={() => setSubject((previousSubject) => `${previousSubject} {{name}}`)}>
+																<span
+																	style={{ cursor: 'pointer' }}
+																	onClick={() =>
+																		setCurrentCampaign((prevState) => ({
+																			...prevState,
+																			subject: `${prevState.subject_b} {{name}}`,
+																		}))
+																	}
+																>
 																	{'{{name}}'}
 																</span>
-																<span style={{ cursor: 'pointer' }} onClick={() => setSubject((previousSubject) => `${previousSubject} {{email}}`)}>
+																<span
+																	style={{ cursor: 'pointer' }}
+																	onClick={() =>
+																		setCurrentCampaign((prevState) => ({
+																			...prevState,
+																			subject: `${prevState.subject_b} {{email}}`,
+																		}))
+																	}
+																>
 																	{'{{email}}'}
 																</span>
 															</div>
@@ -239,11 +311,11 @@ const NewCampaign = () => {
 										{abSplit && (
 											<>
 												<InputText
-													value={subjectB}
+													value={currentCampaign?.subject_b}
 													label={'Subject B'}
 													icon={'Emoji'}
 													emojiPicker={true}
-													onChange={(e) => setSubjectB(e.target.value)}
+													onChange={(e) => setCurrentCampaign({ ...currentCampaign, subject_b: e.target.value })}
 													hasError={!!errors.subjectB}
 													errorMessage={errors.subjectB}
 												/>
@@ -256,10 +328,26 @@ const NewCampaign = () => {
 																icon: 'info',
 																html: (
 																	<div>
-																		<span style={{ cursor: 'pointer' }} onClick={() => setSubjectB((previousSubject) => `${previousSubject} {{name}}`)}>
+																		<span
+																			style={{ cursor: 'pointer' }}
+																			onClick={() =>
+																				setCurrentCampaign((prevState) => ({
+																					...prevState,
+																					subject_b: `${prevState.subject_b} {{name}}`,
+																				}))
+																			}
+																		>
 																			{'{{name}}'}
 																		</span>
-																		<span style={{ cursor: 'pointer' }} onClick={() => setSubjectB((previousSubject) => `${previousSubject} {{email}}`)}>
+																		<span
+																			style={{ cursor: 'pointer' }}
+																			onClick={() =>
+																				setCurrentCampaign((prevState) => ({
+																					...prevState,
+																					subject_b: `${prevState.subject_b} {{email}}`,
+																				}))
+																			}
+																		>
 																			{'{{email}}'}
 																		</span>
 																	</div>
@@ -287,7 +375,9 @@ const NewCampaign = () => {
 											</div>
 											<div className="campaign-preview-second-row campaign-preview-active-row w-100">
 												<p style={{ fontSize: '16px', color: 'rgba(16, 15, 28, 1)', fontWeight: '600' }}>Sender</p>
-												<p style={{ fontSize: '14px', color: 'rgba(16, 15, 28, 1)', fontWeight: '500' }}>{subject === '' ? 'Subject goes here' : subject}</p>
+												<p style={{ fontSize: '14px', color: 'rgba(16, 15, 28, 1)', fontWeight: '500' }}>
+													{currentCampaign?.subject === '' ? 'Subject goes here' : currentCampaign?.subject}
+												</p>
 												<p style={{ fontSize: '14px', color: 'rgba(136, 125, 118, 1)', fontWeight: '500' }}>Your email preheader will appear here.</p>
 											</div>
 											<div className="campaign-preview-third-row w-90">
@@ -307,7 +397,7 @@ const NewCampaign = () => {
 
 					{step === 4 && (
 						<>
-							<div className="mt50 d-flex flex-column gap-20" style={{ maxWidth: '450px' }}>
+							<div className="mt50 d-flex flex-column gap-20" style={{ maxWidth: '550px' }}>
 								<h1 className="campaign-title">Review and Sent</h1>
 								<div className="new-campaign-right flex-1">
 									<div className="campaign-preview-wrapper d-flex flex-column align-items-center">
@@ -322,7 +412,9 @@ const NewCampaign = () => {
 										</div>
 										<div className="campaign-preview-second-row campaign-preview-active-row w-100">
 											<p style={{ fontSize: '16px', color: 'rgba(16, 15, 28, 1)', fontWeight: '600' }}>Sender</p>
-											<p style={{ fontSize: '14px', color: 'rgba(16, 15, 28, 1)', fontWeight: '500' }}>{subject === '' ? 'Subject goes here' : subject}</p>
+											<p style={{ fontSize: '14px', color: 'rgba(16, 15, 28, 1)', fontWeight: '500' }}>
+												{currentCampaign.subject === '' ? 'Subject goes here' : currentCampaign.subject}
+											</p>
 											<p style={{ fontSize: '14px', color: 'rgba(136, 125, 118, 1)', fontWeight: '500' }}>Your email preheader will appear here.</p>
 										</div>
 										<div className="campaign-preview-third-row w-90">
@@ -330,9 +422,6 @@ const NewCampaign = () => {
 											<div className="skeleton-2"></div>
 										</div>
 									</div>
-									{/* <div className="d-flex justify-content-end mt20">
-										<Checkbox checked={true} label={'Track Opens'} />
-									</div> */}
 								</div>
 
 								<div className="d-flex content-space-between">
@@ -344,14 +433,67 @@ const NewCampaign = () => {
 									</div>
 								</div>
 								<div className="d-flex flex-column align-items-left">
-									<Dropdown options={groups} withDivider={false} icon={'Plus'} />
-									<p>+ Add Filtering</p>
+									<Dropdown options={groups} withDivider={false} icon={'Plus'}>
+										{' '}
+										Select a group
+									</Dropdown>
+									<p onClick={addRecpFilter}>+ Add Filtering</p>
 								</div>
-								<div className="d-flex ">
-									<Dropdown options={filterOptions} onOptionSelect={(option) => setSelectedFilterTrigger(option)} withDivider={false} icon={'Plus'} />
-									<Dropdown options={selectedFilterTrigger === 'ocmp' ? campaignOptions : availableLinks} withDivider={false} icon={'Plus'} />
-									<Dropdown options={groups} withDivider={false} icon={'Plus'} />
-									<Button icon="Close" />
+								<div className="d-flex flex-column">
+									{currentCampaign.recp_filters?.$and && currentCampaign.recp_filters.$and.length > 0 ? (
+										currentCampaign.recp_filters.$and.map((f, i) => {
+											let iKey = { label: 'Previous Campaign', value: 'ocmp' }
+											let iCondition = { label: 'opened', value: 'contains' }
+											let iValue = null
+
+											if (f.$or[0]?.ocmp_ids) {
+												iKey = { label: 'Previous Campaign', value: 'ocmp' }
+												if (f.$or[0].ocmp_ids?.$contains) {
+													iCondition = { label: 'Was opened', value: 'contains' }
+													iValue = {
+														label: campaignOptions.filter((cmp) => {
+															return cmp.value === f.$or[0].ocmp_ids?.$contains
+														})[0].label,
+														value: f.$or[0].ocmp_ids?.$contains,
+													}
+												} else if (f.$or[0].ocmp_ids?.$notContains) {
+													iCondition = { label: 'Was NOT opened', value: 'notContains' }
+													iValue = {
+														label: campaignOptions.filter((cmp) => {
+															return cmp.value === f.$or[0].ocmp_ids?.$notContains
+														})[0].label,
+														value: f.$or[0].ocmp_ids?.$notContains,
+													}
+												}
+											} else if (f.$or[0]?.links_clicked) {
+												iKey = { label: 'Link of prev. cmp.', value: 'link' }
+												if (f.$or[0].links_clicked?.$contains) {
+													iCondition = { label: 'Was clicked', value: 'contains' }
+													iValue = { label: f.$or[0].links_clicked?.$contains, value: f.$or[0].links_clicked?.$contains }
+												} else if (f.$or[0].links_clicked?.$notContains) {
+													iCondition = { label: 'Was NOT clicked', value: 'notContains' }
+													iValue = { label: f.$or[0].links_clicked?.$notContains, value: f.$or[0].links_clicked?.$notContains }
+												}
+											}
+											return (
+												<RcpFilter
+													key={i}
+													id={i}
+													initialKey={iKey}
+													initialCondition={iCondition}
+													initialValue={iValue}
+													campaigns={campaignOptions}
+													links={availableLinks}
+													onComplete={(id, result) => {
+														updateRecpFilter(id, result)
+													}}
+													onDelete={handleDeleteRecpFilter}
+												/>
+											)
+										})
+									) : (
+										<></>
+									)}
 								</div>
 								<div className="d-flex flex-column align-items-left">
 									<Switch label={'Schedule Campaign'}></Switch>

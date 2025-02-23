@@ -26,6 +26,7 @@
 
 		&.active {
 			background-color: rgba(255, 255, 255, 0.7);
+			text-align: left;
 		}
 
 		&.inactive {
@@ -131,6 +132,7 @@
 		min-width: 150px;
 		overflow-y: auto;
 		margin-top: 10px;
+		text-align: left;
 
 		.dropdown-item {
 			padding: 10px 18px;

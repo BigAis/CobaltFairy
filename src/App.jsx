@@ -22,7 +22,6 @@ function App() {
 	const navigate = useNavigate()
 	const location = useLocation()
 
-
 	useEffect(() => {
 		const fairymail_session = localStorage.getItem('fairymail_session')
 		//ckesisis fix
@@ -50,8 +49,8 @@ function App() {
 				<Route path="/payment-plan" element={<PaymentPlan />} />
 				<Route path="/campaigns" element={<Campaigns />} />
 				<Route path="/campaigns/new" element={<NewCampaign />} />
-				<Route path="/campaigns/new/:uuid" element={<NewCampaign />} />
-				<Route path="/campaigns/edit/:uuid" element={<EditCampaign />} />
+				<Route path="/campaigns/edit/:uuid" element={<NewCampaign />} />
+				<Route path="/campaigns/overview/:uuid" element={<EditCampaign />} />
 				<Route path="/subscribers" element={<Subscribers />} />
 				<Route path="/integrations" element={<Integrations />} />
 				<Route path="/automations" element={<Automations />} />

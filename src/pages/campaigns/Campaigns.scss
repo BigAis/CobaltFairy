@@ -138,3 +138,11 @@ div.campaign-preview-active-row {
 .stepper-container {
 	justify-content: center;
 }
+
+.dropdown-wrapper {
+	flex: 0 0 30%;
+}
+
+.dropdown-wrapper:last-child {
+	flex: 0 0 10%;
+}

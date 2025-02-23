@@ -12,7 +12,8 @@ import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
 // import { v4 as uuidv4 } from 'uuid'
 
-const CampaignsTable = ({ campaigns, dashboardPreviewOnly=false }) => {
+const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false }) => {
+	console.log('campaigns is : ', campaigns)
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 	const user = User.get()
 	const navigate = useNavigate()
@@ -31,8 +32,8 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly=false }) => {
 		{ value: 'rename_cmp', label: 'Rename' },
 		{ value: 'overview_cmp', label: 'Overview' },
 	]
-	const handleLeftClick = () => {
-		alert('Editor for specific campaign should be here. function handleLeftClick() component CampaignsTable.jsx')
+	const handleLeftClick = (rowData) => {
+		navigate(`/campaigns/edit/${rowData.uuid}`)
 	}
 
 	const handleDeleteCampaign = async (uuid) => {
@@ -89,9 +90,6 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly=false }) => {
 				}),
 			}
 
-			console.log('newCampaign is : ', newCampaign)
-			// return
-
 			let resp = await ApiService.post(
 				'campaigns/',
 				{
@@ -113,7 +111,7 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly=false }) => {
 		switch (selectedValue) {
 			case 'overview_cmp':
 				console.log('Overview action triggered')
-				navigate(`/campaigns/edit/${rowData.uuid}`)
+				navigate(`/campaigns/overview/${rowData.uuid}`)
 				// Implement overview logic here
 				break
 			case 'edit':
@@ -145,7 +143,13 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly=false }) => {
 	const actionsBodyTemplate = (rowData) => {
 		return (
 			<div>
-				<Dropdown withDivider={true} icon={'Plus'} options={dropdownOptions} onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, rowData)} onLeftClick={handleLeftClick}>
+				<Dropdown
+					withDivider={true}
+					icon={'Plus'}
+					options={dropdownOptions}
+					onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, rowData)}
+					onLeftClick={() => handleLeftClick(rowData)}
+				>
 					Edit
 				</Dropdown>
 			</div>
@@ -172,7 +176,14 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly=false }) => {
 		// <div>
 		<>
 			{!dashboardPreviewOnly ? (
-				<DataTable value={paginatedData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
+				<DataTable
+					value={paginatedData}
+					paginator={false}
+					selection={selectedCampaigns}
+					onSelectionChange={(e) => setSelectedCampaigns(e.value)}
+					dataKey="id"
+					rowClassName={() => 'p-table-row'}
+				>
 					<Column
 						body={(rowData) => (
 							<div style={{ position: 'relative' }}>
@@ -217,37 +228,44 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly=false }) => {
 					<Column field="clicks" body={clickBodyTemplate} header="Clicks" />
 					<Column field="type" body={typeBodyTemplate} header="Type" />
 					<Column field="date" header="Date" />
-					<Column header="Actions" body={actionsBodyTemplate} />
-				</DataTable>		
+					<Column field="uuid" header="Actions" body={actionsBodyTemplate} />
+				</DataTable>
 			) : (
-<DataTable value={paginatedData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
-				<Column
-					body={(rowData) => (
-						<div style={{ position: 'relative' }}>
-							{/* Image */}
-							{rowData.image ? (
-								<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
-							) : (
-								<img src={'images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
-							)}
-						</div>
-					)}
-					header={() => (
-						<Checkbox
-							checked={selectedCampaigns.length === paginatedData.length && selectedCampaigns.length > 0}
-							onChange={(e) => {
-								if (e) {
-									setSelectedCampaigns([...paginatedData])
-								} else {
-									setSelectedCampaigns([])
-								}
-							}}
-						/>
-					)}
-					headerStyle={{ width: '80px' }}
-				/>
-				<Column field="name" header="Name" />
-				<Column field="recipients" header="Recipients" />
+				<DataTable
+					value={paginatedData}
+					paginator={false}
+					selection={selectedCampaigns}
+					onSelectionChange={(e) => setSelectedCampaigns(e.value)}
+					dataKey="id"
+					rowClassName={() => 'p-table-row'}
+				>
+					<Column
+						body={(rowData) => (
+							<div style={{ position: 'relative' }}>
+								{/* Image */}
+								{rowData.image ? (
+									<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+								) : (
+									<img src={'images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+								)}
+							</div>
+						)}
+						header={() => (
+							<Checkbox
+								checked={selectedCampaigns.length === paginatedData.length && selectedCampaigns.length > 0}
+								onChange={(e) => {
+									if (e) {
+										setSelectedCampaigns([...paginatedData])
+									} else {
+										setSelectedCampaigns([])
+									}
+								}}
+							/>
+						)}
+						headerStyle={{ width: '80px' }}
+					/>
+					<Column field="name" header="Name" />
+					<Column field="recipients" header="Recipients" />
 				</DataTable>
 			)}
 			<Pagination currentPage={1} totalResults={campaigns.length} resultsPerPage={10} onChange={handlePageChange} />

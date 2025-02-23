@@ -151,7 +151,7 @@ const EditCampaign = () => {
 												<div className="campaing-stats-card-item">
 													<div className="campaing-stats-card-item-header">
 														<div>Clicked : {campaign.stats?.c || 0}</div>
-														<div>{campaign.stats.cr || 0}%</div>
+														<div>{campaign.stats?.cr || 0}%</div>
 													</div>
 													<div>
 														<div className="progress-bar">
