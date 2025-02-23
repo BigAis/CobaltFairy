@@ -17,6 +17,7 @@ import DatePicker from '../../components/DatePicker'
 import RcpFilter from './RcpFilters'
 
 import * as Yup from 'yup'
+import Editor from './Editor'
 
 const NewCampaign = () => {
 	const { uuid } = useParams()
@@ -155,7 +156,7 @@ const NewCampaign = () => {
 				console.log('response is : ', response)
 				if (response && response.data && response.data.code === 200) {
 					navigate(`/campaigns/edit/${campaignData.udid}`)
-					setStep(step + 2)
+					setStep(step + 1)
 				}
 			} else {
 				campaignData.udid = uuidv4()
@@ -165,7 +166,7 @@ const NewCampaign = () => {
 				console.log('response is : ', response)
 				if (response && response.data && response.data.code === 200) {
 					navigate(`/campaigns/edit/${campaignData.udid}`)
-					setStep(step + 2)
+					setStep(step + 1)
 				}
 			}
 		} catch (err) {
@@ -248,9 +249,9 @@ const NewCampaign = () => {
 
 	return (
 		<>
-			<div className="fm-page-wrapper justify-content-center">
-				<div className="fm-content-outer-wrapper d-flex flex-column align-items-center">
-					<Stepper steps={steps} current={step - 1} />
+			<div className="fm-page-wrapper justify-content-center" style={{background:step===3?'#FFF8EF':''}}>
+				<div className="fm-content-outer-wrapper d-flex flex-column align-items-center" style={{width:step===3 ? '100%':''}}>
+					<Stepper steps={steps} current={step - 1} style={{marginTop:'30px'}} />
 
 					{step === 2 && (
 						<>
@@ -391,6 +392,16 @@ const NewCampaign = () => {
 									</div>
 								</div>
 								<Button onClick={handleNext}>Next</Button>
+							</div>
+						</>
+					)}
+
+					{step === 3 && (
+						<>
+							<div className="mt70" style={{width:'100%'}}>
+								<div className="fm-content-wrapper d-flex gap-50 justify-content-center" style={{width:'100%'}}>
+									<Editor/>
+								</div>
 							</div>
 						</>
 					)}

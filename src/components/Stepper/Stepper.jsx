@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import './Stepper.scss'
 import classNames from 'classnames'
 
-const Stepper = ({ steps, current, className }) => {
+const Stepper = ({ steps, current, className, ...props }) => {
 	return (
 		<>
-			<div className={classNames('stepper-container', className)}>
+			<div className={classNames('stepper-container', className)} {...props}>
 				{steps.map((s, i) => {
 					return (
 						<>
