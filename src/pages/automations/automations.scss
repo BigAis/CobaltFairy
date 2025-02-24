@@ -25,6 +25,7 @@
 .flow-editor-container{
     background:#fff8ef;
     .header{
+        flex-direction: column;;
         padding-top:10px;
         .buttons{
             margin-top: 50px;
@@ -69,6 +70,7 @@
 
                 }
                 .delay-dropdown{
+                    min-width: 180px;
                     .dropdown-right{
                         padding:12px;
                     }

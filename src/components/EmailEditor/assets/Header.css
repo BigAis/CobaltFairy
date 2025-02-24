@@ -15,7 +15,12 @@
 .header-box .btn .icon{
     margin:0;
 }
-
+.email-editor-notifications{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+}
 .editor-content .icon path, .icon:hover path{
     fill:none!important;
 }

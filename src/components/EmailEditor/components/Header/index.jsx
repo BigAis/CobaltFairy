@@ -16,7 +16,7 @@ import NotificationBar from '../../../NotificationBar/NotificationBar'
 const Header = ({setStep,currentCampaign}) => {
   const {user, account } = useAccount();
   const { previewMode, setPreviewMode, bodySettings, blockList, actionType, setBlockList, setBodySettings, editorRef } = useContext(GlobalContext);
-  const [notifications,setNotifications] = useState([{id:new Date().getTime()/1000,message:'Email data saved successfully.'}])
+  const [notifications,setNotifications] = useState([])
   const [modalPreview, setModalPreview] = useState(previewMode);
   const [blockListHistory, setBlockListHistory] = useState({
     histories: [],
@@ -96,11 +96,13 @@ const Header = ({setStep,currentCampaign}) => {
     <>
       <div className="header">
         <div className="email-editor-notifications">
-          {notifications.map(n=>{
+          {notifications.map(n=>{return (
             <NotificationBar type="warning" message={n.message} onClose={()=>{
               setNotifications(notifications.filter(not=>not.id!=n.id))
             }}/>
+          )
           })}
+          {}
         </div>
         <div className="header-box" style={{textAlign:'left'}}>
           <Button 

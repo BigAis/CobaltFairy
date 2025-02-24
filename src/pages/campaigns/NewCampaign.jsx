@@ -233,17 +233,15 @@ const NewCampaign = () => {
 
 	useEffect(() => {
 		if (uuid && user) {
-			if (step === 2) {
-				getCampaign(uuid).then((response) => {
-					if (response && response.data && response.data.data) {
-						setCampaignData(response.data.data[0])
-						setIsEdit(true)
-					}
-				})
+			getCampaign(uuid).then((response) => {
+				if (response && response.data && response.data.data) {
+					setCampaignData(response.data.data[0])
+					setIsEdit(true)
+				}
+			})
 
-				getGroups()
-				getCampaigns()
-			}
+			getGroups()
+			getCampaigns()
 		}
 	}, [uuid, user, step])
 
