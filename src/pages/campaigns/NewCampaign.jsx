@@ -15,9 +15,15 @@ import Dropdown from '../../components/Dropdown'
 import Switch from '../../components/Switch'
 import DatePicker from '../../components/DatePicker'
 import RcpFilter from './RcpFilters'
+import Editor from './Editor'
 
 import * as Yup from 'yup'
-import Editor from './Editor'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const NewCampaign = () => {
 	const { uuid } = useParams()
@@ -42,7 +48,7 @@ const NewCampaign = () => {
 	const [campaigns, setCampaigns] = useState([])
 	const [availableLinks, setAvailableLinks] = useState([])
 	const [selectedFilterTrigger, setSelectedFilterTrigger] = useState(null)
-	const [selectedGroup] = useState(null)
+	const [scheduleCampaign, setScheduleCampaign] = useState(false)
 	const [errors, setErrors] = useState({})
 
 	const [abSplit, setAbSplit] = useState((currentCampaign?.type === 'absplit' ? true : false) || false)
@@ -80,8 +86,12 @@ const NewCampaign = () => {
 	})
 
 	const getCampaign = async (uuid) => {
-		const response = await ApiService.get(`fairymailer/getCampaigns?filters[uuid]=${uuid}&populate=recp_groups`, user.jwt)
+		const response = await ApiService.get(`fairymailer/getCampaigns?filters[uuid]=${uuid}&populate[recp_groups][fields][0]=id`, user.jwt)
+		console.log('response from getCampaign is : ', response.data.data[0])
 		setCurrentCampaign(response.data.data[0])
+		if (response.data.data[0] && response.data.data[0].date) {
+			setScheduleCampaign(true)
+		}
 		return response
 	}
 
@@ -140,6 +150,73 @@ const NewCampaign = () => {
 		}
 	}
 
+	const handleSave = async (actionClicked) => {
+		switch (actionClicked) {
+			case 'saveAndExit':
+				handleSaveAndExit()
+				break
+			case 'schedule':
+				handleSchedule()
+				break
+			case 'sentNow':
+				handleSendNow()
+				break
+		}
+	}
+
+	const handleSaveAndExit = async () => {
+		const campaignData = {
+			...currentCampaign,
+			date: null,
+			account: account.id,
+		}
+		try {
+			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData }, user.jwt)
+			if (response && response.data && response.data.code === 200) {
+				navigate(`/campaigns/`)
+			}
+		} catch (err) {
+			console.log('error is : ', err)
+		}
+	}
+
+	const handleSchedule = async () => {
+		const campaignData = {
+			...currentCampaign,
+			account: account.id,
+		}
+		try {
+			console.log('campaignData is : ', campaignData)
+
+			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData }, user.jwt)
+			console.log('response is : ', response)
+			if (response && response.data && response.data.code === 200) {
+				navigate(`/campaigns/`)
+			}
+		} catch (err) {
+			console.log('error is : ', err)
+		}
+	}
+
+	const handleSendNow = async () => {
+		const campaignData = {
+			...currentCampaign,
+			date: dayjs().add(10, 'day').toISOString(),
+			account: account.id,
+		}
+		try {
+			console.log('campaignData is : ', campaignData)
+
+			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData }, user.jwt)
+			console.log('response is : ', response)
+			if (response && response.data && response.data.code === 200) {
+				navigate(`/campaigns/`)
+			}
+		} catch (err) {
+			console.log('error is : ', err)
+		}
+	}
+
 	const handleNext = async () => {
 		try {
 			await validationSchema.validate({ subject: currentCampaign.subject, subjectB: currentCampaign.subject_b }, { abortEarly: false })
@@ -185,7 +262,7 @@ const NewCampaign = () => {
 
 	const sendTestEmail = async () => {
 		const campaignUdid = uuid
-		const response = await ApiService.post(`custom/sendTestDraft`, { campaign_id: campaignUdid, account_id: account.id }, user.jwt)
+		const response = await ApiService.post(`fairymail/sendDraft`, { campaign_id: campaignUdid }, user.jwt)
 		console.log('response from sendTestEmail is : ', response)
 	}
 
@@ -245,11 +322,20 @@ const NewCampaign = () => {
 		}
 	}, [uuid, user, step])
 
+	useEffect(() => {
+		// if (!scheduleCampaign) {
+		setCurrentCampaign((prevState) => ({
+			...prevState,
+			date: scheduleCampaign ? (currentCampaign.date ? dayjs(currentCampaign.date).toISOString() : dayjs().toISOString()) : null,
+		}))
+		// }
+	}, [scheduleCampaign])
+
 	return (
 		<>
-			<div className="fm-page-wrapper justify-content-center" style={{background:step===3?'#FFF8EF':''}}>
-				<div className="fm-content-outer-wrapper d-flex flex-column align-items-center" style={{width:step===3 ? '100%':''}}>
-					<Stepper steps={steps} current={step - 1} style={{marginTop:'30px'}} />
+			<div className="fm-page-wrapper justify-content-center" style={{ background: step === 3 ? '#FFF8EF' : '' }}>
+				<div className="fm-content-outer-wrapper d-flex flex-column align-items-center" style={{ width: step === 3 ? '100%' : '' }}>
+					<Stepper steps={steps} current={step - 1} style={{ marginTop: '30px' }} />
 
 					{step === 2 && (
 						<>
@@ -279,25 +365,27 @@ const NewCampaign = () => {
 															<div>
 																<span
 																	style={{ cursor: 'pointer' }}
-																	onClick={() =>
+																	onClick={() => {
 																		setCurrentCampaign((prevState) => ({
 																			...prevState,
-																			subject: `${prevState.subject_b} {{name}}`,
+																			subject: `${prevState.subject} {{name}}`,
 																		}))
-																	}
+																		PopupText.close()
+																	}}
 																>
 																	{'{{name}}'}
 																</span>
 																<span
 																	style={{ cursor: 'pointer' }}
-																	onClick={() =>
+																	onClick={() => {
 																		setCurrentCampaign((prevState) => ({
 																			...prevState,
-																			subject: `${prevState.subject_b} {{email}}`,
+																			subject: `${prevState.subject} {{email}}`,
 																		}))
-																	}
+																		PopupText.close()
+																	}}
 																>
-																	{'{{email}}'}
+																	{' {{email}}'}
 																</span>
 															</div>
 														),
@@ -329,25 +417,27 @@ const NewCampaign = () => {
 																	<div>
 																		<span
 																			style={{ cursor: 'pointer' }}
-																			onClick={() =>
+																			onClick={() => {
 																				setCurrentCampaign((prevState) => ({
 																					...prevState,
 																					subject_b: `${prevState.subject_b} {{name}}`,
 																				}))
-																			}
+																				PopupText.close()
+																			}}
 																		>
 																			{'{{name}}'}
 																		</span>
 																		<span
 																			style={{ cursor: 'pointer' }}
-																			onClick={() =>
+																			onClick={() => {
 																				setCurrentCampaign((prevState) => ({
 																					...prevState,
 																					subject_b: `${prevState.subject_b} {{email}}`,
 																				}))
-																			}
+																				PopupText.close()
+																			}}
 																		>
-																			{'{{email}}'}
+																			{' {{email}}'}
 																		</span>
 																	</div>
 																),
@@ -396,9 +486,9 @@ const NewCampaign = () => {
 
 					{step === 3 && (
 						<>
-							<div style={{width:'100%', marginTop:'40px'}}>
-								<div className="fm-content-wrapper d-flex gap-50 justify-content-center" style={{width:'100%'}}>
-									<Editor currentCampaign={currentCampaign} setStep={setStep}/>
+							<div style={{ width: '100%', marginTop: '40px' }}>
+								<div className="fm-content-wrapper d-flex gap-50 justify-content-center" style={{ width: '100%' }}>
+									<Editor currentCampaign={currentCampaign} setStep={setStep} />
 								</div>
 							</div>
 						</>
@@ -407,7 +497,7 @@ const NewCampaign = () => {
 					{step === 4 && (
 						<>
 							<div className="mt50 d-flex flex-column gap-20" style={{ maxWidth: '550px' }}>
-								<h1 className="campaign-title">Review and Sent</h1>
+								<h1 className="campaign-title">Review and Send</h1>
 								<div className="new-campaign-right flex-1">
 									<div className="campaign-preview-wrapper d-flex flex-column align-items-center">
 										<div className="campaign-preview-title w-90 d-flex align-items-center">
@@ -442,7 +532,31 @@ const NewCampaign = () => {
 									</div>
 								</div>
 								<div className="d-flex flex-column align-items-left">
-									<Dropdown options={groups} withDivider={false} icon={'Plus'}>
+									<Dropdown
+										onOptionSelect={(option) => {
+											setCurrentCampaign((prevState) => {
+												const updatedGroups = [...prevState.recp_groups]
+												if (updatedGroups.length !== 0) {
+													updatedGroups[0].id = parseInt(option.value)
+												} else {
+													updatedGroups.push({ id: parseInt(option.value) })
+												}
+
+												return { ...prevState, recp_groups: updatedGroups }
+											})
+										}}
+										options={groups}
+										withDivider={false}
+										icon={'Plus'}
+										selectedValue={
+											currentCampaign?.recp_groups[0]
+												? {
+														label: groups.filter((g) => g.value == currentCampaign.recp_groups[0].id)[0]?.label,
+														value: '' + currentCampaign.recp_groups[0].id,
+												  }
+												: null
+										}
+									>
 										{' '}
 										Select a group
 									</Dropdown>
@@ -505,22 +619,70 @@ const NewCampaign = () => {
 									)}
 								</div>
 								<div className="d-flex flex-column align-items-left">
-									<Switch label={'Schedule Campaign'}></Switch>
-								</div>
-								<div>
-									<DatePicker
-										dateFormat="d/m/Y"
-										timeFormat={'H:i'}
-										pickerType="datetime"
-										onChange={(selection) => {
-											console.log('selected date-time', selection)
+									<Switch
+										onChange={(option) => {
+											setScheduleCampaign(option)
+											console.log('asdasdasdasd : ', option)
 										}}
-									></DatePicker>
+										checked={scheduleCampaign}
+										label={'Schedule Campaign'}
+									></Switch>
 								</div>
 
+								{scheduleCampaign && (
+									<div>
+										<DatePicker
+											dateFormat="d/m/Y"
+											timeFormat={'H:i'}
+											pickerType="datetime"
+											value={currentCampaign?.date && dayjs(currentCampaign.date).toISOString()}
+											onChange={(selection) => {
+												setCurrentCampaign((prevState) => ({
+													...prevState,
+													date: dayjs(selection).toISOString(),
+												}))
+												console.log('selected date-time', selection)
+												console.log('selected date-time dayjs', dayjs(selection).toISOString())
+											}}
+										></DatePicker>
+									</div>
+								)}
+
 								<div className="d-flex justify-content-center gap-20">
-									<Button>Save & Exit</Button>
-									<Button>Schedule Campaign</Button>
+									<Button
+										onClick={() => {
+											handleSave('saveAndExit')
+										}}
+									>
+										Save & Exit
+									</Button>
+									{scheduleCampaign ? (
+										<Button
+											onClick={() => {
+												handleSave('schedule')
+											}}
+										>
+											Schedule Campaign
+										</Button>
+									) : (
+										<Button
+											onClick={() => {
+												PopupText.fire({
+													text: 'Are you sure?',
+													icon: 'info',
+													showConfirmButton: true,
+													confirmButtonText: 'OK',
+													onConfirm: () => {
+														handleSave('sentNow')
+														console.log('User clicked OK!')
+													},
+													showCancelButton: false,
+												})
+											}}
+										>
+											Send now
+										</Button>
+									)}
 								</div>
 							</div>
 						</>

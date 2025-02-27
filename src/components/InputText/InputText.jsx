@@ -41,7 +41,17 @@ const InputText = ({ value, onChange, placeholder, label, hasError = false, erro
 							<Icon name={icon} className="input-icon" />
 						</div>
 					)}
-					<input type="text" placeholder={label ? '' : placeholder} value={value} onChange={handleInputChange} className={computedClassName} disabled={disabled} name={name} {...props} />
+					<input
+						style={{ paddingRight: emojiPicker ? '40px' : '' }}
+						type="text"
+						placeholder={label ? '' : placeholder}
+						value={value}
+						onChange={handleInputChange}
+						className={computedClassName}
+						disabled={disabled}
+						name={name}
+						{...props}
+					/>
 					{label && (
 						<label className={classNames('floating-label', { filled: value || placeholder })}>
 							{isRequired && '*'}
