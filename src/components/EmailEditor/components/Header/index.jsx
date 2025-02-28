@@ -31,7 +31,7 @@ const Header = ({setStep,currentCampaign}) => {
       const data = editorRef.current.exportData(['Inter:400,700']);
       let updResp = await ApiService.post(`fairymailer/updateCampaign`,{data:{uuid:currentCampaign.uuid,design:JSON.stringify(data),html}},user.jwt)
       console.log('updresp',updResp)
-      setNotifications([...notifications,{id:new Date().getTime()/1000,message:'Email data saved successfully.'}])
+      setNotifications([...notifications,{id:new Date().getTime()/1000,message:'Email data saved successfully.', autoClose:3000}])
     }
     return true
   }
@@ -99,7 +99,7 @@ const Header = ({setStep,currentCampaign}) => {
           {notifications.map(n=>{return (
             <NotificationBar type="warning" message={n.message} onClose={()=>{
               setNotifications(notifications.filter(not=>not.id!=n.id))
-            }}/>
+            }} autoClose={n.autoClose}/>
           )
           })}
           {}

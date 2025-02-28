@@ -19,10 +19,11 @@ import Main from "./components/Main/index";
 import "./assets/App.css";
 
 const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = "en", customLanguageLibraries, setStep, currentCampaign}, ref) => {
+  console.log('bodySettings',bodySettings)
   const [state, dispatch] = useReducer(reducer, {
     ...defaultState,
     fontList: fontList ?? [],
-    // bodySettings: bodySettings ?? defaultState.bodySettings,
+    bodySettings: bodySettings&&bodySettings.styles ? bodySettings : defaultState.bodySettings,
     blockList: blockList ?? defaultState.blockList,
     languageLibraries: customLanguageLibraries,
   });

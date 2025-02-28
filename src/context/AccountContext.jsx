@@ -21,8 +21,8 @@ export const AccountProvider = ({ children }) => {
 				console.log('respppp',resp.data)
 				User.setAccounts(resp.data.user.accounts)
 				const account = resp.data.user.account
-				account.payment_plan = resp.data.account.payment_plan
 				console.log('set account',account)
+				account.payment_plan = resp.data.account.payment_plan
 				setAccount(account)
 			} catch (error) {
 				setError(error)

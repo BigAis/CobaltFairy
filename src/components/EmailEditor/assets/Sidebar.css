@@ -118,8 +118,8 @@
 }
 
 .side-bar {
-    width: 380px;
-    min-width: 380px;
+    width: 300px;
+    min-width: 300px;
     background: var(--left-sidebar-background);
     height: 100%;
     display: flex;

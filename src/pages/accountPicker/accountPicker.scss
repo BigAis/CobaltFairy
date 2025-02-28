@@ -25,6 +25,7 @@
 			line-height: 19px;
 			align-items: center;
 			display: flex;
+            break-inside: avoid-column;
 			.account-info {
 				display: flex;
 				min-width: 200px;

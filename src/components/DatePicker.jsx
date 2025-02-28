@@ -60,6 +60,7 @@ function CustomDatePicker({ dateFormat, timeFormat, pickerType = 'datetime', onC
 				minTime={pickerType !== 'date' && isSameDay(startDate, minDate) ? minTime : undefined}
 				maxTime={pickerType !== 'date' && isSameDay(startDate, minDate) ? maxTime : undefined}
 				customInput={<DateInput pickerType={pickerType} />}
+				{...props}
 			/>
 		</div>
 	)

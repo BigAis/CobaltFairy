@@ -44,7 +44,7 @@ const PageHeader = () => {
 				<div
 					className="account-info"
 					onClick={() => {
-						navigate('/payment-plan', { replace: true })
+						navigate('/choose-account', { replace: true })
 					}}
 				>
 					<div>
@@ -55,7 +55,7 @@ const PageHeader = () => {
 				</div>
 			</Card>
 			<div className="user-info" onClick={(e)=>{setUserMenuOpen(true);e.stopPropagation()}}>
-				<Card style={{marginRight:'20px', cursor:'pointer'}} onClick={()=>{navigate('/choose-account')}}>{getNameInitials(account?.name)}</Card>
+				<Card style={{marginRight:'20px', cursor:'pointer'}} onClick={()=>{}}>{getNameInitials(user?.user?.name)}</Card>
 				<div className="user">
 					<h4>{user?.user?.name}</h4>
 					<span>{user?.user?.email}</span>

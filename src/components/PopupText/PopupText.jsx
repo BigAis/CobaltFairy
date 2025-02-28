@@ -11,7 +11,7 @@ const PopupText = ({
 	text,
 	html,
 	icon,
-	focusCancel = false,
+	focusCancel = true,
 	showConfirmButton = true,
 	showDenyButton = false,
 	showCancelButton = true,

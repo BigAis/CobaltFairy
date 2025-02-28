@@ -630,11 +630,12 @@ const NewCampaign = () => {
 								</div>
 
 								{scheduleCampaign && (
-									<div>
+									<div className='schedule-campaign'>
 										<DatePicker
 											dateFormat="d/m/Y"
 											timeFormat={'H:i'}
 											pickerType="datetime"
+											style={{width:'100%'}}
 											value={currentCampaign?.date && dayjs(currentCampaign.date).toISOString()}
 											onChange={(selection) => {
 												setCurrentCampaign((prevState) => ({
@@ -668,15 +669,15 @@ const NewCampaign = () => {
 										<Button
 											onClick={() => {
 												PopupText.fire({
-													text: 'Are you sure?',
+													text: 'The campaign will be sent right now. Are you sure?',
 													icon: 'info',
 													showConfirmButton: true,
-													confirmButtonText: 'OK',
+													showCancelButton: true,
+													confirmButtonText: 'Send it',
 													onConfirm: () => {
 														handleSave('sentNow')
 														console.log('User clicked OK!')
 													},
-													showCancelButton: false,
 												})
 											}}
 										>
