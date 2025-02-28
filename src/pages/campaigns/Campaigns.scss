@@ -149,3 +149,8 @@ div.campaign-preview-active-row {
 .schedule-campaign .date-input{
 	width:100%;
 }
+@media(max-width:1200px){
+	.fm-content-wrapper {
+		min-width: 100%;
+	}
+}

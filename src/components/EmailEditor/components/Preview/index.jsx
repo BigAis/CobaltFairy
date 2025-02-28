@@ -39,6 +39,7 @@ const Preview = (props) => {
       <div className="default-scrollbar" id="preview">
         <div
           className="preview-content"
+          data-type="preview-content"
           style={{
             width: previewMode === "desktop" ? "100%" : 364,
             ...bodySettings.styles,

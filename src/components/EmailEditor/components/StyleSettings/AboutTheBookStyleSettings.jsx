@@ -14,6 +14,7 @@ import { Switch, Slider, Input } from "antd";
 import { deepClone } from "../../utils/helpers";
 import ImageUploadPopup from "./ImageUploadPopup"
 import Button from "../../../Button"
+import useDataSource from "../../configs/useDataSource"
 
 
 
@@ -47,6 +48,7 @@ const AboutTheBookStyleSettings = () => {
     const fontSize = findStyleItem(currentItem.data.styles, "fontSize");
     const lineHeight = findStyleItem(currentItem.data.styles, "lineHeight");
     const fontFamilyList = ["sans-serif", "Inter", "Arial", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
+    const { fontsList } = useDataSource();
 
     return (
       <>
@@ -67,7 +69,8 @@ const AboutTheBookStyleSettings = () => {
                   className={classNames(textAlign === value ? "align-style-item-active" : "align-style-item-un_active", "align-style-item")}
                   onClick={() => otherStylesChange("textAlign", value)}
                 >
-                  <FontAwesomeIcon icon={icon} className="tag-style-size" />
+                  {/* <FontAwesomeIcon icon={icon} className="tag-style-size" /> */}
+                  <img src={`/images/align-${value}.png`}/>
                 </div>
               );
             })}
@@ -76,12 +79,12 @@ const AboutTheBookStyleSettings = () => {
         {cardItemElement(
           t("font_family"),
           <Select className="input-width" value={fontFamily} onChange={inputChange("fontFamily")}>
-            {fontFamilyList.map((item) => (
-              <Select.Option key={item} value={item}>
-                {item}
-              </Select.Option>
-            ))}
-          </Select>
+          {fontsList.map((item) => (
+            <Select.Option key={item.name} value={item.attribute}>
+              {item.name}
+            </Select.Option>
+          ))}
+        </Select>
         )}
         {cardItemElement(
           t("font_size"),
@@ -220,7 +223,8 @@ const AboutTheBookStyleSettings = () => {
                   className={classNames(textAlign === value ? "align-style-item-active" : "align-style-item-un_active", "align-style-item")}
                   onClick={() => updateContentTextAlign(value)}
                 >
-                  <FontAwesomeIcon icon={icon} className="tag-style-size" />
+                  {/* <FontAwesomeIcon icon={icon} className="tag-style-size" /> */}
+                  <img src={`/images/align-${value}.png`}/>
                 </div>
               );
             })}

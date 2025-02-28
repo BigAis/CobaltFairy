@@ -17,6 +17,7 @@ const Header = ({setStep,currentCampaign}) => {
   const {user, account } = useAccount();
   const { previewMode, setPreviewMode, bodySettings, blockList, actionType, setBlockList, setBodySettings, editorRef } = useContext(GlobalContext);
   const [notifications,setNotifications] = useState([])
+  const [fontsIncluded,setFontsIncluded] = useState([])
   const [modalPreview, setModalPreview] = useState(previewMode);
   const [blockListHistory, setBlockListHistory] = useState({
     histories: [],

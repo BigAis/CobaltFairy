@@ -1,3 +1,5 @@
+import useDataSource from "../configs/useDataSource";
+
 const createStyleString = (className, styles) => {
   const regex = new RegExp(/[A-Z]/g);
   const kebabCase = (str) => str.replace(regex, (v) => `-${v.toLowerCase()}`);
@@ -206,7 +208,9 @@ const blockListToHtml = (blockList, bodySettings) => {
   return content;
 };
 
-const dataToHtml = ({ bodySettings, blockList, fontList=[] }) => {
+const dataToHtml = ({ bodySettings, blockList }) => {
+  const fontsList = []; //recursively itterate blocklist to export all fonts, and find the required urls to add.
+  // console.log('blockList',blockList);
   let content = "";
   const { newBlockList, styles } = createStyleTag(blockList);
   content = blockListToHtml(newBlockList, bodySettings);
@@ -224,8 +228,8 @@ const dataToHtml = ({ bodySettings, blockList, fontList=[] }) => {
       <!--[if !mso]><!-->
       `;
       for(const font of fontList){
-        // fontStyles += ` <link href='https://fonts.googleapis.com/css?family=${font}' rel='stylesheet' type='text/css'> `
-        // fontMediaStyles += ` @import url('https://fonts.googleapis.com/css2?family=${font}&display=swap');`
+        fontStyles += ` <link href='https://fonts.googleapis.com/css?family=${font}' rel='stylesheet' type='text/css'> `
+        fontMediaStyles += ` @import url('https://fonts.googleapis.com/css2?family=${font}&display=swap');`
       }
       fontStyles += `
       <!--<![endif]-->
@@ -300,7 +304,7 @@ const dataToHtml = ({ bodySettings, blockList, fontList=[] }) => {
   </head>
   <body>
   <div style="opacity:0;">${bodySettings.preHeader}</div>
-  <div style="background-color:${bodySettings.styles.backgroundColor};color:${bodySettings.styles.color}; font-family:${bodySettings.styles.fontFamily};"> ${content}</div>
+  <div style="background-color:${bodySettings.styles.backgroundColor};color:${bodySettings.styles.color}; font-family:${bodySettings.styles.fontFamily.attribute};"> ${content}</div>
   </body>
   </html>`;
 };
