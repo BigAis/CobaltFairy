@@ -18,7 +18,9 @@
     padding: 1em;
     border-radius: 10px;
     .imagepicker-tabs{
-        margin-bottom:20px;
+        // margin-bottom:20px;
+        display:flex;
+        justify-content: start;
         a{
             color: black;
             border-radius: 8px 8px 0 0;

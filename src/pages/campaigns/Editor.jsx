@@ -13,8 +13,9 @@ function Editor({currentCampaign, setStep}) {
             console.log('in des',des)
             //check if old builder
             if(des.components || des.styles){
-                await PopupText.fire({icon:'warning',text:'This campaign was created with the old version of Fairy Mail. You need to edit it with that version.',showCancelButton:false});
-                setStep(2);
+                await PopupText.fire({icon:'warning',text:'This campaign was created with the old version of Fairy Mail. You need to edit it with that version.',showCancelButton:false, onConfirm:()=>{
+                    setStep(2);
+                }})
                 return;
             }
             if(des.bodySettings && des.blockList){

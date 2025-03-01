@@ -48,7 +48,6 @@ const getBlockConfigsList = (t) => {
         mobile: {},
       },
     },
-  
     {
       name: t("button"),
       key: "button",
@@ -68,10 +67,10 @@ const getBlockConfigsList = (t) => {
       styles: {
         desktop: {
           width: "auto",
-          fontSize: 12,
+          fontSize: 14,
           lineHeight: "140%",
           borderRadius: 4,
-          fontFamily: "sans-serif",
+          fontFamily: "Inter",
           paddingTop: 10,
           paddingBottom: 10,
           paddingLeft: 20,
@@ -454,6 +453,108 @@ const getBlockConfigsList = (t) => {
       },
     },
     {
+      name: '2 Books',
+      key: "column",
+      type: "1-1",
+      columnType:"2-sections",
+      styles: {
+        key: "column",
+        desktop: {
+          backgroundColor: "transparent",
+          paddingTop: 0,
+          paddingLeft: 0,
+          paddingRight: 0,
+          paddingBottom: 0,
+          contentBackground: "#fff",
+        },
+        mobile: {},
+      },
+      children:  Array.from({ length: 2 }).map(() => {
+        return {
+          name: t("content"),
+          key: "content",
+          width: "50%",
+          styles: {
+            key: "column",
+            desktop: {
+              backgroundColor: "transparent",
+              paddingTop: 0,
+              paddingLeft: 0,
+              paddingRight: 0,
+              paddingBottom: 0,
+              contentBackground: "transparent",
+            },
+            mobile: {},
+          },
+          children: [
+            {
+              name: t("image"),
+              key: "image",
+              src: "",
+              alt: "Image",
+              type: "link",
+              linkURL: "",
+              contentStyles: { desktop: {paddingTop: 12, paddingBottom: 12, paddingLeft: 12, paddingRight: 12, textAlign: "center",}, mobile: {},},
+              styles: { desktop: { width: "auto", }, mobile: {},},
+            },
+            {
+              name: t("text"),
+              key: "text",
+              text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+              styles: {
+                desktop: {
+                  fontSize: 13,
+                  fontFamily: "Inter",
+                  color: undefined,
+                  lineHeight: "100%",
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  paddingLeft: 12,
+                  paddingRight: 12,
+                  textAlign: "left",
+                },
+                mobile: {},
+              },
+            },
+            {
+              name: t("button"),
+              key: "button",
+              text: 'Download now!',
+              type: "link",
+              linkURL: "",
+              contentStyles: {
+                desktop: {
+                  textAlign: "center",
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  paddingLeft: 12,
+                  paddingRight: 12,
+                },
+                mobile: {},
+              },
+              styles: {
+                desktop: {
+                  width: "100%",
+                  fontSize: 14,
+                  lineHeight: "140%",
+                  borderRadius: 4,
+                  fontFamily: "Inter",
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                  paddingLeft: 20,
+                  paddingRight: 20,
+                  backgroundColor: "#FF4C49",
+                  color: "#fff",
+                  display: "inline-block",
+                },
+                mobile: {},
+              },
+            }
+          ],
+        }
+      }),
+    },
+    {
       name: 'Footer',
       key: "column",
       type: "1-1",
@@ -495,7 +596,8 @@ const getBlockConfigsList = (t) => {
             {
               name: t("text"),
               key: "text",
-              text: 'Site url here<br>pen name email here',
+              subkey : 'footer-links',
+              text: 'yourwebsite.tld<br>email@yourwebsite.tld',
               styles: {
                 desktop: {
                   fontSize: 14,
