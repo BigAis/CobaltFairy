@@ -21,9 +21,17 @@ import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import MultipleDropdown from '../../components/MultipleDropdown/MultipleDropdown'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
+
+const options = [
+	{ value: 'apple', label: 'Apple' },
+	{ value: 'banana', label: 'Banana' },
+	{ value: 'cherry', label: 'Cherry' },
+	{ value: 'grape', label: 'Grape' },
+]
 
 const NewCampaign = () => {
 	const { uuid } = useParams()
@@ -45,6 +53,7 @@ const NewCampaign = () => {
 	// const [subjectB, setSubjectB] = useState('')
 	const [step, setStep] = useState(location.state ? location.state.step : 2)
 	const [groups, setGroups] = useState([])
+	const [selectedGroups, setSelectedGroups] = useState([])
 	const [campaigns, setCampaigns] = useState([])
 	const [availableLinks, setAvailableLinks] = useState([])
 	const [selectedFilterTrigger, setSelectedFilterTrigger] = useState(null)
@@ -169,7 +178,9 @@ const NewCampaign = () => {
 			...currentCampaign,
 			date: null,
 			account: account.id,
+			recp_groups: selectedGroups && selectedGroups.length > 0 ? selectedGroups.map((option) => option.value) : [],
 		}
+
 		try {
 			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData }, user.jwt)
 			if (response && response.data && response.data.code === 200) {
@@ -330,6 +341,30 @@ const NewCampaign = () => {
 		}))
 		// }
 	}, [scheduleCampaign])
+
+	useEffect(() => {
+		if (currentCampaign && currentCampaign.recp_groups && currentCampaign.recp_groups.length > 0) {
+			if (groups && groups.length > 0) {
+				setSelectedGroups(
+					currentCampaign.recp_groups.map((group) => ({
+						value: `${group.id}`,
+						label: groups.find((grp) => group.id == grp.value).label,
+					}))
+				)
+			}
+		}
+	}, [currentCampaign])
+
+	const handleSelection = (selected) => {
+		const final = selected.map((selectedOption) => {
+			return selectedOption.value
+		})
+		console.log('final are : ', final)
+
+		setSelectedGroups(selected)
+
+		console.log('Selected Options:', selected)
+	}
 
 	return (
 		<>
@@ -532,7 +567,7 @@ const NewCampaign = () => {
 									</div>
 								</div>
 								<div className="d-flex flex-column align-items-left">
-									<Dropdown
+									{/* <Dropdown
 										onOptionSelect={(option) => {
 											setCurrentCampaign((prevState) => {
 												const updatedGroups = [...prevState.recp_groups]
@@ -559,7 +594,8 @@ const NewCampaign = () => {
 									>
 										{' '}
 										Select a group
-									</Dropdown>
+									</Dropdown> */}
+									<MultipleDropdown options={groups} selectedValues={selectedGroups} onOptionSelect={handleSelection} />
 									<p onClick={addRecpFilter}>+ Add Filtering</p>
 								</div>
 								<div className="d-flex flex-column">
@@ -630,12 +666,12 @@ const NewCampaign = () => {
 								</div>
 
 								{scheduleCampaign && (
-									<div className='schedule-campaign'>
+									<div className="schedule-campaign">
 										<DatePicker
 											dateFormat="d/m/Y"
 											timeFormat={'H:i'}
 											pickerType="datetime"
-											style={{width:'100%'}}
+											style={{ width: '100%' }}
 											value={currentCampaign?.date && dayjs(currentCampaign.date).toISOString()}
 											onChange={(selection) => {
 												setCurrentCampaign((prevState) => ({
@@ -652,15 +688,35 @@ const NewCampaign = () => {
 								<div className="d-flex justify-content-center gap-20">
 									<Button
 										onClick={() => {
-											handleSave('saveAndExit')
+											PopupText.fire({
+												text: scheduleCampaign ? 'This action will remove the scheduled date. Are you sure?' : 'The campaign will be saved as a draft. Are you sure?',
+												icon: 'info',
+												showConfirmButton: true,
+												showCancelButton: true,
+												confirmButtonText: 'Save Draft',
+												onConfirm: () => {
+													handleSave('saveAndExit')
+													console.log('User clicked OK!')
+												},
+											})
 										}}
 									>
-										Save & Exit
+										Save as Draft
 									</Button>
 									{scheduleCampaign ? (
 										<Button
 											onClick={() => {
-												handleSave('schedule')
+												PopupText.fire({
+													text: 'The campaign will be scheduled immediately. Are you sure?',
+													icon: 'info',
+													showConfirmButton: true,
+													showCancelButton: true,
+													confirmButtonText: 'Schedule',
+													onConfirm: () => {
+														handleSave('schedule')
+														console.log('User clicked OK!')
+													},
+												})
 											}}
 										>
 											Schedule Campaign

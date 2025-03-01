@@ -24,19 +24,20 @@ import User from './user.svg?react'
 import Clock from './clock.svg?react'
 import Emoji from './emoji.svg?react'
 
-import Save  from './save.svg?react'
-import Export  from './export.svg?react'
-import Mobile  from './mobile.svg?react'
-import Tablet  from './tablet.svg?react'
-import Desktop  from './desktop.svg?react'
-import Undo  from './undo.svg?react'
-import Redo  from './redo.svg?react'
-import Trash  from './trash.svg?react'
-import Pointer  from './pointer.svg?react'
-import Pencil  from './pencil.svg?react'
-import CloseCircle  from './close-circle.svg?react'
-import PlusCircle  from './plus-circle.svg?react'
- 
+import Save from './save.svg?react'
+import Export from './export.svg?react'
+import Mobile from './mobile.svg?react'
+import Tablet from './tablet.svg?react'
+import Desktop from './desktop.svg?react'
+import Undo from './undo.svg?react'
+import Redo from './redo.svg?react'
+import Trash from './trash.svg?react'
+import Pointer from './pointer.svg?react'
+import Pencil from './pencil.svg?react'
+import CloseCircle from './close-circle.svg?react'
+import PlusCircle from './plus-circle.svg?react'
+import PlusLight from './PlusLight.svg?react'
+
 import Filters from './filters.svg?react'
 
 const icons = {
@@ -45,6 +46,7 @@ const icons = {
 	AlignRight,
 	ArrowDown,
 	Plus,
+	PlusLight,
 	Clock,
 	Emoji,
 	Envelope,
@@ -77,7 +79,7 @@ const icons = {
 	Pointer,
 	Pencil,
 	CloseCircle,
-	PlusCircle
+	PlusCircle,
 }
 
 export default icons

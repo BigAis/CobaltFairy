@@ -146,6 +146,20 @@ div.campaign-preview-active-row {
 .dropdown-wrapper:last-child {
 	flex: 0 0 10%;
 }
-.schedule-campaign .date-input{
-	width:100%;
+.schedule-campaign .date-input {
+	width: 100%;
+}
+
+.templates-container > div.card {
+	width: calc(33.33% - 15px);
+	flex: 0 0 auto;
+}
+
+p.template-card-label {
+	position: absolute;
+	border-radius: 4px;
+	background-color: #ffc3ad;
+	padding: 8px 18px;
+	top: 15px;
+	left: 15px;
 }

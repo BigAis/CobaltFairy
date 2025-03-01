@@ -17,15 +17,13 @@ import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
 import PopupText from '../../components/PopupText/PopupText'
 import { use } from 'react'
+import TemplateCard from '../../components/TemplateCard/TemplateCard'
 
 const account = {
 	name: 'Cobalt Fairy',
 	plan: 'Free Plan',
 }
-const user = {
-	name: 'Cobalt Fairy',
-	email: 'cf@fairymail.app',
-}
+
 const getNameInitials = (name) =>
 	name
 		.split(' ')
@@ -75,7 +73,8 @@ const subs_stats = [
 const Campaigns = () => {
 	const navigate = useNavigate()
 
-	const [campaigns1, setCampaigns1] = useState([])
+	const [dropdownViewer, setDropdownViewer] = useState('campaigns')
+
 	const [account, setAccount] = useState({})
 	const [searchTerm, setSearchTerm] = useState('')
 	const [loading, setLoading] = useState(true)
@@ -83,6 +82,7 @@ const Campaigns = () => {
 	const [currentPage, setCurrentPage] = useState(1)
 	const [skeletons] = useState([{}, {}, {}, {}, {}, {}, {}, {}, {}])
 	const [campaigns, setCampaigns] = useState([])
+	const [templates, setTemplates] = useState([])
 	const [cmpStatus, setCmpStatus] = useState('sent')
 	const [meta, setMeta] = useState([])
 	const [error, setError] = useState(null)
@@ -91,61 +91,27 @@ const Campaigns = () => {
 	const [emailVerified, setEmailVerified] = useState(true)
 	const [selectedCampaignType, setSelectedCampaignType] = useState('sent')
 
-	const [user2, setUser2] = useState()
-
-	// const [filteredCampaigns, setFilteredCampaigns] = useState([])
-	// const campaignsTableData = filteredCampaigns.map((campaign) => {
-	// 	return {
-	// 		image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
-	// 		name: campaign.name,
-	// 		recipients: campaign.recipients,
-	// 		stats: campaign?.stats,
-	// 		opens: campaign?.stats?.o,
-	// 		clicks: campaign?.stats?.c,
-	// 		type: campaign.type === 'absplit' ? 'AB Split' : 'Normal',
-	// 		date: campaign.date,
-	// 		actions: campaign.actions,
-	// 		uuid: campaign.uuid,
-	// 		account: campaign?.account?.id,
-	// 		recp_groups: [...campaign.recp_groups],
-	// 	}
-	// })
+	const [user, setUser] = useState()
 
 	const totalCampaignsSent = campaigns.filter((campaign) => campaign.status === 'sent').length
 	const totalCampaignsDraft = campaigns.filter((campaign) => campaign.status === 'draft').length
 	const totalCampaignsOutBox = campaigns.filter((campaign) => campaign.status === 'outbox').length
 
 	useEffect(() => {
-		setUser2(User.get())
+		setUser(User.get())
 	}, [])
 
 	useEffect(() => {
-		console.log('user2 is : ', user2)
-		setAccount(async () => (await ApiService.get(`fairymailer/getAccount`, user2.jwt)).data.user.account)
-	}, [user2])
+		setAccount(async () => (await ApiService.get(`fairymailer/getAccount`, user.jwt)).data.user.account)
+	}, [user])
 
 	useEffect(() => {
-		console.log('account from useEffect is : ', account)
 		getCampaigns()
+		getTemplates()
 	}, [account])
-
-	useEffect(() => {
-		console.log('meta from useEffect are : ', meta)
-		// console.log(
-		// 	'campaigns sent from useEffect are : ',
-		// 	campaigns.filter((cmp) => {
-		// 		console.log('cmp.status inside filter', cmp.status)
-		// 		return cmp.status === 'draft'
-		// 	})
-		// )
-	}, [meta])
 
 	const updateSearchTerm = async (search) => {
 		setSearchTerm(search)
-
-		// if (search.length) {
-		// let account = await ApiService.get(`fairymailer/getAccount`, user2.jwt)
-		// account = account.data.user.account
 
 		let outboxfilter = selectedCampaignType == 'outbox' ? '&filters[date][$notNull]=true' : selectedCampaignType == 'drafts' ? '&filters[date][$null]=true' : ''
 
@@ -153,40 +119,18 @@ const Campaigns = () => {
 			`fairymailer/getCampaigns?filters[name][$contains]=${search}&filters[account]=${account?.id}&filters[status]=${
 				selectedCampaignType == 'outbox' ? 'draft' : selectedCampaignType == 'drafts' ? 'draft' : selectedCampaignType
 			}${outboxfilter}&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=100&pagination[page]=1`,
-			user2.jwt
+			user.jwt
 		)
-		console.log('cmps from search are : ', resp)
 
 		setCampaigns(resp.data.data)
-
-		// this.setState({ campaigns: resp.data.data, meta: resp.data.meta })
-		// }
 	}
+
 	const getCampaigns = async (page = 1) => {
 		try {
-			console.log('user is getCampaigns : ', user2.jwt)
-
-			// let account = await ApiService.get(`fairymailer/getAccount`, user2.jwt)
-			// account = account.data.user.account
-			// console.log('account is : ', account)
-
-			// if (account) {
-			// 	setAccount(account)
-			// 	setDomainVerified(account.domain_verified)
-			// 	setEmailVerified(account.email_verified)
-			// 	setDkimVerified(account.dkim_verified)
-			// }
-
-			// let outboxfilter = selectedCampaignType == 'outbox' ? '&filters[date][$notNull]=true' : selectedCampaignType == 'draft' ? '&filters[date][$null]=true' : ''
-			// let resp = await ApiService.get(
-			// 	`fairymailer/getCampaigns?filters[account]=${account.id}&filters[status]=${
-			// 		selectedCampaignType == 'outbox' ? 'draft' : selectedCampaignType
-			// 	}${outboxfilter}&sort[sent_at]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
-			// 	user.jwt
-			// )
+			console.log('user is getCampaigns : ', user.jwt)
 			let resp = await ApiService.get(
 				`fairymailer/getCampaigns?filters[account]=${account.id}&sort[sent_at]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
-				user2.jwt
+				user.jwt
 			)
 			console.log('cmps from getCampaigns ', resp)
 			setCampaigns(
@@ -197,6 +141,20 @@ const Campaigns = () => {
 			)
 
 			setMeta(resp.data.meta)
+		} catch (error) {
+			console.error(error)
+		}
+	}
+
+	const getTemplates = async (page = 1) => {
+		try {
+			let resp = await ApiService.get(`fairymailer/getTemplates?pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`, user.jwt)
+			console.log('templates from getTemplates ', resp)
+			if (resp.data && resp.data.data) {
+				setTemplates(resp.data.data)
+				//TODO Templates Meta
+				// this.setState({ templates: resp.data.data, meta: resp.data.meta })
+			}
 		} catch (error) {
 			console.error(error)
 		}
@@ -222,22 +180,25 @@ const Campaigns = () => {
 									{ value: 'sent', label: `Sent (${campaigns.filter((campaign) => campaign.status === 'sent').length})` },
 									{ value: 'draft', label: `Draft (${totalCampaignsDraft})` },
 									{ value: 'outbox', label: `Outbox(${totalCampaignsOutBox})` },
-									// { value: 'all', label: 'Templates (4)' },
+									{ value: 'templates', label: 'Templates (4)' },
 								]}
 								onChange={(value) => {
 									console.log('the value is : ', value)
 									switch (value) {
 										case 'sent':
+											setDropdownViewer('campaigns')
 											setSelectedCampaignType('sent')
-											// setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'sent'))
 											break
 										case 'draft':
+											setDropdownViewer('campaigns')
 											setSelectedCampaignType('draft')
-											// setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'draft'))
 											break
 										case 'outbox':
+											setDropdownViewer('campaigns')
 											setSelectedCampaignType('outbox')
-											// setFilteredCampaigns(campaigns.filter((campaign) => campaign.status === 'outbox'))
+											break
+										case 'templates':
+											setDropdownViewer('templates')
 											break
 									}
 								}}
@@ -259,7 +220,27 @@ const Campaigns = () => {
 					</div>
 
 					<div className="">
-						<CampaignsTable campaigns={campaigns.filter((campaign) => campaign.status === selectedCampaignType)} dashboardPreviewOnly={false} />
+						{dropdownViewer === 'campaigns' ? (
+							<CampaignsTable campaigns={campaigns.filter((campaign) => campaign.status === selectedCampaignType)} dashboardPreviewOnly={false} />
+						) : (
+							<>
+								<div className="d-flex flex-wrap templates-container gap-20 mt20">
+									<Card style={{ cursor: 'pointer' }} className={'d-flex flex-column align-items-center justify-content-center gap-20'}>
+										<Icon name="PlusLight" size={64}></Icon>
+										<p>Create New</p>
+									</Card>
+									{templates &&
+										templates.map((template) => (
+											<TemplateCard
+												key={template.uuid}
+												templateName={template.name}
+												onPreviewClick={() => console.log('onPreviewClick')}
+												onEditClick={() => console.log('onEditClick')}
+											/>
+										))}
+								</div>
+							</>
+						)}
 					</div>
 				</div>
 			</div>
