@@ -191,8 +191,8 @@ const AboutTheBookStyleSettings = () => {
   };
 
   const imageStyleSettings = () => {
-    const width = findStyleItem(currentItem.data.styles, "width");
-    const textAlign = findStyleItem(currentItem.data.contentStyles, "textAlign");
+    const width = findStyleItem(currentItem.data.image.styles, "width");
+    const textAlign = findStyleItem(currentItem.data.image.contentStyles, "textAlign");
     return (
       <>
         <div className="right-setting-block-item-title">{t("image_styles")}</div>

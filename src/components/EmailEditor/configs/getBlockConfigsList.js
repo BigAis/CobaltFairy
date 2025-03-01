@@ -1,3 +1,4 @@
+const MAIN_APP_BASE_URL = "https://fairymail.cobaltfairy.com";
 const getBlockConfigsList = (t) => {
   return [
     {
@@ -261,7 +262,7 @@ const getBlockConfigsList = (t) => {
         return {
           name: t("content"),
           key: "content",
-          width: "33%",
+          width: "33.3333%",
           styles: {
             key: "column",
             desktop: {
@@ -355,6 +356,10 @@ const getBlockConfigsList = (t) => {
     {
       name: "About the book",
       key: "about_the_book",
+      styles: {
+        desktop: {},
+        mobile: {},
+      },
       image:{
         src: "",
         alt: "About the book",
@@ -447,6 +452,106 @@ const getBlockConfigsList = (t) => {
         desktop: { paddingTop: 4, paddingBottom: 4, paddingLeft: 6, paddingRight: 6 },
         mobile: {},
       },
+    },
+    {
+      name: 'Footer',
+      key: "column",
+      type: "1-1",
+      columnType:"footer",
+      styles: {
+        key: "column",
+        desktop: {
+          backgroundColor: "transparent",
+          paddingTop: 0,
+          paddingLeft: 0,
+          paddingRight: 0,
+          paddingBottom: 0,
+          contentBackground: "#fff",
+        },
+        mobile: {},
+      },
+      styles: {
+        desktop: {},
+        mobile: {},
+      },
+      children:[
+        {
+          name: t("content"),
+          key: "content",
+          width: "50%",
+          styles: {
+            key: "column",
+            desktop: {
+              backgroundColor: "transparent",
+              paddingTop: 0,
+              paddingLeft: 0,
+              paddingRight: 0,
+              paddingBottom: 0,
+              contentBackground: "transparent",
+            },
+            mobile: {},
+          },
+          children: [
+            {
+              name: t("text"),
+              key: "text",
+              text: 'Site url here<br>pen name email here',
+              styles: {
+                desktop: {
+                  fontSize: 14,
+                  fontFamily: "Inter",
+                  color: undefined,
+                  lineHeight: "140%",
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  paddingLeft: 12,
+                  paddingRight: 12,
+                  textAlign: "left",
+                },
+                mobile: {},
+              },
+            }
+          ],
+        },
+        {
+          name: t("content"),
+          key: "content",
+          width: "50%",
+          styles: {
+            key: "column",
+            desktop: {
+              backgroundColor: "transparent",
+              paddingTop: 0,
+              paddingLeft: 0,
+              paddingRight: 0,
+              paddingBottom: 0,
+              contentBackground: "transparent",
+            },
+            mobile: {},
+          },
+          children: [
+            {
+              name: t("text"),
+              key: "text",
+              text: `You received this email because you signed up on our website or made a purchase from us.<br><br><a href="${MAIN_APP_BASE_URL}/api/unsubscribe/{{pixel_uid}}/{{pixel_group}}">Unsubscribe</a>`,
+              styles: {
+                desktop: {
+                  fontSize: 11,
+                  fontFamily: "Inter",
+                  color: undefined,
+                  lineHeight: "140%",
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  paddingLeft: 12,
+                  paddingRight: 12,
+                  textAlign: "right",
+                },
+                mobile: { fontSize: 11,fontFamily: "Inter",textAlign: "right",},
+              },
+            }
+          ],
+        }
+      ]
     },
   ];
 };

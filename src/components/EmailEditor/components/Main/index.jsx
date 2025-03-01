@@ -59,14 +59,23 @@ const Main = ({ language, setStep, currentCampaign }) => {
       event.preventDefault();
       event.stopPropagation();
       let { index } = event.target.dataset;
-      console.log(event.target.dataset.type);
+      // console.log(event.target.dataset.type);
       switch (event.target.dataset.type) {
         case "empty-block":
           clearLabelStyles();
           clearContentLabelStyles();
           event.target.style.border = "1px dashed #2faade";
           break;
+        case "preview-content":
+            const last_block = document.querySelector('.block-drag-label-content:last-of-type');
+            const dragLabelElements_ = document.getElementsByClassName("block-drag-label-content");
+            Array.from(dragLabelElements_).forEach((item) => {
+              if (Number(item.dataset.index) === Number(last_block.dataset.index)) {
+                item.children[0].style.visibility = "visible";
+              }
+            });
 
+            break;
         case "drag-over-column":
           clearContentLabelStyles();
           const dragLabelElements = document.getElementsByClassName("block-drag-label-content");
@@ -80,7 +89,7 @@ const Main = ({ language, setStep, currentCampaign }) => {
           break;
 
         case "block-item-move":
-          clearLabelStyles();
+          // clearLabelStyles();
           const dragBlockItemElements = document.getElementsByClassName("block-content-drag-label-content");
           Array.from(dragBlockItemElements).forEach((item) => {
             if (item.dataset.index === index) {
@@ -110,37 +119,13 @@ const Main = ({ language, setStep, currentCampaign }) => {
     event.preventDefault();
     event.stopPropagation();
     const { type } = event.target.dataset;
+    console.log('drop',type)
     setIsDragStart(false);
     switch (type) {
       case "empty-block":
         const newCurrentItem = currentItem.data.key !== "column" ? getColumnConfig(currentItem.data) : getColumnConfig();
         setBlockList([newCurrentItem], "add");
         setCurrentItem({ data: newCurrentItem, type: "edit", index: 0 });
-        break;
-      case "preview-content":
-        // clearEmptyContentStyles();
-        // const _index = document.querySelector('.block-drag-label-content:last-of-type');
-        console.log('_index',document.querySelector('.block-content-drag-label-content:last-of-type').dataset.index)
-        // const newBlockList = deepClone(blockList);
-        // const indexArr = index.split("-");
-        // const blockIndex = indexArr[0];
-        // const itemIndex = indexArr[1];
-        // newBlockList[blockIndex].children[itemIndex].children = [currentItem.data];
-        // if (currentItem.type === "move") {
-        //   const { index: oldIndex } = currentItem;
-        //   const oldIndexArr = oldIndex.split("-");
-        //   const oldBlockIndex = oldIndexArr[0];
-        //   const oldItemIndex = oldIndexArr[1];
-        //   const oldItem = newBlockList[oldBlockIndex].children[oldItemIndex];
-        //   if (oldItem.children.length === 1) {
-        //     newBlockList[oldBlockIndex].children[oldItemIndex].children = [defaultContentConfig];
-        //   } else {
-        //     newBlockList[oldBlockIndex].children[oldItemIndex].children = oldItem.children.filter((item, index) => index !== Number(oldIndexArr[2]));
-        //   }
-        // }
-        // setCurrentItem({ ...currentItem, type: "edit", index });
-        // setBlockList([...newBlockList], "move");
-        break;
         break;
       case "empty-block-item":
         clearEmptyContentStyles();
@@ -165,6 +150,32 @@ const Main = ({ language, setStep, currentCampaign }) => {
         setCurrentItem({ ...currentItem, type: "edit", index });
         setBlockList([...newBlockList], "move");
         break;
+        // case "preview-content":
+        //   {
+        //     const { position, index } = document.querySelector('.block-content-drag-label-content:last-of-type').dataset;
+        //     console.log(position,index, currentItem)
+        //     const newBlockList = deepClone(blockList);
+        //     let newCurrentItem = deepClone(currentItem);
+        //     if (currentItem.type === "add") {
+        //       newBlockList.splice(index, 0, currentItem.data);
+        //       newCurrentItem = { ...currentItem, type: "edit", index };
+        //     } else if (currentItem.type === "move") {
+        //       const moveItem = newBlockList.splice(currentItem.index, 1)[0];
+        //       newBlockList.splice(index, 0, moveItem);
+        //       newCurrentItem = { ...currentItem, type: "edit", index: position === "top" ? Number(index) : index - 1 };
+        //     }
+        //     setCurrentItem({ ...newCurrentItem });
+        //     setBlockList([...newBlockList], "move");
+        //   }
+  
+        //   setTimeout(() => {
+        //     const dragLabelElements = document.getElementsByClassName("block-drag-label-content");
+        //     Array.from(dragLabelElements).forEach((item) => {
+        //       item.children[0].style.visibility = "hidden";
+        //     });
+        //   }, 30);
+
+        //   break;
       case "drag-over-column":
         {
           const { position, index } = event.target.dataset;

@@ -25,7 +25,7 @@ const Header = ({setStep,currentCampaign}) => {
   });
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const { histories, index } = blockListHistory;
-  console.log('currentCampaign',currentCampaign)
+  // console.log('currentCampaign',currentCampaign)
   const saveCampaign = async (showConfirmationMsg=true)=>{
     if(editorRef && editorRef.current){
       const html = editorRef.current.exportHtml(['Inter:400,700']);

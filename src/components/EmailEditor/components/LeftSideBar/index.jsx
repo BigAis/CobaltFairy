@@ -90,7 +90,7 @@ const LeftSideBar = (props) => {
             if(item.isDivider) return (
               <h4 className="itemiblock-list-title">{item.name}</h4>
             )
-            if(item.key=="about_the_book") item.key='hero';
+            // if(item.key=="about_the_book") item.key='hero';
             return (
               <div
                 className="side-bar-blocks-item"

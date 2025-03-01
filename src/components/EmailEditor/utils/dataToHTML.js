@@ -1,4 +1,4 @@
-import useDataSource from "../configs/useDataSource";
+import getFontsList from "../configs/getFontsList";
 
 const createStyleString = (className, styles) => {
   const regex = new RegExp(/[A-Z]/g);
@@ -208,9 +208,26 @@ const blockListToHtml = (blockList, bodySettings) => {
   return content;
 };
 
+const extractFonts = (blockList=[], fontList=[]) => {
+  const availFonts = getFontsList();
+  for(const block of blockList){
+    if(block.styles && block.styles.desktop && block.styles.desktop.fontFamily){
+      let f = availFonts.filter(font=>{if(font.family && font.attribute==block.styles.desktop.fontFamily) return font;})
+      if(!f || f.length<1) continue;
+      if(!fontList.includes(f) && f[0].family) fontList.push(f[0].family)
+    }
+    if(block.styles && block.styles.mobile && block.styles.mobile.fontFamily){
+      let f = availFonts.filter(font=>{if(font.family && font.attribute==block.styles.mobile.fontFamily) return font;})
+      if(!f || f.length<1) continue;
+      if(!fontList.includes(f) && f[0].family) fontList.push(f[0].family)
+    }
+    if(block.children) fontList = [...fontList, ...extractFonts(block.children,fontList)];
+  }
+  return fontList;
+}
+
 const dataToHtml = ({ bodySettings, blockList }) => {
-  const fontsList = []; //recursively itterate blocklist to export all fonts, and find the required urls to add.
-  // console.log('blockList',blockList);
+  const fontList = extractFonts(blockList); //recursively itterate blocklist to export all fonts, and find the required urls to add.
   let content = "";
   const { newBlockList, styles } = createStyleTag(blockList);
   content = blockListToHtml(newBlockList, bodySettings);
