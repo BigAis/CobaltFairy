@@ -348,7 +348,7 @@ const NewCampaign = () => {
 				setSelectedGroups(
 					currentCampaign.recp_groups.map((group) => ({
 						value: `${group.id}`,
-						label: groups.find((grp) => group.id == grp.value).label,
+						label: groups.find((grp) => `${group.id}` == `${grp.value}`)?.label,
 					}))
 				)
 			}
@@ -370,7 +370,7 @@ const NewCampaign = () => {
 		<>
 			<div className="fm-page-wrapper justify-content-center" style={{ background: step === 3 ? '#FFF8EF' : '' }}>
 				<div className="fm-content-outer-wrapper d-flex flex-column align-items-center" style={{ width: step === 3 ? '100%' : '' }}>
-					<Stepper steps={steps} current={step - 1} setStep={setStep} hasBack={true} minStep={{step:2,url:'/campaigns'}} style={{ marginTop: '30px' }} />
+					<Stepper steps={steps} current={step - 1} setStep={setStep} hasBack={true} minStep={{ step: 2, url: '/campaigns' }} style={{ marginTop: '30px' }} />
 
 					{step === 2 && (
 						<>

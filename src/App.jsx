@@ -17,6 +17,7 @@ import Automations from './pages/automations/automations'
 import EditAutomation from './pages/automations/edit-automation'
 import AccountPicker from './pages/accountPicker/accountPicker'
 import FlowEditor from './pages/automations/FlowEditor'
+import EditTemplate from './pages/templates/EditTemplate'
 
 function App() {
 	const navigate = useNavigate()
@@ -50,6 +51,7 @@ function App() {
 				<Route path="/campaigns" element={<Campaigns />} />
 				<Route path="/campaigns/new" element={<NewCampaign />} />
 				<Route path="/campaigns/edit/:uuid" element={<NewCampaign />} />
+				<Route path="/templates/edit/:uuid" element={<EditTemplate />} />
 				<Route path="/campaigns/overview/:uuid" element={<EditCampaign />} />
 				<Route path="/subscribers" element={<Subscribers />} />
 				<Route path="/integrations" element={<Integrations />} />

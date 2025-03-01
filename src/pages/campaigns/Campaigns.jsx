@@ -4,6 +4,7 @@ import '../../fullpage.scss'
 
 import { React, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAccount } from '../../context/AccountContext'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
@@ -18,64 +19,60 @@ import { ApiService } from '../../service/api-service'
 import PopupText from '../../components/PopupText/PopupText'
 import { use } from 'react'
 import TemplateCard from '../../components/TemplateCard/TemplateCard'
+import { v4 as uuidv4 } from 'uuid'
 
-const account = {
-	name: 'Cobalt Fairy',
-	plan: 'Free Plan',
-}
-
-const getNameInitials = (name) =>
-	name
-		.split(' ')
-		.map((word) => word[0].toUpperCase())
-		.join('')
-const stats = [
-	{
-		label: 'Emails Sent',
-		value: '752',
-		percentage: -12,
-		defaultValue: false, // This will be the default selected option
-	},
-	{
-		label: 'Totals Clicks',
-		value: '159',
-		percentage: 17,
-		defaultValue: false,
-	},
-	{
-		label: 'Total Opens',
-		value: '340',
-		percentage: 19,
-		defaultValue: false,
-	},
-	{
-		label: 'Spam',
-		value: '85',
-		percentage: 5,
-		defaultValue: false,
-	},
-]
-const subs_stats = [
-	{
-		label: 'Total',
-		value: '752',
-		default: false,
-		percentage: 5,
-	},
-	{
-		label: 'Unsubscribed',
-		value: '159',
-		default: true,
-		percentage: 5,
-	},
-]
+// const getNameInitials = (name) =>
+// 	name
+// 		.split(' ')
+// 		.map((word) => word[0].toUpperCase())
+// 		.join('')
+// const stats = [
+// 	{
+// 		label: 'Emails Sent',
+// 		value: '752',
+// 		percentage: -12,
+// 		defaultValue: false, // This will be the default selected option
+// 	},
+// 	{
+// 		label: 'Totals Clicks',
+// 		value: '159',
+// 		percentage: 17,
+// 		defaultValue: false,
+// 	},
+// 	{
+// 		label: 'Total Opens',
+// 		value: '340',
+// 		percentage: 19,
+// 		defaultValue: false,
+// 	},
+// 	{
+// 		label: 'Spam',
+// 		value: '85',
+// 		percentage: 5,
+// 		defaultValue: false,
+// 	},
+// ]
+// const subs_stats = [
+// 	{
+// 		label: 'Total',
+// 		value: '752',
+// 		default: false,
+// 		percentage: 5,
+// 	},
+// 	{
+// 		label: 'Unsubscribed',
+// 		value: '159',
+// 		default: true,
+// 		percentage: 5,
+// 	},
+// ]
 
 const Campaigns = () => {
 	const navigate = useNavigate()
 
 	const [dropdownViewer, setDropdownViewer] = useState('campaigns')
 
-	const [account, setAccount] = useState({})
+	const { user, account } = useAccount()
 	const [searchTerm, setSearchTerm] = useState('')
 	const [loading, setLoading] = useState(true)
 	const [itemsPerPage, setItemsPerPage] = useState(50)
@@ -91,19 +88,9 @@ const Campaigns = () => {
 	const [emailVerified, setEmailVerified] = useState(true)
 	const [selectedCampaignType, setSelectedCampaignType] = useState('sent')
 
-	const [user, setUser] = useState()
-
 	const totalCampaignsSent = campaigns.filter((campaign) => campaign.status === 'sent').length
 	const totalCampaignsDraft = campaigns.filter((campaign) => campaign.status === 'draft').length
 	const totalCampaignsOutBox = campaigns.filter((campaign) => campaign.status === 'outbox').length
-
-	useEffect(() => {
-		setUser(User.get())
-	}, [])
-
-	useEffect(() => {
-		setAccount(async () => (await ApiService.get(`fairymailer/getAccount`, user.jwt)).data.user.account)
-	}, [user])
 
 	useEffect(() => {
 		getCampaigns()
@@ -154,6 +141,19 @@ const Campaigns = () => {
 				setTemplates(resp.data.data)
 				//TODO Templates Meta
 				// this.setState({ templates: resp.data.data, meta: resp.data.meta })
+			}
+		} catch (error) {
+			console.error(error)
+		}
+	}
+
+	const createTemplateByName = async (templateName) => {
+		try {
+			const templateUuid = uuidv4()
+			const resp = await ApiService.post(`templates/`, { data: { uuid: templateUuid, name: templateName, account: account.id } }, user.jwt)
+			console.log('templates from  createTemplateByName', resp)
+			if (resp && resp.data && resp.data.data) {
+				navigate(`/templates/edit/${templateUuid}`)
 			}
 		} catch (error) {
 			console.error(error)
@@ -225,17 +225,39 @@ const Campaigns = () => {
 						) : (
 							<>
 								<div className="d-flex flex-wrap templates-container gap-20 mt20">
-									<Card style={{ cursor: 'pointer' }} className={'d-flex flex-column align-items-center justify-content-center gap-20'}>
+									<Card
+										style={{ cursor: 'pointer' }}
+										className={'d-flex flex-column align-items-center justify-content-center gap-20'}
+										onClick={() => {
+											PopupText.fire({
+												text: 'Enter Template Name',
+												inputField: true,
+												inputLabel: 'Template Name',
+												confirmButtonText: 'Submit',
+												onConfirm: (inputValue) => {
+													console.log('User entered:', inputValue)
+												},
+											}).then((result) => {
+												if (result.isConfirmed) {
+													console.log('Confirmed with input:', result.inputValue)
+													createTemplateByName(result.inputValue)
+												} else if (result.isCancelled) {
+													console.log('Popup cancelled')
+												}
+											})
+										}}
+									>
 										<Icon name="PlusLight" size={64}></Icon>
 										<p>Create New</p>
 									</Card>
 									{templates &&
+										templates.length > 0 &&
 										templates.map((template) => (
 											<TemplateCard
 												key={template.uuid}
 												templateName={template.name}
 												onPreviewClick={() => console.log('onPreviewClick')}
-												onEditClick={() => console.log('onEditClick')}
+												onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
 											/>
 										))}
 								</div>

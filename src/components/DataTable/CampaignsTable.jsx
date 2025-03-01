@@ -108,7 +108,7 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false }) => {
 	const handleActionSelect = (selectedValue, rowData) => {
 		console.log('rowdata2 is : ', rowData)
 
-		switch (selectedValue) {
+		switch (selectedValue.value) {
 			case 'overview_cmp':
 				console.log('Overview action triggered')
 				navigate(`/campaigns/overview/${rowData.uuid}`)

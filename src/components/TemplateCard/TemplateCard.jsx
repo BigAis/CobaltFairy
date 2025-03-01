@@ -26,7 +26,7 @@ const TemplateCard = ({ templateName, onPreviewClick, onEditClick }) => {
 TemplateCard.propTypes = {
 	templateName: PropTypes.string.isRequired,
 	onPreviewClick: PropTypes.func.isRequired,
-	onNewCampaignClick: PropTypes.func.isRequired,
+	onEditClick: PropTypes.func.isRequired,
 }
 
 export default TemplateCard
