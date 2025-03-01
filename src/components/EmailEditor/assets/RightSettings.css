@@ -15,6 +15,7 @@
     line-height: 17px;
     color: var(--right-settings-font-color);
     font-weight: 600;
+    text-align: left;
     /* border-left: 4px solid #3B82F6; */
 }
 
@@ -23,7 +24,9 @@
     height: 21px;
     font-weight: 600;
     margin-bottom: 30;
+    text-align:left;
 }
+
 
 .card-item {
     display: flex;
@@ -58,6 +61,7 @@
     padding: 12px 24px;
     font-size: 14px;
     font-family: 'Inter';
+    text-align: left;;
     line-height: 17px;
     font-weight: 500;
     color: var(--right-settings-block-title-font-color);
@@ -83,7 +87,9 @@
     background-color: var(--gray-400);
 }
 
-
+.ant-select{
+    width:100%;
+}
 
 .input-width {
     width: 96px;
@@ -105,6 +111,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    background:white;
+    border: 2px solid rgba(218, 209, 197, 1)
 }
 
 .align-style-item-active {

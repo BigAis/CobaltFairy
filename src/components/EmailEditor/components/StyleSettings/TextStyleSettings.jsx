@@ -2,13 +2,13 @@ import { useContext } from "react";
 import { GlobalContext } from "../../reducers";
 import classNames from "../../utils/classNames";
 import { InputNumber, Select } from "antd";
-
+import Dropdown from "../../../Dropdown"
 import ColorPicker from "../ColorPicker";
 import PaddingSettings from "./PaddingSettings";
 import useLayout from "../../utils/useStyleLayout";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAlignCenter, faAlignLeft, faAlignRight, faAlignJustify } from "@fortawesome/free-solid-svg-icons";
 import useTranslation from "../../translation";
+import useDataSource from "../../configs/useDataSource"
 
 const TextStyleSettings = () => {
   const { currentItem } = useContext(GlobalContext);
@@ -39,6 +39,7 @@ const TextStyleSettings = () => {
     const fontSize = findStyleItem(currentItem.data.styles, "fontSize");
     const lineHeight = findStyleItem(currentItem.data.styles, "lineHeight");
     const fontFamilyList = ["sans-serif", "Inter", "Arial", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
+    const { fontsList } = useDataSource();
 
     return (
       <>
@@ -59,7 +60,8 @@ const TextStyleSettings = () => {
                   className={classNames(textAlign === value ? "align-style-item-active" : "align-style-item-un_active", "align-style-item")}
                   onClick={() => otherStylesChange("textAlign", value)}
                 >
-                  <FontAwesomeIcon icon={icon} className="tag-style-size" />
+                  <img src={`/images/align-${value}.png`}/>
+                  {/* <FontAwesomeIcon icon={icon} className="tag-style-size" /> */}
                 </div>
               );
             })}
@@ -67,10 +69,17 @@ const TextStyleSettings = () => {
         )}
         {cardItemElement(
           t("font_family"),
+          /**
+           *   <Dropdown options={fontFamilyList.map((item) => {return {label:item,value:item}})} onChange={inputChange("fontFamily")}>
+            {fontFamily}
+          </Dropdown>
+       
+           * 
+           */
           <Select className="input-width" value={fontFamily} onChange={inputChange("fontFamily")}>
-            {fontFamilyList.map((item) => (
-              <Select.Option key={item} value={item}>
-                {item}
+            {fontsList.map((item) => (
+              <Select.Option key={item.name} value={item.attribute}>
+                {item.name}
               </Select.Option>
             ))}
           </Select>

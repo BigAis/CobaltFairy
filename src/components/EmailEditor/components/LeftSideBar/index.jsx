@@ -87,6 +87,10 @@ const LeftSideBar = (props) => {
       >
         <div className="side-bar-blocks-container">
           {blockConfigsList.map((item) => {
+            if(item.isDivider) return (
+              <h4 className="itemiblock-list-title">{item.name}</h4>
+            )
+            if(item.key=="about_the_book") item.key='hero';
             return (
               <div
                 className="side-bar-blocks-item"
@@ -97,7 +101,16 @@ const LeftSideBar = (props) => {
                 onDragStart={dragStart(item)}
               >
                 <div className="sidebar-block">
-                  <FontAwesomeIcon icon={icons[item.key]} className="sidebar-block-icon" />
+                  {/* <FontAwesomeIcon icon={icons[item.key]} className="sidebar-block-icon" /> */}
+                  {item.key=="column" ? (
+                    <>
+                      <img src={`/images/editor-icons/${item.columnType}.png`}/>
+                    </>
+                  ) : ( 
+                    <>
+                      <img src={`/images/editor-icons/${item.key}.png`}/>
+                    </>
+                  )}
                   <div className="sidebar-block-text">{item.name}</div>
                 </div>
               </div>

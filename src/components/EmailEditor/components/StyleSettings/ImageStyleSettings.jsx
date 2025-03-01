@@ -131,7 +131,8 @@ const ImageStyleSettings = () => {
                   className={classNames(textAlign === value ? "align-style-item-active" : "align-style-item-un_active", "align-style-item")}
                   onClick={() => updateContentTextAlign(value)}
                 >
-                  <FontAwesomeIcon icon={icon} className="tag-style-size" />
+                  <img src={`/images/align-${value}.png`}/>
+                  {/* <FontAwesomeIcon icon={icon} className="tag-style-size" /> */}
                 </div>
               );
             })}

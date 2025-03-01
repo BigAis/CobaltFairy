@@ -1,57 +1,32 @@
 const getBlockConfigsList = (t) => {
   return [
     {
-      name: t("column"),
-      key: "column",
-      type: "full",
-      styles: {
-        key: "column",
+      name: 'Content',
+      isDivider:true
+    },
+    {
+      name: t("image"),
+      key: "image",
+      src: "",
+      alt: "Image",
+      type: "link",
+      linkURL: "",
+      contentStyles: {
         desktop: {
-          backgroundColor: "transparent",
-          paddingTop: 0,
-          paddingLeft: 0,
-          paddingRight: 0,
-          paddingBottom: 0,
-          contentBackground: "#fff",
+          paddingTop: 12,
+          paddingBottom: 12,
+          paddingLeft: 12,
+          paddingRight: 12,
+          textAlign: "center",
         },
         mobile: {},
       },
-      children: [
-        {
-          name: t("content"),
-          key: "content",
-          width: "100%",
-          styles: {
-            key: "column",
-            desktop: {
-              backgroundColor: "transparent",
-              paddingTop: 0,
-              paddingLeft: 0,
-              paddingRight: 0,
-              paddingBottom: 0,
-              contentBackground: "transparent",
-            },
-            mobile: {},
-          },
-          children: [
-            {
-              name: t("drag_block_here"),
-              key: "empty",
-              width: "100%",
-              styles: {
-                desktop: {
-                  backgroundColor: "transparent",
-                  paddingTop: 0,
-                  paddingLeft: 0,
-                  paddingRight: 0,
-                  paddingBottom: 0,
-                },
-                mobile: {},
-              },
-            },
-          ],
+      styles: {
+        desktop: {
+          width: "auto",
         },
-      ],
+        mobile: {},
+      },
     },
     {
       name: t("text"),
@@ -72,27 +47,7 @@ const getBlockConfigsList = (t) => {
         mobile: {},
       },
     },
-    {
-      name: t("heading"),
-      key: "heading",
-      text: t("heading_content"),
-      type: "h1",
-      styles: {
-        desktop: {
-          fontSize: 22,
-          lineHeight: "140%",
-          fontFamily: "Inter",
-          color: undefined,
-          paddingTop: 12,
-          paddingBottom: 12,
-          paddingLeft: 12,
-          paddingRight: 12,
-          textAlign: "left",
-          fontWeight: "bold",
-        },
-        mobile: {},
-      },
-    },
+  
     {
       name: t("button"),
       key: "button",
@@ -153,28 +108,249 @@ const getBlockConfigsList = (t) => {
       },
     },
     {
-      name: t("image"),
-      key: "image",
-      src: "",
-      alt: "Image",
-      type: "link",
-      linkURL: "",
-      contentStyles: {
+      name: t("heading"),
+      key: "heading",
+      text: t("heading_content"),
+      type: "h1",
+      styles: {
         desktop: {
+          fontSize: 22,
+          lineHeight: "140%",
+          fontFamily: "Inter",
+          color: undefined,
           paddingTop: 12,
           paddingBottom: 12,
           paddingLeft: 12,
           paddingRight: 12,
-          textAlign: "center",
+          textAlign: "left",
+          fontWeight: "bold",
         },
         mobile: {},
       },
+    },
+    {
+      name: 'Sections',
+      isDivider:true
+    },
+    {
+      name: '1 Section',
+      key: "column",
+      columnType:"1-section",
+      type: "full",
       styles: {
+        key: "column",
         desktop: {
-          width: "auto",
+          backgroundColor: "transparent",
+          paddingTop: 0,
+          paddingLeft: 0,
+          paddingRight: 0,
+          paddingBottom: 0,
+          contentBackground: "#fff",
         },
         mobile: {},
       },
+      children: [
+        {
+          name: t("content"),
+          key: "content",
+          width: "100%",
+          styles: {
+            key: "column",
+            desktop: {
+              backgroundColor: "transparent",
+              paddingTop: 0,
+              paddingLeft: 0,
+              paddingRight: 0,
+              paddingBottom: 0,
+              contentBackground: "transparent",
+            },
+            mobile: {},
+          },
+          children: [
+            {
+              name: t("drag_block_here"),
+              key: "empty",
+              width: "100%",
+              styles: {
+                desktop: {
+                  backgroundColor: "transparent",
+                  paddingTop: 0,
+                  paddingLeft: 0,
+                  paddingRight: 0,
+                  paddingBottom: 0,
+                },
+                mobile: {},
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: '2 Sections',
+      key: "column",
+      type: "1-1",
+      columnType:"2-sections",
+      styles: {
+        key: "column",
+        desktop: {
+          backgroundColor: "transparent",
+          paddingTop: 0,
+          paddingLeft: 0,
+          paddingRight: 0,
+          paddingBottom: 0,
+          contentBackground: "#fff",
+        },
+        mobile: {},
+      },
+      children:  Array.from({ length: 2 }).map(() => {
+        return {
+          name: t("content"),
+          key: "content",
+          width: "50%",
+          styles: {
+            key: "column",
+            desktop: {
+              backgroundColor: "transparent",
+              paddingTop: 0,
+              paddingLeft: 0,
+              paddingRight: 0,
+              paddingBottom: 0,
+              contentBackground: "transparent",
+            },
+            mobile: {},
+          },
+          children: [
+            {
+              name: t("drag_block_here"),
+              key: "empty",
+              width: "100%",
+              styles: {
+                desktop: {
+                  backgroundColor: "transparent",
+                  paddingTop: 0,
+                  paddingLeft: 0,
+                  paddingRight: 0,
+                  paddingBottom: 0,
+                },
+                mobile: {},
+              },
+            },
+          ],
+        }
+      }),
+    },
+    {
+      name: '3 Sections',
+      key: "column",
+      type: "1-1-1",
+      columnType:"3-sections",
+      styles: {
+        key: "column",
+        desktop: {
+          backgroundColor: "transparent",
+          paddingTop: 0,
+          paddingLeft: 0,
+          paddingRight: 0,
+          paddingBottom: 0,
+          contentBackground: "#fff",
+        },
+        mobile: {},
+      },
+      children:  Array.from({ length: 3 }).map(() => {
+        return {
+          name: t("content"),
+          key: "content",
+          width: "33%",
+          styles: {
+            key: "column",
+            desktop: {
+              backgroundColor: "transparent",
+              paddingTop: 0,
+              paddingLeft: 0,
+              paddingRight: 0,
+              paddingBottom: 0,
+              contentBackground: "transparent",
+            },
+            mobile: {},
+          },
+          children: [
+            {
+              name: t("drag_block_here"),
+              key: "empty",
+              width: "100%",
+              styles: {
+                desktop: {
+                  backgroundColor: "transparent",
+                  paddingTop: 0,
+                  paddingLeft: 0,
+                  paddingRight: 0,
+                  paddingBottom: 0,
+                },
+                mobile: {},
+              },
+            },
+          ],
+        }
+      }),
+    },
+    {
+      name: '4 Sections',
+      key: "column",
+      type: "1-1-1-1",
+      columnType:"4-sections",
+      styles: {
+        key: "column",
+        desktop: {
+          backgroundColor: "transparent",
+          paddingTop: 0,
+          paddingLeft: 0,
+          paddingRight: 0,
+          paddingBottom: 0,
+          contentBackground: "#fff",
+        },
+        mobile: {},
+      },
+      children:  Array.from({ length: 4 }).map(() => {
+        return {
+          name: t("content"),
+          key: "content",
+          width: "25%",
+          styles: {
+            key: "column",
+            desktop: {
+              backgroundColor: "transparent",
+              paddingTop: 0,
+              paddingLeft: 0,
+              paddingRight: 0,
+              paddingBottom: 0,
+              contentBackground: "transparent",
+            },
+            mobile: {},
+          },
+          children: [
+            {
+              name: t("drag_block_here"),
+              key: "empty",
+              width: "100%",
+              styles: {
+                desktop: {
+                  backgroundColor: "transparent",
+                  paddingTop: 0,
+                  paddingLeft: 0,
+                  paddingRight: 0,
+                  paddingBottom: 0,
+                },
+                mobile: {},
+              },
+            },
+          ],
+        }
+      }),
+    },
+    {
+      name: 'Special',
+      isDivider:true
     },
     {
       name: "About the book",
