@@ -5,6 +5,7 @@ import useSection from "../../utils/useSection";
 import classNames from "../../utils/classNames";
 import { GlobalContext } from "../../reducers";
 import { Modal, Input } from "antd";
+import PopupText from '../../../PopupText/PopupText'
 
 const Link = ({ modifyText, setTextContent }) => {
   const { selectionRange, blockList } = useContext(GlobalContext);
@@ -43,15 +44,19 @@ const Link = ({ modifyText, setTextContent }) => {
     setInputConfig({ value: "", range: null });
   };
 
-  const addLinkTag = () => {
+  const addLinkTag = async () => {
     let selection = window.getSelection();
     let range = selection.getRangeAt(0);
     const rangeParentNode = range.commonAncestorContainer.parentNode;
     const rangeIsLink = rangeParentNode.nodeName === "A";
     const newInputConfig = { ...inputConfig, range };
     if (rangeIsLink) {
+      if(rangeParentNode.href.includes('api/unsubscribe') && rangeParentNode.href.includes('pixel_uid')){
+        await PopupText.fire({text:'Unsubscribe links cannot be edited.',showCancelButton:false})
+        return;
+      }
       newInputConfig.rangeIsLink = true;
-      newInputConfig.value = rangeParentNode.href.replace("https://", "");
+      newInputConfig.value = rangeParentNode.href.replace("https://", "").replace("http://","");
     }
     setInputConfig(newInputConfig);
     setIsModalOpen(true);
@@ -60,13 +65,20 @@ const Link = ({ modifyText, setTextContent }) => {
 
   return (
     <>
-      <button className={classNames("rich-text-tools-button ", node && "rich-text-tools-button-active")} title="超链接" onClick={addLinkTag}>
+      <button className={classNames("rich-text-tools-button ", node && "rich-text-tools-button-active")} title="Link" onClick={addLinkTag}>
         <FontAwesomeIcon icon={faLink} className="rich-text-tools-button-icon" />
       </button>
       <button
         className={classNames("rich-text-tools-button")}
-        title="删除超链接"
-        onClick={() => {
+        title="Remove link"
+        onClick={ async () => {
+          let selection = window.getSelection();
+          let range = selection.getRangeAt(0);
+          const rangeParentNode = range.commonAncestorContainer.parentNode;
+          if(rangeParentNode.href.includes('api/unsubscribe') && rangeParentNode.href.includes('pixel_uid')){
+            await PopupText.fire({text:'Unsubscribe links cannot be removed.',showCancelButton:false})
+            return;
+          }
           modifyText("unlink", false, null);
           setTextContent();
         }}

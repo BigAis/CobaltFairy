@@ -20,7 +20,7 @@ const Italic = ({ modifyText, setTextContent }) => {
   return (
     <button
       className={classNames("rich-text-tools-button ", node && "rich-text-tools-button-active")}
-      title="斜体"
+      title="Italics"
       onClick={() => {
         modifyText("italic", false, null);
         setTextContent();

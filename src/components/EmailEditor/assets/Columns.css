@@ -103,6 +103,10 @@
     bottom: 50%;
     z-index: 104;
     top: 0;
+    left:0;
+}
+.block-move-content-bottom[data-lastblock="true"]:after {
+    height:calc(100vh - 5%);
 }
 
 .block-move-content-bottom::after {
@@ -112,6 +116,7 @@
     top: 50%;
     z-index: 104;
     bottom: 0;
+    left:0;
 }
 
 
@@ -128,15 +133,15 @@
 }
 
 .block-move-bottom {
-    width: 100%;
-    bottom: -2px;
-    height: 10px;
-    background-color: var(--block-active-border);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 103;
-    visibility: hidden;
+        width: 100%;
+        bottom: -2px;
+        height: 4px;
+        background-color: var(--block-active-border);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 103;
+        visibility: hidden;    
 }
 
 .block-tools-drag_here {

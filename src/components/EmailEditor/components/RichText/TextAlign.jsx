@@ -21,7 +21,7 @@ const TextAlign = ({ modifyText, setTextContent }) => {
     <>
       <button
         className={classNames("rich-text-tools-button ", textAlign === "left" && "rich-text-tools-button-active")}
-        title="居左"
+        title="Align left"
         onClick={() => {
           modifyText("justifyLeft", false, null);
           setTextContent();
@@ -31,7 +31,7 @@ const TextAlign = ({ modifyText, setTextContent }) => {
       </button>
       <button
         className={classNames("rich-text-tools-button ", textAlign === "center" && "rich-text-tools-button-active")}
-        title="居中"
+        title="Align center"
         onClick={() => {
           modifyText("justifyCenter", false, null);
           setTextContent();
@@ -41,7 +41,7 @@ const TextAlign = ({ modifyText, setTextContent }) => {
       </button>
       <button
         className={classNames("rich-text-tools-button ", textAlign === "right" && "rich-text-tools-button-active")}
-        title="居右"
+        title="Align right"
         onClick={() => {
           modifyText("justifyRight", false, null);
           setTextContent();

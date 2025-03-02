@@ -12,7 +12,10 @@
     padding: 6px;
     border-radius: 4px;
 }
-
+.rich-text-tools.first-node {
+    position: absolute;
+    top: 50px;
+}
 .rich-text-tools-body {
     display: flex;
     flex-wrap: wrap;

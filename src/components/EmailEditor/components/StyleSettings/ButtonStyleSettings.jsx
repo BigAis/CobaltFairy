@@ -8,6 +8,7 @@ import PaddingSettings from "./PaddingSettings";
 import useLayout from "../../utils/useStyleLayout";
 import { deepClone } from "../../utils/helpers";
 import useTranslation from "../../translation";
+import useDataSource from "../../configs/useDataSource";
 
 const ButtonStyleSettings = () => {
   const { currentItem, previewMode } = useContext(GlobalContext);
@@ -69,6 +70,7 @@ const ButtonStyleSettings = () => {
     const lineHeight = findStyleItem(currentItem.data.styles, "lineHeight");
     const backgroundColor = findStyleItem(currentItem.data.styles, "backgroundColor");
     const fontFamilyList = ["sans-serif", "Arial", "Inter", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
+    const { fontsList } = useDataSource();
 
     return (
       <>
@@ -90,12 +92,12 @@ const ButtonStyleSettings = () => {
         {cardItemElement(
           t("font_family"),
           <Select className="input-width" value={fontFamily} onChange={inputChange("fontFamily")}>
-            {fontFamilyList.map((item) => (
-              <Select.Option key={item} value={item}>
-                {item}
-              </Select.Option>
-            ))}
-          </Select>
+          {fontsList.map((item) => (
+            <Select.Option key={item.name} value={item.attribute}>
+              {item.name}
+            </Select.Option>
+          ))}
+        </Select>
         )}
         {cardItemElement(
           t("font_size"),

@@ -20,7 +20,7 @@ const Bold = ({ modifyText, setTextContent }) => {
   return (
     <button
       className={classNames("rich-text-tools-button ", node && "rich-text-tools-button-active")}
-      title="加粗"
+      title="Bold"
       onClick={() => {
         modifyText("bold", false, null);
         setTextContent();
