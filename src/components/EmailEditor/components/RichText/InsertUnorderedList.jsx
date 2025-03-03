@@ -20,7 +20,7 @@ const InsertUnorderedList = ({ modifyText, setTextContent }) => {
   return (
     <button
       className={classNames("rich-text-tools-button ", node && "rich-text-tools-button-active")}
-      title="无序列表"
+      title="Unordered list"
       onClick={() => {
         modifyText("insertUnorderedList", false, null);
         setTextContent();

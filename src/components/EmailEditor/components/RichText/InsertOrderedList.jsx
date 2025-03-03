@@ -20,7 +20,7 @@ const InsertOrderedList = ({ modifyText, setTextContent }) => {
   return (
     <button
       className={classNames("rich-text-tools-button ", node && "rich-text-tools-button-active")}
-      title="有序列表"
+      title="Ordered list"
       onClick={() => {
         modifyText("insertOrderedList", false, null);
         setTextContent();

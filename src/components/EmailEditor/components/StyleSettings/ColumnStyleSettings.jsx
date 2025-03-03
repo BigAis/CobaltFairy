@@ -9,6 +9,7 @@ import PaddingSettings from "./PaddingSettings";
 import useStyleLayout from "../../utils/useStyleLayout";
 import useDataSource from "../../configs/useDataSource";
 import useTranslation from "../../translation";
+// import ColorPicker from '../../../ColorPicker'
 
 const ColumnStyleSettings = () => {
   const { currentItem, previewMode } = useContext(GlobalContext);
@@ -167,6 +168,7 @@ const ColumnStyleSettings = () => {
                     t("content_background_color"),
                     <ColorPicker color={backgroundColor} setColor={({ hex }) => changeColumnList("backgroundColor", index)(hex)} />
                   )}
+                  {/* <ColorPicker initColorHex={backgroundColor} onChange={({ hex }) => changeColumnList("backgroundColor", index)(hex)} /> */}
                   <PaddingSettings
                     padding={{
                       paddingTop: findStyleItem(item.styles, "paddingTop"),

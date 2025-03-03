@@ -20,7 +20,7 @@ const Underline = ({ modifyText, setTextContent }) => {
   return (
     <button
       className={classNames("rich-text-tools-button ", node && "rich-text-tools-button-active")}
-      title="下划线"
+      title="Underline"
       onClick={() => {
         modifyText("underline", false, null);
         setTextContent();

@@ -6,8 +6,6 @@ const useLayout = () => {
   const { previewMode, currentItem, blockList, setBlockList, setCurrentItem } = useContext(GlobalContext);
 
   const findStyleItem = (styles, key) => {
-    console.log('styles',styles)
-    console.log('previewMode',previewMode)
     if(!styles || !styles[previewMode]) return "";
     let styleItem = styles[previewMode][key];
     if (!styleItem) {

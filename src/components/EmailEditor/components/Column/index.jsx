@@ -163,7 +163,7 @@ const Column = (props) => {
   };
 
   let hasAboutTheBookBlock = false;
-  for(const item of block.children){
+  if(block.children) for(const item of block.children){
     for(const child of item.children){
       if(child.parentKey=="about_the_book") hasAboutTheBookBlock=true;
     }
@@ -203,7 +203,7 @@ const Column = (props) => {
           </div>
 
           <div className="width-full height-full absolute" onDragOver={preventDefault}>
-            {isDragStart && currentItem.data.key === "column" && (
+            {isDragStart && currentItem && currentItem.data.key === "column" && (
               <>
                 <div
                   className="block-move-content-top"
@@ -218,13 +218,14 @@ const Column = (props) => {
                   data-type="drag-over-column"
                   data-position="bottom"
                   data-index={blockIndex + 1}
+                  data-lastBLock={(blockIndex + 1)==blockList.length}
                 ></div>
               </>
             )}
           </div>
           <div className="column margin-auto" style={{ ...newStyles, maxWidth: "100%" }}>
             <div className="block-content" style={{ background: contentBackground, width: bodySettings.contentWidth, paddingBottom: hasAboutTheBookBlock? '12px' : 'inherit'}} data-index={blockIndex}>
-              {block.children.map((content, index) => {
+              {block.children && block.children.map((content, index) => {
                 let contentStyles = previewMode === "desktop" ? content.styles.desktop : { ...content.styles.desktop, ...content.styles.mobile };
                 return (
                   <Fragment key={index}>

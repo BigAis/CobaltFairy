@@ -157,7 +157,6 @@ const RichText = ({ index, textBlock, styles }) => {
   const editFontName = (item) => {
     modifyText("fontName", false, item);
   };
-
   return (
     <div
       className="rich-text"
@@ -168,7 +167,7 @@ const RichText = ({ index, textBlock, styles }) => {
       }}
     >
       <motion.div
-        className="rich-text-tools"
+        className={`rich-text-tools ${'0-0-0'===index ? 'first-node' : ''}`}
         initial={{ scale: 0, x: 0 }}
         animate={{ scale: 1, x: 0 }}
         style={{ width: isHidden ? "auto" : "375px" }}
@@ -176,25 +175,16 @@ const RichText = ({ index, textBlock, styles }) => {
         <div className="rich-text-tools-body items-center">
           {!isHidden && (
             <>
-              {selectElement(fontSizeList, styles.fontSize + "px", "fontSize", editFontSize)}
-              {selectElement(fontname_configs, styles.fontFamily, "fontName", editFontName)}
-              {/* 字体颜色 */}
-              <FontColor modifyText={modifyText} setTextContent={setTextContent} />
-              {/* 粗体 */}
+              {/* {selectElement(fontSizeList, styles.fontSize + "px", "fontSize", editFontSize)}
+              {selectElement(fontname_configs, styles.fontFamily, "fontName", editFontName)} */}
+              {/* <FontColor modifyText={modifyText} setTextContent={setTextContent} /> */}
               <Bold modifyText={modifyText} setTextContent={setTextContent} />
-              {/* 斜体 */}
               <Italic modifyText={modifyText} setTextContent={setTextContent} />
-              {/* 下划线 */}
               <Underline modifyText={modifyText} setTextContent={setTextContent} />
-              {/* 删除线 */}
               <Strikethrough modifyText={modifyText} setTextContent={setTextContent} />
-              {/* 有序列表 */}
               <InsertOrderedList modifyText={modifyText} setTextContent={setTextContent} />
-              {/* 无序列表 */}
               <InsertUnorderedList modifyText={modifyText} setTextContent={setTextContent} />
-              {/* 超链接 */}
               <Link modifyText={modifyText} setTextContent={setTextContent} />
-              {/* text align */}
               <TextAlign modifyText={modifyText} setTextContent={setTextContent} />
             </>
           )}

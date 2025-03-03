@@ -6,7 +6,7 @@ import PropTypes from 'prop-types'
 import chroma from 'chroma-js';
 import './ColorPicker.scss';
 
-function ColorPicker({ initColorHex, initColorAlpha, onChange, className, ...props }) {
+function ColorPicker({ initColorHex, initColorAlpha = 1, onChange, className, ...props }) {
   const computedClassName = classNames('color-picker-container' , className)
   const [color, setColor] = useState('#FFA600');
   const [opacity, setOpacity] = useState(initColorAlpha);
