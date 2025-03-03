@@ -2,28 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import '../../assets/ImagePicker.scss'
+import { useAccount } from '../../../../context/AccountContext';
+import { useParams } from 'react-router-dom';
+import PopupText from '../../../PopupText/PopupText';
 
 const ImageUploadPopup = ({shown = false, setShown = ()=>{}, selectImage=(src)=>{}}) => {
     const [files, setFiles] = useState([]);
     const [uploadedImages, setUploadedImages] = useState([]);
     const [activeTab, setActiveTab] = useState('upload'); // State to manage active tab
-
+    const {user,account} = useAccount();
+    const params = useParams()
     useEffect(() => {
         // Load images from local storage on component mount
         const images = JSON.parse(localStorage.getItem('recentImages')) || [];
         setUploadedImages(images);
     }, []);
-
-    const { getRootProps, getInputProps } = useDropzone({
+    
+    const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
         accept: 'image/*',
+        maxSize: 5 * 1024 * 1024, // 5 MB in bytes
         onDrop: acceptedFiles => {
-            // Process each file here
+            
+            const filesRejected = fileRejections.length > 0 && fileRejections[0].errors[0].code === 'file-too-large';
+            if(filesRejected){
+                console.log(filesRejected);
+                PopupText.fire({text:'Only image files up to 5MB accepted.',showCancelButton:false})
+                return;
+            }
             acceptedFiles.forEach(file => {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('fairymail_version', true);
-
-                axios.post(`https://cdn.cobaltfairy.online/controller.php?user=${'debug_user'}&cmp=${btoa('debug_cmp')}`, formData, {
+                axios.post(`https://cdn.cobaltfairy.online/controller.php?user=${btoa(user.user.username)}&cmp=${btoa(params.uuid)}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -41,7 +51,7 @@ const ImageUploadPopup = ({shown = false, setShown = ()=>{}, selectImage=(src)=>
                     console.error(err);
                 });
             });
-        }
+        },
     });
 
     const updateLocalStorage = (newImage) => {

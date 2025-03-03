@@ -159,7 +159,7 @@ const RichText = ({ index, textBlock, styles }) => {
   };
   return (
     <div
-      className="rich-text"
+      className={`rich-text ${'0-0-0'===index ? 'first-node' : ''}`}
       ref={richTextRef}
       onClick={(event) => {
         event.preventDefault();
@@ -167,7 +167,7 @@ const RichText = ({ index, textBlock, styles }) => {
       }}
     >
       <motion.div
-        className={`rich-text-tools ${'0-0-0'===index ? 'first-node' : ''}`}
+        className={`rich-text-tools`}
         initial={{ scale: 0, x: 0 }}
         animate={{ scale: 1, x: 0 }}
         style={{ width: isHidden ? "auto" : "375px" }}
