@@ -49,15 +49,15 @@ const EditTemplate = () => {
 		<>
 			<div className="fm-page-wrapper">
 				{/* <Sidemenu /> */}
-				<div className="fm-page-container">
-					{/* {user && account && <PageHeader user={user.user} account={{ plan: 'Free Plan', ...(account || {}) }} />} */}
-					{template && (
-						<>
-							<p>Editing template : {template && template.name}</p>
-							<Editor editorType="template" currentCampaign={template} />
-						</>
-					)}
-				</div>
+				{/* <div className="fm-page-container"> */}
+				{/* {user && account && <PageHeader user={user.user} account={{ plan: 'Free Plan', ...(account || {}) }} />} */}
+				{template && (
+					<>
+						{/* <p>Editing template : {template && template.name}</p> */}
+						<Editor editorType="template" currentCampaign={template} />
+					</>
+				)}
+				{/* </div> */}
 			</div>
 		</>
 	)

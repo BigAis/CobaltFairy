@@ -18,7 +18,7 @@ import dataToHtml from './utils/dataToHTML'
 import Main from './components/Main/index'
 import './assets/App.css'
 
-const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = 'en', customLanguageLibraries, setStep, currentCampaign, editorType }, ref) => {
+const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = 'en', customLanguageLibraries, setStep, currentCampaign, editorType, setDesign }, ref) => {
 	// console.log('bodySettings',bodySettings)
 	const [state, dispatch] = useReducer(reducer, {
 		...defaultState,
@@ -86,7 +86,7 @@ const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = 
 				},
 			}}
 		>
-			<Main language={language} setStep={setStep} currentCampaign={currentCampaign} editorType={editorType} />
+			<Main language={language} setStep={setStep} currentCampaign={currentCampaign} editorType={editorType} setDesign={setDesign} />
 		</GlobalContext.Provider>
 	)
 })

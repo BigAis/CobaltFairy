@@ -10,7 +10,7 @@ import RightSetting from '../RightSetting'
 import useTranslation from '../../translation'
 import useDataSource from '../../configs/useDataSource'
 
-const Main = ({ language, setStep, currentCampaign, editorType }) => {
+const Main = ({ language, setStep, currentCampaign, editorType, setDesign }) => {
 	const { blockList, setBlockList, currentItem, setCurrentItem, setIsDragStart, setLanguage } = useContext(GlobalContext)
 	const { t } = useTranslation()
 	const { getColumnConfig } = useDataSource()
@@ -298,7 +298,7 @@ const Main = ({ language, setStep, currentCampaign, editorType }) => {
 	return (
 		<>
 			<div className="email-editor" onDragOver={onDragOver} onDrop={onDrop} onDragLeave={onDragLeave}>
-				<Header setStep={setStep} currentCampaign={currentCampaign} editorType={editorType} />
+				<Header setStep={setStep} currentCampaign={currentCampaign} editorType={editorType} setDesign={setDesign} />
 				<div className="email-editor-main" onClick={blurCurrentItem}>
 					<LeftSideBar clearStyles={clearStyles} />
 					<Preview clearStyles={clearStyles} />

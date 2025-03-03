@@ -41,6 +41,10 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 		}
 	}, [currentCampaign])
 
+	useEffect(() => {
+		console.log('design from the editor is : ', design)
+	}, [design])
+
 	return (
 		<div className="editor" style={{ width: '100%' }}>
 			<div className="editor-content">
@@ -54,6 +58,7 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 						setStep={setStep}
 						currentCampaign={currentCampaign}
 						editorType={editorType}
+						setDesign={setDesign}
 					/>
 				)}
 			</div>

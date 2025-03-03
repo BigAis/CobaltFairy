@@ -256,7 +256,7 @@ const Campaigns = () => {
 											<TemplateCard
 												key={template.uuid}
 												templateName={template.name}
-												onPreviewClick={() => console.log('onPreviewClick')}
+												onPreviewClick={() => (window.location.href = `https://fairymail.cobaltfairy.com/api/fairymailer/load-campaign-body/${template.uuid}`)}
 												onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
 											/>
 										))}

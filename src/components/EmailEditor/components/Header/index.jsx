@@ -15,8 +15,10 @@ import NotificationBar from '../../../NotificationBar/NotificationBar'
 import PopupText from '../../../PopupText/PopupText'
 import { v4 as uuidv4 } from 'uuid'
 import { useNavigate } from 'react-router-dom'
+import Dropdown from '../../../Dropdown'
+// import { setTime } from 'react-datepicker/dist/date_utils'
 
-const Header = ({ setStep, currentCampaign, editorType }) => {
+const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 	const { user, account } = useAccount()
 	const navigate = useNavigate()
 	const { previewMode, setPreviewMode, bodySettings, blockList, actionType, setBlockList, setBodySettings, editorRef } = useContext(GlobalContext)
@@ -31,6 +33,10 @@ const Header = ({ setStep, currentCampaign, editorType }) => {
 	const { histories, index } = blockListHistory
 
 	const [templates, setTemplates] = useState([])
+	const popupTemplateOptions = templates && templates.map((tpl) => ({ label: `${tpl.name}`, value: `${tpl.uuid}` }))
+	console.log('popupTemplateOptions', popupTemplateOptions)
+
+	const [selectedTemplateOption, setSelectedTemplateOption] = useState(null)
 
 	// console.log('currentCampaign',currentCampaign)
 	const saveCampaign = async (showConfirmationMsg = true) => {
@@ -86,6 +92,12 @@ const Header = ({ setStep, currentCampaign, editorType }) => {
 			console.error(error)
 		}
 	}
+
+	useEffect(() => {
+		setTimeout(() => {
+			console.log('changing design')
+		}, 3000)
+	}, [])
 
 	useEffect(() => {
 		getTemplates()
@@ -162,7 +174,7 @@ const Header = ({ setStep, currentCampaign, editorType }) => {
 					})}
 					{}
 				</div>
-				<div className="header-box" style={{ textAlign: 'left' }}>
+				<div className="header-box d-flex align-items-center" style={{ textAlign: 'left' }}>
 					<Button
 						type="secondary"
 						icon="Desktop"
@@ -184,6 +196,7 @@ const Header = ({ setStep, currentCampaign, editorType }) => {
 						onClick={() => setPreviewMode('mobile')}
 						className={classNames('header-icon-small', previewMode === 'mobile' && 'header-icon_active', previewMode !== 'mobile' && 'header-icon_disabled')}
 					></Button>
+					<p>Editing template : {currentCampaign.name}</p>
 				</div>
 				<div className="header-box text-center">
 					{editorType === 'campaign' && (
@@ -225,7 +238,69 @@ const Header = ({ setStep, currentCampaign, editorType }) => {
 					>
 						Export
 					</Button>
-					<Button style={{ margin: '0 10px' }} icon="Export" type="secondary" className={'exportbtn'} onClick={() => {}}>
+					<Button
+						style={{ margin: '0 10px' }}
+						icon="Export"
+						type="secondary"
+						className={'exportbtn'}
+						onClick={() => {
+							PopupText.fire({
+								text: 'Select an option:', // Optional, since we're using html
+								html: (() => {
+									return (
+										<div>
+											<Dropdown
+												selectedValue={null}
+												options={popupTemplateOptions}
+												onOptionSelect={(opt) => {
+													console.log('option is ', opt)
+													setSelectedTemplateOption(opt)
+												}} // Update state when selection changes
+											>
+												Select an option
+											</Dropdown>
+											<p>Selected: {selectedTemplateOption ? selectedTemplateOption.label : 'None'}</p>
+										</div>
+									)
+								})(),
+								onConfirm: () => {
+									setTimeout(async () => {
+										const selectedTemplateToRender = templates.find((tpl) => {
+											console.log('inside find tpl.uuid', tpl.uuid)
+											return `${tpl.uuid}` === `${selectedTemplateOption?.value}`
+										})
+
+										console.log('selectedTemplateToRender', selectedTemplateToRender)
+										// return
+										const design = JSON.parse(selectedTemplateToRender.design)
+
+										console.log('design after init', design)
+										if (design.components || design.styles) {
+											await PopupText.fire({
+												icon: 'warning',
+												text: 'You cannot import this template because it was created with the old version of Fairy Mail.',
+												showCancelButton: false,
+												onConfirm: () => {},
+											})
+											return
+										}
+										console.log('design after first check', design)
+
+										if (design.bodySettings && design.blockList) {
+											console.log('design body settings ', design.bodySettings)
+											console.log('design blocklist ', design.blockList)
+											setDesign((prevState) => ({
+												...prevState,
+												...design,
+											}))
+											console.log('after set design')
+										}
+										console.log('design after second check', design)
+									}, 1000)
+								},
+							})
+						}}
+					>
 						Import
 					</Button>
 				</div>
