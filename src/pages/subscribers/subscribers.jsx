@@ -32,6 +32,13 @@ const Subscribers = () => {
 		if(resp.data && resp.data.data) setGroups(resp.data.data)
 		if(resp.data && resp.data.meta) setTotalGroups(resp.data.meta.pagination.total)
 	}
+	const renderAddButton =()=>{
+		switch(view){
+			case "subs": return (<Button icon={'Plus'} type="action"> Add Subscribers </Button>);
+			case "groups": return (<Button icon={'Plus'} type="action"> Add Group </Button>);
+			default: return <></>
+		}
+	}
 	useEffect(()=>{
 		loadData()
 	},[user])
@@ -43,9 +50,7 @@ const Subscribers = () => {
 					<PageHeader user={user} account={account}/>
 					<div className="page-name-container">
 						<div className="page-name">Subscribers</div>
-						<Button icon={'Plus'} type="action">
-							Add Subscribers
-						</Button>
+						{renderAddButton()}
 					</div>
 					<div className="filters-container">
 						<div className="button-group-wrapper">
