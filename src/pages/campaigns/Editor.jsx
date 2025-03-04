@@ -8,6 +8,7 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 	const emailEditorRef = useRef(null)
 	const [language, setLanguage] = useState('en')
 	const [design, setDesign] = useState(null)
+	const [key, setKey] = useState(0)
 
 	const parseDesign = async (des) => {
 		if (des) {
@@ -42,6 +43,7 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 	}, [currentCampaign])
 
 	useEffect(() => {
+		setKey((prevState) => prevState + 1)
 		console.log('design from the editor is : ', design)
 	}, [design])
 
@@ -50,6 +52,7 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 			<div className="editor-content">
 				{currentCampaign && design && design.blockList && (
 					<EmailEditor
+						key={key}
 						ref={emailEditorRef}
 						blockList={design.blockList}
 						fontList={design.fontList}

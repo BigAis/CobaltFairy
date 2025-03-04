@@ -37,6 +37,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 	console.log('popupTemplateOptions', popupTemplateOptions)
 
 	const [selectedTemplateOption, setSelectedTemplateOption] = useState(null)
+	let selectedTemplate = null
 
 	// console.log('currentCampaign',currentCampaign)
 	const saveCampaign = async (showConfirmationMsg = true) => {
@@ -58,7 +59,6 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 			let updResp = await ApiService.put(`templates/${currentCampaign.id}`, { data: { design: JSON.stringify(data), html } }, user.jwt)
 			console.log('updresp', updResp)
 			setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Email data saved successfully.', autoClose: 3000 }])
-			navigate('/campaigns')
 		}
 		return true
 	}
@@ -196,22 +196,21 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 						onClick={() => setPreviewMode('mobile')}
 						className={classNames('header-icon-small', previewMode === 'mobile' && 'header-icon_active', previewMode !== 'mobile' && 'header-icon_disabled')}
 					></Button>
-					{editorType=="template" && (<p>Editing template : {currentCampaign.name}</p>)}
+					{editorType == 'template' && <p>Editing template : {currentCampaign.name}</p>}
 				</div>
 				<div className="header-box text-center">
-					{editorType === 'campaign' && (
-						<Button
-							style={{ margin: '0 10px' }}
-							icon="Save"
-							type="secondary"
-							className={'savebtn'}
-							onClick={() => {
-								saveCampaign()
-							}}
-						>
-							Save
-						</Button>
-					)}
+					<Button
+						style={{ margin: '0 10px' }}
+						icon="Save"
+						type="secondary"
+						className={'savebtn'}
+						onClick={async () => {
+							editorType === 'campaign' ? await saveCampaign() : await saveTemplate()
+						}}
+					>
+						Save
+					</Button>
+
 					<Button
 						style={{ margin: '0 10px' }}
 						icon="Export"
@@ -254,12 +253,13 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 												options={popupTemplateOptions}
 												onOptionSelect={(opt) => {
 													console.log('option is ', opt)
+													selectedTemplate = opt
 													setSelectedTemplateOption(opt)
 												}} // Update state when selection changes
 											>
 												Select an option
 											</Dropdown>
-											<p>Selected: {selectedTemplateOption ? selectedTemplateOption.label : 'None'}</p>
+											{/* <p>Selected: {selectedTemplate ? selectedTemplate.label : 'None'}</p> */}
 										</div>
 									)
 								})(),
@@ -267,7 +267,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 									setTimeout(async () => {
 										const selectedTemplateToRender = templates.find((tpl) => {
 											console.log('inside find tpl.uuid', tpl.uuid)
-											return `${tpl.uuid}` === `${selectedTemplateOption?.value}`
+											return `${tpl.uuid}` === `${selectedTemplate?.value}`
 										})
 
 										console.log('selectedTemplateToRender', selectedTemplateToRender)
@@ -326,6 +326,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 								if (savedData) setStep(4)
 							} else if (editorType === 'template') {
 								const savedData = await saveTemplate()
+								navigate('/campaigns')
 							}
 						}}
 					>
