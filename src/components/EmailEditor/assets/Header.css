@@ -21,6 +21,7 @@
     left:0;
     right:0;
 }
+
 .editor-content .icon path, .icon:hover path{
     fill:none!important;
 }
