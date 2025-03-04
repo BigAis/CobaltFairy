@@ -2,6 +2,9 @@
     position: absolute;
     z-index: 1060;
 }
+.rich-text.first-node {
+    bottom:-90px!important
+}
 
 .rich-text-tools {
     max-width: 375px;
@@ -11,10 +14,6 @@
     align-items: center;
     padding: 6px;
     border-radius: 4px;
-}
-.rich-text-tools.first-node {
-    position: absolute;
-    top: 50px;
 }
 .rich-text-tools-body {
     display: flex;

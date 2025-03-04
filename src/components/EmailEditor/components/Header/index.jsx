@@ -196,7 +196,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 						onClick={() => setPreviewMode('mobile')}
 						className={classNames('header-icon-small', previewMode === 'mobile' && 'header-icon_active', previewMode !== 'mobile' && 'header-icon_disabled')}
 					></Button>
-					<p>Editing template : {currentCampaign.name}</p>
+					{editorType=="template" && (<p>Editing template : {currentCampaign.name}</p>)}
 				</div>
 				<div className="header-box text-center">
 					{editorType === 'campaign' && (

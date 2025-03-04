@@ -116,10 +116,10 @@ const Main = ({ language, setStep, currentCampaign, editorType, setDesign }) => 
 	)
 
 	const onDrop = (event) => {
+		if(event.target.classList.contains('dropzone')) return;
 		event.preventDefault()
 		event.stopPropagation()
 		const { type } = event.target.dataset
-		console.log('drop', type)
 		setIsDragStart(false)
 		switch (type) {
 			case 'empty-block':
