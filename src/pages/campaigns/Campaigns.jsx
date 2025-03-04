@@ -89,8 +89,8 @@ const Campaigns = () => {
 	const [selectedCampaignType, setSelectedCampaignType] = useState('sent')
 
 	const totalCampaignsSent = campaigns.filter((campaign) => campaign.status === 'sent').length
-	const totalCampaignsDraft = campaigns.filter((campaign) => campaign.status === 'draft').length
-	const totalCampaignsOutBox = campaigns.filter((campaign) => campaign.status === 'outbox').length
+	const totalCampaignsDraft = campaigns.filter((campaign) => campaign.status === 'draft' && !campaign.date).length
+	const totalCampaignsOutBox = campaigns.filter((campaign) => campaign.status === 'draft' && campaign.date).length
 
 	useEffect(() => {
 		getCampaigns()
@@ -221,7 +221,7 @@ const Campaigns = () => {
 
 					<div className="">
 						{dropdownViewer === 'campaigns' ? (
-							<CampaignsTable campaigns={campaigns.filter((campaign) => campaign.status === selectedCampaignType)} dashboardPreviewOnly={false} />
+							<CampaignsTable campaigns={campaigns.filter((campaign) => (selectedCampaignType!=="outbox" && (campaign.status === selectedCampaignType)) || (selectedCampaignType==="outbox") && campaign.status==="draft" && campaign.date)} dashboardPreviewOnly={false} />
 						) : (
 							<>
 								<div className="d-flex flex-wrap templates-container gap-20 mt20">

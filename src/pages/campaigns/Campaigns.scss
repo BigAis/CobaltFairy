@@ -69,7 +69,9 @@ div.campaing-stats-card-item p.stat-number {
 p.stat-table-heading {
 	color: rgba(136, 125, 118, 1);
 }
-
+.p-datatable-wrapper{
+	min-height:50vh
+}
 div.campaign-preview-title {
 	border: 2px solid rgba(218, 209, 197, 1);
 	border-radius: 8px 8px 0px 0px;
@@ -154,7 +156,13 @@ div.campaign-preview-active-row {
 	width: calc(33.33% - 15px);
 	flex: 0 0 auto;
 }
-
+.new-campaign-notifications{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+	z-index: 999;
+}
 p.template-card-label {
 	position: absolute;
 	border-radius: 4px;

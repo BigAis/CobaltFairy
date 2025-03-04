@@ -114,9 +114,9 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false }) => {
 				navigate(`/campaigns/overview/${rowData.uuid}`)
 				// Implement overview logic here
 				break
+			case 'rename_cmp':
 			case 'edit':
-				console.log('Edit action triggered')
-				// Implement edit logic here
+				navigate(`/campaigns/edit/${rowData.uuid}`)
 				break
 			case 'delete_cmp':
 				console.log('Delete action triggered')
