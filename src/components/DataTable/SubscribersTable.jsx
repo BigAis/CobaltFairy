@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAccount } from '../../context/AccountContext'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
 import { Button } from 'primereact/button'
@@ -8,8 +10,11 @@ import Pagination from '../Pagination'
 import Dropdown from '../Dropdown'
 import Checkbox from '../Checkbox'
 import PopupText from '../PopupText/PopupText'
+import { ApiService } from '../../service/api-service'
 
 const SubscribersTable = ({ subscribers }) => {
+	const navigate = useNavigate()
+	const { user } = useAccount
 	const [selectedSubscribers, setSelectedSubscribers] = useState([])
 
 	const [currentPage, setCurrentPage] = useState(1)
@@ -21,11 +26,26 @@ const SubscribersTable = ({ subscribers }) => {
 
 	const dropdownOptions = [
 		// { value: 'view_sub', label: 'Option 1' },
-		{ value: 'edit_sub', label: 'Edit' },
+		// { value: 'edit_sub', label: 'Edit' },
 		{ value: 'delete_sub', label: 'Delete' },
 	]
-	const handleLeftClick = () => {
-		alert('Left action triggered!')
+	const handleLeftClick = (uuid) => {
+		navigate(`/subscribers/${uuid}`)
+	}
+
+	const deleteSubscriber = async (rowData) => {
+		PopupText.fire({
+			text: `Do you really want to remove subscriber ${rowData.email}? This action will unsubscribe them from all groups until they subscribe again manually.`,
+			confirmButtonText: 'Yes, delete.',
+		}).then(async (result) => {
+			if (result.isConfirmed) {
+				console.log('Confirmed with input:', result)
+				await ApiService.post(`fairymailer/removeSubscriber`, { data: rowData }, user.jwt)
+				// if (response.data && response.data.code == 200) {
+				// 	navigate('/subscribers/')
+				// }
+			}
+		})
 	}
 
 	const handleActionSelect = (selectedValue, rowData) => {
@@ -37,17 +57,7 @@ const SubscribersTable = ({ subscribers }) => {
 				break
 			case 'delete_sub':
 				console.log('Edit action triggered')
-				PopupText.fire({
-					text: `Do you really want to remove subscriber ${rowData?.email}? This action will unsubscribe them from all groups until they subscribe again manually.`,
-					confirmButtonText: 'Yes, delete!',
-				}).then((result) => {
-					if (result.isConfirmed) {
-						console.log('Deleting subscriber...')
-					} else if (result.isCancelled) {
-						console.log('Popup cancelled...')
-					}
-				})
-
+				deleteSubscriber(rowData)
 				break
 			default:
 				console.log('No action found for:', selectedValue)
@@ -65,8 +75,14 @@ const SubscribersTable = ({ subscribers }) => {
 	const actionsBodyTemplate = (rowData) => {
 		return (
 			<div>
-				<Dropdown withDivider={true} icon={'Plus'} options={dropdownOptions} onLeftClick={handleLeftClick} onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, rowData)}>
-					View
+				<Dropdown
+					withDivider={true}
+					icon={'Plus'}
+					options={dropdownOptions}
+					onLeftClick={() => handleLeftClick(rowData.udid)}
+					onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, rowData)}
+				>
+					Edit
 				</Dropdown>
 			</div>
 		)
