@@ -106,10 +106,11 @@ const parseItem = (item, index, styles, parentIndex) => {
 }
 
 const createImageString = (imageConfig) => {
+  const imageString = `<img src="${imageConfig.src}" alt="${imageConfig.alt}" style="max-width:100%;${imageConfig.styleConfig.desktop}" 
+      ${imageConfig.styleConfig.mobile ? `class="${imageConfig.styleConfig.className}"` : ""}/> `
   return `<div ${imageConfig.contentStyleConfig.mobile ? `class="${imageConfig.contentStyleConfig.className}"` : ""} 
   style="${imageConfig.contentStyleConfig.desktop}">
-      <img src="${imageConfig.src}" alt="${imageConfig.alt}" style="max-width:100%;${imageConfig.styleConfig.desktop}" 
-      ${imageConfig.styleConfig.mobile ? `class="${imageConfig.styleConfig.className}"` : ""}/> 
+      ${imageConfig.linkURL && imageConfig.linkURL.length>0 ? `<a href="${imageConfig.linkURL}" target="_blank">${imageString}</a>` : imageString}
   </div>`;
 };
 

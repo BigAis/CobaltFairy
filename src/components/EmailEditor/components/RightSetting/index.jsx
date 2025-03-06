@@ -1,15 +1,18 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import ColorPicker from "../ColorPicker";
 import { GlobalContext } from "../../reducers";
-import { InputNumber, Input } from "antd";
+import { InputNumber, Input, Select } from "antd";
 import StyleSettings from "../StyleSettings";
 import useLayout from "../../utils/useStyleLayout";
 import useTranslation from "../../translation";
 import InputText from "../../../InputText/InputText";
+import useDataSource from "../../configs/useDataSource"
 
 const RightSetting = () => {
-  const { currentItem, isDragStart, bodySettings, setBodySettings } = useContext(GlobalContext);
+  const { currentItem, isDragStart, blockList, setBlockList, bodySettings, setBodySettings } = useContext(GlobalContext);
+  const { fontsList } = useDataSource();
+  const [fontFamily,setFontFamily] = useState('Inter, sans-serif')
   const { t } = useTranslation();
   const { cardItemElement } = useLayout();
   const blockTitle = () => {
@@ -45,7 +48,42 @@ const RightSetting = () => {
 
   const colorChange = (key) => (color) => {
     setBodySettings({ ...bodySettings, styles: { ...bodySettings.styles, [key]: color.hex } }, "set_body_settings");
+    if(key==='linkColor'){ 
+      recursivelyUpdateBlocks(blockList, color.hex, bodySettings.styles?.fontFamily??'Inter')
+    }
+    console.log(blockList)
   };
+  const updateFontFamily = (value)=>{
+    console.log(value)
+    setFontFamily(value)
+    setBodySettings({ ...bodySettings, styles: { ...bodySettings.styles, fontFamily: value } }, "set_body_settings");
+    recursivelyUpdateBlocks(blockList, bodySettings?.styles?.linkColor??'#000',value);
+  }
+  const recursivelyUpdateBlocks = (items,linkColor="",fontFamily="",returndata=false) => {
+    let newblockList = items.map(obj => {
+        if (obj.text && obj.text.includes('<a')) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(obj.text, "text/html");
+            const link = doc.querySelector("a");
+            if (link) { link.style.color = linkColor; }
+            const newHtmlString = doc.body.innerHTML;
+            if(newHtmlString) obj.text = newHtmlString
+        }
+        if(obj.text && obj.styles){
+          obj.styles = {
+            ...obj.styles,
+            desktop:{ ...obj.styles.desktop, fontFamily},
+            mobile:{ ...obj.styles.mobile, fontFamily},
+          }
+        }
+        if (Array.isArray(obj.children)) {
+          obj.children = recursivelyUpdateBlocks(obj.children,linkColor,fontFamily,true);
+        }
+        return obj;
+    });
+    if(returndata) return newblockList
+    setBlockList([...newblockList])
+}
 
   const themeElement = () => {
     return (
@@ -53,10 +91,22 @@ const RightSetting = () => {
         <div className="subject-settings">{t("body_settings")}</div>
         <div className="margin-top-32">
           {cardItemElement(t("text_color"), <ColorPicker color={bodySettings.styles.color} setColor={colorChange("color")} />)}
+          {cardItemElement('Links Color', <ColorPicker color={bodySettings.styles.linkColor?? '#fff'} setColor={colorChange("linkColor")} />)}
           {cardItemElement(
-            t("email_theme_background_color"),
+            'Background Color (Theme)',
             <ColorPicker color={bodySettings.styles.backgroundColor} setColor={colorChange("backgroundColor")} />
           )}
+          {cardItemElement(
+          t("font_family"),
+            <Select className="input-width" value={fontFamily} onChange={updateFontFamily}>
+              {fontsList.map((item) => (
+                <Select.Option key={item.name} value={item.attribute}>
+                  {item.name}
+                </Select.Option>
+              ))}
+            </Select>
+        )}
+          
           {cardItemElement(
             'Container Width',
             <InputNumber

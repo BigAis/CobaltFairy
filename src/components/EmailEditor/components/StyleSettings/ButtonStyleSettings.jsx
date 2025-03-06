@@ -22,15 +22,14 @@ const ButtonStyleSettings = () => {
       const newCurrentItem = deepClone(currentItem);
       newCurrentItem.data.linkURL = newValue;
       updateItemStyles(newCurrentItem.data);
+      console.log(newCurrentItem)
     };
 
     return (
       <div>
-        <div className="right-setting-block-item-title">{t("button_action")}</div>
-        {cardItemElement(t("action_type"), <div className="link-tag">{t("link")}</div>)}
         <div className="card-item-title">{t("link_url")}</div>
         <div className="margin-top-6">
-          <Input addonBefore="https://" value={linkURL} onChange={linkChange} />
+          <Input value={linkURL} onChange={linkChange} />
         </div>
       </div>
     );

@@ -34,7 +34,6 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 
 	const [templates, setTemplates] = useState([])
 	const popupTemplateOptions = templates && templates.map((tpl) => ({ label: `${tpl.name}`, value: `${tpl.uuid}` }))
-	console.log('popupTemplateOptions', popupTemplateOptions)
 
 	const [selectedTemplateOption, setSelectedTemplateOption] = useState(null)
 	let selectedTemplate = null
@@ -82,7 +81,6 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 	const getTemplates = async (page = 1, itemsPerPage = 50) => {
 		try {
 			let resp = await ApiService.get(`fairymailer/getTemplates?pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`, user.jwt)
-			console.log('templates from getTemplates ', resp)
 			if (resp.data && resp.data.data) {
 				setTemplates(resp.data.data)
 				//TODO Templates Meta
