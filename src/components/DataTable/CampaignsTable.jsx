@@ -12,14 +12,14 @@ import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
 // import { v4 as uuidv4 } from 'uuid'
 
-const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false }) => {
+const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPage = 20 }) => {
 	console.log('campaigns is : ', campaigns)
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 	const user = User.get()
 	const navigate = useNavigate()
 
 	const [currentPage, setCurrentPage] = useState(1)
-	const rowsPerPage = 5
+	const rowsPerPage = resultsPerPage
 
 	const handlePageChange = (page) => {
 		setCurrentPage(page)
@@ -268,7 +268,7 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false }) => {
 					<Column field="recipients" header="Recipients" />
 				</DataTable>
 			)}
-			<Pagination currentPage={1} totalResults={campaigns.length} resultsPerPage={10} onChange={handlePageChange} />
+			<Pagination currentPage={1} totalResults={campaigns.length} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
 			{/* </div> */}
 		</>
 	)

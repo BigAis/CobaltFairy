@@ -75,7 +75,7 @@ const Campaigns = () => {
 	const { user, account } = useAccount()
 	const [searchTerm, setSearchTerm] = useState('')
 	const [loading, setLoading] = useState(true)
-	const [itemsPerPage, setItemsPerPage] = useState(50)
+	const [itemsPerPage, setItemsPerPage] = useState(100)
 	const [currentPage, setCurrentPage] = useState(1)
 	const [skeletons] = useState([{}, {}, {}, {}, {}, {}, {}, {}, {}])
 	const [campaigns, setCampaigns] = useState([])
@@ -103,7 +103,7 @@ const Campaigns = () => {
 		let outboxfilter = selectedCampaignType == 'outbox' ? '&filters[date][$notNull]=true' : selectedCampaignType == 'drafts' ? '&filters[date][$null]=true' : ''
 
 		let resp = await ApiService.get(
-			`fairymailer/getCampaigns?filters[name][$contains]=${search}&filters[account]=${account?.id}&filters[status]=${
+			`fairymailer/getCampaigns?filters[name][$contains]=${search}&filters[status]=${
 				selectedCampaignType == 'outbox' ? 'draft' : selectedCampaignType == 'drafts' ? 'draft' : selectedCampaignType
 			}${outboxfilter}&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=100&pagination[page]=1`,
 			user.jwt
@@ -116,7 +116,7 @@ const Campaigns = () => {
 		try {
 			console.log('user is getCampaigns : ', user.jwt)
 			let resp = await ApiService.get(
-				`fairymailer/getCampaigns?filters[account]=${account.id}&sort[sent_at]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
+				`fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
 				user.jwt
 			)
 			console.log('cmps from getCampaigns ', resp)
@@ -221,7 +221,7 @@ const Campaigns = () => {
 
 					<div className="">
 						{dropdownViewer === 'campaigns' ? (
-							<CampaignsTable campaigns={campaigns.filter((campaign) => (selectedCampaignType!=="outbox" && (campaign.status === selectedCampaignType)) || (selectedCampaignType==="outbox") && campaign.status==="draft" && campaign.date)} dashboardPreviewOnly={false} />
+							<CampaignsTable resultsPerPage={10} campaigns={campaigns.filter((campaign) => (selectedCampaignType!=="outbox" && (campaign.status === selectedCampaignType)) || (selectedCampaignType==="outbox") && campaign.status==="draft" && campaign.date)} dashboardPreviewOnly={false} />
 						) : (
 							<>
 								<div className="d-flex flex-wrap templates-container gap-20 mt20">
