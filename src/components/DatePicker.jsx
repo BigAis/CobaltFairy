@@ -6,7 +6,7 @@ import PropTypes from 'prop-types'
 import 'react-datepicker/dist/react-datepicker.css'
 import './DatePicker.scss' // Path to your CSS file
 
-function CustomDatePicker({ dateFormat, timeFormat, pickerType = 'datetime', onChange, className, value, ...props }) {
+function CustomDatePicker({ dateFormat, timeFormat, pickerType = 'datetime', onChange, className, value, hasMinDate, hasDefaultDate, ...props }) {
 	const [startDate, setStartDate] = useState(value ? new Date(value) : new Date())
 	const showTimeSelect = timeFormat !== undefined
 	const computedClassName = classNames('date-picker-container', className)
@@ -25,7 +25,7 @@ function CustomDatePicker({ dateFormat, timeFormat, pickerType = 'datetime', onC
 	}
 
 	// Calculate +2 hours from now for minTime
-	const minDate = new Date(new Date().setHours(new Date().getHours() + 2))
+	const minDate = hasMinDate ? new Date(new Date().setHours(new Date().getHours() + 2)) : undefined
 	const minTime = new Date(new Date().setHours(new Date().getHours() + 2))
 	const maxTime = new Date(new Date().setHours(23, 59)) // Set maxTime to the end of the day
 
@@ -93,6 +93,8 @@ const DateInput = forwardRef(({ value, onClick, pickerType }) => {
 	)
 })
 
+DateInput.displayName = 'DateInput'
+
 CustomDatePicker.propTypes = {
 	dateFormat: PropTypes.string,
 	timeFormat: PropTypes.string,
@@ -100,6 +102,13 @@ CustomDatePicker.propTypes = {
 	onChange: PropTypes.func,
 	className: PropTypes.string,
 	value: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+	hasMinDate: PropTypes.bool,
+	hasDefaultDate: PropTypes.bool,
+}
+
+CustomDatePicker.defaultProps = {
+	hasMinDate: true,
+	hasDefaultDate: true,
 }
 
 export default CustomDatePicker

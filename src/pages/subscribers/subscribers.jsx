@@ -17,6 +17,14 @@ import { ApiService } from '../../service/api-service'
 import GroupsTable from '../../components/DataTable/GroupsTable'
 import MultipleDropdown from '../../components/MultipleDropdown/MultipleDropdown'
 import DatePicker from '../../components/DatePicker'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+import qs from 'qs'
 
 const Subscribers = () => {
 	const { user, account } = useAccount()
@@ -26,7 +34,75 @@ const Subscribers = () => {
 	const [totalGroups, setTotalGroups] = useState(0)
 	const [view, setView] = useState('subs')
 	const [subscriberSearchValue, setSubscriberSearchValue] = useState('')
+	const [showFilters, setShowFilters] = useState(false)
 
+	const groupOptions =
+		groups &&
+		groups.map((grp) => ({
+			label: `${grp.name}`,
+			value: `${grp.udid}`,
+		}))
+
+	const [subscribersFilters, setSubscribersFilters] = useState({
+		email: '',
+		name: '',
+		groups: [],
+		dateFrom: '',
+		dateTo: '',
+	})
+
+	const handleFilterChange = (key, value) => {
+		setSubscribersFilters((prev) => ({
+			...prev,
+			[key]: value,
+		}))
+	}
+
+	const handleSelection = (selected) => {
+		// const final = selected.map((selectedOption) => {
+		// 	return selectedOption.value
+		// })
+
+		setSubscribersFilters((prev) => ({
+			...prev,
+			groups: selected,
+		}))
+		// currentCampaign.recp_groups = final;
+		console.log('Selected Options:', selected)
+	}
+
+	const filterSubscribersAction = async () => {
+		const groupIds = subscribersFilters.groups
+			.map((selected) => {
+				const matchedGroup = groups.find((group) => group.udid === selected.value)
+				return matchedGroup ? matchedGroup.id : null
+			})
+			.filter((id) => id !== null)
+
+		console.log('groups are : ', groupIds)
+
+		const query = {
+			filters: {
+				email: subscribersFilters.email ? { $contains: subscribersFilters.email } : undefined,
+				name: subscribersFilters.name ? { $contains: subscribersFilters.name } : undefined,
+				groups: groupIds.length > 0 ? { id: { $in: groupIds } } : undefined,
+				createdAt: {
+					...(subscribersFilters.dateFrom ? { $gte: dayjs(subscribersFilters.dateFrom).tz('Europe/Athens').startOf('day').toISOString() } : {}),
+					...(subscribersFilters.dateTo ? { $lte: dayjs(subscribersFilters.dateTo).tz('Europe/Athens').endOf('day').toISOString() } : {}),
+				},
+			},
+		}
+
+		Object.keys(query.filters).forEach((key) => {
+			if (query.filters[key] === undefined) delete query.filters[key]
+		})
+
+		const queryString = qs.stringify(query, { encode: false })
+
+		const subscribersResponse = await ApiService.get(`fairymailer/getSubscribers?${queryString}&pagination[page]=${1}&pagination[pageSize]=${100}&populate[groups][count]=1`, user.jwt) ///?page=${page}&pageSize=${pageSize}
+		console.log('Subscribers', subscribersResponse)
+		if (subscribersResponse && subscribersResponse.data && subscribersResponse.data.data) setSubscribers(subscribersResponse.data.data)
+	}
 	const loadData = async () => {
 		let resp = await ApiService.get(
 			`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[email][$contains]=${subscriberSearchValue}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
@@ -38,6 +114,7 @@ const Subscribers = () => {
 		if (resp.data && resp.data.data) setGroups(resp.data.data)
 		if (resp.data && resp.data.meta) setTotalGroups(resp.data.meta.pagination.total)
 	}
+
 	const renderAddButton = () => {
 		switch (view) {
 			case 'subs':
@@ -58,6 +135,7 @@ const Subscribers = () => {
 				return <></>
 		}
 	}
+
 	useEffect(() => {
 		loadData()
 	}, [user, subscriberSearchValue])
@@ -101,38 +179,54 @@ const Subscribers = () => {
 									setSubscriberSearchValue(e.target.value)
 								}}
 							/>
-							<Button type="secondary" icon={'Filters'} className="button-filters">
+							<Button
+								type="secondary"
+								icon={'Filters'}
+								className="button-filters"
+								onClick={() => {
+									setShowFilters((prev) => {
+										return !prev
+									})
+								}}
+							>
 								{' '}
 								Filters{' '}
 							</Button>
 						</div>
 					</div>
-					<Card className={'d-flex flex-column subscriber-filters-card gap-20'}>
+					<Card style={{ display: showFilters ? 'flex' : 'none' }} className={'d-flex flex-column subscriber-filters-card gap-20 mt20'}>
 						<div className="d-flex gap-20 ">
-							<InputText label={'Email Contains'}></InputText>
-							<InputText label={'Name'}></InputText>
-							<MultipleDropdown style={{ width: 'auto' }} options={subscribers} selectedValues={[]} onOptionSelect={''} />
+							<InputText value={subscribersFilters.email} onChange={(e) => handleFilterChange('email', e.target.value)} label={'Email Contains'}></InputText>
+							<InputText value={subscribersFilters.name} onChange={(e) => handleFilterChange('name', e.target.value)} label={'Name'}></InputText>
+							<MultipleDropdown style={{ width: 'auto' }} options={groupOptions} selectedValues={subscribersFilters.groups} onOptionSelect={handleSelection} />
 						</div>
 						<div className="d-flex gap-20">
 							<DatePicker
+								hasMinDate={false}
+								hasDefaultDate={false}
 								dateFormat="d/m/Y"
 								timeFormat={'H:i'}
 								pickerType="date"
-								onChange={(selection) => {
-									console.log('selected date', selection)
+								onChange={(e) => {
+									console.log('selected date', e)
+									handleFilterChange('dateFrom', e)
 								}}
+								value={subscribersFilters.dateFrom}
 							></DatePicker>
 							<DatePicker
+								hasMinDate={false}
 								dateFormat="d/m/Y"
 								timeFormat={'H:i'}
 								pickerType="date"
-								onChange={(selection) => {
-									console.log('selected date', selection)
+								onChange={(e) => {
+									console.log('selected date', e)
+									handleFilterChange('dateTo', e)
 								}}
+								value={subscribersFilters.dateTo}
 							></DatePicker>
 						</div>
 						<div>
-							<Button>Apply Filters</Button>
+							<Button onClick={filterSubscribersAction}>Apply Filters</Button>
 						</div>
 					</Card>
 
