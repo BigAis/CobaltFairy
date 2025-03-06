@@ -10,6 +10,12 @@ import Checkbox from '../Checkbox'
 import PopupText from '../../components/PopupText/PopupText'
 import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 // import { v4 as uuidv4 } from 'uuid'
 
 const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPage = 20 }) => {
@@ -30,10 +36,10 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPag
 		{ value: 'delete_cmp', label: 'Delete' },
 		{ value: 'duplicate_cmp', label: 'Duplicate' },
 		{ value: 'rename_cmp', label: 'Rename' },
-		{ value: 'overview_cmp', label: 'Overview' },
+		// { value: 'overview_cmp', label: 'Overview' },
 	]
 	const handleLeftClick = (rowData) => {
-		navigate(`/campaigns/edit/${rowData.uuid}`)
+		rowData.status === 'sent' ? navigate(`/campaigns/overview/${rowData.uuid}`) : navigate(`/campaigns/edit/${rowData.uuid}`)
 	}
 
 	const handleDeleteCampaign = async (uuid) => {
@@ -109,11 +115,11 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPag
 		console.log('rowdata2 is : ', rowData)
 
 		switch (selectedValue.value) {
-			case 'overview_cmp':
-				console.log('Overview action triggered')
-				navigate(`/campaigns/overview/${rowData.uuid}`)
-				// Implement overview logic here
-				break
+			// case 'overview_cmp':
+			// 	console.log('Overview action triggered')
+			// 	navigate(`/campaigns/overview/${rowData.uuid}`)
+			// 	// Implement overview logic here
+			// 	break
 			case 'rename_cmp':
 			case 'edit':
 				navigate(`/campaigns/edit/${rowData.uuid}`)
@@ -150,7 +156,7 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPag
 					onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, rowData)}
 					onLeftClick={() => handleLeftClick(rowData)}
 				>
-					Edit
+					{rowData.status === 'sent' ? 'Overview' : 'Edit'}
 				</Dropdown>
 			</div>
 		)
@@ -170,6 +176,10 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPag
 
 	const typeBodyTemplate = (rowData) => {
 		return rowData.type === 'absplit' ? 'A/B Split' : 'Normal'
+	}
+
+	const dateBodyTemplate = (rowData) => {
+		return dayjs(rowData.date).tz('Europe/Athens').format('DD-MM-YYYY HH:mm')
 	}
 
 	return (
@@ -227,7 +237,7 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPag
 					<Column field="stats.o" body={openBodyTemplate} header="Opens" />
 					<Column field="clicks" body={clickBodyTemplate} header="Clicks" />
 					<Column field="type" body={typeBodyTemplate} header="Type" />
-					<Column field="date" header="Date" />
+					<Column field="date" header="Date" body={dateBodyTemplate} />
 					<Column field="uuid" header="Actions" body={actionsBodyTemplate} />
 				</DataTable>
 			) : (

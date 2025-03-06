@@ -3,12 +3,16 @@
 	align-items: center;
 	justify-content: space-between;
 }
-.button-filters{
+.button-filters {
 	min-width: 184px;
 	min-height: 51px;
 }
 .subscribers {
-	.p-datatable .p-datatable-table .p-datatable-tbody > tr{
-		height:62px;
+	.p-datatable .p-datatable-table .p-datatable-tbody > tr {
+		height: 62px;
 	}
+}
+
+div.subscriber-filters-card div {
+	flex: 1;
 }

@@ -12,13 +12,19 @@ import Checkbox from '../Checkbox'
 import PopupText from '../PopupText/PopupText'
 import { ApiService } from '../../service/api-service'
 
-const SubscribersTable = ({ subscribers }) => {
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+const SubscribersTable = ({ subscribers, resultsPerPage = 10 }) => {
+	console.log('subscribers are : ', subscribers)
+
 	const navigate = useNavigate()
-	const { user } = useAccount
+	const { user } = useAccount()
 	const [selectedSubscribers, setSelectedSubscribers] = useState([])
 
 	const [currentPage, setCurrentPage] = useState(1)
-	const rowsPerPage = 20
+	const rowsPerPage = resultsPerPage
 
 	const handlePageChange = (page) => {
 		setCurrentPage(page)
@@ -88,6 +94,10 @@ const SubscribersTable = ({ subscribers }) => {
 		)
 	}
 
+	const dateBodyTemplate = (rowData) => {
+		return dayjs(rowData.createdAt).tz('Europe/Athens').format('DD-MM-YYYY HH:mm')
+	}
+
 	return (
 		// <div>
 		<>
@@ -133,10 +143,7 @@ const SubscribersTable = ({ subscribers }) => {
 				/>
 				<Column field="name" header="Name" />
 				<Column field="email" header="Email" />
-				{/* <Column field="emailSent" header="Email Sent" /> */}
-				{/* <Column field="emailOpens" header="Email Opens" /> */}
-				{/* <Column field="emailClicks" header="Email Clicks" /> */}
-				<Column field="createdAt" header="Subscribed" />
+				<Column field="createdAt" body={dateBodyTemplate} header="Subscribed" />
 				<Column header="Actions" body={actionsBodyTemplate} />
 			</DataTable>
 			<Pagination currentPage={1} totalResults={subscribers.length} resultsPerPage={10} onChange={handlePageChange} />

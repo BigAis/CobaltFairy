@@ -96,7 +96,7 @@ const EditCampaign = () => {
 					{campaign && (
 						<>
 							<div className="page-name-container">
-								<div className="page-name">Campaigns > {campaign.name}</div>
+								<div className="page-name">Campaigns &gt; {campaign.name}</div>
 							</div>
 							<div className="page-sent-at">
 								<Icon name={'Clock'} size={12} style={{ color: 'red' }} />
