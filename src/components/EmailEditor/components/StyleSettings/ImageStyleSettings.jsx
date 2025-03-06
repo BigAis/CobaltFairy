@@ -23,7 +23,12 @@ const ImageStyleSettings = () => {
     const linkChange = (event) => {
       const newValue = event.target.value;
       const newCurrentItem = deepClone(currentItem);
-      currentItem.data.linkURL = newValue;
+      newCurrentItem.data.linkURL = newValue;
+      updateItemStyles(newCurrentItem.data);
+    };
+    const clearLink = () => {
+      const newCurrentItem = deepClone(currentItem);
+      newCurrentItem.data.linkURL = '';
       updateItemStyles(newCurrentItem.data);
     };
 
@@ -33,7 +38,9 @@ const ImageStyleSettings = () => {
         {/* {cardItemElement(t("action_type"), <div className="link-tag">{t("link")}</div>)} */}
         <div className="card-item-title">{t("link_url")}</div>
         <div className="margin-top-6">
-          <Input addonBefore="https://" value={linkURL} onChange={linkChange} />
+          <Input value={linkURL} onChange={linkChange} />
+          <a style={{fontSize:'12px',float:'right'}} onClick={clearLink}>Clear</a>
+          {/* addonBefore="https://" */}
         </div>
       </>
     );

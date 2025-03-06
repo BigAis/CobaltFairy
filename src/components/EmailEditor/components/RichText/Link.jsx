@@ -8,7 +8,7 @@ import { Modal, Input } from "antd";
 import PopupText from '../../../PopupText/PopupText'
 
 const Link = ({ modifyText, setTextContent }) => {
-  const { selectionRange, blockList } = useContext(GlobalContext);
+  const { selectionRange, blockList, bodySettings } = useContext(GlobalContext);
   const { getSelectionNode } = useSection();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputConfig, setInputConfig] = useState({
@@ -32,6 +32,7 @@ const Link = ({ modifyText, setTextContent }) => {
       let link = document.createElement("a");
       link.target = "_black";
       link.href = value;
+      if(bodySettings.styles.linkColor) link.style=`color:${bodySettings.styles.linkColor}`
       range.surroundContents(link);
     }
 
@@ -56,7 +57,7 @@ const Link = ({ modifyText, setTextContent }) => {
         return;
       }
       newInputConfig.rangeIsLink = true;
-      newInputConfig.value = rangeParentNode.href.replace("https://", "").replace("http://","");
+      newInputConfig.value = rangeParentNode.href;//.replace("https://", "").replace("http://","");
     }
     setInputConfig(newInputConfig);
     setIsModalOpen(true);
@@ -74,22 +75,43 @@ const Link = ({ modifyText, setTextContent }) => {
         onClick={ async () => {
           let selection = window.getSelection();
           let range = selection.getRangeAt(0);
-          const rangeParentNode = range.commonAncestorContainer.parentNode;
-          if(rangeParentNode.href.includes('api/unsubscribe') && rangeParentNode.href.includes('pixel_uid')){
-            await PopupText.fire({text:'Unsubscribe links cannot be removed.',showCancelButton:false})
-            return;
+          let rangeParentNode;
+          if (selection.rangeCount > 0 && selection.isCollapsed) {
+            rangeParentNode = range.startContainer;
+            if (rangeParentNode.nodeType === Node.TEXT_NODE) {
+              rangeParentNode = rangeParentNode.parentNode;
+            }
+            selection = window.getSelection();
+            range = document.createRange();
+            range.selectNodeContents(rangeParentNode);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            if(rangeParentNode.href && rangeParentNode.href.includes('api/unsubscribe') && rangeParentNode.href.includes('pixel_uid')){
+              await PopupText.fire({text:'Unsubscribe links cannot be removed.',showCancelButton:false})
+              return;
+            }
+            modifyText("unlink", false, null);
+            modifyText("removeformat", false, null);
+            setTextContent();
+          }else{
+            rangeParentNode = range.commonAncestorContainer.parentNode;
+            if(rangeParentNode.href && rangeParentNode.href.includes('api/unsubscribe') && rangeParentNode.href.includes('pixel_uid')){
+              await PopupText.fire({text:'Unsubscribe links cannot be removed.',showCancelButton:false})
+              return;
+            }
+            modifyText("unlink", false, null);
+            modifyText("removeformat", false, null);
+            setTextContent();
           }
-          modifyText("unlink", false, null);
-          setTextContent();
         }}
       >
         <FontAwesomeIcon icon={faUnlink} className="rich-text-tools-button-icon" />
       </button>
       <Modal title="Link URL" open={isModalOpen} zIndex={1100} onOk={addLink} onCancel={closeModal} okText="Ok" cancelText="Cancel">
         <Input
-          addonBefore="https://"
-          value={inputConfig.value.replace("https://", "")}
-          onChange={(event) => setInputConfig({ ...inputConfig, value: "https://" + event.target.value })}
+          // addonBefore="https://"
+          value={inputConfig.value} //.replace("https://", "")
+          onChange={(event) => setInputConfig({ ...inputConfig, value: event.target.value })} //"https://" + 
         />
       </Modal>
     </>

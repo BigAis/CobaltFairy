@@ -28,7 +28,7 @@ const getColumnConfigFunc = (t) => {
           paddingLeft: 0,
           paddingRight: 0,
           paddingBottom: 0,
-          contentBackground: "#fff",
+          contentBackground: "transparent",
         },
         mobile: {},
       },

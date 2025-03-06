@@ -376,7 +376,7 @@ const NewCampaign = () => {
 		console.log('final are : ', final)
 
 		setSelectedGroups(selected)
-
+		currentCampaign.recp_groups = final;
 		console.log('Selected Options:', selected)
 	}
 
@@ -589,7 +589,9 @@ const NewCampaign = () => {
 								</div>
 
 								<div className="d-flex content-space-between">
-									<div>Mail Preview</div>
+									<div>
+										{/* Mail Preview */}
+									</div>
 									<div>
 										<Button onClick={sendTestEmail} type="secondary">
 											Send test email
@@ -625,7 +627,9 @@ const NewCampaign = () => {
 										{' '}
 										Select a group
 									</Dropdown> */}
+									<p>Target Group:</p>
 									<MultipleDropdown options={groups} selectedValues={selectedGroups} onOptionSelect={handleSelection} />
+									<br></br>
 									<p onClick={addRecpFilter}>+ Add Filtering</p>
 								</div>
 								<div className="d-flex flex-column">
