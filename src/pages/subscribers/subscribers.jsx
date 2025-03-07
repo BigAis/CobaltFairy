@@ -2,8 +2,8 @@ import SubscribersTable from '../../components/DataTable/SubscribersTable'
 import '../dashboard/dashboard.scss'
 import '../../fullpage.scss'
 
-import { React, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { React, useEffect, useState, useRef } from 'react'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
@@ -29,6 +29,10 @@ import qs from 'qs'
 
 const Subscribers = () => {
 	const navigate = useNavigate()
+	const location = useLocation()
+
+	const { filterString } = useParams()
+
 	const { user, account } = useAccount()
 	const [subscribers, setSubscribers] = useState([])
 	const [totalSubs, setTotalSubs] = useState(0)
@@ -36,7 +40,10 @@ const Subscribers = () => {
 	const [totalGroups, setTotalGroups] = useState(0)
 	const [view, setView] = useState('subs')
 	const [subscriberSearchValue, setSubscriberSearchValue] = useState('')
+	const [groupSearchValue, setGroupSearchValue] = useState('')
 	const [showFilters, setShowFilters] = useState(false)
+
+	const base64string = btoa(JSON.stringify({}))
 
 	const groupOptions =
 		groups &&
@@ -112,7 +119,9 @@ const Subscribers = () => {
 		)
 		if (resp.data && resp.data.data) setSubscribers(resp.data.data)
 		if (resp.data && resp.data.meta) setTotalSubs(resp.data.meta.pagination.total)
-		resp = await ApiService.get('fairymailer/getGroups?populate[subscribers][count]=true', user.jwt)
+
+		resp = await ApiService.get(`fairymailer/getGroups?populate[subscribers][count]=true&filters[name][$contains]=${groupSearchValue}`, user.jwt)
+
 		if (resp.data && resp.data.data) setGroups(resp.data.data)
 		if (resp.data && resp.data.meta) setTotalGroups(resp.data.meta.pagination.total)
 	}
@@ -144,7 +153,23 @@ const Subscribers = () => {
 
 	useEffect(() => {
 		loadData()
-	}, [user, subscriberSearchValue])
+	}, [user, subscriberSearchValue, groupSearchValue, subscribersFilters])
+
+	useEffect(() => {
+		if (filterString) {
+			const objfrombase64 = JSON.parse(atob(filterString))
+			console.log('Filter String:', objfrombase64)
+			const groupIdToFilter = groupOptions.find((grp) => {
+				return grp.value === objfrombase64.group_udid
+			})
+			console.log('groupIdToFilter', groupIdToFilter)
+			setSubscribersFilters((prev) => ({
+				...prev,
+				groups: [groupIdToFilter],
+			}))
+		}
+	}, [filterString])
+
 	return (
 		<>
 			<div className="fm-page-wrapper">
@@ -152,7 +177,8 @@ const Subscribers = () => {
 				<div className="fm-page-container">
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
-						<div className="page-name">Subscribers</div>
+						{view === 'subs' && <div className="page-name">Subscribers</div>}
+						{view === 'groups' && <div className="page-name">Groups</div>}
 						{renderAddButton()}
 					</div>
 					<div className="filters-container">
@@ -169,36 +195,56 @@ const Subscribers = () => {
 								]}
 								onChange={(value) => {
 									if (value) setView(value)
+									setShowFilters(false)
 								}}
 								value={'subs'}
 							></ButtonGroup>
 						</div>
-						<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-							<InputText
-								style={{ width: '100%', margin: 0, marginRight: '20px' }}
-								placeholder="Search Subscribers"
-								label="Search Subscribers"
-								hasError={false}
-								errorMessage="Name must be at least 3 characters long."
-								value={subscriberSearchValue}
-								onChange={(e) => {
-									setSubscriberSearchValue(e.target.value)
-								}}
-							/>
-							<Button
-								type="secondary"
-								icon={'Filters'}
-								className="button-filters"
-								onClick={() => {
-									setShowFilters((prev) => {
-										return !prev
-									})
-								}}
-							>
-								{' '}
-								Filters{' '}
-							</Button>
-						</div>
+
+						{view === 'subs' && (
+							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+								<InputText
+									style={{ width: '100%', margin: 0, marginRight: '20px' }}
+									placeholder="Search Subscribers"
+									label="Search Subscribers"
+									hasError={false}
+									errorMessage="Name must be at least 3 characters long."
+									value={subscriberSearchValue}
+									onChange={(e) => {
+										setSubscriberSearchValue(e.target.value)
+									}}
+								/>
+								<Button
+									type="secondary"
+									icon={'Filters'}
+									className="button-filters"
+									onClick={() => {
+										setShowFilters((prev) => {
+											return !prev
+										})
+									}}
+								>
+									{' '}
+									Filters{' '}
+								</Button>
+							</div>
+						)}
+
+						{view === 'groups' && (
+							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+								<InputText
+									style={{ width: '100%', margin: 0, marginRight: '20px' }}
+									placeholder="Search Groups"
+									label="Search Groups"
+									hasError={false}
+									errorMessage="Name must be at least 3 characters long."
+									value={groupSearchValue}
+									onChange={(e) => {
+										setGroupSearchValue(e.target.value)
+									}}
+								/>
+							</div>
+						)}
 					</div>
 					<Card style={{ display: showFilters ? 'flex' : 'none' }} className={'d-flex flex-column subscriber-filters-card gap-20 mt20'}>
 						<div className="d-flex gap-20 ">
@@ -244,7 +290,14 @@ const Subscribers = () => {
 
 					{view === 'groups' && (
 						<div className="groups">
-							<GroupsTable groups={groups} resultsPerPage={10} onUpdate={handleOnUpdate} />
+							<GroupsTable
+								groups={groups}
+								resultsPerPage={10}
+								onUpdate={handleOnUpdate}
+								setView={setView}
+								setShowFilters={setShowFilters}
+								setSubscribersFilters={setSubscribersFilters}
+							/>
 						</div>
 					)}
 				</div>

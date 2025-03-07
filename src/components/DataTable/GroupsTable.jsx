@@ -12,7 +12,7 @@ import Checkbox from '../Checkbox'
 import PopupText from '../PopupText/PopupText'
 import { ApiService } from '../../service/api-service'
 
-const GroupsTable = ({ groups, resultsPerPage = 10, onUpdate }) => {
+const GroupsTable = ({ groups, resultsPerPage = 10, onUpdate, setView, setShowFilters }) => {
 	console.log('groups are : ', groups)
 
 	const navigate = useNavigate()
@@ -42,9 +42,14 @@ const GroupsTable = ({ groups, resultsPerPage = 10, onUpdate }) => {
 		console.log('rowdata2 is : ', rowData)
 
 		switch (selectedValue.value) {
-			case 'edit_sub':
+			case 'view_subs': {
 				console.log('Overview action triggered')
+				const groupUdidBase64 = btoa(JSON.stringify({ group_udid: rowData.udid }))
+				navigate(`/subscribers/filters/${groupUdidBase64}`)
+				setView('subs')
+				setShowFilters(true)
 				break
+			}
 			case 'delete_group':
 				console.log('Edit action triggered')
 				deleteGroup(rowData)

@@ -57,6 +57,7 @@ function App() {
 				<Route path="/campaigns/overview/:uuid" element={<EditCampaign />} />
 				<Route path="/subscribers" element={<Subscribers />} />
 				<Route path="/subscribers/:uuid" element={<EditSubscriber />} />
+				<Route path="/subscribers/filters/:filterString" element={<Subscribers />} />
 				<Route path="/subscribers/group/new" element={<EditGroup />} />
 				<Route path="/subscribers/group/:uuid" element={<EditGroup />} />
 				<Route path="/integrations" element={<Integrations />} />
