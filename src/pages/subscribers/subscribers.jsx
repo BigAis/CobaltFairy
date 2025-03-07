@@ -3,6 +3,7 @@ import '../dashboard/dashboard.scss'
 import '../../fullpage.scss'
 
 import { React, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
@@ -27,6 +28,7 @@ dayjs.extend(timezone)
 import qs from 'qs'
 
 const Subscribers = () => {
+	const navigate = useNavigate()
 	const { user, account } = useAccount()
 	const [subscribers, setSubscribers] = useState([])
 	const [totalSubs, setTotalSubs] = useState(0)
@@ -110,7 +112,7 @@ const Subscribers = () => {
 		)
 		if (resp.data && resp.data.data) setSubscribers(resp.data.data)
 		if (resp.data && resp.data.meta) setTotalSubs(resp.data.meta.pagination.total)
-		resp = await ApiService.get('fairymailer/getGroups?polulate=*', user.jwt)
+		resp = await ApiService.get('fairymailer/getGroups?populate[subscribers][count]=true', user.jwt)
 		if (resp.data && resp.data.data) setGroups(resp.data.data)
 		if (resp.data && resp.data.meta) setTotalGroups(resp.data.meta.pagination.total)
 	}
@@ -126,7 +128,7 @@ const Subscribers = () => {
 				)
 			case 'groups':
 				return (
-					<Button icon={'Plus'} type="action">
+					<Button onClick={() => navigate('/subscribers/group/new')} icon={'Plus'} type="action">
 						{' '}
 						Add Group{' '}
 					</Button>
@@ -134,6 +136,10 @@ const Subscribers = () => {
 			default:
 				return <></>
 		}
+	}
+
+	const handleOnUpdate = async () => {
+		loadData()
 	}
 
 	useEffect(() => {
@@ -232,13 +238,13 @@ const Subscribers = () => {
 
 					{view === 'subs' && (
 						<div className="subscribers">
-							<SubscribersTable subscribers={subscribers} resultsPerPage={10} />
+							<SubscribersTable subscribers={subscribers} resultsPerPage={10} onUpdate={handleOnUpdate} />
 						</div>
 					)}
 
 					{view === 'groups' && (
 						<div className="groups">
-							<GroupsTable groups={groups} />
+							<GroupsTable groups={groups} resultsPerPage={10} onUpdate={handleOnUpdate} />
 						</div>
 					)}
 				</div>

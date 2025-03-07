@@ -19,6 +19,7 @@ import AccountPicker from './pages/accountPicker/accountPicker'
 import FlowEditor from './pages/automations/FlowEditor'
 import EditTemplate from './pages/templates/EditTemplate'
 import EditSubscriber from './pages/subscribers/EditSubscriber'
+import EditGroup from './pages/subscribers/EditGroup'
 
 function App() {
 	const navigate = useNavigate()
@@ -56,6 +57,8 @@ function App() {
 				<Route path="/campaigns/overview/:uuid" element={<EditCampaign />} />
 				<Route path="/subscribers" element={<Subscribers />} />
 				<Route path="/subscribers/:uuid" element={<EditSubscriber />} />
+				<Route path="/subscribers/group/new" element={<EditGroup />} />
+				<Route path="/subscribers/group/:uuid" element={<EditGroup />} />
 				<Route path="/integrations" element={<Integrations />} />
 				<Route path="/automations" element={<Automations />} />
 				<Route path="/automations/:autId" element={<EditAutomation />} />

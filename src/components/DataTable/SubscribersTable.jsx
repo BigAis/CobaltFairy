@@ -16,9 +16,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
-const SubscribersTable = ({ subscribers, resultsPerPage = 10 }) => {
-	console.log('subscribers are : ', subscribers)
-
+const SubscribersTable = ({ subscribers, resultsPerPage = 10, onUpdate }) => {
 	const navigate = useNavigate()
 	const { user } = useAccount()
 	const [selectedSubscribers, setSelectedSubscribers] = useState([])
@@ -46,7 +44,10 @@ const SubscribersTable = ({ subscribers, resultsPerPage = 10 }) => {
 		}).then(async (result) => {
 			if (result.isConfirmed) {
 				console.log('Confirmed with input:', result)
-				await ApiService.post(`fairymailer/removeSubscriber`, { data: rowData }, user.jwt)
+				const deleteSubscriberResponse = await ApiService.post(`fairymailer/removeSubscriber`, { data: rowData }, user.jwt)
+				if (deleteSubscriberResponse) {
+					onUpdate()
+				}
 				// if (response.data && response.data.code == 200) {
 				// 	navigate('/subscribers/')
 				// }
