@@ -12,7 +12,7 @@ import Checkbox from '../Checkbox'
 import PopupText from '../PopupText/PopupText'
 import { ApiService } from '../../service/api-service'
 
-const GroupsTable = ({ groups, resultsPerPage = 10, onUpdate, setView, setShowFilters }) => {
+const GroupsTable = ({ groups, resultsPerPage = 10, onUpdate, setView }) => {
 	console.log('groups are : ', groups)
 
 	const navigate = useNavigate()
@@ -47,7 +47,6 @@ const GroupsTable = ({ groups, resultsPerPage = 10, onUpdate, setView, setShowFi
 				const groupUdidBase64 = btoa(JSON.stringify({ group_udid: rowData.udid }))
 				navigate(`/subscribers/filters/${groupUdidBase64}`)
 				setView('subs')
-				setShowFilters(true)
 				break
 			}
 			case 'delete_group':

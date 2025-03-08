@@ -42,6 +42,14 @@ const Subscribers = () => {
 	const [subscriberSearchValue, setSubscriberSearchValue] = useState('')
 	const [groupSearchValue, setGroupSearchValue] = useState('')
 	const [showFilters, setShowFilters] = useState(false)
+	const [subscribersFilters, setSubscribersFilters] = useState({
+		email: '',
+		name: '',
+		groups: [],
+		dateFrom: '',
+		dateTo: '',
+	})
+	const [autoAppliedFilters, setAutoAppliedFilters] = useState(false)
 
 	const base64string = btoa(JSON.stringify({}))
 
@@ -51,14 +59,6 @@ const Subscribers = () => {
 			label: `${grp.name}`,
 			value: `${grp.udid}`,
 		}))
-
-	const [subscribersFilters, setSubscribersFilters] = useState({
-		email: '',
-		name: '',
-		groups: [],
-		dateFrom: '',
-		dateTo: '',
-	})
 
 	const handleFilterChange = (key, value) => {
 		setSubscribersFilters((prev) => ({
@@ -112,19 +112,25 @@ const Subscribers = () => {
 		console.log('Subscribers', subscribersResponse)
 		if (subscribersResponse && subscribersResponse.data && subscribersResponse.data.data) setSubscribers(subscribersResponse.data.data)
 	}
-	const loadData = async () => {
-		let resp = await ApiService.get(
+
+	const getSubscribers = async () => {
+		const resp = await ApiService.get(
 			`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[email][$contains]=${subscriberSearchValue}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
 			user.jwt
 		)
 		if (resp.data && resp.data.data) setSubscribers(resp.data.data)
 		if (resp.data && resp.data.meta) setTotalSubs(resp.data.meta.pagination.total)
+	}
 
-		resp = await ApiService.get(`fairymailer/getGroups?populate[subscribers][count]=true&filters[name][$contains]=${groupSearchValue}`, user.jwt)
-
+	const getGroups = async () => {
+		const resp = await ApiService.get(`fairymailer/getGroups?populate[subscribers][count]=true&filters[name][$contains]=${groupSearchValue}`, user.jwt)
 		if (resp.data && resp.data.data) setGroups(resp.data.data)
 		if (resp.data && resp.data.meta) setTotalGroups(resp.data.meta.pagination.total)
 	}
+
+	useEffect(() => {
+		console.log('debugging groups : ', groups)
+	}, [groups])
 
 	const renderAddButton = () => {
 		switch (view) {
@@ -148,15 +154,21 @@ const Subscribers = () => {
 	}
 
 	const handleOnUpdate = async () => {
-		loadData()
+		getGroups()
+		autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
 	}
 
 	useEffect(() => {
-		loadData()
-	}, [user, subscriberSearchValue, groupSearchValue, subscribersFilters])
+		if (user) {
+			if (groups.length === 0) getGroups()
+			autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
+		}
+	}, [user, subscriberSearchValue, groupSearchValue, subscribersFilters, autoAppliedFilters])
 
 	useEffect(() => {
-		if (filterString) {
+		if (filterString && groups && groups.length > 0) {
+			setShowFilters(true)
+
 			const objfrombase64 = JSON.parse(atob(filterString))
 			console.log('Filter String:', objfrombase64)
 			const groupIdToFilter = groupOptions.find((grp) => {
@@ -167,8 +179,9 @@ const Subscribers = () => {
 				...prev,
 				groups: [groupIdToFilter],
 			}))
+			setAutoAppliedFilters(true)
 		}
-	}, [filterString])
+	}, [filterString, groups])
 
 	return (
 		<>
@@ -197,7 +210,7 @@ const Subscribers = () => {
 									if (value) setView(value)
 									setShowFilters(false)
 								}}
-								value={'subs'}
+								value={view}
 							></ButtonGroup>
 						</div>
 
@@ -250,7 +263,13 @@ const Subscribers = () => {
 						<div className="d-flex gap-20 ">
 							<InputText value={subscribersFilters.email} onChange={(e) => handleFilterChange('email', e.target.value)} label={'Email Contains'}></InputText>
 							<InputText value={subscribersFilters.name} onChange={(e) => handleFilterChange('name', e.target.value)} label={'Name'}></InputText>
-							<MultipleDropdown style={{ width: 'auto' }} options={groupOptions} selectedValues={subscribersFilters.groups} onOptionSelect={handleSelection} />
+							<MultipleDropdown
+								placeholder="Belongs to group"
+								style={{ width: 'auto' }}
+								options={groupOptions}
+								selectedValues={subscribersFilters.groups}
+								onOptionSelect={handleSelection}
+							/>
 						</div>
 						<div className="d-flex gap-20">
 							<DatePicker
@@ -290,14 +309,7 @@ const Subscribers = () => {
 
 					{view === 'groups' && (
 						<div className="groups">
-							<GroupsTable
-								groups={groups}
-								resultsPerPage={10}
-								onUpdate={handleOnUpdate}
-								setView={setView}
-								setShowFilters={setShowFilters}
-								setSubscribersFilters={setSubscribersFilters}
-							/>
+							<GroupsTable groups={groups} resultsPerPage={10} onUpdate={handleOnUpdate} setView={setView} />
 						</div>
 					)}
 				</div>

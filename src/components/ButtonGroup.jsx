@@ -8,7 +8,7 @@ const ButtonGroup = ({ children, options, value, onChange, className, ...props }
 	const [activeValue, setActiveValue] = useState('')
 	useEffect(() => {
 		setActiveValue(value)
-	}, [])
+	}, [value])
 	const computedClassName = classNames('btn-group', 'btn-sm', className)
 
 	return (
