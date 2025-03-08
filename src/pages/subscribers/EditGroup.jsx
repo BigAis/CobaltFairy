@@ -115,8 +115,10 @@ const EditGroup = () => {
 
 							<div className="d-flex gap-20">
 								{isEdit && (
-									<Button type="secondary" onClick={deleteGroup}>
-										Delete
+									<Button type="secondary" onClick={()=>{
+										navigate('/subscribers')
+									}}>
+										Go Back
 									</Button>
 								)}
 								<Button onClick={saveGroup}>Save</Button>
