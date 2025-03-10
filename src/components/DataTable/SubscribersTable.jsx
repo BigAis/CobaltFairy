@@ -28,11 +28,8 @@ const SubscribersTable = ({ subscribers, resultsPerPage = 10, onUpdate }) => {
 		setCurrentPage(page)
 	}
 
-	const dropdownOptions = [
-		// { value: 'view_sub', label: 'Option 1' },
-		// { value: 'edit_sub', label: 'Edit' },
-		{ value: 'delete_sub', label: 'Delete' },
-	]
+	const dropdownOptions = [{ value: 'delete_sub', label: 'Delete' }]
+
 	const handleLeftClick = (uuid) => {
 		navigate(`/subscribers/${uuid}`)
 	}
@@ -48,9 +45,6 @@ const SubscribersTable = ({ subscribers, resultsPerPage = 10, onUpdate }) => {
 				if (deleteSubscriberResponse) {
 					onUpdate()
 				}
-				// if (response.data && response.data.code == 200) {
-				// 	navigate('/subscribers/')
-				// }
 			}
 		})
 	}

@@ -33,11 +33,15 @@ const Subscribers = () => {
 
 	const { filterString } = useParams()
 
+	const [resultsPerPage, setResultsPerPage] = useState(10)
+	const [totalGroups, setTotalGroups] = useState(0)
+	const [currentGroupPage, setCurrentGroupPage] = useState(1)
+
 	const { user, account } = useAccount()
 	const [subscribers, setSubscribers] = useState([])
 	const [totalSubs, setTotalSubs] = useState(0)
 	const [groups, setGroups] = useState([])
-	const [totalGroups, setTotalGroups] = useState(0)
+
 	const [view, setView] = useState('subs')
 	const [subscriberSearchValue, setSubscriberSearchValue] = useState('')
 	const [groupSearchValue, setGroupSearchValue] = useState('')
@@ -68,16 +72,10 @@ const Subscribers = () => {
 	}
 
 	const handleSelection = (selected) => {
-		// const final = selected.map((selectedOption) => {
-		// 	return selectedOption.value
-		// })
-
 		setSubscribersFilters((prev) => ({
 			...prev,
 			groups: selected,
 		}))
-		// currentCampaign.recp_groups = final;
-		console.log('Selected Options:', selected)
 	}
 
 	const filterSubscribersAction = async () => {
@@ -87,8 +85,6 @@ const Subscribers = () => {
 				return matchedGroup ? matchedGroup.id : null
 			})
 			.filter((id) => id !== null)
-
-		console.log('groups are : ', groupIds)
 
 		const query = {
 			filters: {
@@ -122,15 +118,37 @@ const Subscribers = () => {
 		if (resp.data && resp.data.meta) setTotalSubs(resp.data.meta.pagination.total)
 	}
 
-	const getGroups = async () => {
-		const resp = await ApiService.get(`fairymailer/getGroups?populate[subscribers][count]=true&filters[name][$contains]=${groupSearchValue}`, user.jwt)
-		if (resp.data && resp.data.data) setGroups(resp.data.data)
-		if (resp.data && resp.data.meta) setTotalGroups(resp.data.meta.pagination.total)
+	const getGroups = async (page = 1) => {
+		const query = {
+			pagination: {
+				pageSize: resultsPerPage,
+				page,
+			},
+		}
+		const queryString = qs.stringify(query, { encode: false })
+
+		try {
+			const resp = await ApiService.get(`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true&filters[name][$contains]=${groupSearchValue}`, user.jwt)
+
+			if (resp.data && resp.data.data) {
+				setGroups(resp.data.data)
+				setTotalGroups(resp.data.meta.pagination.total)
+			}
+			setCurrentGroupPage(page)
+		} catch (error) {
+			console.error('Error fetching groups:', error)
+		}
+	}
+
+	const handlePageChange = (newPage) => {
+		getGroups(newPage)
 	}
 
 	useEffect(() => {
-		console.log('debugging groups : ', groups)
-	}, [groups])
+		if (user) {
+			getGroups(currentGroupPage)
+		}
+	}, [user, currentGroupPage])
 
 	const renderAddButton = () => {
 		switch (view) {
@@ -309,7 +327,16 @@ const Subscribers = () => {
 
 					{view === 'groups' && (
 						<div className="groups">
-							<GroupsTable groups={groups} resultsPerPage={10} onUpdate={handleOnUpdate} setView={setView} />
+							{/* <GroupsTable
+								groups={groups}
+								resultsPerPage={resultsPerPage}
+								currentPage={currentGroupPage}
+								totalResults={totalGroups}
+								onPageChange={handlePageChange}
+								onUpdate={handleOnUpdate}
+								setView={setView}
+							/> */}
+							<GroupsTable groupSearchValue={groupSearchValue} onUpdate={handleOnUpdate} setView={setView} />
 						</div>
 					)}
 				</div>
