@@ -14,6 +14,7 @@ import CampaignsTable from '../../components/DataTable/CampaignsTable'
 import { useNavigate } from 'react-router-dom'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
 import { Line } from 'react-chartjs-2'
+import PopupText from '../../components/PopupText/PopupText'
 const Dashboard = () => {
 	const navigate = useNavigate()
 	const { user, account, loading, error } = useAccount()
@@ -159,15 +160,17 @@ const Dashboard = () => {
 						</div>
 					</Card>
 					<div className="dashboard-ctas">
-						<Button type={'secondary'}>
+						<Button type={'secondary'} onClick={()=>{navigate(`/campaigns/new`)}}>
 							<Icon name="Campaigns" />
 							Create Campaign
 						</Button>
-						<Button type={'secondary'}>
+						<Button type={'secondary'} onClick={()=>{
+							PopupText.fire({text:'Under Construction',showCancelButton:false,confirmButtonText:'OK'})
+						}}>
 							<Icon name="Contacts" />
 							Import Contacts
 						</Button>
-						<Button type={'secondary'}>
+						<Button type={'secondary'}  onClick={()=>{navigate(`/automations/new`)}}>
 							<Icon name="Automations" />
 							Create Automation
 						</Button>
