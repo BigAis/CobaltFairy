@@ -15,16 +15,16 @@ import { useNavigate } from 'react-router-dom'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 const Dashboard = () => {
-	const navigate = useNavigate();
+	const navigate = useNavigate()
 	const { user, account, loading, error } = useAccount()
-	const [ statsData, setStatsData ] = useState({});
-	const [ statsKey, setStatsKey ] = useState('d7');
-	const [ subsStats, setSubsStats ] = useState(null);
-	const [ subsStatsKey, setSubsStatsKey ] = useState('d7');
-	const [ latestCampaigns, setLatestCampaigns ] = useState([{},{},{},{}]);
-	const [ stats, setStats ] = useState([]);
+	const [statsData, setStatsData] = useState({})
+	const [statsKey, setStatsKey] = useState('d7')
+	const [subsStats, setSubsStats] = useState(null)
+	const [subsStatsKey, setSubsStatsKey] = useState('d7')
+	const [latestCampaigns, setLatestCampaigns] = useState([{}, {}, {}, {}])
+	const [stats, setStats] = useState([])
 
-	const isPositive=true
+	const isPositive = true
 	const subsChartData = {
 		labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
 		datasets: [
@@ -73,55 +73,57 @@ const Dashboard = () => {
 		},
 	}
 
-	const loadStats = async ()=>{
-		if(!user) return;
-		let stats = await ApiService.get('fairymailer/dashboard-stats',user.jwt);
-		console.log('stats',stats.data);
-		setStatsData(stats.data);
+	const loadStats = async () => {
+		if (!user) return
+		let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt)
+		console.log('stats', stats.data)
+		setStatsData(stats.data)
 		let resp = await ApiService.get(
-					`fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
-					user.jwt
-				)
-		setLatestCampaigns(resp.data.data)
+			`fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
+			user.jwt
+		)
+		// setLatestCampaigns(resp.data.data)
 	}
-	const createStatsMetrics = ()=>{
-		let key = statsKey;
-		if(!key || !statsData || !statsData[key]) return;
-		let data = [];
-		data.push({label:'Emails Sent', defaultValue:false, value: statsData[key].emails, percentage:0})
-		data.push({label:'Total Opens', defaultValue:false, value: statsData[key].opens, percentage:0})
-		data.push({label:'Total Clicks', defaultValue:false, value: statsData[key].clicks, percentage:0})
-		data.push({label:'Spam', defaultValue:false, value: 0, percentage:0})
-		console.log('stats data',data)
+	const createStatsMetrics = () => {
+		let key = statsKey
+		if (!key || !statsData || !statsData[key]) return
+		let data = []
+		data.push({ label: 'Emails Sent', defaultValue: false, value: statsData[key].emails, percentage: 0 })
+		data.push({ label: 'Total Opens', defaultValue: false, value: statsData[key].opens, percentage: 0 })
+		data.push({ label: 'Total Clicks', defaultValue: false, value: statsData[key].clicks, percentage: 0 })
+		data.push({ label: 'Spam', defaultValue: false, value: 0, percentage: 0 })
+		console.log('stats data', data)
 		setStats(data)
 	}
-	const createSubsStatsMetrics = ()=>{
-		let key = statsKey;
-		if(!key || !statsData || !statsData[key]) {console.log(statsData,key);return}
-		let data = [];
-		data.push({label:'Total', defaultValue:false, value: statsData[key].subs_count, percentage:0})
-		data.push({label:'Unsubscribed', defaultValue:false, value: statsData[key].unsubs, percentage:0})
+	const createSubsStatsMetrics = () => {
+		let key = statsKey
+		if (!key || !statsData || !statsData[key]) {
+			console.log(statsData, key)
+			return
+		}
+		let data = []
+		data.push({ label: 'Total', defaultValue: false, value: statsData[key].subs_count, percentage: 0 })
+		data.push({ label: 'Unsubscribed', defaultValue: false, value: statsData[key].unsubs, percentage: 0 })
 		setSubsStats(data)
 		console.log(data)
 	}
-	useEffect(()=>{
+	useEffect(() => {
 		createStatsMetrics()
-	},[statsData, statsKey])
-	useEffect(()=>{
+	}, [statsData, statsKey])
+	useEffect(() => {
 		createSubsStatsMetrics()
-	},[statsData, subsStatsKey])
+	}, [statsData, subsStatsKey])
 
-	useEffect(()=>{
-		loadStats();
-	},[user])
-
+	useEffect(() => {
+		loadStats()
+	}, [user])
 
 	return (
 		<>
 			<div className="dashboard-wrapper">
 				<Sidemenu />
 				<div className="dashboard-container">
-					<PageHeader/>
+					<PageHeader />
 					<div className="page-name-container">
 						<div className="page-name">Dashboard</div>
 					</div>
@@ -137,7 +139,7 @@ const Dashboard = () => {
 									{ value: 'all', label: 'All' },
 								]}
 								onChange={(value) => {
-									setStatsKey(value);
+									setStatsKey(value)
 								}}
 							></ButtonGroup>
 						</div>
@@ -180,7 +182,7 @@ const Dashboard = () => {
 										{ value: 'all', label: 'All' },
 									]}
 									onChange={(value) => {
-										setSubsStatsKey(value);
+										setSubsStatsKey(value)
 									}}
 								></ButtonGroup>
 							</div>
@@ -188,12 +190,12 @@ const Dashboard = () => {
 							<div className="campaign-charts d-flex gap-30">
 								{subsStats && (
 									<>
-									<div>
-										<Stat stats={subsStats} hasChart={false} defaultLabel={'Total'} />
-									</div>
-									<div>
-										<Stat stats={subsStats} hasChart={false} defaultLabel={'Unsubscribed'} />
-									</div>
+										<div>
+											<Stat stats={subsStats} hasChart={false} defaultLabel={'Total'} />
+										</div>
+										<div>
+											<Stat stats={subsStats} hasChart={false} defaultLabel={'Unsubscribed'} />
+										</div>
 									</>
 								)}
 							</div>
@@ -202,16 +204,30 @@ const Dashboard = () => {
 								<Line data={subsChartData} options={subsChartOptions} />
 							</div>
 							<br></br>
-							<Button type={'secondary'} onClick={()=>{navigate('/subscribers')}}>All Subscribers</Button>
+							<Button
+								type={'secondary'}
+								onClick={() => {
+									navigate('/subscribers')
+								}}
+							>
+								All Subscribers
+							</Button>
 						</Card>
 						<Card className="subscribers-stats">
 							<div className="stats-head">
 								<span className="stats-title">Latest Campaigns</span>
 							</div>
 							<br></br>
-							<CampaignsTable campaigns={latestCampaigns.filter((campaign) => campaign.status ===  'sent')} dashboardPreviewOnly={true} />
+							<CampaignsTable campaigns={latestCampaigns.filter((campaign) => campaign.status === 'sent')} dashboardPreviewOnly={true} />
 							<br></br>
-							<Button type={'secondary'} onClick={()=>{navigate('/campaigns')}}>All Campaigns</Button>
+							<Button
+								type={'secondary'}
+								onClick={() => {
+									navigate('/campaigns')
+								}}
+							>
+								All Campaigns
+							</Button>
 						</Card>
 					</div>
 				</div>

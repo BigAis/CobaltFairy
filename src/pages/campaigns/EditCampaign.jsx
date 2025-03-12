@@ -33,7 +33,7 @@ const campaignButtonGroupOptions = [
 	{ value: 'loc_data_tab', label: `Location Data` },
 ]
 
-const emailClientsOptions = { Gmail: '41%', Outlook: '20%', AppleMail: '15%', Yahoo: '10%' }
+// const emailClientsOptions = { Gmail: '41%', Outlook: '20%', AppleMail: '15%', Yahoo: '10%' }
 
 const EditCampaign = () => {
 	const { uuid } = useParams()
@@ -42,6 +42,8 @@ const EditCampaign = () => {
 	const [selectedTab, setSelectedTab] = useState('overview_tab')
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 
+	const emailClientsOptions = campaign?.stats?.metadata?.emailClient
+
 	const absplitCampaignData =
 		campaign?.type === 'absplit'
 			? [
@@ -49,18 +51,18 @@ const EditCampaign = () => {
 						image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
 						subject: campaign?.subject,
 						recipients: campaign?.recipients / 2,
-						opens: campaign?.stats?.o,
+						opens: campaign?.stats?.uo,
 						openRate: campaign?.stats?.or,
-						clicks: campaign?.stats?.c,
+						clicks: campaign?.stats?.uc,
 						clickRate: campaign?.stats?.cr,
 					},
 					{
 						image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
 						subject: campaign?.subject_b,
 						recipients: campaign?.recipients / 2,
-						opens: campaign?.stats?.ob,
+						opens: campaign?.stats?.uob,
 						openRate: campaign?.stats?.obr,
-						clicks: campaign?.stats?.cb,
+						clicks: campaign?.stats?.ucb,
 						clickRate: campaign?.stats?.cbr,
 					},
 			  ]
@@ -140,26 +142,37 @@ const EditCampaign = () => {
 												<div className="campaing-stats-card-item">
 													<div className="campaing-stats-card-item-header">
 														<div>Emails Sent : {campaign.recipients}</div>
-														<div>22.12%</div>
+														<div>100%</div>
 													</div>
 													<div>
 														<div className="progress-bar">
-															<div className="progress"></div>
+															<div style={{ width: '100%' }} className="progress"></div>
 														</div>
 													</div>
 												</div>
 												<div className="campaing-stats-card-item">
 													<div className="campaing-stats-card-item-header">
-														<div>Clicked : {campaign.stats?.c || 0}</div>
-														<div>{campaign.stats?.cr || 0}%</div>
+														<div>Opens : {campaign.stats?.uo || 0}</div>
+														<div>{((campaign.stats?.uo / campaign.recipients) * 100).toFixed(2) || 0}%</div>
 													</div>
 													<div>
 														<div className="progress-bar">
-															<div className="progress"></div>
+															<div style={{ width: `${(campaign.stats?.uo / campaign.recipients) * 100}%` }} className="progress"></div>
 														</div>
 													</div>
 												</div>
 												<div className="campaing-stats-card-item">
+													<div className="campaing-stats-card-item-header">
+														<div>Clicked : {campaign.stats?.uc || 0}</div>
+														<div>{((campaign.stats?.uc / campaign.recipients) * 100).toFixed(2) || 0}%</div>
+													</div>
+													<div>
+														<div className="progress-bar">
+															<div style={{ width: `${(campaign.stats?.uc / campaign.recipients) * 100}%` }} className="progress"></div>
+														</div>
+													</div>
+												</div>
+												{/* <div className="campaing-stats-card-item">
 													<div className="campaing-stats-card-item-header">
 														<div>Click to open rate</div>
 														<div>16.51%</div>
@@ -169,7 +182,7 @@ const EditCampaign = () => {
 															<div className="progress"></div>
 														</div>
 													</div>
-												</div>
+												</div> */}
 											</div>
 											<div className="campaing-stats-card-wrapper d-flex gap-50">
 												<div className="campaing-stats-card-item">
@@ -185,7 +198,7 @@ const EditCampaign = () => {
 														<div>Unsubscribe</div>
 													</div>
 													<div>
-														<p className="stat-number">28 | 5%</p>
+														<p className="stat-number">N/A | N/A</p>
 													</div>
 												</div>
 												<div className="campaing-stats-card-item">
@@ -193,7 +206,7 @@ const EditCampaign = () => {
 														<div>Spam Complaints</div>
 													</div>
 													<div>
-														<p className="stat-number">1 | 2%</p>
+														<p className="stat-number">N/A | N/A</p>
 													</div>
 												</div>
 												<div className="campaing-stats-card-item">
@@ -201,7 +214,7 @@ const EditCampaign = () => {
 														<div>Soft Bounce</div>
 													</div>
 													<div>
-														<p className="stat-number">12 | 5%</p>
+														<p className="stat-number">N/A | N/A</p>
 													</div>
 												</div>
 												<div className="campaing-stats-card-item">
@@ -209,7 +222,7 @@ const EditCampaign = () => {
 														<div>Hard Bounce</div>
 													</div>
 													<div>
-														<p className="stat-number">0</p>
+														<p className="stat-number">N/A </p>
 													</div>
 												</div>
 											</div>
@@ -230,6 +243,7 @@ const EditCampaign = () => {
 													</div>
 													{campaign.stats?.l &&
 														Object.entries(campaign.stats.l)
+															.sort((a, b) => b[1] - a[1]) // Sort by value (ascending order)
 															.slice(0, 3)
 															.map(([key, value]) => (
 																<div
@@ -256,7 +270,7 @@ const EditCampaign = () => {
 										<div className="d-flex gap-20">
 											<Card className={'stats-card'}>
 												<p className="stat-heading">Device Type</p>
-												<DoughnutChart />
+												<DoughnutChart stats={campaign.stats} />
 											</Card>
 											<Card className={'stats-card'}>
 												<p className="stat-heading">Email Clients</p>
@@ -266,16 +280,18 @@ const EditCampaign = () => {
 														<p className="stat-table-heading">Subscribers</p>
 													</div>
 													{emailClientsOptions &&
-														Object.entries(emailClientsOptions).map(([key, value]) => (
-															<div
-																className="d-flex content-space-between mt20"
-																style={{ textAlign: 'left', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
-																key={key}
-															>
-																<p>{key}</p>
-																<p>{value}</p>
-															</div>
-														))}
+														Object.entries(emailClientsOptions)
+															.sort((a, b) => b[1] - a[1])
+															.map(([key, value]) => (
+																<div
+																	className="d-flex content-space-between mt20"
+																	style={{ textAlign: 'left', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
+																	key={key}
+																>
+																	<p>{key}</p>
+																	<p>{value}</p>
+																</div>
+															))}
 												</div>
 												{/* <Pagination currentPage={1} totalResults={50} resultsPerPage={5} onChange={() => {}} className={'mt10'} /> */}
 											</Card>
@@ -341,7 +357,7 @@ const EditCampaign = () => {
 								<>
 									<InputText label="Subject" value={campaign.subject} disabled={true} />
 
-									<EmailPreview />
+									<EmailPreview uuid={campaign.uuid} />
 								</>
 							)}
 
@@ -357,16 +373,18 @@ const EditCampaign = () => {
 												<p className="stat-table-heading">Clicks</p>
 											</div>
 											{campaign.stats?.l &&
-												Object.entries(campaign.stats.l).map(([key, value]) => (
-													<div
-														className="d-flex content-space-between align-items-center mt20"
-														style={{ backgroundColor: ' #FFF8EF', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
-														key={key}
-													>
-														<p style={{ textAlign: 'left', overflow: 'hidden' }}>{key}</p>
-														<p>{value}</p>
-													</div>
-												))}
+												Object.entries(campaign.stats.l)
+													.sort((a, b) => b[1] - a[1])
+													.map(([key, value]) => (
+														<div
+															className="d-flex content-space-between align-items-center mt20"
+															style={{ backgroundColor: ' #FFF8EF', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
+															key={key}
+														>
+															<p style={{ textAlign: 'left', overflow: 'hidden' }}>{key}</p>
+															<p>{value}</p>
+														</div>
+													))}
 										</div>
 									</div>
 								</>

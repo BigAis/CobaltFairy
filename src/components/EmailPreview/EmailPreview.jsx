@@ -1,7 +1,7 @@
 import React from 'react'
 
-const EmailPreview = () => {
-	const previewUrl = 'https://en.wikipedia.org/wiki/Main_Page'
+const EmailPreview = (uuid) => {
+	const previewUrl = `https://fairymail.cobaltfairy.com/api/fairymailer/load-campaign-body/${uuid}`
 
 	return (
 		<div style={{ width: '100%', height: '600px', border: '1px solid #ccc', overflow: 'hidden', borderRadius: '8px' }}>

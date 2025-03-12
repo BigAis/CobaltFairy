@@ -4,6 +4,7 @@ import { useAccount } from '../../context/AccountContext'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
 import { Button } from 'primereact/button'
+import { Skeleton } from 'primereact/skeleton'
 import 'primereact/resources/themes/lara-light-indigo/theme.css'
 import './DataTable.scss'
 import Pagination from '../Pagination'
@@ -16,22 +17,70 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
-const SubscribersTable = ({ subscribers, resultsPerPage = 10, onUpdate }) => {
+import qs from 'qs'
+
+// const SubscribersTable = ({ subscribers, resultsPerPage = 10, onUpdate }) => {
+const SubscribersTable = ({ subscriberSearchValue, subscribersQueryFilter, onUpdate, setView, setTotalSubs }) => {
 	const navigate = useNavigate()
 	const { user } = useAccount()
-	const [selectedSubscribers, setSelectedSubscribers] = useState([])
 
+	const [loading, setLoading] = useState(false)
+	const [subscribers, setSubscribers] = useState([])
+	const [totalResults, setTotalResults] = useState(0)
 	const [currentPage, setCurrentPage] = useState(1)
+	const resultsPerPage = 10
+
+	const [selectedSubscribers, setSelectedSubscribers] = useState([])
 	const rowsPerPage = resultsPerPage
 
-	const handlePageChange = (page) => {
-		setCurrentPage(page)
+	const handlePageChange = (newPage) => {
+		setCurrentPage(newPage)
 	}
 
 	const dropdownOptions = [{ value: 'delete_sub', label: 'Delete' }]
 
 	const handleLeftClick = (uuid) => {
 		navigate(`/subscribers/${uuid}`)
+	}
+
+	const getSubscribers = async (page = 1, filterString = '') => {
+		setLoading(true)
+		const query = {
+			filters: {
+				email: {
+					$contains: subscriberSearchValue,
+				},
+			},
+			sort: ['createdAt:desc'],
+			pagination: {
+				pageSize: resultsPerPage,
+				page,
+			},
+		}
+		console.log('filter from getSubscribers', filterString)
+		console.log('filter from getSubscribers', qs.stringify(filterString, { encode: false }))
+		// delete filterString.filters.createdAt
+		const queryString = filterString ? qs.stringify(filterString, { encode: false }) : qs.stringify(query, { encode: false })
+
+		console.log('queryString from getSubscribers', queryString)
+
+		try {
+			// const resp = await ApiService.get(
+			// 	`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[email][$contains]=${subscriberSearchValue}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
+			// 	user.jwt
+			// )
+			const resp = await ApiService.get(`fairymailer/getSubscribers?${queryString}&populate[groups][count]=1`, user.jwt)
+
+			if (resp.data && resp.data.data) {
+				setSubscribers(resp.data.data)
+				setTotalResults(resp.data.meta.pagination.total)
+			}
+			setCurrentPage(page)
+		} catch (error) {
+			console.error('Error fetching subscribers:', error)
+		} finally {
+			setLoading(false)
+		}
 	}
 
 	const deleteSubscriber = async (rowData) => {
@@ -70,8 +119,11 @@ const SubscribersTable = ({ subscribers, resultsPerPage = 10, onUpdate }) => {
 	const paginatedData = subscribers.slice(startIndex, endIndex)
 
 	useEffect(() => {
-		console.log('selected subscribers : ', selectedSubscribers)
-	}, [selectedSubscribers])
+		if (user) {
+			getSubscribers(currentPage, subscribersQueryFilter)
+			console.log('useEffect running', subscribersQueryFilter)
+		}
+	}, [currentPage, user, subscriberSearchValue, subscribersQueryFilter])
 
 	const actionsBodyTemplate = (rowData) => {
 		return (
@@ -97,11 +149,11 @@ const SubscribersTable = ({ subscribers, resultsPerPage = 10, onUpdate }) => {
 		// <div>
 		<>
 			<DataTable
-				value={paginatedData}
+				value={subscribers}
 				paginator={false}
 				selection={selectedSubscribers}
 				onSelectionChange={(e) => setSelectedSubscribers(e.value)}
-				dataKey="name"
+				dataKey="udid"
 				rowClassName={() => 'p-table-row'}
 			>
 				<Column
@@ -136,12 +188,12 @@ const SubscribersTable = ({ subscribers, resultsPerPage = 10, onUpdate }) => {
 					)}
 					headerStyle={{ width: '80px' }}
 				/>
-				<Column field="name" header="Name" />
-				<Column field="email" header="Email" />
-				<Column field="createdAt" body={dateBodyTemplate} header="Subscribed" />
-				<Column header="Actions" body={actionsBodyTemplate} />
+				<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
+				<Column field="email" header="Email" body={(rowData) => (loading ? <Skeleton /> : rowData.email)} />
+				<Column field="createdAt" body={(rowData) => (loading ? <Skeleton /> : dateBodyTemplate(rowData))} header="Subscribed" />
+				<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
 			</DataTable>
-			<Pagination currentPage={1} totalResults={subscribers.length} resultsPerPage={10} onChange={handlePageChange} />
+			<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
 			{/* </div> */}
 		</>
 	)

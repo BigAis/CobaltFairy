@@ -80,17 +80,18 @@ const Campaigns = () => {
 	const [skeletons] = useState([{}, {}, {}, {}, {}, {}, {}, {}, {}])
 	const [campaigns, setCampaigns] = useState([])
 	const [templates, setTemplates] = useState([])
-	const [cmpStatus, setCmpStatus] = useState('sent')
+
 	const [meta, setMeta] = useState([])
+	const [campaignsMeta, setCampaignsMeta] = useState([])
 	const [error, setError] = useState(null)
 	const [domainVerified, setDomainVerified] = useState(true)
 	const [dkimVerified, setDkimVerified] = useState(true)
 	const [emailVerified, setEmailVerified] = useState(true)
 	const [selectedCampaignType, setSelectedCampaignType] = useState('sent')
 
-	const totalCampaignsSent = campaigns.filter((campaign) => campaign.status === 'sent').length
-	const totalCampaignsDraft = campaigns.filter((campaign) => campaign.status === 'draft' && !campaign.date).length
-	const totalCampaignsOutBox = campaigns.filter((campaign) => campaign.status === 'draft' && campaign.date).length
+	const totalCampaignsSent = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.sent : 0
+	const totalCampaignsDraft = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.draft : 0
+	const totalCampaignsOutBox = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.outbox : 0
 
 	useEffect(() => {
 		getCampaigns()
@@ -116,7 +117,7 @@ const Campaigns = () => {
 		try {
 			console.log('user is getCampaigns : ', user.jwt)
 			let resp = await ApiService.get(
-				`fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
+				`fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${1}&pagination[page]=${page}`,
 				user.jwt
 			)
 			console.log('cmps from getCampaigns ', resp)
@@ -127,7 +128,7 @@ const Campaigns = () => {
 				}))
 			)
 
-			setMeta(resp.data.meta)
+			setCampaignsMeta(resp.data.meta)
 		} catch (error) {
 			console.error(error)
 		}
@@ -177,7 +178,7 @@ const Campaigns = () => {
 							<ButtonGroup
 								value="sent"
 								options={[
-									{ value: 'sent', label: `Sent (${campaigns.filter((campaign) => campaign.status === 'sent').length})` },
+									{ value: 'sent', label: `Sent (${totalCampaignsSent})` },
 									{ value: 'draft', label: `Draft (${totalCampaignsDraft})` },
 									{ value: 'outbox', label: `Outbox(${totalCampaignsOutBox})` },
 									{ value: 'templates', label: 'Templates (4)' },
@@ -199,6 +200,7 @@ const Campaigns = () => {
 											break
 										case 'templates':
 											setDropdownViewer('templates')
+											setSelectedCampaignType('templates')
 											break
 									}
 								}}
@@ -221,7 +223,16 @@ const Campaigns = () => {
 
 					<div className="">
 						{dropdownViewer === 'campaigns' ? (
-							<CampaignsTable resultsPerPage={10} campaigns={campaigns.filter((campaign) => (selectedCampaignType!=="outbox" && (campaign.status === selectedCampaignType)) || (selectedCampaignType==="outbox") && campaign.status==="draft" && campaign.date)} dashboardPreviewOnly={false} />
+							<CampaignsTable
+								resultsPerPage={10}
+								// campaigns={campaigns.filter(
+								// 	(campaign) =>
+								// 		(selectedCampaignType !== 'outbox' && campaign.status === selectedCampaignType) ||
+								// 		(selectedCampaignType === 'outbox' && campaign.status === 'draft' && campaign.date)
+								// )}
+								selectedCampaignType={selectedCampaignType}
+								dashboardPreviewOnly={false}
+							/>
 						) : (
 							<>
 								<div className="d-flex flex-wrap templates-container gap-20 mt20">

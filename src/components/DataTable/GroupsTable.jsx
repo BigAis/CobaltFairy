@@ -24,16 +24,11 @@ const GroupsTable = ({ groupSearchValue, onUpdate, setView }) => {
 	const [groups, setGroups] = useState([])
 	const [totalResults, setTotalResults] = useState(0)
 	const [currentPage, setCurrentPage] = useState(1)
-	const resultsPerPage = 10 // Define it here
+	const resultsPerPage = 10
 
 	const [selectedGroups, setSelectedGroups] = useState([])
 
-	// const [currentPage, setCurrentPage] = useState(1)
 	const rowsPerPage = resultsPerPage
-
-	// const handlePageChange = (page) => {
-	// 	setCurrentPage(page)
-	// }
 
 	const dropdownOptions = [
 		{ value: 'view_subs', label: 'Subscribers' },
@@ -50,7 +45,7 @@ const GroupsTable = ({ groupSearchValue, onUpdate, setView }) => {
 	}, [currentPage, groupSearchValue])
 
 	const handlePageChange = (newPage) => {
-		setCurrentPage(newPage) // ✅ Triggers useEffect → fetches new page
+		setCurrentPage(newPage)
 	}
 
 	const handleActionSelect = (selectedValue, rowData) => {
@@ -99,16 +94,11 @@ const GroupsTable = ({ groupSearchValue, onUpdate, setView }) => {
 			confirmButtonText: 'Yes, delete.',
 		}).then(async (result) => {
 			if (result.isConfirmed) {
-				console.log('Confirmed with input:', result)
 				const deleteResponse = await ApiService.post(`fairymailer/deleteGroupByGuid/${rowData.udid}`, { data: {} }, user.jwt)
 				if (deleteResponse) {
-					console.log('on update running')
 					onUpdate()
+					getGroups()
 				}
-
-				// if (response.data && response.data.code == 200) {
-				// 	navigate('/subscribers/')
-				// }
 			}
 		})
 	}
@@ -179,11 +169,11 @@ const GroupsTable = ({ groupSearchValue, onUpdate, setView }) => {
 					)}
 					headerStyle={{ width: '80px' }}
 				/>
-				<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton width="100px" height="20px" /> : rowData.name)} />
-				<Column field="subscribers.count" header="Subscribers" body={(rowData) => (loading ? <Skeleton width="50px" height="20px" /> : rowData.subscribers?.count || 0)} />
-				<Column field="open_rate" header="Opens" body={(rowData) => (loading ? <Skeleton width="50px" height="20px" /> : rowData.open_rate)} />
-				<Column field="click_rate" header="Click" body={(rowData) => (loading ? <Skeleton width="50px" height="20px" /> : rowData.click_rate)} />
-				<Column header="Actions" body={(rowData) => (loading ? <Skeleton width="50px" height="20px" /> : actionsBodyTemplate(rowData))} />
+				<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
+				<Column field="subscribers.count" header="Subscribers" body={(rowData) => (loading ? <Skeleton /> : rowData.subscribers?.count || 0)} />
+				<Column field="open_rate" header="Opens" body={(rowData) => (loading ? <Skeleton /> : rowData.open_rate)} />
+				<Column field="click_rate" header="Click" body={(rowData) => (loading ? <Skeleton /> : rowData.click_rate)} />
+				<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
 			</DataTable>
 			<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
 			{/* </div> */}

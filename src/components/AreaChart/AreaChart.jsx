@@ -10,7 +10,7 @@ const AreaChart = () => {
 		datasets: [
 			{
 				label: 'High',
-				data: [30, 28, 35, 60, 50, 40, 45],
+				data: [1, 1, 1, 1, 1, 1, 1],
 				borderColor: '#2FBF2F',
 				backgroundColor: 'rgba(47, 191, 47, 0.2)',
 				borderWidth: 2,
@@ -21,7 +21,7 @@ const AreaChart = () => {
 			},
 			{
 				label: 'Low',
-				data: [15, 18, 12, 20, 22, 18, 19],
+				data: [0, 0, 0, 0, 0, 0, 0],
 				borderColor: '#F4A622',
 				backgroundColor: 'rgba(244, 166, 34, 0.1)',
 				borderWidth: 2,

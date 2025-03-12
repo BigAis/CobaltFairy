@@ -14,10 +14,10 @@ const ButtonGroup = ({ children, options, value, onChange, className, ...props }
 	return (
 		<>
 			<div className={computedClassName}>
-				{options.map((opt) => {
+				{options.map((opt, i) => {
 					return (
 						<Button
-							key={opt.value}
+							key={i}
 							className={className}
 							active={opt.value == activeValue}
 							type="secondary"

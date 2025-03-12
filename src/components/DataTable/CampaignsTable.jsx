@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAccount } from '../../context/AccountContext'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
+import { Skeleton } from 'primereact/skeleton'
 import 'primereact/resources/themes/lara-light-indigo/theme.css'
 import './DataTable.scss'
 import Pagination from '../Pagination'
@@ -18,17 +20,22 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 // import { v4 as uuidv4 } from 'uuid'
 
-const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPage = 20 }) => {
-	console.log('campaigns is : ', campaigns)
-	const [selectedCampaigns, setSelectedCampaigns] = useState([])
-	const user = User.get()
-	const navigate = useNavigate()
+import qs from 'qs'
 
+const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, resultsPerPage = 20 }) => {
+	const navigate = useNavigate()
+	const { user } = useAccount()
+
+	const [loading, setLoading] = useState(false)
+	const [campaigns, setCampaigns] = useState([])
+	const [totalResults, setTotalResults] = useState(0)
 	const [currentPage, setCurrentPage] = useState(1)
 	const rowsPerPage = resultsPerPage
 
-	const handlePageChange = (page) => {
-		setCurrentPage(page)
+	const [selectedCampaigns, setSelectedCampaigns] = useState([])
+
+	const handlePageChange = (newPage) => {
+		setCurrentPage(newPage)
 		setSelectedCampaigns([])
 	}
 
@@ -138,13 +145,91 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPag
 		}
 	}
 
+	const getCampaigns = async (page = 1) => {
+		setLoading(true)
+		let campaignStatusFilter = {}
+		switch (selectedCampaignType) {
+			case 'sent':
+				campaignStatusFilter = {
+					status: {
+						$eq: 'sent',
+					},
+				}
+				break
+			case 'draft':
+				campaignStatusFilter = {
+					$and: [
+						{
+							status: {
+								$eq: 'draft',
+							},
+						},
+						{
+							date: { $null: true },
+						},
+					],
+				}
+				break
+			case 'outbox':
+				campaignStatusFilter = {
+					$and: [
+						{
+							status: {
+								$eq: 'draft',
+							},
+						},
+						{
+							date: { $notNull: true },
+						},
+					],
+				}
+				break
+		}
+		console.log('campaignStatusFilter', campaignStatusFilter)
+		const query = {
+			filters: campaignStatusFilter,
+			sort: ['id:desc'],
+			pagination: {
+				pageSize: dashboardPreviewOnly ? 3 : resultsPerPage,
+				page,
+			},
+			populate: {
+				recp_groups: {
+					populate: {
+						subscribers: {
+							count: true,
+						},
+					},
+				},
+			},
+		}
+		const queryString = qs.stringify(query, { encode: false })
+
+		try {
+			const resp = await ApiService.get(`fairymailer/getCampaigns?${queryString}`, user.jwt)
+
+			if (resp.data && resp.data.data) {
+				console.log('cmps from getCampaigns inside campaignsTable', resp)
+				setCampaigns(resp.data.data)
+				setTotalResults(resp.data.meta.pagination.total)
+			}
+			setCurrentPage(page)
+		} catch (error) {
+			console.error('Error fetching groups:', error)
+		} finally {
+			setLoading(false)
+		}
+	}
+
 	const startIndex = (currentPage - 1) * rowsPerPage
 	const endIndex = startIndex + rowsPerPage
 	const paginatedData = campaigns.slice(startIndex, endIndex)
 
 	useEffect(() => {
-		console.log('selected campagins : ', selectedCampaigns)
-	}, [selectedCampaigns])
+		if (user) {
+			getCampaigns(currentPage)
+		}
+	}, [user, currentPage, selectedCampaignType])
 
 	const actionsBodyTemplate = (rowData) => {
 		return (
@@ -179,45 +264,42 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPag
 	}
 
 	const dateBodyTemplate = (rowData) => {
-		return dayjs(rowData.date).tz('Europe/Athens').format('DD-MM-YYYY HH:mm')
+		return rowData.date ? dayjs(rowData.date).tz('Europe/Athens').format('DD-MM-YYYY HH:mm') : ''
 	}
 
 	return (
 		// <div>
 		<>
 			{!dashboardPreviewOnly ? (
-				<DataTable
-					value={paginatedData}
-					paginator={false}
-					selection={selectedCampaigns}
-					onSelectionChange={(e) => setSelectedCampaigns(e.value)}
-					dataKey="id"
-					rowClassName={() => 'p-table-row'}
-				>
+				<DataTable value={campaigns} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
 					<Column
-						body={(rowData) => (
-							<div style={{ position: 'relative' }}>
-								{/* Checkbox in the Top-Left Corner */}
-								<div style={{ position: 'absolute', top: '10px', left: '5px' }}>
-									<Checkbox
-										checked={selectedCampaigns.some((campaign) => campaign.name === rowData.name)}
-										onChange={(e) => {
-											if (e) {
-												setSelectedCampaigns((prev) => [...prev, rowData])
-											} else {
-												setSelectedCampaigns((prev) => prev.filter((campaign) => campaign.id !== rowData.id))
-											}
-										}}
-									/>
+						body={(rowData) =>
+							loading ? (
+								<Skeleton />
+							) : (
+								<div style={{ position: 'relative' }}>
+									{/* Checkbox in the Top-Left Corner */}
+									<div style={{ position: 'absolute', top: '10px', left: '5px' }}>
+										<Checkbox
+											checked={selectedCampaigns.some((campaign) => campaign.name === rowData.name)}
+											onChange={(e) => {
+												if (e) {
+													setSelectedCampaigns((prev) => [...prev, rowData])
+												} else {
+													setSelectedCampaigns((prev) => prev.filter((campaign) => campaign.id !== rowData.id))
+												}
+											}}
+										/>
+									</div>
+									{/* Image */}
+									{rowData.image ? (
+										<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+									) : (
+										<img src={'images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+									)}
 								</div>
-								{/* Image */}
-								{rowData.image ? (
-									<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
-								) : (
-									<img src={'images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
-								)}
-							</div>
-						)}
+							)
+						}
 						header={() => (
 							<Checkbox
 								checked={selectedCampaigns.length === paginatedData.length && selectedCampaigns.length > 0}
@@ -232,23 +314,16 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPag
 						)}
 						headerStyle={{ width: '80px' }}
 					/>
-					<Column field="name" header="Name" />
-					<Column field="recipients" header="Recipients" />
-					<Column field="stats.o" body={openBodyTemplate} header="Opens" />
-					<Column field="clicks" body={clickBodyTemplate} header="Clicks" />
-					<Column field="type" body={typeBodyTemplate} header="Type" />
-					<Column field="date" header="Date" body={dateBodyTemplate} />
-					<Column field="uuid" header="Actions" body={actionsBodyTemplate} />
+					<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
+					<Column field="recipients" header="Recipients" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
+					<Column field="stats.o" header="Opens" body={(rowData) => (loading ? <Skeleton /> : openBodyTemplate(rowData))} />
+					<Column field="clicks" header="Clicks" body={(rowData) => (loading ? <Skeleton /> : clickBodyTemplate(rowData))} />
+					<Column field="type" header="Type" body={(rowData) => (loading ? <Skeleton /> : typeBodyTemplate(rowData))} />
+					<Column field="date" header="Date" body={(rowData) => (loading ? <Skeleton /> : dateBodyTemplate(rowData))} />
+					<Column field="uuid" header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
 				</DataTable>
 			) : (
-				<DataTable
-					value={paginatedData}
-					paginator={false}
-					selection={selectedCampaigns}
-					onSelectionChange={(e) => setSelectedCampaigns(e.value)}
-					dataKey="id"
-					rowClassName={() => 'p-table-row'}
-				>
+				<DataTable value={campaigns} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
 					<Column
 						body={(rowData) => (
 							<div style={{ position: 'relative' }}>
@@ -278,7 +353,9 @@ const CampaignsTable = ({ campaigns, dashboardPreviewOnly = false, resultsPerPag
 					<Column field="recipients" header="Recipients" />
 				</DataTable>
 			)}
-			<Pagination currentPage={1} totalResults={campaigns.length} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
+
+			<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
+
 			{/* </div> */}
 		</>
 	)

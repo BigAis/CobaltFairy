@@ -33,9 +33,9 @@ const Subscribers = () => {
 
 	const { filterString } = useParams()
 
-	const [resultsPerPage, setResultsPerPage] = useState(10)
+	// const [resultsPerPage, setResultsPerPage] = useState(10)
 	const [totalGroups, setTotalGroups] = useState(0)
-	const [currentGroupPage, setCurrentGroupPage] = useState(1)
+	// const [currentGroupPage, setCurrentGroupPage] = useState(1)
 
 	const { user, account } = useAccount()
 	const [subscribers, setSubscribers] = useState([])
@@ -54,6 +54,7 @@ const Subscribers = () => {
 		dateTo: '',
 	})
 	const [autoAppliedFilters, setAutoAppliedFilters] = useState(false)
+	const [subscribersQueryFilter, setSubscribersQueryFilter] = useState('')
 
 	const base64string = btoa(JSON.stringify({}))
 
@@ -87,6 +88,11 @@ const Subscribers = () => {
 			.filter((id) => id !== null)
 
 		const query = {
+			sort: ['createdAt:desc'],
+			pagination: {
+				pageSize: 1000,
+				page: 1,
+			},
 			filters: {
 				email: subscribersFilters.email ? { $contains: subscribersFilters.email } : undefined,
 				name: subscribersFilters.name ? { $contains: subscribersFilters.name } : undefined,
@@ -102,11 +108,12 @@ const Subscribers = () => {
 			if (query.filters[key] === undefined) delete query.filters[key]
 		})
 
-		const queryString = qs.stringify(query, { encode: false })
+		setSubscribersQueryFilter(query)
+		// const queryString = qs.stringify(query, { encode: false })
 
-		const subscribersResponse = await ApiService.get(`fairymailer/getSubscribers?${queryString}&pagination[page]=${1}&pagination[pageSize]=${100}&populate[groups][count]=1`, user.jwt) ///?page=${page}&pageSize=${pageSize}
-		console.log('Subscribers', subscribersResponse)
-		if (subscribersResponse && subscribersResponse.data && subscribersResponse.data.data) setSubscribers(subscribersResponse.data.data)
+		// const subscribersResponse = await ApiService.get(`fairymailer/getSubscribers?${queryString}&pagination[page]=${1}&pagination[pageSize]=${100}&populate[groups][count]=1`, user.jwt) ///?page=${page}&pageSize=${pageSize}
+		// console.log('Subscribers', subscribersResponse)
+		// if (subscribersResponse && subscribersResponse.data && subscribersResponse.data.data) setSubscribers(subscribersResponse.data.data)
 	}
 
 	const getSubscribers = async () => {
@@ -121,34 +128,34 @@ const Subscribers = () => {
 	const getGroups = async (page = 1) => {
 		const query = {
 			pagination: {
-				pageSize: resultsPerPage,
+				pageSize: 1000,
 				page,
 			},
+			// fields: ['id', 'udid'],
 		}
 		const queryString = qs.stringify(query, { encode: false })
 
 		try {
-			const resp = await ApiService.get(`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true&filters[name][$contains]=${groupSearchValue}`, user.jwt)
+			const resp = await ApiService.get(`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true&`, user.jwt)
 
 			if (resp.data && resp.data.data) {
 				setGroups(resp.data.data)
 				setTotalGroups(resp.data.meta.pagination.total)
 			}
-			setCurrentGroupPage(page)
 		} catch (error) {
 			console.error('Error fetching groups:', error)
 		}
 	}
 
-	const handlePageChange = (newPage) => {
-		getGroups(newPage)
-	}
+	// const handlePageChange = (newPage) => {
+	// 	getGroups(newPage)
+	// }
 
 	useEffect(() => {
 		if (user) {
-			getGroups(currentGroupPage)
+			getGroups()
 		}
-	}, [user, currentGroupPage])
+	}, [user])
 
 	const renderAddButton = () => {
 		switch (view) {
@@ -181,7 +188,8 @@ const Subscribers = () => {
 			if (groups.length === 0) getGroups()
 			autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
 		}
-	}, [user, subscriberSearchValue, groupSearchValue, subscribersFilters, autoAppliedFilters])
+	}, [user, subscribersFilters, autoAppliedFilters])
+	// }, [user, subscriberSearchValue, groupSearchValue, subscribersFilters, autoAppliedFilters])
 
 	useEffect(() => {
 		if (filterString && groups && groups.length > 0) {
@@ -321,7 +329,7 @@ const Subscribers = () => {
 
 					{view === 'subs' && (
 						<div className="subscribers">
-							<SubscribersTable subscribers={subscribers} resultsPerPage={10} onUpdate={handleOnUpdate} />
+							<SubscribersTable subscriberSearchValue={subscriberSearchValue} subscribersQueryFilter={subscribersQueryFilter} onUpdate={handleOnUpdate} setView={setView} />
 						</div>
 					)}
 
