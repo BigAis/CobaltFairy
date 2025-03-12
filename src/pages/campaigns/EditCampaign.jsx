@@ -43,14 +43,14 @@ const EditCampaign = () => {
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 
 	const emailClientsOptions = campaign?.stats?.metadata?.emailClient
-	const halfRecps = Math.round(campaign?.recipients / 2);
+	const halfRecps = Math.round(campaign?.recipients / 2)
 	const absplitCampaignData =
 		campaign?.type === 'absplit'
 			? [
 					{
 						image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
 						subject: campaign?.subject,
-						recipients: halfRecps % 2 == 0 ? halfRecps : halfRecps-1,
+						recipients: halfRecps % 2 == 0 ? halfRecps : halfRecps - 1,
 						opens: campaign?.stats?.uo,
 						openRate: campaign?.stats?.or,
 						clicks: campaign?.stats?.uc,
@@ -152,23 +152,33 @@ const EditCampaign = () => {
 												</div>
 												<div className="campaing-stats-card-item">
 													<div className="campaing-stats-card-item-header">
-														<div>Opens : {campaign.stats?.uo || 0}</div>
-														<div>{((campaign.stats?.uo / campaign.recipients) * 100).toFixed(2) || 0}%</div>
+														<div>Opens : {campaign.stats?.uob ? campaign.stats?.uo + campaign.stats?.uob : campaign.stats?.uo || 0}</div>
+														<div>
+															{campaign.stats?.uob
+																? (((campaign.stats?.uo + campaign.stats?.uob) / campaign.recipients) * 100).toFixed(2)
+																: ((campaign.stats?.uo / campaign.recipients) * 100).toFixed(2) || 0}
+															%
+														</div>
 													</div>
 													<div>
 														<div className="progress-bar">
-															<div style={{ width: `${(campaign.stats?.uo / campaign.recipients) * 100}%` }} className="progress"></div>
+															<div style={{ width: `${campaign.stats.or}%` }} className="progress"></div>
 														</div>
 													</div>
 												</div>
 												<div className="campaing-stats-card-item">
 													<div className="campaing-stats-card-item-header">
-														<div>Clicked : {campaign.stats?.uc || 0}</div>
-														<div>{((campaign.stats?.uc / campaign.recipients) * 100).toFixed(2) || 0}%</div>
+														<div>Clicked : {campaign.stats?.ucb ? campaign.stats?.uc + campaign.stats?.ucb : campaign.stats?.uc || 0}</div>
+														<div>
+															{campaign.stats?.ucb
+																? (((campaign.stats?.uc + campaign.stats?.ucb) / campaign.recipients) * 100).toFixed(2)
+																: ((campaign.stats?.uc / campaign.recipients) * 100).toFixed(2) || 0}
+															%
+														</div>
 													</div>
 													<div>
 														<div className="progress-bar">
-															<div style={{ width: `${(campaign.stats?.uc / campaign.recipients) * 100}%` }} className="progress"></div>
+															<div style={{ width: `${campaign.stats.cr}%` }} className="progress"></div>
 														</div>
 													</div>
 												</div>
