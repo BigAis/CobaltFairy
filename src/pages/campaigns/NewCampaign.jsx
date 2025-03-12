@@ -336,47 +336,59 @@ const NewCampaign = () => {
 			getGroups()
 			getCampaigns()
 		}
-		if(step==4 && currentCampaign && currentCampaign.design){
-			try{
-				let des = JSON.parse(currentCampaign.design);
-				if(des && des.bodySettings) setCurrentDesign(des)
-				console.log('des.bodySettings',des.bodySettings)
-			}catch(err){
-				console.log('des.bodySettings',err)
+		if (step == 4 && currentCampaign && currentCampaign.design) {
+			try {
+				let des = JSON.parse(currentCampaign.design)
+				if (des && des.bodySettings) setCurrentDesign(des)
+				console.log('des.bodySettings', des.bodySettings)
+			} catch (err) {
+				console.log('des.bodySettings', err)
 			}
 		}
 	}, [uuid, user, step])
 
 	useEffect(() => {
-		// if (!scheduleCampaign) {
+		console.log('currentCampaign from scheduleCampaign useEffect is : ', currentCampaign)
 		setCurrentCampaign((prevState) => ({
 			...prevState,
 			date: scheduleCampaign ? (currentCampaign.date ? dayjs(currentCampaign.date).toISOString() : dayjs().toISOString()) : null,
 		}))
+		// if (!scheduleCampaign) {
 		// }
 	}, [scheduleCampaign])
 
 	useEffect(() => {
 		if (currentCampaign && currentCampaign.recp_groups && currentCampaign.recp_groups.length > 0) {
 			if (groups && groups.length > 0) {
+				currentCampaign.recp_groups = currentCampaign.recp_groups.map((group) => {
+					const groupId = typeof group === 'object' ? `${group.id}` : `${group}`
+					return `${groupId}`
+				})
+
+				console.log('groups from loading currentCampaign groups', currentCampaign.recp_groups)
+
 				setSelectedGroups(
-					currentCampaign.recp_groups.map((group) => ({
-						value: `${group.id}`,
-						label: groups.find((grp) => `${group.id}` == `${grp.value}`)?.label,
-					}))
+					currentCampaign.recp_groups.map((group) => {
+						const groupId = typeof group === 'object' ? `${group.id}` : `${group}`
+						return {
+							value: groupId,
+							label: groups.find((grp) => `${grp.value}` === groupId)?.label,
+						}
+					})
 				)
 			}
 		}
 	}, [currentCampaign])
 
 	const handleSelection = (selected) => {
+		setSelectedGroups(selected)
+
 		const final = selected.map((selectedOption) => {
 			return selectedOption.value
 		})
 		console.log('final are : ', final)
 
-		setSelectedGroups(selected)
-		currentCampaign.recp_groups = final;
+		currentCampaign.recp_groups = final
 		console.log('Selected Options:', selected)
 	}
 
@@ -579,7 +591,10 @@ const NewCampaign = () => {
 											<p style={{ fontSize: '14px', color: 'rgba(16, 15, 28, 1)', fontWeight: '500' }}>
 												{currentCampaign.subject === '' ? 'Subject goes here' : currentCampaign.subject}
 											</p>
-											<p style={{ fontSize: '14px', color: 'rgba(136, 125, 118, 1)', fontWeight: '500' }}> {currentDesign && currentDesign.bodySettings ? currentDesign.bodySettings.preHeader : 'Your email preheader will appear here.'}</p>
+											<p style={{ fontSize: '14px', color: 'rgba(136, 125, 118, 1)', fontWeight: '500' }}>
+												{' '}
+												{currentDesign && currentDesign.bodySettings ? currentDesign.bodySettings.preHeader : 'Your email preheader will appear here.'}
+											</p>
 										</div>
 										<div className="campaign-preview-third-row w-90">
 											<div className="skeleton-1"></div>
@@ -589,9 +604,7 @@ const NewCampaign = () => {
 								</div>
 
 								<div className="d-flex content-space-between">
-									<div>
-										{/* Mail Preview */}
-									</div>
+									<div>{/* Mail Preview */}</div>
 									<div>
 										<Button onClick={sendTestEmail} type="secondary">
 											Send test email
@@ -599,34 +612,6 @@ const NewCampaign = () => {
 									</div>
 								</div>
 								<div className="d-flex flex-column align-items-left">
-									{/* <Dropdown
-										onOptionSelect={(option) => {
-											setCurrentCampaign((prevState) => {
-												const updatedGroups = [...prevState.recp_groups]
-												if (updatedGroups.length !== 0) {
-													updatedGroups[0].id = parseInt(option.value)
-												} else {
-													updatedGroups.push({ id: parseInt(option.value) })
-												}
-
-												return { ...prevState, recp_groups: updatedGroups }
-											})
-										}}
-										options={groups}
-										withDivider={false}
-										icon={'Plus'}
-										selectedValue={
-											currentCampaign?.recp_groups[0]
-												? {
-														label: groups.filter((g) => g.value == currentCampaign.recp_groups[0].id)[0]?.label,
-														value: '' + currentCampaign.recp_groups[0].id,
-												  }
-												: null
-										}
-									>
-										{' '}
-										Select a group
-									</Dropdown> */}
 									<p>Target Group:</p>
 									<MultipleDropdown options={groups} selectedValues={selectedGroups} onOptionSelect={handleSelection} />
 									<br></br>
@@ -748,7 +733,7 @@ const NewCampaign = () => {
 												// 	showCancelButton: true,
 												// 	confirmButtonText: 'Schedule',
 												// 	onConfirm: () => {
-														
+
 												// 		console.log('User clicked OK!')
 												// 	},
 												// })

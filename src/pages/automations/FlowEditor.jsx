@@ -13,7 +13,6 @@ import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
 import PopupText from '../../components/PopupText/PopupText'
 
-
 const FlowEditor = () => {
 	const { autId } = useParams()
 	const automationContainerRef = useRef(null)
@@ -30,12 +29,8 @@ const FlowEditor = () => {
 	const [excludeNodes, setExcludeNodes] = useState([])
 	const [nodes, setNodes] = useState([])
 
-    const {user,account} = useAccount()
-    const steps = [
-        {label:'Automations'},
-        {label:'Edit Automation'},
-        {label:'Editor'},
-    ];
+	const { user, account } = useAccount()
+	const steps = [{ label: 'Automations' }, { label: 'Edit Automation' }, { label: 'Editor' }]
 	//State for Sidebar Setting
 	const [selectedNode, setSelectedNode] = useState(null)
 
@@ -47,14 +42,13 @@ const FlowEditor = () => {
 			loadTemplates()
 			loadCmpLinks()
 		}
-		if(account && user) init()
-	}, [user,account])
-
+		if (account && user) init()
+	}, [user, account])
 
 	const loadData = async (autId) => {
 		let resp = await ApiService.get(`fairymailer/getAutomations?filters[uuid]=${autId}&populate=*`, user.jwt)
 		const loadedNodes = resp.data.data[0].design
-		console.log('loadedNodes',loadedNodes,resp.data)
+		console.log('loadedNodes', loadedNodes, resp.data)
 		if (loadedNodes && loadedNodes.length > 0) {
 			setNodes(loadedNodes)
 			setHasTrigger(true)
@@ -105,9 +99,9 @@ const FlowEditor = () => {
 		}
 	}
 
-	useEffect(()=>{
-		console.log('Updated groups: ',groups); //DONT ERASE THIS.
-	},[groups])
+	useEffect(() => {
+		console.log('Updated groups: ', groups) //DONT ERASE THIS.
+	}, [groups])
 
 	const extractLinksFromCampaignDesign = (components = [], links = []) => {
 		components.forEach((component) => {
@@ -121,10 +115,10 @@ const FlowEditor = () => {
 		return links
 	}
 
-	const exportData = async (showSuccessMessage=true) => {
+	const exportData = async (showSuccessMessage = true) => {
 		const isAutomationValid = validateNodes()
 		if (!isAutomationValid) {
-			PopupText.fire({ icon: 'error', text: 'You have empty actions in your flow. You need to delete unwanted actions.', showCancelButton:false})
+			PopupText.fire({ icon: 'error', text: 'You have empty actions in your flow. You need to delete unwanted actions.', showCancelButton: false })
 			return
 		}
 
@@ -134,23 +128,23 @@ const FlowEditor = () => {
 		if (data && data.id > 0) {
 			resp = await ApiService.post(`fairymailer/save-automation/`, newData, user.jwt)
 		} else {
-			PopupText.fire({ icon: 'error', text: 'Failed to save your changes :(', showCancelButton:false})
+			PopupText.fire({ icon: 'error', text: 'Failed to save your changes :(', showCancelButton: false })
 		}
 		if (resp?.data?.data?.id) {
-			if(showSuccessMessage) PopupText.fire({ icon: 'success', text: 'You changes are successfully saved!', showCancelButton:false})
+			if (showSuccessMessage) PopupText.fire({ icon: 'success', text: 'You changes are successfully saved!', showCancelButton: false })
 		} else {
-			PopupText.fire({ icon: 'error', text: 'Failed to save your changes. If this problem persists, contact our support team.', showCancelButton:false})
+			PopupText.fire({ icon: 'error', text: 'Failed to save your changes. If this problem persists, contact our support team.', showCancelButton: false })
 		}
 	}
 
-	const addNode = (type, input = 0, position = 0, name= "") => {
+	const addNode = (type, input = 0, position = 0, name = '') => {
 		let maxid = 0
 		nodes.map((n) => {
 			if (n && n.id && n.id > maxid) maxid = n.id
 		})
 		const newNode = { id: maxid + 1, type, input: [{ id: input }], output: [] }
-		if(name && name.length>0){
-			newNode.name = name;
+		if (name && name.length > 0) {
+			newNode.name = name
 		}
 		let tmp = nodes
 		tmp.forEach((n, i) => {
@@ -170,8 +164,6 @@ const FlowEditor = () => {
 	const selectNode = (node) => {
 		setSelectedNode(node)
 	}
-
-
 
 	const workflowConditionOptions = [
 		{ value: 'cmp_open', label: 'was opened' },
@@ -209,8 +201,6 @@ const FlowEditor = () => {
 
 	const workflowEmailLinkOptions = getTplIdLinks()
 
-
-
 	const conditionOptions = [
 		{ value: 'when-user-opens-campaign', label: 'If Subscriber has opened a campaign' },
 		{ value: 'when-user-clicks-link', label: 'If Subscriber has clicked a link' },
@@ -238,6 +228,8 @@ const FlowEditor = () => {
 						if (node.data) return { value: node.id, label: node.data.emailSubject }
 					})
 			: []
+
+	console.log('workflow campaigns are : ', workflowCampaigns)
 
 	const handleTriggerSelectChange = (ev) => {
 		// Update the `name` and reset additional settings in `selectedNode`
@@ -355,7 +347,7 @@ const FlowEditor = () => {
 			case 'delay':
 				selectedValue = selectedValue[0]
 				triggerType = 'delay'
-				if(['days','hours'].includes(selectedValue)) triggerType = 'delayValue'
+				if (['days', 'hours'].includes(selectedValue)) triggerType = 'delayValue'
 				break
 			case 'copy-to-group':
 				triggerType = 'group'
@@ -380,13 +372,10 @@ const FlowEditor = () => {
 				break
 		}
 		console.log(triggerType, selectedValue)
-		let newNode = {...selectedNode,
-			data: { [triggerType]: selectedValue },
-			meta: { label: selectedLabel && selectedLabel[0] ? selectedLabel[0] : '' },
-		}
-		console.log('new Node',newNode)
+		let newNode = { ...selectedNode, data: { [triggerType]: selectedValue }, meta: { label: selectedLabel && selectedLabel[0] ? selectedLabel[0] : '' } }
+		console.log('new Node', newNode)
 		const updatedNodes = nodes.map((node) => (node.id === selectedNode.id ? { ...newNode } : node))
-		console.log('updatedNodes ',updatedNodes)
+		console.log('updatedNodes ', updatedNodes)
 		setNodes(updatedNodes)
 		setSelectedNode(null)
 	}
@@ -407,7 +396,7 @@ const FlowEditor = () => {
 			setSelectedNode(null)
 			console.log('Updated nodes:', updatedNodes)
 		}
-		setSelectedNode(null);
+		setSelectedNode(null)
 	}
 
 	const removeNode = async (node) => {
@@ -737,7 +726,7 @@ const FlowEditor = () => {
 			default:
 				break
 		}
-		console.log('Validation of',node,result)
+		console.log('Validation of', node, result)
 		return result
 	}
 
@@ -751,26 +740,37 @@ const FlowEditor = () => {
 	}
 
 	return (
-        <div className='flow-editor-container'>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
-			<div className='header'>
-				<Stepper steps={steps} current={3}/>
-				<div className='buttons'>
-					<Button type="secondary" icon="Save" onClick={exportData} >Save</Button>
-					<Switch style={{margin:'0 10px'}} label={data && data.active ? 'Automation is running' : 'Automation is stopped'} checked={data?.active} onChange={(value)=>{
-						setData({
-							...data,
-							active: value
-						})
-					}}/>
-					<Button onClick={async ()=>{
-						await exportData(false);
-						navigate('/automations');
-					}}>Done Editing</Button>
+		<div className="flow-editor-container">
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
+			<div className="header">
+				<Stepper steps={steps} current={3} />
+				<div className="buttons">
+					<Button type="secondary" icon="Save" onClick={exportData}>
+						Save
+					</Button>
+					<Switch
+						style={{ margin: '0 10px' }}
+						label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
+						checked={data?.active}
+						onChange={(value) => {
+							setData({
+								...data,
+								active: value,
+							})
+						}}
+					/>
+					<Button
+						onClick={async () => {
+							await exportData(false)
+							navigate('/automations')
+						}}
+					>
+						Done Editing
+					</Button>
 				</div>
 			</div>
-			<div className='body'>
-				<div id="automation-builder" ref={automationContainerRef} >
+			<div className="body">
+				<div id="automation-builder" ref={automationContainerRef}>
 					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '90vw' }}>
 						{nodes.map((node, idx) => {
 							let children
@@ -792,49 +792,75 @@ const FlowEditor = () => {
 										children={children}
 										getChildrenOfCondition={getChildrenOfCondition}
 										handleAdditionalChange={handleAdditionalChange}
-										data={{groups,avlCampaigns,workflowCampaigns,templates,cmpLinks}}
+										data={{ groups, avlCampaigns, workflowCampaigns, templates, cmpLinks }}
 										setSideBarShown={setSideBarShown}
-										onUpdate={(data)=>{
-											console.log('OnUpdate Node: ',data)
-											setNodes(nodes.map(n=>{
-												if(n.id==data.id) return data;
-												return n;
-											}))
+										onUpdate={(data) => {
+											console.log('OnUpdate Node: ', data)
+											setNodes(
+												nodes.map((n) => {
+													if (n.id == data.id) return data
+													return n
+												})
+											)
 										}}
 									/>
 								)
 						})}
 					</ul>
 				</div>
-				<div className={"flow-sidebar "+(sidebarShown && 'visible')}>
+				<div className={'flow-sidebar ' + (sidebarShown && 'visible')}>
 					{!hasTrigger ? (
 						<>
 							{!selectedNode && (
 								<div>
-									<h3 className='triggers-header'>Triggers</h3>
+									<h3 className="triggers-header">Triggers</h3>
 									<br></br>
-									<Card onClick={()=>{
-										addNode('trigger',0,0,'when-user-subscribes');
-										selectNode(nodes[0])
-									}} style={{cursor:'pointer'}}>
-										<h5><img src='/images/automations/when_user_subscribes.png'/>&nbsp;When subscriber joins a group</h5>
-										<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.</p>
+									<Card
+										onClick={() => {
+											addNode('trigger', 0, 0, 'when-user-subscribes')
+											selectNode(nodes[0])
+										}}
+										style={{ cursor: 'pointer' }}
+									>
+										<h5>
+											<img src="/images/automations/when_user_subscribes.png" />
+											&nbsp;When subscriber joins a group
+										</h5>
+										<p>
+											Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.
+										</p>
 									</Card>
 									<br></br>
-									<Card onClick={()=>{
-										addNode('trigger',0,0,'when-user-opens-campaign');
-										selectNode(nodes[0])
-									}} style={{cursor:'pointer'}}>
-										<h5><img src='/images/automations/wehen_user_opens_cmp.png'/>&nbsp;When opens a campaign</h5>
-										<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.</p>
+									<Card
+										onClick={() => {
+											addNode('trigger', 0, 0, 'when-user-opens-campaign')
+											selectNode(nodes[0])
+										}}
+										style={{ cursor: 'pointer' }}
+									>
+										<h5>
+											<img src="/images/automations/wehen_user_opens_cmp.png" />
+											&nbsp;When opens a campaign
+										</h5>
+										<p>
+											Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.
+										</p>
 									</Card>
 									<br></br>
-									<Card onClick={()=>{
-										addNode('trigger',0,0,'when-user-clicks-link');
-										selectNode(nodes[0])
-									}} style={{cursor:'pointer'}}>
-										<h5><img src='/images/automations/when_user_clicks_link.png'/>&nbsp;When clicks a link</h5>
-										<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.</p>
+									<Card
+										onClick={() => {
+											addNode('trigger', 0, 0, 'when-user-clicks-link')
+											selectNode(nodes[0])
+										}}
+										style={{ cursor: 'pointer' }}
+									>
+										<h5>
+											<img src="/images/automations/when_user_clicks_link.png" />
+											&nbsp;When clicks a link
+										</h5>
+										<p>
+											Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.
+										</p>
 									</Card>
 									<br></br>
 								</div>
@@ -843,10 +869,7 @@ const FlowEditor = () => {
 								<div style={{ flexGrow: '1' }}>
 									{/* Render the additional select based on the trigger option */}
 									{selectedNode.name === 'when-user-subscribes' && (
-											<>
-												{/* <h4 style={{fontFamily:'Inter',fontSize:'16px', textAlign:'left', marginBottom:'10px'}}>Select a group</h4> */}
-												
-											</>
+										<>{/* <h4 style={{fontFamily:'Inter',fontSize:'16px', textAlign:'left', marginBottom:'10px'}}>Select a group</h4> */}</>
 									)}
 									{selectedNode.name === 'when-user-opens-campaign' && (
 										<Select
@@ -899,7 +922,6 @@ const FlowEditor = () => {
 								</div>
 							)}
 
-
 							{selectedNode && selectedNode.type === 'action' && (
 								<div style={{ flexGrow: '1' }}>
 									<Select
@@ -911,7 +933,7 @@ const FlowEditor = () => {
 														label: actionOptions.find((option) => {
 															return option.value === selectedNode.name
 														}).label,
-												}
+												  }
 												: null // Handle the case where `name` is null or undefined
 										}
 										options={actionOptions}
@@ -968,7 +990,6 @@ const FlowEditor = () => {
 
 							{selectedNode && selectedNode.type === 'condition' && (
 								<div style={{ flexGrow: '1' }}>
-								
 									{selectedNode.name === 'workflow-activity' && (
 										<>
 											<Select
@@ -1215,33 +1236,88 @@ const FlowEditor = () => {
 						</>
 					) : (
 						<>
-							<div className='toolbox'>
-								
-								<div className='panel-header'>
-									<Icon name={'Caret'}/>
+							<div className="toolbox">
+								<div className="panel-header">
+									<Icon name={'Caret'} />
 									<h5>Actions</h5>
 								</div>
-								<div className='panel'>
-									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','delay') }}> <img draggable="false" src="/images/automations/action_delay.png"/> </Card>
-									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','action-copy-group') }}> <img draggable="false" src="/images/automations/action_copy_group.png"/> </Card>
-									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','action-remove-group') }}> <img draggable="false" src="/images/automations/action_remove_group.png"/> </Card>
-									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','email') }}> <img draggable="false" src="/images/automations/action_template.png"/> </Card>
-									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','action-move-group') }}> <img draggable="false" src="/images/automations/action_move_group.png"/> </Card>
-									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','action-unsubscribe') }}> <img draggable="false" src="/images/automations/action_unsubscribe.png"/> </Card>
+								<div className="panel">
+									<Card
+										draggable="true"
+										onDragStart={(e) => {
+											e.dataTransfer.setData('text/plain', 'delay')
+										}}
+									>
+										{' '}
+										<img draggable="false" src="/images/automations/action_delay.png" />{' '}
+									</Card>
+									<Card
+										draggable="true"
+										onDragStart={(e) => {
+											e.dataTransfer.setData('text/plain', 'action-copy-group')
+										}}
+									>
+										{' '}
+										<img draggable="false" src="/images/automations/action_copy_group.png" />{' '}
+									</Card>
+									<Card
+										draggable="true"
+										onDragStart={(e) => {
+											e.dataTransfer.setData('text/plain', 'action-remove-group')
+										}}
+									>
+										{' '}
+										<img draggable="false" src="/images/automations/action_remove_group.png" />{' '}
+									</Card>
+									<Card
+										draggable="true"
+										onDragStart={(e) => {
+											e.dataTransfer.setData('text/plain', 'email')
+										}}
+									>
+										{' '}
+										<img draggable="false" src="/images/automations/action_template.png" />{' '}
+									</Card>
+									<Card
+										draggable="true"
+										onDragStart={(e) => {
+											e.dataTransfer.setData('text/plain', 'action-move-group')
+										}}
+									>
+										{' '}
+										<img draggable="false" src="/images/automations/action_move_group.png" />{' '}
+									</Card>
+									<Card
+										draggable="true"
+										onDragStart={(e) => {
+											e.dataTransfer.setData('text/plain', 'action-unsubscribe')
+										}}
+									>
+										{' '}
+										<img draggable="false" src="/images/automations/action_unsubscribe.png" />{' '}
+									</Card>
 								</div>
-								<div className='panel-header'>
-									<Icon name={'Caret'}/>
+								<div className="panel-header">
+									<Icon name={'Caret'} />
 									<h5>Conditions</h5>
 								</div>
-								<div className='panel'>
-									<Card draggable="true" onDragStart={(e)=>{ e.dataTransfer.setData('text/plain','condition') }}> <img src="/images/automations/condition.png"/> </Card>
+								<div className="panel">
+									<Card
+										draggable="true"
+										onDragStart={(e) => {
+											e.dataTransfer.setData('text/plain', 'condition')
+										}}
+									>
+										{' '}
+										<img src="/images/automations/condition.png" />{' '}
+									</Card>
 								</div>
 							</div>
 						</>
 					)}
 				</div>
 			</div>
-        </div>
+		</div>
 	)
 }
 

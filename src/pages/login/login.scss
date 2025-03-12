@@ -1,342 +1,332 @@
-.login-component{
-
-.login-wrapper {
-    display: flex;
-    align-items: center;
-    min-height: 80vh;
-    background-color: #FFF1DF;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 2em 0;
-    .input-text-wrapper {
-        .floating-label{
-            top: calc(50% - 8px );
-        }
-        &:focus + .floating-label,
-		&:not(:placeholder-shown) + .floating-label {
-			top: 14px!important;
+.login-component {
+	.login-wrapper {
+		display: flex;
+		align-items: center;
+		min-height: 80vh;
+		background-color: #fff1df;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 2em 0;
+		.input-text-wrapper {
+			.floating-label {
+				// top: calc(50% - 8px);
+			}
+			&:focus + .floating-label,
+			&:not(:placeholder-shown) + .floating-label {
+				// top: 14px !important;
+			}
 		}
-    }
-    .card{
-       
-        width: 100%;
-        max-width: 450px;
-        padding: 40px;
-    }
-}
+		.card {
+			width: 100%;
+			max-width: 450px;
+			padding: 40px;
+		}
+	}
 
+	.header-info {
+		width: 100%;
+		margin-bottom: 20px;
+	}
 
-.header-info {
-    width: 100%;
-    margin-bottom: 20px; 
-}
+	.header-info header {
+		text-align: center;
+	}
 
-.header-info header {
-    text-align: center;
-}
+	.header-info header h1 {
+		font-family: 'Bitter', serif;
+		font-weight: 700;
+		font-size: 32px;
+		color: #333;
+		margin: 0;
+	}
 
-.header-info header h1 {
-    font-family: 'Bitter', serif;
-    font-weight: 700;
-    font-size: 32px;
-    color: #333;
-    margin: 0; 
-}
+	.header-info header p {
+		font-family: 'Inter', sans-serif;
+		font-weight: 500;
+		font-size: 16px;
+		color: #777;
+		margin: 5px 0 0 0;
+	}
 
-.header-info header p {
-    font-family: 'Inter', sans-serif;
-    font-weight: 500; 
-    font-size: 16px; 
-    color: #777;
-    margin: 5px 0 0 0; 
-}
+	.login-options {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
 
-.login-options {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
+	.google-login-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		padding: 12px;
+		background-color: #ffffff;
+		border: 2px solid #dad1c5;
+		border-radius: 5px;
+		font-size: 1rem;
+		font-family: 'Inter', sans-serif;
+		color: #333;
+		cursor: pointer;
+		transition: background-color 0.3s, box-shadow 0.3s;
+		margin-bottom: 10px;
+		text-align: center;
+	}
 
-.google-login-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 12px;
-    background-color: #ffffff;
-    border: 2px solid #DAD1C5;
-    border-radius: 5px;
-    font-size: 1rem;
-    font-family: 'Inter', sans-serif;
-    color: #333;
-    cursor: pointer;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    margin-bottom: 10px;
-    text-align: center;
-}
+	.google-login-btn:hover {
+		background-color: #f7f7f7;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
 
-.google-login-btn:hover {
-    background-color: #f7f7f7;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+	.google-logo {
+		width: 20px;
+		height: 20px;
+		margin-right: 8px;
+	}
 
-.google-logo {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-}
+	.breakpoint-or {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		margin: 20px 0;
+	}
 
-.breakpoint-or {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    margin: 20px 0;
-}
+	.breakpoint-or::before,
+	.breakpoint-or::after {
+		content: '';
+		flex: 1;
+		height: 2px;
+		background-color: #dad1c5;
+	}
 
-.breakpoint-or::before,
-.breakpoint-or::after {
-    content: '';
-    flex: 1;
-    height: 2px;
-    background-color: #DAD1C5;
-}
+	.breakpoint-or span {
+		margin: 0 10px;
+		font-size: 16px;
+		color: #dad1c5;
+		font-family: 'Inter', sans-serif;
+		font-weight: 500;
+	}
 
-.breakpoint-or span {
-    margin: 0 10px;
-    font-size: 16px;
-    color: #DAD1C5;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500
-}
+	.email-form {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		gap: 10px;
+	}
 
-.email-form {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
+	.email-form input {
+		font-size: 1rem;
+		font-family: 'Inter', sans-serif;
+		border: 2px solid #dad1c5;
+		border-radius: 5px;
+		// margin-bottom: 15px;
+		width: 100%;
+		height: 48px;
+		box-sizing: border-box;
+		transition: border-color 0.3s;
+		background-color: rgba(255, 255, 255, 0.5);
+		color: #333;
+	}
+	.email-form {
+		.input-text-wrapper .error-message {
+			margin-top: -10px;
+			margin-bottom: 10px;
+		}
+	}
 
-.email-form input {
-    font-size: 1rem; 
-    font-family: 'Inter', sans-serif;
-    border: 2px solid #DAD1C5;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    width: 100%; 
-    height: 48px; 
-    box-sizing: border-box; 
-    transition: border-color 0.3s;
-    background-color:  rgba(255, 255, 255, 0.5); 
-    color: #333;
-}
-.email-form{
-    .input-text-wrapper .error-message {
-        margin-top: -10px;
-        margin-bottom: 10px;
-    }
-}
+	.email-form input:focus {
+		border-color: #4285f4;
+		outline: none;
+	}
 
-.email-form input:focus {
-    border-color: #4285f4;
-    outline: none;
-}
+	.email-form button {
+		padding: 12px;
+		background-color: rgba(255, 195, 173, 0.5);
+		color: 333;
+		border: 2px solid #ff635d;
+		border-radius: 5px;
+		font-size: 1.1rem;
+		cursor: pointer;
+		transition: background-color 0.3s;
+	}
 
-.email-form button {
-    padding: 12px;
-    background-color: rgba(255, 195, 173, 0.5);
-    color: 333;
-    border: 2px solid #FF635D;
-    border-radius: 5px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
+	.email-form button:hover {
+		background-color: rgba(255, 195, 173, 0.8);
+		border-color: #ff2a1e;
+	}
 
-.email-form button:hover {
-    background-color: rgba(255, 195, 173, 0.8);
-    border-color: #FF2A1E;
-}
+	.input-rows {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 20px 0;
+	}
 
+	.input-groups {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		max-width: 400px;
+		margin: 0 auto;
+		position: relative;
+		.input-text-wrapper {
+			width: 100%;
+		}
+	}
 
+	.user-password {
+		flex: 1;
+		// padding: 14px 100px;
+		font-size: 14px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		box-sizing: border-box;
+	}
 
-.input-rows {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px 0;
-  }
-  
-  .input-groups {
-    display: flex;
-    align-items: center; 
-    gap: 10px; 
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-    position: relative;
-    .input-text-wrapper{
-        width:100%
-    }
-  }
-  
-  .user-password {
-    flex: 1; 
-    padding: 14px 100px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-  
-  .eye-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    position: absolute;
-    right: 8px;
-  }
+	.eye-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: none;
+		border: none;
+		padding: 8px;
+		cursor: pointer;
+		position: absolute;
+		right: 8px;
+	}
 
-  .eye-button:hover svg {
-    fill: #007BFF;
-  }
-  
-.remember-me {
-    align-items: l;
-}
+	.eye-button:hover svg {
+		fill: #007bff;
+	}
 
-.back-button{
-    svg{
-        transform: rotate(180deg);
-    }
-}
-.back-button:hover{
-    color: #FF635D;
-    path{
-        fill: #FF635D;
-    }
-}
+	.remember-me {
+		align-items: l;
+	}
 
+	.back-button {
+		svg {
+			transform: rotate(180deg);
+		}
+	}
+	.back-button:hover {
+		color: #ff635d;
+		path {
+			fill: #ff635d;
+		}
+	}
 
-.forgot-password {
-    position: absolute;
-    bottom: -20px;
-    right: 0;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: 'Inter', sans-serif;
-    color: #333;
-    cursor: pointer;
-    transition: color 0.3s;
-    &:hover {
-      color: #333;
-    }
-  }
+	.forgot-password {
+		position: absolute;
+		bottom: -20px;
+		right: 0;
+		font-size: 14px;
+		font-weight: 500;
+		font-family: 'Inter', sans-serif;
+		color: #333;
+		cursor: pointer;
+		transition: color 0.3s;
+		&:hover {
+			color: #333;
+		}
+	}
 
+	@media (max-width: 768px) {
+		.login-wrapper {
+			padding: 20px;
+			background-color: #fff1df;
+		}
 
+		.card {
+			background-color: #fff1df;
+			border: 0;
+		}
+		.email-form {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			max-width: 450px;
+		}
 
+		.email-form input {
+			font-size: 1rem;
+			font-family: 'Inter', sans-serif;
+			border: 2px solid #dad1c5;
+			border-radius: 5px;
+			margin-bottom: 15px;
+			width: 100%;
+			height: 48px;
+			box-sizing: border-box;
+			transition: border-color 0.3s;
+			background-color: rgba(255, 255, 255, 0.5);
+			color: #333;
+		}
 
+		.email-form button {
+			padding: 12px;
+			background-color: rgba(255, 195, 173, 0.5);
+			color: 333;
+			border: 2px solid #ff635d;
+			border-radius: 5px;
+			font-size: 1.1rem;
+			cursor: pointer;
+			transition: background-color 0.3s;
+			width: 100%;
+		}
 
-@media (max-width: 768px) {
+		.email-form button:hover {
+			background-color: rgba(255, 195, 173, 0.8);
+			border-color: #ff2a1e;
+		}
 
-    .login-wrapper {
-        padding: 20px;
-        background-color: #FFF1DF;
-    }
+		.google-login-btn {
+			width: 100%;
+			padding: 12px;
+			background-color: #ffffff;
+			border: 2px solid #dad1c5;
+			border-radius: 5px;
+			font-size: 1rem;
+			font-family: 'Inter', sans-serif;
+			color: #333;
+			cursor: pointer;
+			transition: background-color 0.3s, box-shadow 0.3s;
+			margin-bottom: 10px;
+			text-align: center;
+		}
 
-    .card{
-        background-color: #FFF1DF;
-        border: 0;
-    }
-    .email-form {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        max-width: 450px;
-    }
+		.google-login-btn:hover {
+			background-color: #f7f7f7;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
 
-    .email-form input {
-        font-size: 1rem; 
-        font-family: 'Inter', sans-serif;
-        border: 2px solid #DAD1C5;
-        border-radius: 5px;
-        margin-bottom: 15px;
-        width: 100%; 
-        height: 48px; 
-        box-sizing: border-box; 
-        transition: border-color 0.3s;
-        background-color: rgba(255, 255, 255, 0.5); 
-        color: #333;
-    }
+		.google-logo {
+			width: 20px;
+			height: 20px;
+			margin-right: 8px;
+		}
 
-    .email-form button {
-        padding: 12px;
-        background-color: rgba(255, 195, 173, 0.5);
-        color: 333;
-        border: 2px solid #FF635D;
-        border-radius: 5px;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        width: 100%;
-    }
+		.breakpoint-or {
+			display: flex;
+			align-items: center;
+			width: 100%;
+			margin: 10px 0;
+		}
 
-    .email-form button:hover {
-        background-color: rgba(255, 195, 173, 0.8);
-        border-color: #FF2A1E;
-    }
+		.breakpoint-or::before,
+		.breakpoint-or::after {
+			content: '';
+			flex: 1;
+			height: 2px;
+			background-color: #dad1c5;
+		}
 
-    .google-login-btn {
-        width: 100%;
-        padding: 12px;
-        background-color: #ffffff;
-        border: 2px solid #DAD1C5;
-        border-radius: 5px;
-        font-size: 1rem;
-        font-family: 'Inter', sans-serif;
-        color: #333;
-        cursor: pointer;
-        transition: background-color 0.3s, box-shadow 0.3s;
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
-    .google-login-btn:hover {
-        background-color: #f7f7f7;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .google-logo {
-        width: 20px;
-        height: 20px;
-        margin-right: 8px;
-    }
-
-    .breakpoint-or {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        margin: 10px 0;
-    }
-
-    .breakpoint-or::before,
-    .breakpoint-or::after {
-        content: '';
-        flex: 1;
-        height: 2px;
-        background-color: #DAD1C5;
-    }
-
-    .breakpoint-or span {
-        margin: 0 10px;
-        font-size: 16px;
-        color: #DAD1C5;
-        font-family: 'Inter', sans-serif;
-        font-weight: 500
-    }
-}
+		.breakpoint-or span {
+			margin: 0 10px;
+			font-size: 16px;
+			color: #dad1c5;
+			font-family: 'Inter', sans-serif;
+			font-weight: 500;
+		}
+	}
 }

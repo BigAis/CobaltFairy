@@ -181,7 +181,7 @@ const Campaigns = () => {
 									{ value: 'sent', label: `Sent (${totalCampaignsSent})` },
 									{ value: 'draft', label: `Draft (${totalCampaignsDraft})` },
 									{ value: 'outbox', label: `Outbox(${totalCampaignsOutBox})` },
-									{ value: 'templates', label: 'Templates (4)' },
+									{ value: 'templates', label: `Templates (${templates && templates.length > 0 ? templates.length : '0'})` },
 								]}
 								onChange={(value) => {
 									console.log('the value is : ', value)
