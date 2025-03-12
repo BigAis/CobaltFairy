@@ -1,6 +1,7 @@
 import React from 'react'
 
-const EmailPreview = (uuid) => {
+const EmailPreview = ({uuid}) => {
+	console.log('uuid',uuid, typeof uuid)
 	const previewUrl = `https://fairymail.cobaltfairy.com/api/fairymailer/load-campaign-body/${uuid}`
 
 	return (

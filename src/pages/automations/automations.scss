@@ -24,6 +24,9 @@
 }
 .flow-editor-container{
     background:#fff8ef;
+    ul{
+        margin-left:0!important;
+    }
     .header{
         flex-direction: column;;
         padding-top:10px;

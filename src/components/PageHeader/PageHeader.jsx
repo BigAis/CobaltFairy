@@ -62,7 +62,7 @@ const PageHeader = () => {
 				</div>
 				<Icon name="Caret" size={24}/>
 				{userMenuOpen && (
-					<Card className="user-menu">
+					<Card className="user-menu" style={{background:'#FFF9EF'}}>
 						{userMenuOptions.map((option) => (
 							<div style={{fontSize:'16px'}} key={option.label} className="user-menu-option" onClick={() => {option.callback()}}>
 								{option.label}
