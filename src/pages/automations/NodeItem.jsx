@@ -11,6 +11,7 @@ import Dropdown from '../../components/Dropdown'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
 import InputText from '../../components/InputText/InputText'
+import PopupText from '../../components/PopupText/PopupText'
 
 
 const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, getChildrenOfCondition, data, onUpdate, handleAdditionalChange, setSideBarShown }) => {
@@ -40,7 +41,17 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 	const handleRemove = () => {
 		removeNode(node.id)
 	}
-
+	const extractLinksFromCampaignDesign = (components = [], links = []) => {
+		components.forEach((component) => {
+			if (component.components && component.components.length > 0) {
+				links = [...extractLinksFromCampaignDesign(component.components, links)]
+			}
+			if (component.type === 'link') {
+				links.push(component?.attributes?.href)
+			}
+		})
+		return links
+	}
 	const getTplIdLinks = (nodeId) => {
 		let links = []
 		const tplId = nodes.filter((node) => node.id === nodeId)[0]?.data?.tplId
@@ -125,6 +136,8 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 			)
 			break
 		case 'email':
+			// const [isImgLoading,setIsImgLoading] = useState(true);
+			const imageUrl = node?.data?.tplUuid ? `https://cdn.cobaltfairy.com/fairymail/template/img/${node.data.tplUuid}` : '';
 			content = (
 				<li
 					className="d-flex flex-column align-items-center automation-node-item"
@@ -143,21 +156,45 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								<Dropdown
 									className={'delay-dropdown'}
 									style={{width:'350px'}}
-									options={data.templates.map(t=>{return {label:t.attributes.name, value:t.id}})}
+									options={data.templates.map(t=>{return {label:t.attributes.name, value:t.id, uuid:t.attributes.uuid}})}
 									onOptionSelect={(v)=>{
-										node = {...node,templateName: data.templates.filter(t=>t.id==v)[0].attributes.name, data: { ...node.data, tplId: v }}
+										console.log('data.templates',data.templates)
+										node = {...node,templateName: data.templates.filter(t=>t.id==v.value)[0].attributes.name, data: { ...node.data, tplId: v.value, tplUuid:v.uuid, tplImageLoading:true }}
 										onUpdate(node)
 									}}> {node.meta && node.meta.label ? node.meta.label : 'Select a template'}
 								</Dropdown>
 								<InputText 
 									type="text"
-									style={{marginTop:'10px', minWidth:'350px', marginRight:'10px'}}
+									style={{marginTop:'10px', minWidth:'350px'}}
 									label="Subject"
 									onChange={(e)=>{
 										node = {...node, name:node.type, data: { ...node.data, emailSubject: e.target.value }}
 										onUpdate(node)
 									}}
 								/>
+								{node?.data?.tplUuid && (
+									<>
+										<img src={imageUrl} alt="" style={{ display: 'none' }} onLoad={()=>{
+											node = {...node, data: { ...node.data, tplImageLoading:false }}
+											onUpdate(node)
+										}} />
+										{node?.data?.tplImageLoading && <div style={{minHeight:'100px'}}><div style={{ position:'absolute',top: '40%', left: '50%', transform: 'translate(-50%, 5%) scale(.5)' }}><svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" width="200" height="200" style={{shapeRendering:'auto',display:'block',background:'transparent'}}><g><circle fill="none" stroke-width="10" stroke="#fff2df" r="30" cy="50" cx="50"></circle><circle fill="none" stroke-linecap="round" stroke-width="8" stroke="#ff635e" r="30" cy="50" cx="50"><animateTransform keyTimes="0;0.5;1" values="0 50 50;180 50 50;720 50 50" dur="1.5625s" repeatCount="indefinite" type="rotate" attributeName="transform"></animateTransform><animate keyTimes="0;0.5;1" values="18.84955592153876 169.64600329384882;94.2477796076938 94.24777960769377;18.84955592153876 169.64600329384882" dur="1.5625s" repeatCount="indefinite" attributeName="stroke-dasharray"></animate></circle><g></g></g></svg></div></div>}
+										{!node?.data?.tplImageLoading && <>
+											<div style={{minHeight:'200px',width:'100%',background:`url('${imageUrl}')`,backgroundRepeat:'no-repeat',backgroundSize:'cover',backgroundPositionY:0}}>
+												<Button type='secondary' style={{position:'absolute',background:'white',bottom:'30px',right:'50px'}} onClick={async ()=>{
+													await PopupText.fire({
+														text:'The template editor will now open in a new tab. Once you save any changes, you can safely close that tab and return to this one.',
+														showCancelButton:true,
+														confirmButtonText:'OK',
+														onConfirm: ()=>{
+															window.open(`/templates/edit/${node?.data?.tplUuid}`);
+														}
+													})
+												}}>Edit template</Button>
+											</div>
+										</>}
+									</>
+								)}
 							</div>
 						</Card>
 					</div>
@@ -319,7 +356,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 										options={conditionOptions}
 										style={{width:'350px'}}
 										onOptionSelect={(v, l)=>{
-											node = {...node,name: v, data: { ...node.data || {}}, meta: {label: l}}
+											node = {...node,name: v.value, data: { ...node.data || {}}, meta: {label: l}}
 											onUpdate(node)
 									}}> Select a condition </Dropdown>
 									{node.name && node.name == "cmp-activity" && (
@@ -357,13 +394,14 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 
 										</>
 									)}
+									{console.log(node.name)}
 									{node.name && node.name == "workflow-activity" && (
 										<>
 											<Dropdown 
 												options={data.workflowCampaigns}
 												style={{width:'350px'}}
 												onOptionSelect={(v)=>{
-													node = {...node, data: { ...node.data, cmp: v }}
+													node = {...node, data: { ...node.data, cmp: v.value, email_node_id: v.value }}
 													onUpdate(node)
 											}}> Select a campaign </Dropdown>
 
@@ -373,11 +411,12 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 														options={workflowConditionOptions}
 														style={{width:'350px'}}
 														onOptionSelect={(v)=>{
-															node = {...node,data: { ...node.data, trigger: v }}
+															node = {...node,data: { ...node.data, trigger: v.value }}
 															onUpdate(node)
 													}}> Select a trigger </Dropdown>
 													{node.data?.trigger && ['cmp_link_clicked','cmp_link_not_clicked'].includes(node.data?.trigger) && (
 														<>
+															{ console.log('updated',node.data)	}
 															<Dropdown 
 																options={getTplIdLinks(node?.data?.email_node_id)}
 																style={{width:'350px', maxWidth:'350px'}}
@@ -409,7 +448,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 												options={data.cmpLinks}
 												style={{width:'350px'}}
 												onOptionSelect={(v)=>{
-													node = {...node, data: { ...node.data, link: v }}
+													node = {...node, data: { ...node.data, link: v.value }}
 													onUpdate(node)
 											}}> Select a link </Dropdown>
 										</>

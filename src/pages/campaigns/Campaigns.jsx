@@ -19,6 +19,7 @@ import { ApiService } from '../../service/api-service'
 import PopupText from '../../components/PopupText/PopupText'
 import { use } from 'react'
 import TemplateCard from '../../components/TemplateCard/TemplateCard'
+import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
 import { v4 as uuidv4 } from 'uuid'
 
 // const getNameInitials = (name) =>
@@ -263,13 +264,17 @@ const Campaigns = () => {
 									</Card>
 									{templates &&
 										templates.length > 0 &&
-										templates.map((template) => (
-											<TemplateCard
-												key={template.uuid}
-												templateName={template.name}
-												onPreviewClick={() => (window.location.href = `https://fairymail.cobaltfairy.com/api/fairymailer/load-campaign-body/${template.uuid}`)}
-												onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
-											/>
+										templates.sort((a,b) => a.id - b.id).map((template,i) => (
+											<>
+												<TemplateCard
+													key={template.uuid}
+													template_udid={template.uuid}
+													templateName={template.name}
+													onPreviewClick={() => { setTemplates([...templates.filter(t=>t.uuid!=template.uuid),{...template,showPreview:true}]) }}
+													onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
+												/>
+												<TemplatePreview template_udid={template.uuid} show={template.showPreview} onClose={()=>{setTemplates([...templates.filter(t=>t.uuid!=template.uuid),{...template,showPreview:false}])}}/>
+											</>
 										))}
 								</div>
 							</>

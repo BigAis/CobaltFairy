@@ -115,8 +115,10 @@ const Dashboard = () => {
 	}, [statsData, subsStatsKey])
 
 	useEffect(() => {
-		loadStats()
-	}, [user])
+		if (user && account) {
+			loadStats()
+		}
+	}, [user, account])
 
 	return (
 		<>

@@ -43,14 +43,14 @@ const EditCampaign = () => {
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 
 	const emailClientsOptions = campaign?.stats?.metadata?.emailClient
-
+	const halfRecps = Math.round(campaign?.recipients / 2);
 	const absplitCampaignData =
 		campaign?.type === 'absplit'
 			? [
 					{
 						image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
 						subject: campaign?.subject,
-						recipients: campaign?.recipients / 2,
+						recipients: halfRecps % 2 == 0 ? halfRecps : halfRecps-1,
 						opens: campaign?.stats?.uo,
 						openRate: campaign?.stats?.or,
 						clicks: campaign?.stats?.uc,
@@ -59,7 +59,7 @@ const EditCampaign = () => {
 					{
 						image: 'https://i.imgur.com/1Xh6g2b_d.webp?maxwidth=760&fidelity=grand',
 						subject: campaign?.subject_b,
-						recipients: campaign?.recipients / 2,
+						recipients: halfRecps,
 						opens: campaign?.stats?.uob,
 						openRate: campaign?.stats?.obr,
 						clicks: campaign?.stats?.ucb,

@@ -64,7 +64,7 @@ const EditAutomation = ()=>{
     return (
         <div className='edit-automation-wrapper'>
             <div className='edit-automation-header'>
-                <Stepper steps={steps} current={1}></Stepper>
+                <Stepper steps={steps} current={1} setStep={()=>{navigate('/automations')}}></Stepper>
             </div>
             <div className='edit-automation-body'>
                 <>

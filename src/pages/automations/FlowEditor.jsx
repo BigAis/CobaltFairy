@@ -228,6 +228,7 @@ const FlowEditor = () => {
 						if (node.data) return { value: node.id, label: node.data.emailSubject }
 					})
 			: []
+	console.log('updated workflowCampaigns', workflowCampaigns)
 
 	console.log('workflow campaigns are : ', workflowCampaigns)
 
@@ -743,7 +744,13 @@ const FlowEditor = () => {
 		<div className="flow-editor-container">
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
 			<div className="header">
-				<Stepper steps={steps} current={3} />
+				<Stepper
+					steps={steps}
+					current={3}
+					setStep={() => {
+						navigate(`/automations/${autId}`)
+					}}
+				/>
 				<div className="buttons">
 					<Button type="secondary" icon="Save" onClick={exportData}>
 						Save
@@ -771,7 +778,7 @@ const FlowEditor = () => {
 			</div>
 			<div className="body">
 				<div id="automation-builder" ref={automationContainerRef}>
-					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '90vw' }}>
+					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '90vw', paddingBottom: '200px' }}>
 						{nodes.map((node, idx) => {
 							let children
 							if (node.type == 'condition') {

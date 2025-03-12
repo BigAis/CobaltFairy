@@ -1,14 +1,21 @@
-import { useContext } from "react";
 import { GlobalContext } from "../../reducers";
 import RichTextLayout from "../RichText/RichTextLayout";
-import { useMemo } from "react";
+import { useMemo, useContext } from "react";
 import { useAccount } from "../../../../context/AccountContext";
 
 const TextBlock = (props) => {
   const {user,account} = useAccount();
   const { index, blockItem } = props;
-  const { currentItem, previewMode, actionType } = useContext(GlobalContext);
-  const styles = previewMode === "desktop" ? blockItem.styles.desktop : { ...blockItem.styles.desktop, ...blockItem.styles.mobile };
+  const { currentItem, previewMode, actionType, bodySettings } = useContext(GlobalContext);
+  var styles = previewMode === "desktop" ? blockItem.styles.desktop : { ...blockItem.styles.desktop, ...blockItem.styles.mobile };
+  if(bodySettings && bodySettings.styles){
+    try{
+      if(bodySettings.styles.fontFamily) styles.fontFamily = bodySettings.styles.fontFamily
+      if(bodySettings.styles.color) styles.color = bodySettings.styles.color
+    }catch(err){
+      console.log(err)
+    }
+  }
   const isEdit = currentItem && currentItem.index === index;
   const richTextElement = useMemo(() => <RichTextLayout {...props} />, [isEdit, actionType]);
   if(blockItem.subkey && "footer-links"==blockItem.subkey){
