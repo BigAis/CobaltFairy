@@ -11,6 +11,7 @@ import Dropdown from '../../components/Dropdown'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
 import InputText from '../../components/InputText/InputText'
+import PopupText from '../../components/PopupText/PopupText'
 
 
 const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, getChildrenOfCondition, data, onUpdate, handleAdditionalChange, setSideBarShown }) => {
@@ -178,7 +179,20 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											onUpdate(node)
 										}} />
 										{node?.data?.tplImageLoading && <div style={{minHeight:'100px'}}><div style={{ position:'absolute',top: '40%', left: '50%', transform: 'translate(-50%, 5%) scale(.5)' }}><svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" width="200" height="200" style={{shapeRendering:'auto',display:'block',background:'transparent'}}><g><circle fill="none" stroke-width="10" stroke="#fff2df" r="30" cy="50" cx="50"></circle><circle fill="none" stroke-linecap="round" stroke-width="8" stroke="#ff635e" r="30" cy="50" cx="50"><animateTransform keyTimes="0;0.5;1" values="0 50 50;180 50 50;720 50 50" dur="1.5625s" repeatCount="indefinite" type="rotate" attributeName="transform"></animateTransform><animate keyTimes="0;0.5;1" values="18.84955592153876 169.64600329384882;94.2477796076938 94.24777960769377;18.84955592153876 169.64600329384882" dur="1.5625s" repeatCount="indefinite" attributeName="stroke-dasharray"></animate></circle><g></g></g></svg></div></div>}
-										{!node?.data?.tplImageLoading && <div style={{minHeight:'200px',width:'100%',background:`url('${imageUrl}')`,backgroundRepeat:'no-repeat',backgroundSize:'cover',backgroundPositionY:0}}></div>}
+										{!node?.data?.tplImageLoading && <>
+											<div style={{minHeight:'200px',width:'100%',background:`url('${imageUrl}')`,backgroundRepeat:'no-repeat',backgroundSize:'cover',backgroundPositionY:0}}>
+												<Button type='secondary' style={{position:'absolute',background:'white',bottom:'30px',right:'50px'}} onClick={async ()=>{
+													await PopupText.fire({
+														text:'The template editor will now open in a new tab. Once you save any changes, you can safely close that tab and return to this one.',
+														showCancelButton:true,
+														confirmButtonText:'OK',
+														onConfirm: ()=>{
+															window.open(`/templates/edit/${node?.data?.tplUuid}`);
+														}
+													})
+												}}>Edit template</Button>
+											</div>
+										</>}
 									</>
 								)}
 							</div>
