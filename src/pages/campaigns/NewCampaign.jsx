@@ -185,7 +185,7 @@ const NewCampaign = () => {
 		}
 
 		try {
-			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData }, user.jwt)
+			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData , fmversion:'new'}, user.jwt)
 			if (response && response.data && response.data.code === 200) {
 				navigate(`/campaigns/`)
 			}
@@ -202,7 +202,7 @@ const NewCampaign = () => {
 		try {
 			console.log('campaignData is : ', campaignData)
 
-			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData }, user.jwt)
+			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData, fmversion:'new' }, user.jwt)
 			console.log('response is : ', response)
 			if (response && response.data && response.data.code === 200) {
 				navigate(`/campaigns/`)
@@ -221,7 +221,7 @@ const NewCampaign = () => {
 		try {
 			console.log('campaignData is : ', campaignData)
 
-			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData }, user.jwt)
+			const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData, fmversion:'new' }, user.jwt)
 			console.log('response is : ', response)
 			if (response && response.data && response.data.code === 200) {
 				navigate(`/campaigns/`)
@@ -243,7 +243,7 @@ const NewCampaign = () => {
 
 			if (isEdit) {
 				campaignData.udid = uuid
-				const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData }, user.jwt)
+				const response = await ApiService.post('fairymailer/updateCampaign', { data: campaignData, fmversion:'new' }, user.jwt)
 				console.log('response is : ', response)
 				if (response && response.data && response.data.code === 200) {
 					navigate(`/campaigns/edit/${campaignData.udid}`)
