@@ -43,7 +43,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 		if (editorRef && editorRef.current) {
 			const html = editorRef.current.exportHtml(['Inter:400,700'])
 			const data = editorRef.current.exportData(['Inter:400,700'])
-			let updResp = await ApiService.post(`fairymailer/updateCampaign`, { data: { uuid: currentCampaign.uuid, design: JSON.stringify(data), html }, fmversion:'new' }, user.jwt)
+			let updResp = await ApiService.post(`fairymailer/updateCampaign`, { assignses:true, data: { uuid: currentCampaign.uuid, design: JSON.stringify(data), html } }, user.jwt)
 			console.log('updresp', updResp)
 			setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Email data saved successfully.', autoClose: 3000 }])
 		}
