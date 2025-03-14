@@ -17,6 +17,7 @@ import PageHeader from '../../components/PageHeader/PageHeader'
 import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
 import PopupText from '../../components/PopupText/PopupText'
+import NotificationBar from '../../components/NotificationBar/NotificationBar'
 import { use } from 'react'
 import TemplateCard from '../../components/TemplateCard/TemplateCard'
 import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
@@ -81,6 +82,7 @@ const Campaigns = () => {
 	const [skeletons] = useState([{}, {}, {}, {}, {}, {}, {}, {}, {}])
 	const [campaigns, setCampaigns] = useState([])
 	const [templates, setTemplates] = useState([])
+	const [notifications, setNotifications] = useState([])
 
 	const [meta, setMeta] = useState([])
 	const [campaignsMeta, setCampaignsMeta] = useState([])
@@ -149,6 +151,18 @@ const Campaigns = () => {
 		}
 	}
 
+	const refreshData = async ()=>{
+		let current = selectedCampaignType;
+		await getCampaigns();
+		await getTemplates();
+		//workaround - we need to fix this!!
+		// we need a proper way to refresh the data upon actions such as delete, rename, duplicate.
+		setSelectedCampaignType('templates')
+		setTimeout(()=>{
+			setSelectedCampaignType(current)
+		},100)
+	}
+
 	const createTemplateByName = async (templateName) => {
 		try {
 			const templateUuid = uuidv4()
@@ -167,6 +181,13 @@ const Campaigns = () => {
 			<div className="fm-page-wrapper">
 				<Sidemenu />
 				<div className="fm-page-container">
+				{notifications && notifications.length>0 &&  (
+					<div className='notifications-container'>
+						{notifications.map(n=>{
+							return <NotificationBar type={n.type || 'default'} message={n.message} onClose={n.onClose}/>
+						})}
+					</div>
+				)}
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
@@ -231,6 +252,9 @@ const Campaigns = () => {
 								// 		(selectedCampaignType !== 'outbox' && campaign.status === selectedCampaignType) ||
 								// 		(selectedCampaignType === 'outbox' && campaign.status === 'draft' && campaign.date)
 								// )}
+								notifications={notifications}
+								setNotifications={setNotifications}
+								refreshData={refreshData}
 								selectedCampaignType={selectedCampaignType}
 								dashboardPreviewOnly={false}
 							/>

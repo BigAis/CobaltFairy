@@ -132,6 +132,7 @@ const PopupText = ({
 	cancelButtonText = 'Cancel',
 	inputField = false,
 	inputPlaceholder = 'Enter text...',
+	initialInputValue = '',
 	inputLabel = '',
 	inputIcon = null,
 	inputEmojiPicker = false,
@@ -148,6 +149,12 @@ const PopupText = ({
 			}, 100)
 		}
 	}, [focusCancel])
+
+	useEffect(()=>{
+		if(initialInputValue && initialInputValue.length>0){
+			setInputValue(initialInputValue)
+		}
+	},[initialInputValue])
 
 	return (
 		<div className="popup-overlay">

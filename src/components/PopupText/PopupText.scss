@@ -22,6 +22,13 @@
 	opacity: 1;
 	transition: transform 0.2s ease-out, opacity 0.2s ease-out;
 	border: 2px solid rgba(218, 209, 197, 1);
+
+	.input-text-wrapper{
+		margin-top:20px;
+	}
+	.input-text-wrapper .input-text {
+		padding: 10px 18px;
+	}
 }
 
 // Text inside the popup

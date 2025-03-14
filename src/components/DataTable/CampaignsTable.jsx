@@ -15,6 +15,7 @@ import { ApiService } from '../../service/api-service'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { v4 as uuidv4 } from 'uuid'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -22,9 +23,9 @@ dayjs.extend(timezone)
 
 import qs from 'qs'
 
-const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, resultsPerPage = 20 }) => {
+const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, resultsPerPage = 20, refreshData=()=>{}, notifications=[], setNotifications=()=>{} }) => {
 	const navigate = useNavigate()
-	const { user } = useAccount()
+	const { user,account } = useAccount()
 
 	const [loading, setLoading] = useState(false)
 	const [campaigns, setCampaigns] = useState([])
@@ -65,34 +66,33 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 			console.log('Deleting...')
 			let sendResp = await ApiService.post(`fairymailer/removeCampaign`, { data: { udid: uuid } }, user.jwt)
 			setTimeout(() => {
-				PopupText.fire({ icon: 'success', text: 'Deleted successfully!', showConfirmButton: false })
-			}, 1000)
+				refreshData();
+				const key = new Date().getTime();
+				setNotifications([...notifications,{id:key, type:'warning', message:'Deleted successfully.', onClose:()=>{setNotifications(notifications.filter(n=>n.id!=key))}}]);
+			}, 500)
 		}
 	}
 
 	const handleDuplicateCampaign = async (campaign) => {
 		const result = await PopupText.fire({
 			icon: 'question',
-			text: 'Are you sure you want to duplicate this campaign?',
+			text: 'Please type a title for the new campaign',
+			inputField:true,
 			focusCancel: false,
 			showConfirmButton: true,
 			showDenyButton: false,
 			showCancelButton: true,
-			confirmButtonText: 'Yes',
-			cancelButtonText: 'No',
+			confirmButtonText: 'Continue',
+			cancelButtonText: 'Cancel',
 		})
 
 		if (result.isConfirmed) {
-			console.log('Duplicating...')
-			console.log('campaign is : ', campaign)
-
-			let user = User.get()
-			let account = await ApiService.get(`fairymailer/getAccount`, user.jwt)
-			account = account.data.user.account
 			const newCampaign = {
-				udid: uuidv4(),
-				name: `Copy of ${campaign.name}`,
+				...campaign,
+				uuid: uuidv4(),
+				name: `${result.inputValue}`,
 				date: null,
+				sent_at:null,
 				stats: null,
 				account: account?.id,
 				recipients: 0,
@@ -101,8 +101,9 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 				recp_groups: campaign.recp_groups.map((g) => {
 					return g.id
 				}),
+				recp_filters:null,
 			}
-
+			delete(newCampaign.id);
 			let resp = await ApiService.post(
 				'campaigns/',
 				{
@@ -112,9 +113,50 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 			)
 
 			console.log('resp duplicate campaign is : ', resp)
-			setTimeout(() => {
-				PopupText.fire({ icon: 'success', text: 'Duplicated successfully!', showConfirmButton: false })
-			}, 1000)
+			if(resp.data && resp.data.data && resp.data.data.id){
+				refreshData();
+				setTimeout(() => {
+					const key = new Date().getTime();
+					setNotifications([...notifications,{id:key, type:'warning', message:'Campaign duplicated successfully.', onClose:()=>{setNotifications(notifications.filter(n=>n.id!=key))}}]);
+				}, 500)
+			}
+		}
+	}
+
+	const renameCampaign = async(campaign)=>{
+		const result = await PopupText.fire({
+			icon: 'question',
+			text: 'Please type a title for the new campaign',
+			inputField:true,
+			initialInputValue: campaign.name,
+			focusCancel: false,
+			showConfirmButton: true,
+			showDenyButton: false,
+			showCancelButton: true,
+			confirmButtonText: 'Continue',
+			cancelButtonText: 'Cancel',
+		})
+
+		if (result.isConfirmed) {
+			const updCampaign = {
+				uuid: campaign.uuid,
+				name: `${result.inputValue}`,
+			}
+			let resp = await ApiService.post(
+				'fairymailer/updateCampaign',
+				{
+					data: updCampaign,
+				},
+				user.jwt
+			)
+			console.log('renamed resp: ',resp)
+			if(resp.data && resp.data.code && resp.data.code==200){
+				refreshData();
+				setTimeout(() => {
+					const key = new Date().getTime();
+					setNotifications([...notifications,{id:key, type:'warning', message:'Campaign renamed successfully.', onClose:()=>{setNotifications(notifications.filter(n=>n.id!=key))}}]);
+				}, 500)
+			}
 		}
 	}
 
@@ -128,6 +170,8 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 			// 	// Implement overview logic here
 			// 	break
 			case 'rename_cmp':
+				renameCampaign(rowData)
+				break;
 			case 'edit':
 				navigate(`/campaigns/edit/${rowData.uuid}`)
 				break
@@ -271,7 +315,7 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 		// <div>
 		<>
 			{!dashboardPreviewOnly ? (
-				<DataTable value={campaigns} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
+				<DataTable value={campaigns} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey='id' rowClassName={() => 'p-table-row'}>
 					<Column
 						body={(rowData) =>
 							loading ? (
@@ -295,7 +339,7 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 									{rowData.image ? (
 										<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
 									) : (
-										<img src={'images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+										<img src={'/images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
 									)}
 								</div>
 							)
@@ -315,7 +359,7 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 						headerStyle={{ width: '80px' }}
 					/>
 					<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
-					<Column field="recipients" header="Recipients" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
+					<Column field="recipients" header="Recipients" body={(rowData) => (loading ? <Skeleton /> : rowData.recipients??0)} />
 					<Column field="stats.o" header="Opens" body={(rowData) => (loading ? <Skeleton /> : openBodyTemplate(rowData))} />
 					<Column field="clicks" header="Clicks" body={(rowData) => (loading ? <Skeleton /> : clickBodyTemplate(rowData))} />
 					<Column field="type" header="Type" body={(rowData) => (loading ? <Skeleton /> : typeBodyTemplate(rowData))} />
@@ -331,7 +375,7 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 								{rowData.image ? (
 									<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
 								) : (
-									<img src={'images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
+									<img src={'/images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
 								)}
 							</div>
 						)}

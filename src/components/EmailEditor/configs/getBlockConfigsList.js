@@ -635,6 +635,7 @@ const getBlockConfigsList = (t) => {
             {
               name: t("text"),
               key: "text",
+              subkey: "unsubscribe",
               text: `You received this email because you signed up on our website or made a purchase from us.<br><br><a href="${MAIN_APP_BASE_URL}/api/unsubscribe/{{pixel_uid}}/{{pixel_group}}">Unsubscribe</a>`,
               styles: {
                 desktop: {

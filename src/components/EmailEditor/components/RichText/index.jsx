@@ -5,6 +5,7 @@ import { useState } from "react";
 import { GlobalContext } from "../../reducers";
 import { deepClone } from "../../utils/helpers";
 import { motion } from "framer-motion";
+import useDataSource from "../../configs/useDataSource"
 
 import Bold from "./Bold";
 import Italic from "./Italic";
@@ -71,6 +72,7 @@ const RichText = ({ index, textBlock, styles }) => {
   ];
 
   const fontname_configs = ["sans-serif", "Inter", "Arial", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
+  const { fontsList } = useDataSource();
 
   const setTextContent = () => {
     const indexArray = index.split("-");
@@ -128,13 +130,14 @@ const RichText = ({ index, textBlock, styles }) => {
                 key={item}
                 onClick={() => {
                   const currentValueDom = document.querySelector(`#richText-select-value-${type}-${index}`);
-                  currentValueDom.innerHTML = item;
+                  let value = type=="fontName" ? item.attribute : item;
+                  currentValueDom.innerHTML = value;
                   hideOptions();
-                  onChange && onChange(item);
+                  onChange && onChange(value);
                   setTextContent();
                 }}
               >
-                {item}
+                {type=="fontName" ? item.name : item}
               </div>
             );
           })}
@@ -175,9 +178,9 @@ const RichText = ({ index, textBlock, styles }) => {
         <div className="rich-text-tools-body items-center">
           {!isHidden && (
             <>
-              {/* {selectElement(fontSizeList, styles.fontSize + "px", "fontSize", editFontSize)}
-              {selectElement(fontname_configs, styles.fontFamily, "fontName", editFontName)} */}
-              {/* <FontColor modifyText={modifyText} setTextContent={setTextContent} /> */}
+              {selectElement(fontSizeList, styles.fontSize + "px", "fontSize", editFontSize)}
+              {selectElement(fontsList, styles.fontFamily, "fontName", editFontName)}
+              <FontColor modifyText={modifyText} setTextContent={setTextContent} />
               <Bold modifyText={modifyText} setTextContent={setTextContent} />
               <Italic modifyText={modifyText} setTextContent={setTextContent} />
               <Underline modifyText={modifyText} setTextContent={setTextContent} />
