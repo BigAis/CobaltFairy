@@ -1,4 +1,6 @@
 import getFontsList from "../configs/getFontsList";
+const PIXEL_URL = 'https://fairymail.cobaltfairy.com/api'
+
 
 const createStyleString = (className, styles) => {
   const regex = new RegExp(/[A-Z]/g);
@@ -226,14 +228,47 @@ const extractFonts = (blockList=[], fontList=[]) => {
   }
   return fontList;
 }
-
-const dataToHtml = ({ bodySettings, blockList }) => {
+const extractUrls = (htmlText) => {
+  const urlRegex = /(?:https?:\/\/)?(?:www\.)?[\w.-]+(?:\.[a-z]{2,})+(?:\/[\w@?^=%&/~+#{}*-]*)*/gi
+  const matches = htmlText.match(urlRegex)
+  return [...new Set(matches)]
+}
+const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
   const fontList = extractFonts(blockList); //recursively itterate blocklist to export all fonts, and find the required urls to add.
   let content = "";
   const { newBlockList, styles } = createStyleTag(blockList);
   content = blockListToHtml(newBlockList, bodySettings);
+  let links = extractUrls(content)
+  if (links)
+    for (let l = 0; l < links.length; l++) {
+      if (links[l].includes('fairymail.cobaltfairy.com') || links[l].includes('cdn.cobaltfairy.online') || links[l].includes('cdn.cobaltfairy.com')) {
+        continue
+      }
+      if (links[l].includes(' ')) links[l] = links[l].split(' ')[0]
+      if (
+        !links[l].includes('.jpg') &&
+        !links[l].includes('.jpeg') &&
+        !links[l].includes('.png') &&
+        !links[l].includes('.gif') &&
+        !links[l].includes('.webp') &&
+        !links[l].includes('.svg') &&
+        !links[l].includes('cdn.cobaltfairy.online') &&
+        !links[l].includes('cdn.cobaltfairy.com')
+      ) {
+        if (links[l].includes('"')) links[l] = links[l].split('"')[0]
+        if (!links[l].startsWith('http')) links[l] = `http://${links[l]}`
+        content = content
+          .split(links[l])
+          .join(
+            `${PIXEL_URL}/custom/redir?${true ? 'cid' : 'tid'}=${
+              campaignUUID
+            }&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
+          )
+      }
+    }
   let fontStyles = "";
   let fontMediaStyles = "";
+  let pixel = `${PIXEL_URL}/custom/pixel.gif?tid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}`
   if(fontList.length>0) {
     fontStyles += `
       <!--[if mso]>
@@ -318,6 +353,7 @@ const dataToHtml = ({ bodySettings, blockList }) => {
     }
   }
   ${styles}
+  <img alt="Fairy Mail tracking pixel" src=${pixel}/>
 </style>
   </head>
   <body style="background-color:${bodySettings.styles.backgroundColor};">
