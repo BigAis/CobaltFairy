@@ -135,178 +135,127 @@ const EditCampaign = () => {
 
 							{selectedTab === 'overview_tab' && (
 								<>
-									<div className="stats-container d-flex flex-column gap-20 mt20">
-										<Card className={'campaing-stats-card d-flex flex-column'}>
-											<p className="stat-heading">Emails</p>
-											<div className="campaing-stats-card-wrapper d-flex gap-50" style={{ marginBottom: '32px' }}>
-												<div className="campaing-stats-card-item">
-													<div className="campaing-stats-card-item-header">
-														<div>Emails Sent : {campaign.recipients}</div>
-														<div>100%</div>
-													</div>
-													<div>
-														<div className="progress-bar">
-															<div style={{ width: '100%' }} className="progress"></div>
+									{campaign.stats ? (
+										<div className="stats-container d-flex flex-column gap-20 mt20">
+											<Card className={'campaing-stats-card d-flex flex-column'}>
+												<p className="stat-heading">Emails</p>
+												<div className="campaing-stats-card-wrapper d-flex gap-50" style={{ marginBottom: '32px' }}>
+													<div className="campaing-stats-card-item">
+														<div className="campaing-stats-card-item-header">
+															<div>Emails Sent : {campaign.recipients}</div>
+															<div>100%</div>
 														</div>
-													</div>
-												</div>
-												<div className="campaing-stats-card-item">
-													<div className="campaing-stats-card-item-header">
-														<div>Opens : {campaign.stats?.uob ? campaign.stats?.uo + campaign.stats?.uob : campaign.stats?.uo || 0}</div>
 														<div>
-															{campaign.stats?.uob
-																? (((campaign.stats?.uo + campaign.stats?.uob) / campaign.recipients) * 100).toFixed(2)
-																: ((campaign.stats?.uo / campaign.recipients) * 100).toFixed(2) || 0}
-															%
+															<div className="progress-bar">
+																<div style={{ width: '100%' }} className="progress"></div>
+															</div>
 														</div>
 													</div>
-													<div>
-														<div className="progress-bar">
-															<div style={{ width: `${campaign.stats.or}%` }} className="progress"></div>
+													<div className="campaing-stats-card-item">
+														<div className="campaing-stats-card-item-header">
+															<div>Opens : {campaign.stats?.uob ? campaign.stats?.uo + campaign.stats?.uob : campaign.stats?.uo || 0}</div>
+															<div>
+																{campaign.stats?.uob
+																	? (((campaign.stats?.uo + campaign.stats?.uob) / campaign.recipients) * 100).toFixed(2)
+																	: ((campaign.stats?.uo / campaign.recipients) * 100).toFixed(2) || 0}
+																%
+															</div>
 														</div>
-													</div>
-												</div>
-												<div className="campaing-stats-card-item">
-													<div className="campaing-stats-card-item-header">
-														<div>Clicked : {campaign.stats?.ucb ? campaign.stats?.uc + campaign.stats?.ucb : campaign.stats?.uc || 0}</div>
 														<div>
-															{campaign.stats?.ucb
-																? (((campaign.stats?.uc + campaign.stats?.ucb) / campaign.recipients) * 100).toFixed(2)
-																: ((campaign.stats?.uc / campaign.recipients) * 100).toFixed(2) || 0}
-															%
+															<div className="progress-bar">
+																<div style={{ width: `${campaign.stats.or}%` }} className="progress"></div>
+															</div>
 														</div>
 													</div>
-													<div>
-														<div className="progress-bar">
-															<div style={{ width: `${campaign.stats.cr}%` }} className="progress"></div>
+													<div className="campaing-stats-card-item">
+														<div className="campaing-stats-card-item-header">
+															<div>Clicked : {campaign.stats?.ucb ? campaign.stats?.uc + campaign.stats?.ucb : campaign.stats?.uc || 0}</div>
+															<div>
+																{campaign.stats?.ucb
+																	? (((campaign.stats?.uc + campaign.stats?.ucb) / campaign.recipients) * 100).toFixed(2)
+																	: ((campaign.stats?.uc / campaign.recipients) * 100).toFixed(2) || 0}
+																%
+															</div>
+														</div>
+														<div>
+															<div className="progress-bar">
+																<div style={{ width: `${campaign.stats.cr}%` }} className="progress"></div>
+															</div>
 														</div>
 													</div>
 												</div>
-												{/* <div className="campaing-stats-card-item">
-													<div className="campaing-stats-card-item-header">
-														<div>Click to open rate</div>
-														<div>16.51%</div>
-													</div>
-													<div>
-														<div className="progress-bar">
-															<div className="progress"></div>
-														</div>
-													</div>
-												</div> */}
-											</div>
-											<div className="campaing-stats-card-wrapper d-flex gap-50">
-												<div className="campaing-stats-card-item">
-													<div className="campaing-stats-card-item-header">
-														<div>Emails Sent</div>
-													</div>
-													<div>
-														<p className="stat-number">{campaign.recipients}</p>
-													</div>
-												</div>
-												<div className="campaing-stats-card-item">
-													<div className="campaing-stats-card-item-header">
-														<div>Unsubscribe</div>
-													</div>
-													<div>
-														<p className="stat-number">N/A | N/A</p>
-													</div>
-												</div>
-												<div className="campaing-stats-card-item">
-													<div className="campaing-stats-card-item-header">
-														<div>Spam Complaints</div>
-													</div>
-													<div>
-														<p className="stat-number">N/A | N/A</p>
-													</div>
-												</div>
-												<div className="campaing-stats-card-item">
-													<div className="campaing-stats-card-item-header">
-														<div>Soft Bounce</div>
-													</div>
-													<div>
-														<p className="stat-number">N/A | N/A</p>
-													</div>
-												</div>
-												<div className="campaing-stats-card-item">
-													<div className="campaing-stats-card-item-header">
-														<div>Hard Bounce</div>
-													</div>
-													<div>
-														<p className="stat-number">N/A </p>
-													</div>
-												</div>
-											</div>
-											<div></div>
-										</Card>
+											</Card>
 
-										<div className="w-100 d-flex gap-20">
-											<Card className={'stats-card'}>
-												<p className="stat-heading">Opens and clicks</p>
-												<AreaChart />
-											</Card>
-											<Card className={'stats-card'}>
-												<p className="stat-heading">Link Activity</p>
-												<div>
-													<div className="d-flex content-space-between" style={{ borderBottom: '2px solid rgba(218, 209, 197, 1)' }}>
-														<p className="stat-table-heading">Link</p>
-														<p className="stat-table-heading">Clicks</p>
+											<div className="w-100 d-flex gap-20">
+												<Card className={'stats-card'}>
+													<p className="stat-heading">Opens and clicks</p>
+													<AreaChart />
+												</Card>
+												<Card className={'stats-card'}>
+													<p className="stat-heading">Link Activity</p>
+													<div>
+														<div className="d-flex content-space-between" style={{ borderBottom: '2px solid rgba(218, 209, 197, 1)' }}>
+															<p className="stat-table-heading">Link</p>
+															<p className="stat-table-heading">Clicks</p>
+														</div>
+														{campaign.stats?.l &&
+															Object.entries(campaign.stats.l)
+																.sort((a, b) => b[1] - a[1]) // Sort by value (ascending order)
+																.slice(0, 3)
+																.map(([key, value]) => (
+																	<div
+																		className="d-flex content-space-between mt20"
+																		style={{ textAlign: 'left', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
+																		key={key}
+																	>
+																		<p style={{ overflow: 'hidden' }}>{key}</p>
+																		<p>{value}</p>
+																	</div>
+																))}
+														<Button
+															type="secondary"
+															onClick={() => {
+																setSelectedTab('link_act_tab')
+															}}
+															className={'mt20'}
+														>
+															See all links
+														</Button>
 													</div>
-													{campaign.stats?.l &&
-														Object.entries(campaign.stats.l)
-															.sort((a, b) => b[1] - a[1]) // Sort by value (ascending order)
-															.slice(0, 3)
-															.map(([key, value]) => (
-																<div
-																	className="d-flex content-space-between mt20"
-																	style={{ textAlign: 'left', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
-																	key={key}
-																>
-																	<p style={{ overflow: 'hidden' }}>{key}</p>
-																	<p>{value}</p>
-																</div>
-															))}
-													<Button
-														type="secondary"
-														onClick={() => {
-															setSelectedTab('link_act_tab')
-														}}
-														className={'mt20'}
-													>
-														See all links
-													</Button>
-												</div>
-											</Card>
-										</div>
-										<div className="d-flex gap-20">
-											<Card className={'stats-card'}>
-												<p className="stat-heading">Device Type</p>
-												<DoughnutChart stats={campaign.stats} />
-											</Card>
-											<Card className={'stats-card'}>
-												<p className="stat-heading">Email Clients</p>
-												<div>
-													<div className="d-flex content-space-between" style={{ borderBottom: '2px solid rgba(218, 209, 197, 1)' }}>
-														<p className="stat-table-heading">Clients</p>
-														<p className="stat-table-heading">Subscribers</p>
+												</Card>
+											</div>
+											<div className="d-flex gap-20">
+												<Card className={'stats-card'}>
+													<p className="stat-heading">Device Type</p>
+													<DoughnutChart stats={campaign.stats} />
+												</Card>
+												<Card className={'stats-card'}>
+													<p className="stat-heading">Email Clients</p>
+													<div>
+														<div className="d-flex content-space-between" style={{ borderBottom: '2px solid rgba(218, 209, 197, 1)' }}>
+															<p className="stat-table-heading">Clients</p>
+															<p className="stat-table-heading">Subscribers</p>
+														</div>
+														{emailClientsOptions &&
+															Object.entries(emailClientsOptions)
+																.sort((a, b) => b[1] - a[1])
+																.map(([key, value]) => (
+																	<div
+																		className="d-flex content-space-between mt20"
+																		style={{ textAlign: 'left', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
+																		key={key}
+																	>
+																		<p>{key}</p>
+																		<p>{value}</p>
+																	</div>
+																))}
 													</div>
-													{emailClientsOptions &&
-														Object.entries(emailClientsOptions)
-															.sort((a, b) => b[1] - a[1])
-															.map(([key, value]) => (
-																<div
-																	className="d-flex content-space-between mt20"
-																	style={{ textAlign: 'left', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
-																	key={key}
-																>
-																	<p>{key}</p>
-																	<p>{value}</p>
-																</div>
-															))}
-												</div>
-												{/* <Pagination currentPage={1} totalResults={50} resultsPerPage={5} onChange={() => {}} className={'mt10'} /> */}
-											</Card>
+												</Card>
+											</div>
 										</div>
-									</div>
+									) : (
+										'No stats found'
+									)}
 								</>
 							)}
 
@@ -375,28 +324,32 @@ const EditCampaign = () => {
 
 							{selectedTab === 'link_act_tab' && (
 								<>
-									<div className={'stats-card'}>
-										<p className="stat-heading">Link Activity</p>
-										<div>
-											<div className="d-flex content-space-between" style={{ borderBottom: '2px solid rgba(218, 209, 197, 1)' }}>
-												<p className="stat-table-heading">Link</p>
-												<p className="stat-table-heading">Clicks</p>
+									{campaign.stats ? (
+										<div className={'stats-card'}>
+											<p className="stat-heading">Link Activity</p>
+											<div>
+												<div className="d-flex content-space-between" style={{ borderBottom: '2px solid rgba(218, 209, 197, 1)' }}>
+													<p className="stat-table-heading">Link</p>
+													<p className="stat-table-heading">Clicks</p>
+												</div>
+												{campaign.stats?.l &&
+													Object.entries(campaign.stats.l)
+														.sort((a, b) => b[1] - a[1])
+														.map(([key, value]) => (
+															<div
+																className="d-flex content-space-between align-items-center mt20"
+																style={{ backgroundColor: ' #FFF8EF', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
+																key={key}
+															>
+																<p style={{ textAlign: 'left', overflow: 'hidden' }}>{key}</p>
+																<p>{value}</p>
+															</div>
+														))}
 											</div>
-											{campaign.stats?.l &&
-												Object.entries(campaign.stats.l)
-													.sort((a, b) => b[1] - a[1])
-													.map(([key, value]) => (
-														<div
-															className="d-flex content-space-between align-items-center mt20"
-															style={{ backgroundColor: ' #FFF8EF', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
-															key={key}
-														>
-															<p style={{ textAlign: 'left', overflow: 'hidden' }}>{key}</p>
-															<p>{value}</p>
-														</div>
-													))}
 										</div>
-									</div>
+									) : (
+										'No stats found'
+									)}
 								</>
 							)}
 

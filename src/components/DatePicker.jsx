@@ -26,7 +26,7 @@ function CustomDatePicker({ dateFormat, timeFormat, pickerType = 'datetime', onC
 
 	// Calculate +2 hours from now for minTime
 	const minDate = hasMinDate ? new Date(new Date().setHours(new Date().getHours() + 2)) : undefined
-	const minTime = new Date(new Date().setHours(new Date().getHours() + 2))
+	const minTime = new Date(new Date().setHours(new Date().getHours() + 4))
 	const maxTime = new Date(new Date().setHours(23, 59)) // Set maxTime to the end of the day
 
 	const handleDateChange = (date) => {

@@ -151,16 +151,16 @@ const Campaigns = () => {
 		}
 	}
 
-	const refreshData = async ()=>{
-		let current = selectedCampaignType;
-		await getCampaigns();
-		await getTemplates();
+	const refreshData = async () => {
+		let current = selectedCampaignType
+		await getCampaigns()
+		await getTemplates()
 		//workaround - we need to fix this!!
 		// we need a proper way to refresh the data upon actions such as delete, rename, duplicate.
 		setSelectedCampaignType('templates')
-		setTimeout(()=>{
+		setTimeout(() => {
 			setSelectedCampaignType(current)
-		},100)
+		}, 100)
 	}
 
 	const createTemplateByName = async (templateName) => {
@@ -181,13 +181,13 @@ const Campaigns = () => {
 			<div className="fm-page-wrapper">
 				<Sidemenu />
 				<div className="fm-page-container">
-				{notifications && notifications.length>0 &&  (
-					<div className='notifications-container'>
-						{notifications.map(n=>{
-							return <NotificationBar type={n.type || 'default'} message={n.message} onClose={n.onClose}/>
-						})}
-					</div>
-				)}
+					{notifications && notifications.length > 0 && (
+						<div className="notifications-container">
+							{notifications.map((n) => {
+								return <NotificationBar type={n.type || 'default'} message={n.message} onClose={n.onClose} />
+							})}
+						</div>
+					)}
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
@@ -231,15 +231,15 @@ const Campaigns = () => {
 						<div className="row d-flex content-space-between">
 							<InputText
 								onChange={(e) => updateSearchTerm(e.target.value)}
-								style={{ width: '85%' }}
+								style={{ width: '100%' }}
 								placeholder="Search Campaign"
 								label="Search Campaign"
 								hasError={false}
 								errorMessage="Name must be at least 3 characters long."
 							/>
-							<Button type="secondary" icon={'Filters'}>
+							{/* <Button type="secondary" icon={'Filters'}>
 								Filters
-							</Button>
+							</Button> */}
 						</div>
 					</div>
 
@@ -288,18 +288,28 @@ const Campaigns = () => {
 									</Card>
 									{templates &&
 										templates.length > 0 &&
-										templates.sort((a,b) => a.id - b.id).map((template,i) => (
-											<>
-												<TemplateCard
-													key={template.uuid}
-													template_udid={template.uuid}
-													templateName={template.name}
-													onPreviewClick={() => { setTemplates([...templates.filter(t=>t.uuid!=template.uuid),{...template,showPreview:true}]) }}
-													onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
-												/>
-												<TemplatePreview template_udid={template.uuid} show={template.showPreview} onClose={()=>{setTemplates([...templates.filter(t=>t.uuid!=template.uuid),{...template,showPreview:false}])}}/>
-											</>
-										))}
+										templates
+											.sort((a, b) => a.id - b.id)
+											.map((template, i) => (
+												<>
+													<TemplateCard
+														key={template.uuid}
+														template_udid={template.uuid}
+														templateName={template.name}
+														onPreviewClick={() => {
+															setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: true }])
+														}}
+														onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
+													/>
+													<TemplatePreview
+														template_udid={template.uuid}
+														show={template.showPreview}
+														onClose={() => {
+															setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: false }])
+														}}
+													/>
+												</>
+											))}
 								</div>
 							</>
 						)}
