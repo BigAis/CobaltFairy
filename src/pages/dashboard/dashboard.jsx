@@ -9,7 +9,7 @@ import Stat from '../../components/Stat/Stat'
 import ButtonGroup from '../../components/ButtonGroup'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import { useAccount } from '../../context/AccountContext'
-import { ApiService } from '../../service/api-service'
+import { ApiService, APP_VERSION } from '../../service/api-service'
 import CampaignsTable from '../../components/DataTable/CampaignsTable'
 import { useNavigate } from 'react-router-dom'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
@@ -128,7 +128,7 @@ const Dashboard = () => {
 				<div className="dashboard-container">
 					<PageHeader />
 					<div className="page-name-container">
-						<div className="page-name">Dashboard</div>
+						<div className="page-name">Dashboard <small style={{fontSize:'14px',letterSpacing: '.2em'}}>v{APP_VERSION}</small></div>
 					</div>
 					<Card className="dashboard-stats">
 						<div className="stats-head">

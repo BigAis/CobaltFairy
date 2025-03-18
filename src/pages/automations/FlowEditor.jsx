@@ -50,10 +50,49 @@ const FlowEditor = () => {
 		const loadedNodes = resp.data.data[0].design
 		console.log('loadedNodes', loadedNodes, resp.data)
 		if (loadedNodes && loadedNodes.length > 0) {
-			setNodes(loadedNodes)
+			setNodes(transformNodes(loadedNodes))
 			setHasTrigger(true)
 		}
 		setData(resp.data.data[0])
+	}
+
+	const transformNodes = (nodes)=> { //tranforms old fairy mail automations to new version.
+		nodes = nodes.map((node)=>{
+			switch(node.type){
+				case "email": 
+					if(!node.meta) node.meta = {}; 
+					if(!node.meta.label && node.templateName){
+						node.meta.label = node.templateName;
+					}
+				break;
+				case "delay": 
+					if(!node.data) node.data = {}; 
+					if(!node.data.meta) node.data.meta = {}; 
+					if(!node.data.meta.label && node.meta.label){ node.data.meta.label = node.meta.label; }
+					if((!node.data.delay || isNaN(node.data.delay)) && node.data.delayValue){ node.data.delay = [node.data.delayValue]; }
+				break;
+				case "condition": 
+					if(!node.meta) node.meta = {};
+					if(!node.meta.cmpname && node.meta.label){
+						node.meta.cmpname = node.meta.label;
+						node.meta.label = node.name=="workflow-activity" ? 'Workflow Activity' : 'Campaign Activity'
+					}
+					if(!node.data.cmp && node.data.email_node_id)node.data.cmp = node.data.email_node_id
+					if(!node.meta.triggerName && node.data.trigger) {
+						switch(node.data.trigger){
+							case "cmp_open": node.meta.triggerName = 'was opened'; break;
+							case "cmp_not_open": node.meta.triggerName = 'was not opened'; break;
+							case "cmp_link_clicked": node.meta.triggerName = 'had a specific link clicked'; break;
+							case "cmp_link_not_clicked": node.meta.triggerName = 'had a specific link not clicked'; break;
+						}
+						
+						//
+					}
+				break;
+			}
+			return node;
+		})
+		return nodes;
 	}
 
 	const loadGroups = async () => {

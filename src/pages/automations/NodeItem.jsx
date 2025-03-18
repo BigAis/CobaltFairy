@@ -167,6 +167,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									type="text"
 									style={{marginTop:'10px', minWidth:'350px'}}
 									label="Subject"
+									value={node?.data?.emailSubject ?? ''}
 									onChange={(e)=>{
 										node = {...node, name:node.type, data: { ...node.data, emailSubject: e.target.value }}
 										onUpdate(node)
@@ -283,6 +284,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									type="number"
 									style={{marginTop:'10px', width:'140px', marginRight:'10px'}}
 									label="Delay"
+									value={node?.data?.delay[0] ?? ''}
 									onChange={(e)=>{
 										onUpdate({...node,data:{...node.data,delay:[e.target.value]}})
 									}}
@@ -302,7 +304,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								 onOptionSelect={(v,l)=>{
 									node = {...node,name:node.type,data:{...node.data,delayValue:[v],meta:{label:l}}}
 									onUpdate(node)
-								 }}> Select delay type 
+								 }}> {node?.data?.meta?.label ?? 'Select delay type'}
 								</Dropdown>
 								
 							</div>
@@ -343,14 +345,14 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					className="d-flex flex-column align-items-center automation-node-item"
 					data-nodeid={node.id}
 					onClick={()=>{onSelect(node)}}
-					style={{ minWidth: 340 + 2 * howManyConditions * 100 + 'px' }}
+					style={{ minWidth: 340 + (2 * howManyConditions) * 100 + 'px' }}
 				>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
 						<Card>
 							<Icon name="Close" className="close"  onClick={handleRemove}/>
 							<div className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
-								<h4 className='node-type'>{node?.name ? conditionOptions.find((option) => option.value === node.name)?.label : 'Select a condition'}</h4>
+								<h4 className='node-type'>Condition: {node?.name ? conditionOptions.find((option) => option.value === node.name)?.label : 'Select a condition'}</h4>
 								<div style={{display:'flex',flexDirection:'column'}}>
 									<Dropdown 
 										options={conditionOptions}
@@ -358,7 +360,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 										onOptionSelect={(v, l)=>{
 											node = {...node,name: v.value, data: { ...node.data || {}}, meta: {label: l}}
 											onUpdate(node)
-									}}> Select a condition </Dropdown>
+									}}> {node?.meta?.label ?? 'Select a condition'} </Dropdown>
 									{node.name && node.name == "cmp-activity" && (
 										<>
 											<Dropdown 
@@ -394,16 +396,15 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 
 										</>
 									)}
-									{console.log(node.name)}
 									{node.name && node.name == "workflow-activity" && (
 										<>
 											<Dropdown 
 												options={data.workflowCampaigns}
 												style={{width:'350px'}}
 												onOptionSelect={(v)=>{
-													node = {...node, data: { ...node.data, cmp: v.value, email_node_id: v.value }}
+													node = {...node, data: { ...node.data, cmp: v.value, email_node_id: v.value }, meta:{ ...node.meta, cmpname:v.label}}
 													onUpdate(node)
-											}}> Select a campaign </Dropdown>
+											}}> {node.meta?.cmpname ?? 'Select a campaign'}</Dropdown>
 
 											{ node.data?.cmp && (
 												<>
@@ -411,9 +412,9 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 														options={workflowConditionOptions}
 														style={{width:'350px'}}
 														onOptionSelect={(v)=>{
-															node = {...node,data: { ...node.data, trigger: v.value }}
+															node = {...node,data: { ...node.data, trigger: v.value }, meta:{...node.meta,triggerName:v.label}}
 															onUpdate(node)
-													}}> Select a trigger </Dropdown>
+													}}> {node.meta?.triggerName ?? 'Select a trigger'} </Dropdown>
 													{node.data?.trigger && ['cmp_link_clicked','cmp_link_not_clicked'].includes(node.data?.trigger) && (
 														<>
 															{ console.log('updated',node.data)	}
@@ -423,7 +424,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 																onOptionSelect={(v)=>{
 																	node = {...node,data: { ...node.data, link: v }}
 																	onUpdate(node)
-															}}> Select a link </Dropdown>
+															}}> {node.data?.link ?? 'Select a link'} </Dropdown>
 														</>
 													)}
 												</>
@@ -528,7 +529,6 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											let children1 = [0, 1].map((index) => {
 												if (child && child.id) return getChildrenOfCondition(nodes, child.id, index)
 											})
-											console.log('children1',children1)
 											// if (closestCondition(child.id) == node.id)
 												return (
 													<NodeItem
