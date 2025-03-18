@@ -260,15 +260,13 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
         content = content
           .split(links[l])
           .join(
-            `${PIXEL_URL}/custom/redir?${true ? 'cid' : 'tid'}=${
-              campaignUUID
-            }&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
+            `${PIXEL_URL}/custom/redir?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
           )
       }
     }
   let fontStyles = "";
   let fontMediaStyles = "";
-  let pixel = `${PIXEL_URL}/custom/pixel.gif?tid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}`
+  let pixel = `${PIXEL_URL}/custom/pixel.gif?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}`
   if(fontList.length>0) {
     fontStyles += `
       <!--[if mso]>
