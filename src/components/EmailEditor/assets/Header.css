@@ -22,8 +22,14 @@
     right:0;
 }
 
-.editor-content .icon path, .icon:hover path{
+.editor-content .icon.nonefill path, :not(.importbtn) .icon.nonefill:hover path{
     fill:none!important;
+}
+.exportbtn svg, .importbtn svg{
+    margin-right: 5px!important;
+}
+.importbtn svg{
+    transform: rotate(180deg);
 }
 button.btn.btn-secondary.savebtn path {
     fill: black !important;
@@ -89,7 +95,6 @@ button.btn.header-icon_disabled {
 .header-icon_disabled {
     color: var(--header-icon-disabled-color);
 }
-
 .header-drawer-close {
     /* inline-flex justify-center items-center rounded-full bg-gray-500 hover:bg-gray-600 cursor-pointer text-white p-1 h-8 w-8 */
     display: inline-flex;

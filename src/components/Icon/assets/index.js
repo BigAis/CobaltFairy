@@ -37,6 +37,7 @@ import Pencil from './pencil.svg?react'
 import CloseCircle from './close-circle.svg?react'
 import PlusCircle from './plus-circle.svg?react'
 import PlusLight from './PlusLight.svg?react'
+import Import from './import.svg?react'
 
 import Filters from './filters.svg?react'
 
@@ -70,6 +71,7 @@ const icons = {
 	Close,
 	Save,
 	Export,
+	Import,
 	Mobile,
 	Tablet,
 	Desktop,

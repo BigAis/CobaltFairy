@@ -12,7 +12,7 @@ const ButtonBlock = (props) => {
   var styles = previewMode === "desktop" ? blockItem.styles.desktop : { ...blockItem.styles.desktop, ...blockItem.styles.mobile };
   if(bodySettings && bodySettings.styles){
     try{
-      if(bodySettings.styles.fontFamily) styles.fontFamily = bodySettings.styles.fontFamily
+      if(bodySettings.styles && bodySettings.styles.fontFamily) styles.fontFamily = bodySettings.styles.fontFamily
     }catch(err){
       console.log(err)
     }

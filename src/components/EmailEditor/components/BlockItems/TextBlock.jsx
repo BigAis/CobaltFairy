@@ -22,12 +22,18 @@ const TextBlock = (props) => {
   if(blockItem.subkey && "footer-links"==blockItem.subkey){
     let linkcolor = 'inherit';
     if(bodySettings.styles.linkColor) linkcolor = bodySettings.styles.linkColor;
-    blockItem.text= `<a href="${account.website}" style="color:${linkcolor}">${account.website}</a><br><a href="mailto:${account.from_email}" style="color:${linkcolor}">${account.from_email}</a>`;
+    if(blockItem.initFlag){
+      blockItem.text= `<a href="${account.website}" style="color:${linkcolor}">${account.website}</a><br><a href="mailto:${account.from_email}" style="color:${linkcolor}">${account.from_email}</a>`;
+      blockItem.initFlag = false;
+    }
   }
   if(blockItem.subkey && "unsubscribe"==blockItem.subkey){
     let linkcolor = 'inherit';
     if(bodySettings.styles.linkColor) linkcolor = bodySettings.styles.linkColor;
-    blockItem.text= `You received this email because you signed up on our website or made a purchase from us.<br><br><a style="color:${linkcolor}" href="${MAIN_APP_BASE_URL}/api/unsubscribe/{{pixel_uid}}/{{pixel_group}}">Unsubscribe</a>`;
+    if(blockItem.initFlag){
+      blockItem.text= `You received this email because you signed up on our website or made a purchase from us.<br><br><a style="color:${linkcolor}" href="${MAIN_APP_BASE_URL}/api/unsubscribe/{{pixel_uid}}/{{pixel_group}}">Unsubscribe</a>`;
+      blockItem.initFlag = false;
+    }
   }
   return isEdit ? richTextElement : <div style={{ ...styles }} dangerouslySetInnerHTML={{ __html: blockItem.text }}></div>;
 };

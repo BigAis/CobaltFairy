@@ -17,10 +17,12 @@ const ButtonStyleSettings = () => {
 
   const buttonActionElement = () => {
     const { linkURL } = currentItem.data;
+    console.log('linkURL',linkURL)
     const linkChange = (event) => {
       const newValue = event.target.value;
       const newCurrentItem = deepClone(currentItem);
       newCurrentItem.data.linkURL = newValue;
+      console.log('newCurrentItem.data.linkURL',newCurrentItem.data.linkURL)
       updateItemStyles(newCurrentItem.data);
       console.log(newCurrentItem)
     };

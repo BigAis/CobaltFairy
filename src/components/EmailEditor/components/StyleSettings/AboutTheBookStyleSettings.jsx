@@ -121,7 +121,7 @@ const AboutTheBookStyleSettings = () => {
         {/* {cardItemElement(t("action_type"), <div className="link-tag">{t("link")}</div>)} */}
         <div className="card-item-title">{t("link_url")}</div>
         <div className="margin-top-6">
-          <Input addonBefore="https://" value={linkURL} onChange={linkChange} />
+          <Input value={linkURL} onChange={linkChange} />
         </div>
       </>
     );

@@ -212,7 +212,6 @@ const SocialLinkSettings = () => {
                   {currentEditIndex === index && (
                     <div className="margin-top-12 relative">
                       <Input
-                        addonBefore="https://"
                         value={link}
                         onInput={(value) =>
                           updateSocialSettings(

@@ -108,6 +108,7 @@ const parseItem = (item, index, styles, parentIndex) => {
 }
 
 const createImageString = (imageConfig) => {
+  if(!imageConfig.linkURL.includes("://")) imageConfig.linkURL = `https://${imageConfig.linkURL}`
   const imageString = `<img src="${imageConfig.src}" alt="${imageConfig.alt}" style="max-width:100%;${imageConfig.styleConfig.desktop}" 
       ${imageConfig.styleConfig.mobile ? `class="${imageConfig.styleConfig.className}"` : ""}/> `
   return `<div ${imageConfig.contentStyleConfig.mobile ? `class="${imageConfig.contentStyleConfig.className}"` : ""} 
@@ -239,6 +240,7 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
   const { newBlockList, styles } = createStyleTag(blockList);
   content = blockListToHtml(newBlockList, bodySettings);
   let links = extractUrls(content)
+
   if (links)
     for (let l = 0; l < links.length; l++) {
       if (links[l].includes('fairymail.cobaltfairy.com') || links[l].includes('cdn.cobaltfairy.online') || links[l].includes('cdn.cobaltfairy.com')) {
@@ -263,6 +265,7 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
             `${PIXEL_URL}/custom/redir?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
           )
       }
+      content = content.split('https://https://').join('https://').split('https://http://').join('https://')
     }
   let fontStyles = "";
   let fontMediaStyles = "";
@@ -297,6 +300,7 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
       </style>
       `
   } 
+  const backgroundImageString = bodySettings.styles.backgroundImage && bodySettings.styles.backgroundImage.length>0 ? `background-image:${bodySettings.styles.backgroundImage}; background-size:${bodySettings.styles.backgroundSize ?? 'auto'}; background-position:${bodySettings.styles.backgroundPosition ?? 'center center'};` : ''
   return `<html>
   <head>
   <meta charset="UTF-8">
@@ -354,9 +358,9 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
   <img alt="Fairy Mail tracking pixel" src=${pixel}/>
 </style>
   </head>
-  <body style="background-color:${bodySettings.styles.backgroundColor};">
+  <body style="background-color:${bodySettings.styles.backgroundColor};${backgroundImageString}">
   <div style="opacity:0;height:0;overflow:hidden;">${bodySettings.preHeader}</div>
-  <div style="background-color:${bodySettings.styles.backgroundColor};color:${bodySettings.styles.color}; font-family:${bodySettings.styles.fontFamily.attribute};"> ${content}</div>
+  <div style="color:${bodySettings.styles.color}; font-family:${bodySettings.styles.fontFamily.attribute};"> ${content}</div>
   </body>
   </html>`;
 };

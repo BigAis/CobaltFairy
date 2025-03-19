@@ -6,7 +6,7 @@ import classNames from 'classnames'
 import './Button.scss'
 import Icon from './Icon/Icon'
 
-const Button = ({ children, icon, iconSize = null, type = 'primary', active = false, inactive = false, disabled = false, loading = false, onClick, className, ...props }) => {
+const Button = ({ children, icon, iconSize = null, type = 'primary', active = false, inactive = false, disabled = false, loading = false, onClick, className, blackIcon=false, ...props }) => {
 	const [hovered, setHovered] = useState(false)
 
 	const handleClick = (e) => {
@@ -27,13 +27,15 @@ const Button = ({ children, icon, iconSize = null, type = 'primary', active = fa
 		// type === 'primary' ? 'btn-primary' : 'btn-secondary',
 		className // clases from props
 	)
-
+	const blackiconclass = (blackIcon?'blackfill':'nonefill')
+	console.log('button',children,blackIcon,blackiconclass)
 	return (
 		<>
 			<button className={computedClassName} onClick={handleClick} disabled={disabled} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} {...props}>
 				{loading && <span className="spinner"></span>}
 
-				{icon && !loading && <Icon name={icon} size={iconSize} className="icon" />}
+				{icon && !loading && <Icon name={icon} size={iconSize} className={"icon"+' '+blackiconclass
+				} />}
 
 				{children && <span className="text">{children}</span>}
 			</button>

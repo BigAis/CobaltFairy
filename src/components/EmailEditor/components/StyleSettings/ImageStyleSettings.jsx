@@ -34,7 +34,6 @@ const ImageStyleSettings = () => {
 
     return (
       <>
-        <div className="right-setting-block-item-title">Image Link</div>
         {/* {cardItemElement(t("action_type"), <div className="link-tag">{t("link")}</div>)} */}
         <div className="card-item-title">{t("link_url")}</div>
         <div className="margin-top-6">

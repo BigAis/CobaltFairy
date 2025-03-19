@@ -212,6 +212,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 					<Button
 						style={{ margin: '0 10px' }}
 						icon="Export"
+						blackIcon={false}
 						type="secondary"
 						className={'exportbtn'}
 						onClick={() => {
@@ -237,9 +238,10 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 					</Button>
 					<Button
 						style={{ margin: '0 10px' }}
-						icon="Export"
+						icon="Import"
+						blackIcon={true}
 						type="secondary"
-						className={'exportbtn'}
+						className={'importbtn'}
 						onClick={() => {
 							PopupText.fire({
 								text: 'Select an option:', // Optional, since we're using html
@@ -306,12 +308,12 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 					<Icon
 						onClick={prevHistory}
 						name="Undo"
-						className={classNames('header-icon-history', histories[index - 1] && 'header-icon-history_active', !histories[index - 1] && 'header-icon-history_disabled')}
+						className={classNames('nonefill', 'header-icon-history', histories[index - 1] && 'header-icon-history_active', !histories[index - 1] && 'header-icon-history_disabled')}
 					/>
 					<Icon
 						onClick={nextHistory}
 						name="Redo"
-						className={classNames('header-icon-history', histories[index + 1] && 'header-icon-history_active', !histories[index + 1] && 'header-icon-history_disabled')}
+						className={classNames('nonefill', 'header-icon-history', histories[index + 1] && 'header-icon-history_active', !histories[index + 1] && 'header-icon-history_disabled')}
 					/>
 					<Button style={{ margin: '0 10px', marginLeft: '20px' }} type="secondary" onClick={openModal}>
 						Preview

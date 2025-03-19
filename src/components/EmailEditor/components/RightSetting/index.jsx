@@ -8,11 +8,16 @@ import useLayout from "../../utils/useStyleLayout";
 import useTranslation from "../../translation";
 import InputText from "../../../InputText/InputText";
 import useDataSource from "../../configs/useDataSource"
+import ImageUploadPopup from "../StyleSettings/ImageUploadPopup"
+import Button from "../../../Button"
+
 
 const RightSetting = () => {
   const { currentItem, isDragStart, blockList, setBlockList, bodySettings, setBodySettings } = useContext(GlobalContext);
   const { fontsList } = useDataSource();
   const [fontFamily,setFontFamily] = useState('Inter, sans-serif')
+  const [ pickerVisible, setPickerVisible ] = useState(false)
+
   const { t } = useTranslation();
   const { cardItemElement } = useLayout();
   const blockTitle = () => {
@@ -85,6 +90,18 @@ const RightSetting = () => {
     setBlockList([...newblockList])
 }
 
+  const bgImageUrlChange = (key) => (event) => {
+    setBodySettings({ ...bodySettings, styles: { ...bodySettings.styles, backgroundImage: `url('${event.target.value}')`}, backgroundSize:'auto', backgroundPosition:'center center' }, "set_body_settings");
+  };
+
+  const bgImagePick = (src) =>{
+    setBodySettings({ ...bodySettings, styles: { ...bodySettings.styles, backgroundImage: `url('${src}')`, backgroundSize:'auto', backgroundPosition:'center center'} }, "set_body_settings");
+  }
+  const stripUrlStyle = (src) =>{
+    return src.replace("url('","").replace("')","")
+  }
+
+
   const themeElement = () => {
     return (
       <>
@@ -96,6 +113,16 @@ const RightSetting = () => {
             'Background Color (Theme)',
             <ColorPicker color={bodySettings.styles.backgroundColor} setColor={colorChange("backgroundColor")} />
           )}
+          <div className="card-item">
+            <div className="width-full">
+              <div className="card-item-title">Background Image</div> 
+              <div className="margin-top-6">
+                <Input value={stripUrlStyle(bodySettings.styles?.backgroundImage ?? '')} placeholder="Paste Image URL here or choose below:" onChange={bgImageUrlChange("src")} />
+              </div>
+              <Button type="secondary" onClick={()=>{setPickerVisible(true)}} className={'imagePicker'}>Choose Image</Button>
+              <ImageUploadPopup shown={pickerVisible} setShown={setPickerVisible} selectImage={bgImagePick}></ImageUploadPopup>
+            </div>
+          </div>
           {cardItemElement(
           t("font_family"),
             <Select className="input-width" value={fontFamily} onChange={updateFontFamily}>
