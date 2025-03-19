@@ -49,8 +49,7 @@ function CustomDatePicker({ dateFormat, timeFormat, pickerType = 'datetime', onC
 			}
 		}
 	}, [value])
-
-	console.log('datepicker',minDate,startDate)
+	console.log('Value',value)
 
 	return (
 		<div className={computedClassName}>

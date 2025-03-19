@@ -201,7 +201,6 @@ const NewCampaign = () => {
 		}
 		try {
 			console.log('campaignData is : ', campaignData)
-
 			const response = await ApiService.post('fairymailer/updateCampaign', { assignses:true, data: campaignData }, user.jwt)
 			console.log('response is : ', response)
 			if (response && response.data && response.data.code === 200) {
@@ -351,7 +350,7 @@ const NewCampaign = () => {
 		console.log('currentCampaign from scheduleCampaign useEffect is : ', currentCampaign)
 		setCurrentCampaign((prevState) => ({
 			...prevState,
-			date: scheduleCampaign ? (currentCampaign.date ? dayjs(currentCampaign.date).toISOString() : dayjs().toISOString()) : null,
+			date: scheduleCampaign ? (currentCampaign.date ? dayjs(currentCampaign.date).toISOString() : dayjs(new Date(new Date().setHours(new Date().getHours() + 2))).toISOString()) : null,
 		}))
 		// if (!scheduleCampaign) {
 		// }
