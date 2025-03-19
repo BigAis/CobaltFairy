@@ -1,14 +1,11 @@
 import axios from 'axios'
 import { jwtDecode } from 'jwt-decode'
-const APP_VERSION = '0.1.3'
+const APP_VERSION = '0.1.4'
 const BASE_URL = 'https://fairymail.cobaltfairy.com/api'
 // const BASE_URL = 'http://localhost:1337/api'
 export const checkUserExists = async (useremail) => {
 	try {
-		const response = await axios.post(`${BASE_URL}/check-user-exists`, {
-			email: useremail,
-		})
-
+		const response = await axios.post(`${BASE_URL}/check-user-exists`, { email: useremail, })
 		return response.data.exists
 	} catch (error) {
 		console.error()

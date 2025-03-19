@@ -689,6 +689,7 @@ const NewCampaign = () => {
 										<DatePicker
 											dateFormat="d/m/Y"
 											timeFormat={'H:i'}
+											hasMinDate={true}
 											pickerType="datetime"
 											style={{ width: '100%' }}
 											value={currentCampaign?.date && dayjs(currentCampaign.date).toISOString()}
@@ -706,6 +707,7 @@ const NewCampaign = () => {
 
 								<div className="d-flex justify-content-center gap-20">
 									<Button
+									type={scheduleCampaign ? 'secondary' : 'primary'}
 										onClick={() => {
 											PopupText.fire({
 												text: scheduleCampaign ? 'This action will remove the scheduled date. Are you sure?' : 'The campaign will be saved as a draft. Are you sure?',
@@ -724,6 +726,7 @@ const NewCampaign = () => {
 									</Button>
 									{scheduleCampaign ? (
 										<Button
+
 											onClick={() => {
 												handleSave('schedule')
 												// PopupText.fire({
@@ -743,6 +746,7 @@ const NewCampaign = () => {
 										</Button>
 									) : (
 										<Button
+										type={'secondary'}
 											onClick={() => {
 												PopupText.fire({
 													text: 'The campaign will be sent right now. Are you sure?',

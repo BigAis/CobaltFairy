@@ -7,7 +7,8 @@ import 'react-datepicker/dist/react-datepicker.css'
 import './DatePicker.scss' // Path to your CSS file
 
 function CustomDatePicker({ dateFormat, timeFormat, pickerType = 'datetime', onChange, className, value, hasMinDate, hasDefaultDate, ...props }) {
-	const [startDate, setStartDate] = useState(value ? new Date(value) : new Date())
+	const initDate = hasMinDate ? new Date(new Date().setHours(new Date().getHours() + 2)) : new Date('2026-01-01') ;
+	const [startDate, setStartDate] = useState(value ? new Date(value) : initDate)
 	const showTimeSelect = timeFormat !== undefined
 	const computedClassName = classNames('date-picker-container', className)
 
@@ -26,7 +27,7 @@ function CustomDatePicker({ dateFormat, timeFormat, pickerType = 'datetime', onC
 
 	// Calculate +2 hours from now for minTime
 	const minDate = hasMinDate ? new Date(new Date().setHours(new Date().getHours() + 2)) : undefined
-	const minTime = new Date(new Date().setHours(new Date().getHours() + 4))
+	const minTime = new Date(new Date().setHours(new Date().getHours() + 2))
 	const maxTime = new Date(new Date().setHours(23, 59)) // Set maxTime to the end of the day
 
 	const handleDateChange = (date) => {
@@ -41,9 +42,15 @@ function CustomDatePicker({ dateFormat, timeFormat, pickerType = 'datetime', onC
 
 	useEffect(() => {
 		if (value) {
-			setStartDate(new Date(value))
+			if(new Date(value).getTime()<new Date(minDate).getTime()){
+				setStartDate(new Date(minDate))
+			}else{
+				setStartDate(new Date(value))
+			}
 		}
 	}, [value])
+
+	console.log('datepicker',minDate,startDate)
 
 	return (
 		<div className={computedClassName}>
