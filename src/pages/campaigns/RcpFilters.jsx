@@ -84,13 +84,37 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 	const [value, setValue] = useState(initialValue || null)
 
 	useEffect(() => {
+		console.log('key', key)
+		console.log('condition', condition)
+		console.log('value', value)
+		console.log('id', id)
 		if (key && key.value && condition && condition.value && value && value.value) {
 			let filter = {} // Initialize an empty filter object
 
 			switch (key.value) {
 				case 'ocmp':
-					filter = {
-						$or: [condition.value === 'contains' ? { ocmp_ids: { $contains: value.value } } : { ocmp_ids: { $notContains: value.value } }],
+					if (condition.value === 'clicked') {
+						const arrayOfAllLinksClicked = links.map((link) => ({
+							links_clicked: { $contains: link.value },
+						}))
+
+						filter = {
+							$or: arrayOfAllLinksClicked,
+						}
+						console.log('arrayOfAllLinksClicked filter', filter)
+					} else if (condition.value == 'notClicked') {
+						const arrayOfAllLinksClicked = links.map((link) => ({
+							links_clicked: { $notContains: link.value },
+						}))
+
+						filter = {
+							$or: arrayOfAllLinksClicked,
+						}
+						console.log('arrayOfAllLinksClicked filter', filter)
+					} else {
+						filter = {
+							$or: [condition.value === 'contains' ? { ocmp_ids: { $contains: value.value } } : { ocmp_ids: { $notContains: value.value } }],
+						}
 					}
 					break
 				case 'link':
@@ -122,8 +146,7 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 						]}
 						active
 						onOptionSelect={(value) => {
-							const selected = { label: value === 'link' ? 'Link of prev. cmp.' : 'Previous Campaign', value }
-							setKey(selected)
+							setKey(value)
 						}}
 					>
 						{key ? key.label : 'Select Filter Type'}
@@ -133,25 +156,29 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 						options={key?.value === 'ocmp' ? campaigns : links}
 						active
 						onOptionSelect={(value) => {
-							const selected = campaigns.concat(links).find((opt) => opt.value === value)
-							setValue(selected)
+							setValue(value)
 						}}
 					>
 						{value ? value.label : 'Select Option'}
 					</Dropdown>
 
 					<Dropdown
-						options={[
-							{ label: `Was ${key?.value === 'ocmp' ? 'opened' : 'clicked'}`, value: 'contains' },
-							{ label: `Was NOT ${key?.value === 'ocmp' ? 'opened' : 'clicked'}`, value: 'notContains' },
-						]}
+						options={
+							key?.value === 'ocmp'
+								? [
+										{ label: 'Was opened', value: 'opened' },
+										{ label: 'Was NOT opened', value: 'notOpened' },
+										// { label: 'Was clicked', value: 'clicked' },
+										// { label: 'Was NOT clicked', value: 'notClicked' },
+								  ]
+								: [
+										{ label: 'Was clicked', value: 'contains' },
+										{ label: 'Was NOT clicked', value: 'notContains' },
+								  ]
+						}
 						active
 						onOptionSelect={(value) => {
-							const selected = {
-								label: value === 'contains' ? `Was ${key?.value === 'ocmp' ? 'opened' : 'clicked'}` : `Was NOT ${key?.value === 'ocmp' ? 'opened' : 'clicked'}`,
-								value,
-							}
-							setCondition(selected)
+							setCondition(value)
 						}}
 					>
 						{condition ? condition.label : 'Select Condition'}

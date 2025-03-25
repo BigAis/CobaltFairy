@@ -185,7 +185,7 @@ const NewCampaign = () => {
 		}
 
 		try {
-			const response = await ApiService.post('fairymailer/updateCampaign', { assignses:true, data: campaignData }, user.jwt)
+			const response = await ApiService.post('fairymailer/updateCampaign', { assignses: true, data: campaignData }, user.jwt)
 			if (response && response.data && response.data.code === 200) {
 				navigate(`/campaigns/`)
 			}
@@ -201,7 +201,7 @@ const NewCampaign = () => {
 		}
 		try {
 			console.log('campaignData is : ', campaignData)
-			const response = await ApiService.post('fairymailer/updateCampaign', { assignses:true, data: campaignData }, user.jwt)
+			const response = await ApiService.post('fairymailer/updateCampaign', { assignses: true, data: campaignData }, user.jwt)
 			console.log('response is : ', response)
 			if (response && response.data && response.data.code === 200) {
 				navigate(`/campaigns/`)
@@ -220,7 +220,7 @@ const NewCampaign = () => {
 		try {
 			console.log('campaignData is : ', campaignData)
 
-			const response = await ApiService.post('fairymailer/updateCampaign', { assignses:true, data: campaignData }, user.jwt)
+			const response = await ApiService.post('fairymailer/updateCampaign', { assignses: true, data: campaignData }, user.jwt)
 			console.log('response is : ', response)
 			if (response && response.data && response.data.code === 200) {
 				navigate(`/campaigns/`)
@@ -242,7 +242,7 @@ const NewCampaign = () => {
 
 			if (isEdit) {
 				campaignData.udid = uuid
-				const response = await ApiService.post('fairymailer/updateCampaign', { assignses:true, data: campaignData }, user.jwt)
+				const response = await ApiService.post('fairymailer/updateCampaign', { assignses: true, data: campaignData }, user.jwt)
 				console.log('response is : ', response)
 				if (response && response.data && response.data.code === 200) {
 					navigate(`/campaigns/edit/${campaignData.udid}`)
@@ -252,7 +252,7 @@ const NewCampaign = () => {
 				campaignData.udid = uuidv4()
 				campaignData.uuid_b = uuidv4()
 
-				const response = await ApiService.post('fairymailer/createCampaign', { assignses:true, data: campaignData }, user.jwt)
+				const response = await ApiService.post('fairymailer/createCampaign', { assignses: true, data: campaignData }, user.jwt)
 				console.log('response is : ', response)
 				if (response && response.data && response.data.code === 200) {
 					navigate(`/campaigns/edit/${campaignData.udid}`)
@@ -643,6 +643,16 @@ const NewCampaign = () => {
 													}
 												}
 											} else if (f.$or[0]?.links_clicked) {
+												// if (f.$or.length > 1) {
+												// 	iKey = { label: 'Previous Campaign', value: 'ocmp' }
+												// 	if (f.$or[0].links_clicked?.$contains) {
+												// 		iCondition = { label: 'Was clicked', value: 'clicked' }
+												// 		iValue = { label: f.$or[0].links_clicked?.$contains, value: f.$or[0].links_clicked?.$contains }
+												// 	} else if (f.$or[0].links_clicked?.$notContains) {
+												// 		iCondition = { label: 'Was NOT clicked', value: 'notContains' }
+												// 		iValue = { label: f.$or[0].links_clicked?.$notContains, value: f.$or[0].links_clicked?.$notContains }
+												// 	}
+												// } else {
 												iKey = { label: 'Link of prev. cmp.', value: 'link' }
 												if (f.$or[0].links_clicked?.$contains) {
 													iCondition = { label: 'Was clicked', value: 'contains' }
@@ -651,6 +661,7 @@ const NewCampaign = () => {
 													iCondition = { label: 'Was NOT clicked', value: 'notContains' }
 													iValue = { label: f.$or[0].links_clicked?.$notContains, value: f.$or[0].links_clicked?.$notContains }
 												}
+												// }
 											}
 											return (
 												<RcpFilter
@@ -706,7 +717,7 @@ const NewCampaign = () => {
 
 								<div className="d-flex justify-content-center gap-20">
 									<Button
-									type={scheduleCampaign ? 'secondary' : 'primary'}
+										type={scheduleCampaign ? 'secondary' : 'primary'}
 										onClick={() => {
 											PopupText.fire({
 												text: scheduleCampaign ? 'This action will remove the scheduled date. Are you sure?' : 'The campaign will be saved as a draft. Are you sure?',
@@ -725,7 +736,6 @@ const NewCampaign = () => {
 									</Button>
 									{scheduleCampaign ? (
 										<Button
-
 											onClick={() => {
 												handleSave('schedule')
 												// PopupText.fire({
@@ -745,7 +755,7 @@ const NewCampaign = () => {
 										</Button>
 									) : (
 										<Button
-										type={'secondary'}
+											type={'secondary'}
 											onClick={() => {
 												PopupText.fire({
 													text: 'The campaign will be sent right now. Are you sure?',
