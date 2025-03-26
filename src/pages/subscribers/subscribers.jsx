@@ -118,7 +118,7 @@ const Subscribers = () => {
 
 	const getSubscribers = async () => {
 		const resp = await ApiService.get(
-			`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[email][$contains]=${subscriberSearchValue}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
+			`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[active]=true&[email][$contains]=${subscriberSearchValue}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
 			user.jwt
 		)
 		if (resp.data && resp.data.data) setSubscribers(resp.data.data)
