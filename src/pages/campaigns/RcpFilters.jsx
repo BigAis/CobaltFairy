@@ -88,6 +88,15 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 		console.log('condition', condition)
 		console.log('value', value)
 		console.log('id', id)
+
+		if (!value || !value?.value) {
+			const filter = {
+				$or: [],
+			}
+			onComplete(id, filter)
+			return
+		}
+
 		if (key && key.value && condition && condition.value && value && value.value) {
 			let filter = {} // Initialize an empty filter object
 
@@ -121,6 +130,7 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 					filter = {
 						$or: [condition.value === 'contains' ? { links_clicked: { $contains: value.value } } : { links_clicked: { $notContains: value.value } }],
 					}
+
 					break
 				default:
 					break
@@ -140,12 +150,21 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 			<div className="rcp-filter-row d-flex gap-10" key={id}>
 				<div className="d-flex flex-column gap-10" style={{ flexGrow: 0, flexBasis: '90%' }}>
 					<Dropdown
+						selectedValue={key}
 						options={[
-							{ label: 'Link of prev. cmp.', value: 'link' },
+							{ label: 'Link of previous campaign', value: 'link' },
 							{ label: 'Previous Campaign', value: 'ocmp' },
 						]}
 						active
 						onOptionSelect={(value) => {
+							console.log('value on dropdown', value.value == 'link')
+							setValue(null)
+							if (value.value == 'link') {
+								setCondition({ label: 'Was clicked', value: 'contains' })
+							} else {
+								setCondition({ label: 'Was opened', value: 'opened' })
+							}
+							// value.value == 'link' ? setCondition({ label: 'Was clicked', value: 'contains' }) : setCondition({ label: 'Was opened', value: 'opened' })
 							setKey(value)
 						}}
 					>
@@ -153,16 +172,19 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 					</Dropdown>
 
 					<Dropdown
+						selectedValue={value}
 						options={key?.value === 'ocmp' ? campaigns : links}
 						active
+						searchable
 						onOptionSelect={(value) => {
 							setValue(value)
 						}}
 					>
-						{value ? value.label : 'Select Option'}
+						{!value ? (key?.value === 'ocmp' ? 'Select Campaign' : 'Select Link') : value.label}
 					</Dropdown>
 
 					<Dropdown
+						selectedValue={condition}
 						options={
 							key?.value === 'ocmp'
 								? [

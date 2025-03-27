@@ -17,10 +17,12 @@ const Dropdown = ({
 	onLeftClick = null,
 	className,
 	style,
+	searchable = false,
 }) => {
 	const [isOpen, setIsOpen] = useState(false)
 	const [hovered, setHovered] = useState(false)
 	const [selectedOption, setSelectedOption] = useState(selectedValue || null)
+	const [searchTerm, setSearchTerm] = useState('')
 	const dropdownRef = useRef(null)
 
 	const toggleDropdown = () => {
@@ -30,7 +32,6 @@ const Dropdown = ({
 	}
 
 	const handleOptionClick = (option) => {
-		console.log('Selected option:', option)
 		setSelectedOption(option)
 		setIsOpen(false)
 		if (onOptionSelect) {
@@ -51,10 +52,17 @@ const Dropdown = ({
 		}
 	}, [])
 
-	// Update state when `selectedValue` changes from the parent
 	useEffect(() => {
 		setSelectedOption(selectedValue)
 	}, [selectedValue])
+
+	useEffect(() => {
+		if (!isOpen) {
+			setSearchTerm('')
+		}
+	}, [isOpen])
+
+	const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
 
 	const computedClassName = classNames(
 		'dropdown',
@@ -73,7 +81,6 @@ const Dropdown = ({
 			<div className={computedClassName}>
 				{withDivider && (
 					<div className="dropdown-left" onClick={onLeftClick}>
-						{/* Left Section */}
 						{children}
 					</div>
 				)}
@@ -87,11 +94,16 @@ const Dropdown = ({
 
 			{isOpen && (
 				<div className="dropdown-menu">
-					{options.map((option, index) => (
-						<div key={index} className="dropdown-item" onClick={() => handleOptionClick(option)}>
-							{option.label}
-						</div>
-					))}
+					{searchable && <input type="text" className="dropdown-search-input" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />}
+					{filteredOptions.length > 0 ? (
+						filteredOptions.map((option, index) => (
+							<div key={index} className="dropdown-item" onClick={() => handleOptionClick(option)}>
+								{option.label}
+							</div>
+						))
+					) : (
+						<div className="dropdown-item disabled">No results</div>
+					)}
 				</div>
 			)}
 		</div>
@@ -118,6 +130,8 @@ Dropdown.propTypes = {
 	onLeftClick: PropTypes.func,
 	withDivider: PropTypes.bool,
 	className: PropTypes.string,
+	style: PropTypes.object,
+	searchable: PropTypes.bool,
 }
 
 export default Dropdown

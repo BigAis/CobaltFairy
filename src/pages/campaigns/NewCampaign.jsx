@@ -163,6 +163,25 @@ const NewCampaign = () => {
 	}
 
 	const handleSave = async (actionClicked) => {
+		const filtersHasEmptyValue = (filters = currentCampaign.recp_filters.$and) => {
+			return filters.some((filter) => Array.isArray(filter.$or) && filter.$or.length === 0)
+		}
+
+		if (filtersHasEmptyValue()) {
+			const result = await PopupText.fire({
+				text: 'Error in campaign filters. Please complete all filter options.',
+				icon: 'error',
+				confirmButtonText: 'OK',
+				showCancelButton: false,
+				showDenyButton: false,
+			})
+
+			// If user confirmed (clicked OK), just return from the function
+			if (result.isConfirmed) {
+				return
+			}
+		}
+
 		switch (actionClicked) {
 			case 'saveAndExit':
 				handleSaveAndExit()
@@ -620,7 +639,7 @@ const NewCampaign = () => {
 									{currentCampaign.recp_filters?.$and && currentCampaign.recp_filters.$and.length > 0 ? (
 										currentCampaign.recp_filters.$and.map((f, i) => {
 											let iKey = { label: 'Previous Campaign', value: 'ocmp' }
-											let iCondition = { label: 'opened', value: 'contains' }
+											let iCondition = iKey.value == 'ocmp' ? { label: 'Was opened', value: 'contains' } : { label: 'Was clicked', value: 'contains' }
 											let iValue = null
 
 											if (f.$or[0]?.ocmp_ids) {
@@ -653,7 +672,7 @@ const NewCampaign = () => {
 												// 		iValue = { label: f.$or[0].links_clicked?.$notContains, value: f.$or[0].links_clicked?.$notContains }
 												// 	}
 												// } else {
-												iKey = { label: 'Link of prev. cmp.', value: 'link' }
+												iKey = { label: 'Link of previous campaign', value: 'link' }
 												if (f.$or[0].links_clicked?.$contains) {
 													iCondition = { label: 'Was clicked', value: 'contains' }
 													iValue = { label: f.$or[0].links_clicked?.$contains, value: f.$or[0].links_clicked?.$contains }
