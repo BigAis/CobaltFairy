@@ -1,5 +1,6 @@
 import getFontsList from "../configs/getFontsList";
-const PIXEL_URL = 'https://fairymail.cobaltfairy.com/api'
+// const PIXEL_URL = 'https://fairymail.cobaltfairy.com/api'
+const PIXEL_URL = 'https://pixel.fairymail.app'
 
 
 const createStyleString = (className, styles) => {
@@ -243,7 +244,7 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
 
   if (links)
     for (let l = 0; l < links.length; l++) {
-      if (links[l].includes('fairymail.cobaltfairy.com') || links[l].includes('cdn.cobaltfairy.online') || links[l].includes('cdn.cobaltfairy.com')) {
+      if (links[l].includes('fairymail.cobaltfairy.com') || links[l].includes('cdn.cobaltfairy.online') || links[l].includes('cdn.cobaltfairy.com') || links[l].includes('fairymail.app')) {
         continue
       }
       if (links[l].includes(' ')) links[l] = links[l].split(' ')[0]
@@ -255,21 +256,22 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
         !links[l].includes('.webp') &&
         !links[l].includes('.svg') &&
         !links[l].includes('cdn.cobaltfairy.online') &&
-        !links[l].includes('cdn.cobaltfairy.com')
+        !links[l].includes('cdn.cobaltfairy.com') && 
+        !links[l].includes('pixel.fairymail.app')
       ) {
         if (links[l].includes('"')) links[l] = links[l].split('"')[0]
         if (!links[l].startsWith('http')) links[l] = `http://${links[l]}`
         content = content
           .split(links[l])
           .join(
-            `${PIXEL_URL}/custom/redir?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
+            `${PIXEL_URL}/redir?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
           )
       }
       content = content.split('https://https://').join('https://').split('https://http://').join('https://')
     }
   let fontStyles = "";
   let fontMediaStyles = "";
-  let pixel = `${PIXEL_URL}/custom/pixel.gif?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}`
+  let pixel = `${PIXEL_URL}/pixel.gif?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}`
   if(fontList.length>0) {
     fontStyles += `
       <!--[if mso]>
