@@ -163,7 +163,7 @@ const NewCampaign = () => {
 	}
 
 	const handleSave = async (actionClicked) => {
-		const filtersHasEmptyValue = (filters = currentCampaign.recp_filters.$and) => {
+		const filtersHasEmptyValue = (filters = currentCampaign.recp_filters?.$and || []) => {
 			return filters.some((filter) => Array.isArray(filter.$or) && filter.$or.length === 0)
 		}
 
