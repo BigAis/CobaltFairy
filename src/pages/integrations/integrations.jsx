@@ -2,6 +2,7 @@ import IntegrationsTable from '../../components/DataTable/IntegrationsTable'
 import '../dashboard/dashboard.scss'
 import '../../fullpage.scss'
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
@@ -32,6 +33,7 @@ const integrations = [
 ]
 
 const Integrations = () => {
+	const navigate = useNavigate()
 	const [currentPage, setCurrentPage] = useState(1)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedIntegrations, setSelectedIntegrations] = useState([])
@@ -107,9 +109,15 @@ const Integrations = () => {
 												<img src={integration.img} alt={integration.label} className="integration-icon" />
 												<h3 className="integration-title">{integration.label}</h3>
 												<p className="integration-description">{integration.Description}</p>
-												<Button className="integration-add-button" type="secondary" onClick={() => handleAddIntegration(integration)}>
-													Add
-												</Button>
+												{integration.label === 'BookFunnel' ? (
+													<Button className="integration-add-button" type="secondary" onClick={() => navigate('/integrations/bookfunnel')}>
+														View
+													</Button>
+												) : (
+													<Button className="integration-add-button" type="secondary" onClick={() => handleAddIntegration(integration)}>
+														Add
+													</Button>
+												)}
 											</Card>
 										))}
 									</div>

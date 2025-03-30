@@ -20,6 +20,7 @@ import FlowEditor from './pages/automations/FlowEditor'
 import EditTemplate from './pages/templates/EditTemplate'
 import EditSubscriber from './pages/subscribers/EditSubscriber'
 import EditGroup from './pages/subscribers/EditGroup'
+import BookFunnel from './pages/integrations/BookFunnel'
 
 function App() {
 	const navigate = useNavigate()
@@ -61,6 +62,7 @@ function App() {
 				<Route path="/subscribers/group/new" element={<EditGroup />} />
 				<Route path="/subscribers/group/:uuid" element={<EditGroup />} />
 				<Route path="/integrations" element={<Integrations />} />
+				<Route path="/integrations/bookfunnel/:mode?" element={<BookFunnel />} />
 				<Route path="/automations" element={<Automations />} />
 				<Route path="/automations/:autId" element={<EditAutomation />} />
 				<Route path="/automations/editor/:autId" element={<FlowEditor />} />

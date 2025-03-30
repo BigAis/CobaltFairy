@@ -1,79 +1,3 @@
-// import { useEffect, useState } from 'react'
-// import Select from 'react-select'
-
-// const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, initialValue, initialCondition }) => {
-// 	const [key, setKey] = useState(initialKey || null)
-// 	const [condition, setCondition] = useState(initialCondition || null)
-// 	const [value, setValue] = useState(initialValue || null)
-
-// 	useEffect(() => {
-// 		if (key && key.value && condition && condition.value && value && value.value) {
-// 			let filter = {} // Initialize an empty filter object
-
-// 			switch (key.value) {
-// 				case 'ocmp':
-// 					filter = {
-// 						$or: [condition.value === 'contains' ? { ocmp_ids: { $contains: value.value } } : { ocmp_ids: { $notContains: value.value } }],
-// 					}
-// 					break
-// 				case 'link':
-// 					filter = {
-// 						$or: [condition.value === 'contains' ? { links_clicked: { $contains: value.value } } : { links_clicked: { $notContains: value.value } }],
-// 					}
-// 					break
-// 				default:
-// 					break
-// 			}
-
-// 			// Call onComplete with the filter object
-// 			onComplete(id, filter)
-// 		}
-// 	}, [key, value, condition, id])
-// 	return (
-// 		<>
-// 			<small> - And - </small>
-// 			<br></br>
-// 			<div className="rcp-filter-row" key={id}>
-// 				<Select
-// 					options={[
-// 						{ label: 'Link of prev. cmp.', value: 'link' },
-// 						{ label: 'Previous Campaign', value: 'ocmp' },
-// 					]}
-// 					className="select-control"
-// 					value={key}
-// 					onChange={(evt) => {
-// 						setKey(evt)
-// 					}}
-// 				/>
-// 				<Select
-// 					options={key.value == 'ocmp' ? campaigns : links}
-// 					className="select-control"
-// 					value={value}
-// 					onChange={(evt) => {
-// 						setValue(evt)
-// 					}}
-// 				/>
-// 				<Select
-// 					options={[
-// 						{ label: `Was ${key.value == 'ocmp' ? 'opened' : 'clicked'}`, value: 'contains' },
-// 						{ label: `Was NOT ${key.value == 'ocmp' ? 'opened' : 'clicked'}`, value: 'notContains' },
-// 					]}
-// 					className="select-control"
-// 					value={condition}
-// 					onChange={(evt) => {
-// 						setCondition(evt)
-// 					}}
-// 				/>
-// 				<button className="btn btn-danger ml-1" onClick={() => onDelete(id)}>
-// 					X
-// 				</button>
-// 			</div>
-// 		</>
-// 	)
-// }
-
-// export default RcpFilter
-
 import { useEffect, useState } from 'react'
 import Dropdown from '../../components/Dropdown'
 import Button from '../../components/Button'
@@ -82,6 +6,47 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 	const [key, setKey] = useState(initialKey || null)
 	const [condition, setCondition] = useState(initialCondition || null)
 	const [value, setValue] = useState(initialValue || null)
+
+	const campaignOptions =
+		campaigns.length > 0
+			? campaigns.map((cmp) => {
+					return { value: cmp.id, label: cmp.name }
+			  })
+			: []
+
+	function extractLinksV2(data) {
+		const links = []
+
+		function walk(node) {
+			if (Array.isArray(node)) {
+				node.forEach(walk)
+			} else if (typeof node === 'object' && node !== null) {
+				if (node.linkURL && typeof node.linkURL === 'string') {
+					links.push(node.linkURL.trim())
+				}
+				Object.values(node).forEach(walk)
+			}
+		}
+
+		function cleanLinks(links) {
+			return links.filter((link) => link !== 'https://')
+		}
+
+		walk(data)
+		return cleanLinks(links)
+	}
+
+	const extractLinksV1 = (components = [], links = []) => {
+		components.forEach((component) => {
+			if (component.components && component.components.length > 0) {
+				links = [...extractLinksV1(component.components, links)]
+			}
+			if (component.type === 'link') {
+				links.push(component?.attributes?.href)
+			}
+		})
+		return links
+	}
 
 	useEffect(() => {
 		console.log('key', key)
@@ -99,36 +64,91 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 
 		if (key && key.value && condition && condition.value && value && value.value) {
 			let filter = {} // Initialize an empty filter object
+			const meta = []
 
 			switch (key.value) {
 				case 'ocmp':
 					if (condition.value === 'clicked') {
+						console.log('value.value inside clicked', value.value)
+
+						let links = []
+						const selectedCampaign = campaigns.find((cmp) => cmp.id === value.value)
+						if (selectedCampaign) {
+							console.log('selectedCampaing', selectedCampaign)
+							const desing = JSON.parse(selectedCampaign.design)
+
+							if (Object.prototype.hasOwnProperty.call(desing, 'components')) {
+								console.log('this is old FM design')
+								links = extractLinksV1(desing.components)
+								console.log('links', links)
+							} else {
+								links = extractLinksV2(JSON.parse(selectedCampaign.design))
+								console.log('links', links)
+							}
+						}
+
 						const arrayOfAllLinksClicked = links.map((link) => ({
-							links_clicked: { $contains: link.value },
+							links_clicked: { $contains: link },
 						}))
 
 						filter = {
 							$or: arrayOfAllLinksClicked,
+						}
+						meta[id] = {
+							type: 'ocmp',
+							condition: condition.value,
+							value: value.value,
 						}
 						console.log('arrayOfAllLinksClicked filter', filter)
 					} else if (condition.value == 'notClicked') {
+						let links = []
+						const selectedCampaign = campaigns.find((cmp) => cmp.id === value.value)
+						if (selectedCampaign) {
+							console.log('selectedCampaing', selectedCampaign)
+							const desing = JSON.parse(selectedCampaign.design)
+
+							if (Object.prototype.hasOwnProperty.call(desing, 'components')) {
+								console.log('this is old FM design')
+								links = extractLinksV1(desing.components)
+								console.log('links', links)
+							} else {
+								links = extractLinksV2(JSON.parse(selectedCampaign.design))
+								console.log('links', links)
+							}
+						}
+
 						const arrayOfAllLinksClicked = links.map((link) => ({
-							links_clicked: { $notContains: link.value },
+							links_clicked: { $notContains: link },
 						}))
 
 						filter = {
 							$or: arrayOfAllLinksClicked,
 						}
 						console.log('arrayOfAllLinksClicked filter', filter)
+						meta[id] = {
+							type: 'ocmp',
+							condition: condition.value,
+							value: value.value,
+						}
 					} else {
 						filter = {
 							$or: [condition.value === 'contains' ? { ocmp_ids: { $contains: value.value } } : { ocmp_ids: { $notContains: value.value } }],
+						}
+						meta[id] = {
+							type: 'ocmp',
+							condition: condition.value,
+							value: value.value,
 						}
 					}
 					break
 				case 'link':
 					filter = {
 						$or: [condition.value === 'contains' ? { links_clicked: { $contains: value.value } } : { links_clicked: { $notContains: value.value } }],
+					}
+					meta[id] = {
+						type: 'link',
+						condition: condition.value,
+						value: value.value,
 					}
 
 					break
@@ -137,7 +157,8 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 			}
 
 			// Call onComplete with the filter object
-			onComplete(id, filter)
+
+			onComplete(id, filter, meta)
 		}
 	}, [key, value, condition, id])
 
@@ -173,7 +194,7 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 
 					<Dropdown
 						selectedValue={value}
-						options={key?.value === 'ocmp' ? campaigns : links}
+						options={key?.value === 'ocmp' ? campaignOptions : links}
 						active
 						searchable
 						onOptionSelect={(value) => {
@@ -190,8 +211,8 @@ const RcpFilter = ({ id, campaigns, links, onComplete, onDelete, initialKey, ini
 								? [
 										{ label: 'Was opened', value: 'opened' },
 										{ label: 'Was NOT opened', value: 'notOpened' },
-										// { label: 'Was clicked', value: 'clicked' },
-										// { label: 'Was NOT clicked', value: 'notClicked' },
+										{ label: 'Was clicked', value: 'clicked' },
+										{ label: 'Was NOT clicked', value: 'notClicked' },
 								  ]
 								: [
 										{ label: 'Was clicked', value: 'contains' },

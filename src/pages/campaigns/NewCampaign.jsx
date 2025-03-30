@@ -176,7 +176,6 @@ const NewCampaign = () => {
 				showDenyButton: false,
 			})
 
-			// If user confirmed (clicked OK), just return from the function
 			if (result.isConfirmed) {
 				return
 			}
@@ -300,19 +299,22 @@ const NewCampaign = () => {
 		console.log('response from sendTestEmail is : ', response)
 	}
 
-	const updateRecpFilter = (id, filter) => {
+	const updateRecpFilter = (id, filter, meta) => {
+		console.log('meta inside updateRecpFilter is : ', meta)
+
 		setCurrentCampaign((prevCampaign) => {
-			// Create a new copy of the $and array
 			const updatedFilters = [...prevCampaign.recp_filters.$and]
 
-			// Update the specific filter at the given id with the new filter
 			updatedFilters[id] = filter
 
 			return {
 				...prevCampaign,
 				recp_filters: {
-					...prevCampaign.recp_filters,
-					$and: updatedFilters, // Update the $and array inside recp_filters
+					$and: updatedFilters,
+					meta: {
+						...(prevCampaign.recp_filters.meta || {}),
+						...(meta || {}),
+					},
 				},
 			}
 		})
@@ -636,7 +638,7 @@ const NewCampaign = () => {
 									<p onClick={addRecpFilter}>+ Add Filtering</p>
 								</div>
 								<div className="d-flex flex-column">
-									{currentCampaign.recp_filters?.$and && currentCampaign.recp_filters.$and.length > 0 ? (
+									{/* {currentCampaign.recp_filters?.$and && currentCampaign.recp_filters.$and.length > 0 ? (
 										currentCampaign.recp_filters.$and.map((f, i) => {
 											let iKey = { label: 'Previous Campaign', value: 'ocmp' }
 											let iCondition = iKey.value == 'ocmp' ? { label: 'Was opened', value: 'contains' } : { label: 'Was clicked', value: 'contains' }
@@ -689,10 +691,10 @@ const NewCampaign = () => {
 													initialKey={iKey}
 													initialCondition={iCondition}
 													initialValue={iValue}
-													campaigns={campaignOptions}
+													campaigns={campaigns}
 													links={availableLinks}
-													onComplete={(id, result) => {
-														updateRecpFilter(id, result)
+													onComplete={(id, result, meta) => {
+														updateRecpFilter(id, result, meta)
 													}}
 													onDelete={handleDeleteRecpFilter}
 												/>
@@ -700,7 +702,181 @@ const NewCampaign = () => {
 										})
 									) : (
 										<></>
-									)}
+									)} */}
+
+									{/** without migration */}
+									{/* {currentCampaign.recp_filters?.$and?.length > 0 &&
+										currentCampaign.recp_filters.$and.map((f, i) => {
+											const meta = currentCampaign.recp_filters.meta?.[i]
+
+											let iKey = null
+											let iCondition = null
+											let iValue = null
+
+											if (meta?.type === 'ocmp') {
+												iKey = { label: 'Previous Campaign', value: 'ocmp' }
+
+												switch (meta.condition) {
+													case 'clicked':
+														iCondition = { label: 'Was clicked', value: 'clicked' }
+														break
+													case 'notClicked':
+														iCondition = { label: 'Was NOT clicked', value: 'notClicked' }
+														break
+													case 'opened':
+													case 'contains':
+														iCondition = { label: 'Was opened', value: 'contains' }
+														break
+													case 'notOpened':
+													case 'notContains':
+														iCondition = { label: 'Was NOT opened', value: 'notContains' }
+														break
+													default:
+														break
+												}
+
+												iValue = campaignOptions.find((cmp) => cmp.value === meta.value)
+											}
+
+											if (meta?.type === 'link') {
+												iKey = { label: 'Link of previous campaign', value: 'link' }
+
+												switch (meta.condition) {
+													case 'contains':
+														iCondition = { label: 'Was clicked', value: 'contains' }
+														break
+													case 'notContains':
+														iCondition = { label: 'Was NOT clicked', value: 'notContains' }
+														break
+													default:
+														break
+												}
+
+												iValue = {
+													label: meta.value,
+													value: meta.value,
+												}
+											}
+
+											return (
+												<RcpFilter
+													key={i}
+													id={i}
+													initialKey={iKey}
+													initialCondition={iCondition}
+													initialValue={iValue}
+													campaigns={campaigns}
+													links={availableLinks}
+													onComplete={(id, result, meta) => updateRecpFilter(id, result, meta)}
+													onDelete={handleDeleteRecpFilter}
+												/>
+											)
+										})} */}
+
+									{/** includes migration */}
+									{currentCampaign.recp_filters?.$and?.length > 0 &&
+										currentCampaign.recp_filters.$and.map((f, i) => {
+											const meta = currentCampaign.recp_filters.meta?.[i]
+
+											let iKey = null
+											let iCondition = null
+											let iValue = null
+
+											if (meta) {
+												if (meta.type === 'ocmp') {
+													iKey = { label: 'Previous Campaign', value: 'ocmp' }
+
+													switch (meta.condition) {
+														case 'clicked':
+															iCondition = { label: 'Was clicked', value: 'clicked' }
+															break
+														case 'notClicked':
+															iCondition = { label: 'Was NOT clicked', value: 'notClicked' }
+															break
+														case 'opened':
+														case 'contains':
+															iCondition = { label: 'Was opened', value: 'contains' }
+															break
+														case 'notOpened':
+														case 'notContains':
+															iCondition = { label: 'Was NOT opened', value: 'notContains' }
+															break
+														default:
+															break
+													}
+
+													iValue = campaignOptions.find((cmp) => cmp.value === meta.value)
+												}
+
+												if (meta.type === 'link') {
+													iKey = { label: 'Link of previous campaign', value: 'link' }
+
+													switch (meta.condition) {
+														case 'contains':
+															iCondition = { label: 'Was clicked', value: 'contains' }
+															break
+														case 'notContains':
+															iCondition = { label: 'Was NOT clicked', value: 'notContains' }
+															break
+														default:
+															break
+													}
+
+													iValue = {
+														label: meta.value,
+														value: meta.value,
+													}
+												}
+											} else {
+												const firstOr = f?.$or?.[0]
+
+												if (firstOr?.ocmp_ids) {
+													iKey = { label: 'Previous Campaign', value: 'ocmp' }
+
+													if (firstOr.ocmp_ids?.$contains) {
+														iCondition = { label: 'Was opened', value: 'contains' }
+														const val = firstOr.ocmp_ids.$contains
+														iValue = {
+															label: campaignOptions.find((cmp) => cmp.value === val)?.label || val,
+															value: val,
+														}
+													} else if (firstOr.ocmp_ids?.$notContains) {
+														iCondition = { label: 'Was NOT opened', value: 'notContains' }
+														const val = firstOr.ocmp_ids.$notContains
+														iValue = {
+															label: campaignOptions.find((cmp) => cmp.value === val)?.label || val,
+															value: val,
+														}
+													}
+												} else if (firstOr?.links_clicked) {
+													iKey = { label: 'Link of previous campaign', value: 'link' }
+
+													if (firstOr.links_clicked?.$contains) {
+														iCondition = { label: 'Was clicked', value: 'contains' }
+														const val = firstOr.links_clicked.$contains
+														iValue = { label: val, value: val }
+													} else if (firstOr.links_clicked?.$notContains) {
+														iCondition = { label: 'Was NOT clicked', value: 'notContains' }
+														const val = firstOr.links_clicked.$notContains
+														iValue = { label: val, value: val }
+													}
+												}
+											}
+
+											return (
+												<RcpFilter
+													key={i}
+													id={i}
+													initialKey={iKey}
+													initialCondition={iCondition}
+													initialValue={iValue}
+													campaigns={campaigns}
+													links={availableLinks}
+													onComplete={(id, result, meta) => updateRecpFilter(id, result, meta)}
+													onDelete={handleDeleteRecpFilter}
+												/>
+											)
+										})}
 								</div>
 								<div className="d-flex flex-column align-items-left">
 									<Switch
