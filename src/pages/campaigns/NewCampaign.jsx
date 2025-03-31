@@ -593,7 +593,7 @@ const NewCampaign = () => {
 
 					{step === 4 && (
 						<>
-							<div className="mt50 d-flex flex-column gap-20" style={{ maxWidth: '550px' }}>
+							<div className="mt50 d-flex flex-column gap-20" style={{ maxWidth: '550px', paddingBottom:'40px' }}>
 								<h1 className="campaign-title">Review and Send</h1>
 								<div className="new-campaign-right flex-1">
 									<div className="campaign-preview-wrapper d-flex flex-column align-items-center">
