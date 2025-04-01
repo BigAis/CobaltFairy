@@ -21,6 +21,7 @@ import DatePicker from '../../components/DatePicker'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import CustomFieldsTable from '../../components/DataTable/CustomFieldsTable'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -173,6 +174,13 @@ const Subscribers = () => {
 						Add Group{' '}
 					</Button>
 				)
+			case 'custom_fields':
+				return (
+					<Button onClick={() => navigate('/subscribers/group/new')} icon={'Plus'} type="action">
+						{' '}
+						Add Custom Field{' '}
+					</Button>
+				)
 			default:
 				return <></>
 		}
@@ -218,6 +226,7 @@ const Subscribers = () => {
 					<div className="page-name-container">
 						{view === 'subs' && <div className="page-name">Subscribers</div>}
 						{view === 'groups' && <div className="page-name">Groups</div>}
+						{view === 'custom_fields' && <div className="page-name">Custom Fields</div>}
 						{renderAddButton()}
 					</div>
 					<div className="filters-container">
@@ -231,6 +240,7 @@ const Subscribers = () => {
 									{ value: null, label: `History` },
 									{ value: null, label: `Stats` },
 									{ value: null, label: `Clean up` },
+									{ value: 'custom_fields', label: `Custom Fields` },
 								]}
 								onChange={(value) => {
 									if (value) setView(value)
@@ -345,6 +355,21 @@ const Subscribers = () => {
 								setView={setView}
 							/> */}
 							<GroupsTable groupSearchValue={groupSearchValue} onUpdate={handleOnUpdate} setView={setView} />
+						</div>
+					)}
+
+					{view === 'custom_fields' && (
+						<div className="groups">
+							{/* <GroupsTable
+								groups={groups}
+								resultsPerPage={resultsPerPage}
+								currentPage={currentGroupPage}
+								totalResults={totalGroups}
+								onPageChange={handlePageChange}
+								onUpdate={handleOnUpdate}
+								setView={setView}
+							/> */}
+							<CustomFieldsTable setView={setView} />
 						</div>
 					)}
 				</div>
