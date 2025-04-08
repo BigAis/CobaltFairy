@@ -53,9 +53,10 @@ const EditAutomation = ()=>{
         if(automationData.id){
             resp = await ApiService.put(`automations/${automationData.id}`,{data:{name:automationData.name}},user.jwt)
         }else{
+            automationData.account = account.id// we need to fix this in backend.
             resp = await ApiService.post(`automations`,{data:automationData},user.jwt)
         }
-        console.log(resp.data);
+        console.log('respdata',resp.data);
         return true
     }
     useEffect(()=>{
@@ -78,7 +79,7 @@ const EditAutomation = ()=>{
                         }}>Save & back</Button>
                         <Button type="primary" style={{fontSize:'16px'}} onClick={ async ()=>{
                             let result = await saveAutomation();
-                            navigate(`/automations/editor/${automationData.uuid}`)
+                            if(result) navigate(`/automations/editor/${automationData.uuid}`)
                         }}>Edit flow</Button>
                     </div>
                 </>

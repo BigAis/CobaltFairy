@@ -652,6 +652,7 @@ const FlowEditor = () => {
 
 	const validateNode = (node) => {
 		let result = true
+		console.log('validateNode',node)
 		switch (node.type) {
 			case 'trigger':
 				if (!node.name || !node.name.length > 0) {

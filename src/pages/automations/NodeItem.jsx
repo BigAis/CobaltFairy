@@ -114,7 +114,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column automation-node-content-wrapper">
 						<Card className="automation-node-content" style={{ padding: '1.5rem 2.5rem' }}>
 							<h4 className='node-type'>{triggerOptions.find((option) => option.value === node.name).label}</h4>
-							<Dropdown icon={'Plus'} options={data.groups} onOptionSelect={(value)=>{handleAdditionalChange(data.groups.filter(g=>g.value==value))}}>
+							<Dropdown icon={'Plus'} options={data.groups} onOptionSelect={(value)=>{handleAdditionalChange(data.groups.filter(g=>g.value==value.value))}}>
 								{node.meta && node.meta.label ? node.meta.label : 'Select a group'}
 							</Dropdown>
 						</Card>
