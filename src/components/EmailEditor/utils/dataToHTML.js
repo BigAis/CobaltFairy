@@ -134,7 +134,7 @@ const createButtonString = (buttonBlock) => {
   return `<div ${buttonBlock.contentStyleConfig.mobile ? `class="${buttonBlock.contentStyleConfig.className}"` : ""} 
   style="${buttonBlock.contentStyleConfig.desktop}">
     <a ${buttonBlock.styleConfig.mobile ? `class="${buttonBlock.styleConfig.className}"` : ""} 
-    style="${buttonBlock.styleConfig.desktop}" target="_black" href="https://${buttonBlock.linkURL}">${buttonBlock.text}</a>
+    style="${buttonBlock.styleConfig.desktop};text-decoration:none!important" target="_black" href="https://${buttonBlock.linkURL}">${buttonBlock.text}</a>
   </div>`;
 };
 

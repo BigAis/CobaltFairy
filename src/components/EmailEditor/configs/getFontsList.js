@@ -38,12 +38,12 @@ const getFontsList = ()=>{
         },
         {
             name: "Open Sans",
-            attribute: "\"Open Sans\", Arial, Helvetica, sans-serif",
+            attribute: "'Open Sans', Arial, Helvetica, sans-serif",
             family: "Open+Sans"
         },
         {
             name: "PT Sans",
-            attribute: "\"PT Sans\", Arial, Helvetica, sans-serif",
+            attribute: "'PT Sans', Arial, Helvetica, sans-serif",
             family: "PT+Sans"
         },
         {
@@ -53,7 +53,7 @@ const getFontsList = ()=>{
         },
         {
             name: "Source Sans",
-            attribute: "\"Source Sans Pro\", Arial, Helvetica, sans-serif",
+            attribute: "'Source Sans Pro', Arial, Helvetica, sans-serif",
             family: "Source+Sans+Pro"
         },
         {
@@ -68,7 +68,7 @@ const getFontsList = ()=>{
         },
         {
             name: "Montserrat Alternates",
-            attribute: "\"Montserrat Alternates\", sans-serif",
+            attribute: "'Montserrat Alternates', sans-serif",
             family: "Montserrat+Alternates"
         },
         {
@@ -78,7 +78,7 @@ const getFontsList = ()=>{
         },
         {
             name: "Roboto Slab",
-            attribute: "\"Roboto Slab\", serif",
+            attribute: "'Roboto Slab', serif",
             family: "Roboto+Slab"
         },
         {
@@ -88,7 +88,7 @@ const getFontsList = ()=>{
         },
         {
             name: "Titillium Web",
-            attribute: "\"Titillium Web\", sans-serif",
+            attribute: "'Titillium Web', sans-serif",
             family: "Titillium+Web"
         },
         {
@@ -123,12 +123,12 @@ const getFontsList = ()=>{
         },
         {
             name: "Barlow Condensed",
-            attribute: "\"Barlow Condensed\", sans-serif",
+            attribute: "'Barlow Condensed', sans-serif",
             family: "Barlow+Condensed"
         },
         {
             name: "Noto",
-            attribute: "\"Noto Sans\", sans-serif",
+            attribute: "'Noto Sans', sans-serif",
             family: "Noto+Sans"
         },
         {
@@ -153,12 +153,12 @@ const getFontsList = ()=>{
         },
         {
             name: "Work Sans",
-            attribute: "\"Work Sans\", sans-serif",
+            attribute: "'Work Sans', sans-serif",
             family: "Work+Sans"
         },
         {
             name: "Playfair Display",
-            attribute: "\"Playfair Display\", sans-serif",
+            attribute: "'Playfair Display', sans-serif",
             family: "Playfair+Display"
         },
         {
