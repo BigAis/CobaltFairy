@@ -88,7 +88,15 @@ const EditCampaign = () => {
 			console.log('campaign inside useEffect inside editCampaign ', campaign)
 		}
 	}, [campaign])
-
+	const total_cmp_links = [];
+	if(campaign?.stats?.l) for(const ll of Object.keys(campaign.stats.l)){
+		if(!total_cmp_links[ll]) total_cmp_links[ll] = campaign.stats.l[ll]
+		else{ total_cmp_links[ll] = {...total_cmp_links[ll],total:total_cmp_links[ll].total+campaign.stats.l[ll].total, unique:total_cmp_links[ll].unique+campaign.stats.l[ll].unique} }
+	}
+	if(campaign?.stats?.lb) for(const ll of Object.keys(campaign.stats.lb)){
+		if(!total_cmp_links[ll]) total_cmp_links[ll] = campaign.stats.lb[ll]
+		else{ total_cmp_links[ll] = {...total_cmp_links[ll],total:total_cmp_links[ll].total+campaign.stats.lb[ll].total, unique:total_cmp_links[ll].unique+campaign.stats.lb[ll].unique} }
+	}
 	return (
 		<>
 			<div className="fm-page-wrapper">
@@ -199,7 +207,7 @@ const EditCampaign = () => {
 															<p className="stat-table-heading">Clicks</p>
 														</div>
 														{campaign.stats?.l &&
-															Object.entries(campaign.stats.l)
+															Object.entries(total_cmp_links)
 																.sort((a, b) => b[1] - a[1]) // Sort by value (ascending order)
 																.slice(0, 3)
 																.map(([key, value]) => (
@@ -209,7 +217,7 @@ const EditCampaign = () => {
 																		key={key}
 																	>
 																		<p style={{ overflow: 'hidden' }}>{key}</p>
-																		<p>{value}</p>
+																		<p>{value.total ?? value}</p>
 																	</div>
 																))}
 														<Button
@@ -330,10 +338,13 @@ const EditCampaign = () => {
 											<div>
 												<div className="d-flex content-space-between" style={{ borderBottom: '2px solid rgba(218, 209, 197, 1)' }}>
 													<p className="stat-table-heading">Link</p>
-													<p className="stat-table-heading">Clicks</p>
+													<div style={{width:'20%',display:'flex',justifyContent:'space-between'}}>
+														<p className="stat-table-heading">Total Clicks</p>
+														<p className="stat-table-heading">Unique Clicks</p>
+													</div>
 												</div>
 												{campaign.stats?.l &&
-													Object.entries(campaign.stats.l)
+													Object.entries(total_cmp_links)
 														.sort((a, b) => b[1] - a[1])
 														.map(([key, value]) => (
 															<div
@@ -342,7 +353,10 @@ const EditCampaign = () => {
 																key={key}
 															>
 																<p style={{ textAlign: 'left', overflow: 'hidden' }}>{key}</p>
-																<p>{value}</p>
+																<div style={{width:'20%',display:'flex',justifyContent:'space-between'}}>
+																	<p>{value.total ?? value}</p>
+																	<p>{value.unique ?? value}</p>
+																</div>
 															</div>
 														))}
 											</div>
