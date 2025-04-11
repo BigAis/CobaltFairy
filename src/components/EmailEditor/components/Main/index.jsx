@@ -299,8 +299,8 @@ const Main = ({ language, setStep, currentCampaign, editorType, setDesign }) => 
 		<>
 			<div className="email-editor" onDragOver={onDragOver} onDrop={onDrop} onDragLeave={onDragLeave}>
 				<Header setStep={setStep} currentCampaign={currentCampaign} editorType={editorType} setDesign={setDesign} />
-				<div className="email-editor-main" onClick={blurCurrentItem}>
-					<LeftSideBar clearStyles={clearStyles} />
+				<div className="email-editor-main" onClick={blurCurrentItem} style={{height: editorType=='template' ? 'calc(100vh - 75px)' : 'calc(100vh - 195px)'}}>
+					<LeftSideBar clearStyles={clearStyles} editorType={editorType}/>
 					<Preview clearStyles={clearStyles} />
 					<RightSetting />
 				</div>

@@ -12,7 +12,7 @@
     height: 100%;
     display: flex;
     justify-content: space-between;
-    height: calc(100vh - 195px);
+    /* height: calc(100vh - 195px); */
 }
 
 .photo-container {
@@ -116,7 +116,6 @@
     display: flex;
     flex-wrap: wrap;
     overflow-y: scroll;
-    height: calc(100vh - 195px);
     padding-bottom: 60px;
 }
 .itemiblock-list-title{

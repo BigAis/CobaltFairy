@@ -11,7 +11,7 @@ import useTranslation from '../../translation'
 import useDataSource from '../../configs/useDataSource'
 
 const LeftSideBar = (props) => {
-	const { clearStyles } = props
+	const { clearStyles, editorType } = props
 	const { setCurrentItem, setIsDragStart, blockList, setActionType } = useContext(GlobalContext)
 	const [currentSideBarKey, setCurrentSideBarKey] = useState('blocks')
 	const { t } = useTranslation()
@@ -68,7 +68,7 @@ const LeftSideBar = (props) => {
 	const blocksElement = () => {
 		return (
 			<motion.div className="side-bar-blocks" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.3 }} key="blocks">
-				<div className="side-bar-blocks-container">
+				<div className="side-bar-blocks-container" style={{height: editorType=='template' ? 'calc(100vh - 75px)' : 'calc(100vh - 195px)'}}>
 					{blockConfigsList.map((item,i) => {
 						if (item.isDivider) return <h4 className="itemiblock-list-title">{item.name}</h4>
 						// if(item.key=="about_the_book") item.key='hero';
