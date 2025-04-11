@@ -62,7 +62,7 @@ const Dropdown = ({
 		}
 	}, [isOpen])
 
-	const filteredOptions = options.filter((option) => option.label?.toLowerCase().includes(searchTerm?.toLowerCase()))
+	const filteredOptions = options.filter((option) => option?.label?.toLowerCase().includes(searchTerm?.toLowerCase()))
 
 	const computedClassName = classNames(
 		'dropdown',
