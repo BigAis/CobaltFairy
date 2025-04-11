@@ -234,7 +234,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								<Dropdown
 									style={{minWidth:'270px'}}
 									onOptionSelect={(v,l)=>{
-										node = {...node,data:{group:[v]},meta:{label:l}}
+										node = {...node,data:{group:[v]},meta:{label:v.label}}
 										onUpdate(node)
 									}}
 									options={data.groups}
@@ -244,7 +244,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								<Dropdown
 									style={{minWidth:'270px'}}
 									onOptionSelect={(v,l)=>{
-										node = {...node,data:{group:[v]},meta:{label:l}}
+										node = {...node,data:{group:[v]},meta:{label:v.label}}
 										onUpdate(node)
 									}}
 									options={data.groups}
@@ -302,7 +302,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 										},
 									]}
 								 onOptionSelect={(v,l)=>{
-									node = {...node,name:node.type,data:{...node.data,delayValue:[v],meta:{label:l}}}
+									node = {...node,name:node.type,data:{...node.data,delayValue:[v],meta:{label:v.label}}}
 									onUpdate(node)
 								 }}> {node?.data?.meta?.label ?? 'Select delay type'}
 								</Dropdown>

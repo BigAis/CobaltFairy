@@ -68,7 +68,7 @@ const FlowEditor = () => {
 				case "delay": 
 					if(!node.data) node.data = {}; 
 					if(!node.data.meta) node.data.meta = {}; 
-					if(!node.data.meta.label && node.meta.label){ node.data.meta.label = node.meta.label; }
+					if(!node.data.meta.label && node.data?.meta?.label){ node.data.meta.label = node.meta.label; }
 					if((!node.data.delay || isNaN(node.data.delay)) && node.data.delayValue){ node.data.delay = [node.data.delayValue]; }
 				break;
 				case "condition": 
