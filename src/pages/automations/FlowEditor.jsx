@@ -215,14 +215,13 @@ const FlowEditor = () => {
 		let links = []
 		const tplId = nodes.filter((node) => node.id === nodeId)[0]?.data?.tplId
 
-		console.log('node inside getTplLinks are : ', nodeId)
+		console.log('node inside getTplLinks are : ', nodeId, tplId)
 
 		if (templates.length > 0 && tplId) {
 			const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
 			const templateLinks = extractLinksFromCampaignDesign(tplDesign.components)
 
 			console.log('templateLinks', templateLinks)
-
 			if (templateLinks.length > 0) {
 				templateLinks.forEach((ll) => {
 					if (!links.includes(ll)) links.push(ll)

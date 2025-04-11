@@ -46,19 +46,28 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 			if (component.components && component.components.length > 0) {
 				links = [...extractLinksFromCampaignDesign(component.components, links)]
 			}
-			if (component.type === 'link') {
+			if (component.children && component.children.length > 0) {
+				links = [...extractLinksFromCampaignDesign(component.children, links)]
+			}
+			if (component.type && component.type === 'link') {
 				links.push(component?.attributes?.href)
+			}
+			if(component.key && ["image","button"].includes(component.key) && component.linkURL && component.linkURL.length>9){
+				links.push(component.linkURL)
 			}
 		})
 		return links
 	}
 	const getTplIdLinks = (nodeId) => {
 		let links = []
-		const tplId = nodes.filter((node) => node.id === nodeId)[0]?.data?.tplId
+		const tplNode = nodes.filter((node) => node.id === nodeId)[0]
+		if(!tplNode) return [];
+		const tplId = tplNode?.data?.tplId
 		let templates = data.templates;
 		if (templates.length > 0 && tplId) {
 			const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
-			const templateLinks = extractLinksFromCampaignDesign(tplDesign.components)
+			console.log('tplId: ',tplDesign)
+			const templateLinks = extractLinksFromCampaignDesign(tplDesign.components ?? tplDesign.blockList)
 			if (templateLinks.length > 0) {
 				templateLinks.forEach((ll) => {
 					if (!links.includes(ll)) links.push(ll)
@@ -358,7 +367,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 										options={conditionOptions}
 										style={{width:'350px'}}
 										onOptionSelect={(v, l)=>{
-											node = {...node,name: v.value, data: { ...node.data || {}}, meta: {label: l}}
+											node = {...node,name: v.value, data: { ...node.data || {}}, meta: {label: v.label}}
 											onUpdate(node)
 									}}> {node?.meta?.label ?? 'Select a condition'} </Dropdown>
 									{node.name && node.name == "cmp-activity" && (
@@ -417,7 +426,6 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 													}}> {node.meta?.triggerName ?? 'Select a trigger'} </Dropdown>
 													{node.data?.trigger && ['cmp_link_clicked','cmp_link_not_clicked'].includes(node.data?.trigger) && (
 														<>
-															{ console.log('updated',node.data)	}
 															<Dropdown 
 																options={getTplIdLinks(node?.data?.email_node_id)}
 																style={{width:'350px', maxWidth:'350px'}}
