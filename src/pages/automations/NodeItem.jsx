@@ -58,18 +58,44 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 		})
 		return links
 	}
+	// const getTplIdLinks = (nodeId) => {
+	// 	let links = []
+	// 	const tplNode = nodes.filter((node) => node.id === nodeId)[0]
+	// 	if(!tplNode) return [];
+	// 	const tplId = tplNode?.data?.tplId
+	// 	let templates = data.templates;
+	// 	if (templates.length > 0 && tplId) {
+	// 		const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
+	// 		console.log('tplId: ',tplDesign)
+	// 		const templateLinks = extractLinksFromCampaignDesign(tplDesign.components ?? tplDesign.blockList)
+	// 		if (templateLinks.length > 0) {
+	// 			templateLinks.forEach((ll) => {
+	// 				if (!links.includes(ll)) links.push(ll)
+	// 			})
+	// 		}
+	// 		links = links.map((link) => ({
+	// 			value: link,
+	// 			label: link,
+	// 		}))
+	// 	}
+	// 	return links
+	// }
 	const getTplIdLinks = (nodeId) => {
 		let links = []
 		const tplNode = nodes.filter((node) => node.id === nodeId)[0]
-		if(!tplNode) return [];
+
+		if (!tplNode) return []
+
 		const tplId = tplNode?.data?.tplId
-		let templates = data.templates;
+
+		let templates = data.templates
+
 		if (templates.length > 0 && tplId) {
 			const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
-			console.log('tplId: ',tplDesign)
 			const templateLinks = extractLinksFromCampaignDesign(tplDesign.components ?? tplDesign.blockList)
 			if (templateLinks.length > 0) {
 				templateLinks.forEach((ll) => {
+					if (typeof ll === 'undefined') return
 					if (!links.includes(ll)) links.push(ll)
 				})
 			}
@@ -348,6 +374,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 			]
 			let howManyConditions = 0
 			howManyConditions += children && children[0] ? countConditions(children[0], 0) : 0
+			const isFirstCondition = nodes.filter(n=>n.type=="condition")[0].id==node.id;
 			// console.log(node.id, howManyConditions)
 			content = (
 				<li
@@ -426,13 +453,17 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 													}}> {node.meta?.triggerName ?? 'Select a trigger'} </Dropdown>
 													{node.data?.trigger && ['cmp_link_clicked','cmp_link_not_clicked'].includes(node.data?.trigger) && (
 														<>
-															<Dropdown 
+															<Dropdown
 																options={getTplIdLinks(node?.data?.email_node_id)}
-																style={{width:'350px', maxWidth:'350px'}}
-																onOptionSelect={(v)=>{
-																	node = {...node,data: { ...node.data, link: v }}
+																style={{ width: '350px', maxWidth: '350px' }}
+																onOptionSelect={(v) => {
+																	node = { ...node, data: { ...node.data, link: v } }
 																	onUpdate(node)
-															}}> {node.data?.link ?? 'Select a link'} </Dropdown>
+																}}
+															>
+																{' '}
+																{node.data?.link.value ?? 'Select a link'}
+															</Dropdown>
 														</>
 													)}
 												</>
@@ -466,9 +497,9 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 							</div>
 						</Card>
 					</div>
-					<div className="d-flex flex-column align-items-center">
+					<div className="d-flex flex-column align-items-center" style={{minWidth:isFirstCondition?'1000px':'1px'}}>
 						<div className="automation-node-vertical-line"></div>
-						<div className="automation-node-horizontal-line" style={{ width: 550 + (howManyConditions * 50) + 'px' }} />
+						<div className="automation-node-horizontal-line" style={{ width: (550 + (howManyConditions * 50) + (isFirstCondition?300:0)) + 'px' }} />
 
 						<div className="d-flex flex-row w-100" style={{justifyContent:'space-between', alignItems:'start'}}>
 							<div  style={{alignItems:'center', display:'flex', flexDirection:'column', marginLeft:'-40px'}}>

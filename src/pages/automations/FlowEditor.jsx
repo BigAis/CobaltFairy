@@ -29,6 +29,52 @@ const FlowEditor = () => {
 	const [excludeNodes, setExcludeNodes] = useState([])
 	const [nodes, setNodes] = useState([])
 
+	const isDragging = useRef(false)
+	const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
+	
+	useEffect(() => {
+	  const el = automationContainerRef.current
+	  if (!el) return
+	
+	  const onMouseDown = (e) => {
+		isDragging.current = true
+		el.style.cursor = 'grabbing'
+		el.style.userSelect = 'none'
+	
+		dragStart.current = {
+		  x: e.pageX,
+		  y: e.pageY,
+		  scrollLeft: el.scrollLeft,
+		  scrollTop: el.scrollTop,
+		}
+	  }
+	
+	  const onMouseMove = (e) => {
+		if (!isDragging.current) return
+		const dx = e.pageX - dragStart.current.x
+		const dy = e.pageY - dragStart.current.y
+		el.scrollLeft = dragStart.current.scrollLeft - dx
+		el.scrollTop = dragStart.current.scrollTop - dy
+	  }
+	
+	  const stopDragging = () => {
+		isDragging.current = false
+		el.style.cursor = 'grab'
+		el.style.removeProperty('user-select')
+	  }
+	
+	  el.addEventListener('mousedown', onMouseDown)
+	  window.addEventListener('mousemove', onMouseMove)
+	  window.addEventListener('mouseup', stopDragging)
+	
+	  // Clean up
+	  return () => {
+		el.removeEventListener('mousedown', onMouseDown)
+		window.removeEventListener('mousemove', onMouseMove)
+		window.removeEventListener('mouseup', stopDragging)
+	  }
+	}, [])
+
 	const { user, account } = useAccount()
 	const steps = [{ label: 'Automations' }, { label: 'Edit Automation' }, { label: 'Editor' }]
 	//State for Sidebar Setting
@@ -733,7 +779,7 @@ const FlowEditor = () => {
 								result = false
 							} else {
 								if (node.data.trigger === 'cmp_link_clicked' || node.data.trigger === 'cmp_link_not_clicked') {
-									if (!node.data.link || !node.data.link.length > 0) result = false
+									if (!node.data.link || !node.data.link.value || !node.data.link.value.length > 0) result = false
 								}
 							}
 
@@ -817,7 +863,7 @@ const FlowEditor = () => {
 			</div>
 			<div className="body">
 				<div id="automation-builder" ref={automationContainerRef}>
-					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '90vw', paddingBottom: '200px' }}>
+					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '150vw', paddingBottom: '200px' }}>
 						{nodes.map((node, idx) => {
 							let children
 							if (node.type == 'condition') {

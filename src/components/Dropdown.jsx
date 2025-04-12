@@ -62,7 +62,7 @@ const Dropdown = ({
 		}
 	}, [isOpen])
 
-	const filteredOptions = options.filter((option) => option?.label?.toLowerCase().includes(searchTerm?.toLowerCase()))
+	const filteredOptions = options.filter((option) => option?.label?.toLowerCase().includes(searchTerm?.toLowerCase())).filter(f=>f.value)
 
 	const computedClassName = classNames(
 		'dropdown',
@@ -75,7 +75,6 @@ const Dropdown = ({
 		},
 		className
 	)
-
 	return (
 		<div className="dropdown-wrapper" style={style} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} ref={dropdownRef}>
 			<div className={computedClassName}>
@@ -98,7 +97,7 @@ const Dropdown = ({
 					{filteredOptions.length > 0 ? (
 						filteredOptions.map((option, index) => (
 							<div key={index} className="dropdown-item" onClick={() => handleOptionClick(option)}>
-								{option.label}
+								{option?.label??''}
 							</div>
 						))
 					) : (
