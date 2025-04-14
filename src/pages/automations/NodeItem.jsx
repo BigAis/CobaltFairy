@@ -375,7 +375,6 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 			let howManyConditions = 0
 			howManyConditions += children && children[0] ? countConditions(children[0], 0) : 0
 			const isFirstCondition = nodes.filter(n=>n.type=="condition")[0].id==node.id;
-			// console.log(node.id, howManyConditions)
 			content = (
 				<li
 					className="d-flex flex-column align-items-center automation-node-item"
@@ -462,7 +461,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 																}}
 															>
 																{' '}
-																{node.data?.link.value ?? 'Select a link'}
+																{node.data?.link?.value ?? 'Select a link'}
 															</Dropdown>
 														</>
 													)}
@@ -499,9 +498,10 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					</div>
 					<div className="d-flex flex-column align-items-center" style={{minWidth:isFirstCondition?'1000px':'1px'}}>
 						<div className="automation-node-vertical-line"></div>
-						<div className="automation-node-horizontal-line" style={{ width: (550 + (howManyConditions * 50) + (isFirstCondition?300:0)) + 'px' }} />
+						<div className="automation-node-horizontal-line" style={{ width: (650 + (howManyConditions * 50) + (isFirstCondition?300:0)) + 'px' }} />
 
 						<div className="d-flex flex-row w-100" style={{justifyContent:'space-between', alignItems:'start'}}>
+							{/* START OF LEFT LEG (true) */}
 							<div  style={{alignItems:'center', display:'flex', flexDirection:'column', marginLeft:'-40px'}}>
 								<div className="automation-node-vertical-line"></div>
 								<Card style={{padding:'1em',minHeight:0, border:'2px dashed #dad1c5', minWidth:'80px'}} onDrop={(e)=>{
@@ -523,7 +523,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											let children0 = [0, 1].map((index) => {
 												if (child && child.id) return getChildrenOfCondition(nodes, child.id, index)
 											})
-											// if (closestCondition(child.id) == node.id)
+											if (closestCondition(child.id) == node.id)
 												return (
 													<NodeItem
 														key={child ? child.id : 0}
@@ -544,7 +544,8 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 										})}
 								</ul>
 							</div>
-
+							{/* END OF LEFT LEG (true) */}
+							{/* START OF RIGHT LEG (true) */}
 							<div className="d-flex flex-column align-items-end"  style={{alignItems:'center', marginRight:'-40px'}}>
 								<div className="automation-node-vertical-line"></div>
 								<Card style={{padding:'1em',minHeight:0, border:'2px dashed #dad1c5', minWidth:'80px'}} onDrop={(e)=>{
@@ -589,6 +590,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 										})}
 								</ul>
 							</div>
+							{/* END OF RIGHT LEG (true) */}
 						</div>
 					</div>
 				</li>

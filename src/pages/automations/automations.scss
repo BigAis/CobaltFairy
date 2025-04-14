@@ -120,6 +120,7 @@
         }
         .flow-sidebar.visible{
             right: 0;
+            z-index: 9;
         }
         .toolbox{
             .panel-header{

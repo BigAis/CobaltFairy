@@ -312,9 +312,6 @@ const FlowEditor = () => {
 						if (node.data) return { value: node.id, label: node.data.emailSubject }
 					})
 			: []
-	console.log('updated workflowCampaigns', workflowCampaigns)
-
-	console.log('workflow campaigns are : ', workflowCampaigns)
 
 	const handleTriggerSelectChange = (ev) => {
 		// Update the `name` and reset additional settings in `selectedNode`
@@ -671,18 +668,14 @@ const FlowEditor = () => {
 							if (!excludeNodes.includes(c)) tmp.push(c)
 						})
 					} else {
-						console.log('No o', o)
+						console.log('No o.id', o)
 					}
 				})
 			}
 		})
+		console.log('before setExcludeNodes',tmp)
 		setExcludeNodes(tmp)
 	}
-
-	useEffect(() => {
-		console.log('Selected Node is : ', selectedNode)
-		console.log('Nodes are : ', nodes)
-	}, [selectedNode])
 
 	useEffect(() => {
 		refreshNodes()
@@ -690,8 +683,14 @@ const FlowEditor = () => {
 	useEffect(() => {
 		const container = automationContainerRef.current
 		if (container) {
-			const centerPosition = container.clientWidth
-			container.scrollLeft = centerPosition
+			// const centerPosition = (container.clientWidth/2) +300
+			// container.scrollLeft = centerPosition
+			const contentWidth = container.scrollWidth;
+			const containerWidth = container.clientWidth;
+			const sidebarWidth = 200;
+
+			const centerPosition = (contentWidth - containerWidth) / 2 + sidebarWidth;
+			container.scrollLeft = centerPosition;
 		}
 	}, [])
 
@@ -863,7 +862,7 @@ const FlowEditor = () => {
 			</div>
 			<div className="body">
 				<div id="automation-builder" ref={automationContainerRef}>
-					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '150vw', paddingBottom: '200px' }}>
+					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '4500px', paddingBottom: '200px' }}>
 						{nodes.map((node, idx) => {
 							let children
 							if (node.type == 'condition') {
@@ -871,8 +870,11 @@ const FlowEditor = () => {
 							} else {
 								children = []
 							}
-							if (!excludeNodes.includes(node.id))
-								return (
+							if (excludeNodes.map(Number).includes(node.id)) return '';
+							console.log('node.id',node.id,excludeNodes,excludeNodes.includes(node.id))
+							return (
+								<>
+									{console.log('Renders',node.id)}
 									<NodeItem
 										onSelect={(_node) => selectNode(_node)}
 										key={node.id}
@@ -887,7 +889,6 @@ const FlowEditor = () => {
 										data={{ groups, avlCampaigns, workflowCampaigns, templates, cmpLinks }}
 										setSideBarShown={setSideBarShown}
 										onUpdate={(data) => {
-											console.log('OnUpdate Node: ', data)
 											setNodes(
 												nodes.map((n) => {
 													if (n.id == data.id) return data
@@ -896,7 +897,9 @@ const FlowEditor = () => {
 											)
 										}}
 									/>
-								)
+								</>
+							)
+							
 						})}
 					</ul>
 				</div>

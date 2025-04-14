@@ -28,7 +28,6 @@ const Button = ({ children, icon, iconSize = null, type = 'primary', active = fa
 		className // clases from props
 	)
 	const blackiconclass = (blackIcon?'blackfill':'nonefill')
-	console.log('button',children,blackIcon,blackiconclass)
 	return (
 		<>
 			<button className={computedClassName} onClick={handleClick} disabled={disabled} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} {...props}>
