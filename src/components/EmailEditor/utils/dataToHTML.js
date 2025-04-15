@@ -242,33 +242,33 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
   content = blockListToHtml(newBlockList, bodySettings);
   let links = extractUrls(content)
 
-  if (links)
-    for (let l = 0; l < links.length; l++) {
-      if (links[l].includes('fairymail.cobaltfairy.com') || links[l].includes('cdn.cobaltfairy.online') || links[l].includes('cdn.cobaltfairy.com') || links[l].includes('fairymail.app')) {
-        continue
-      }
-      if (links[l].includes(' ')) links[l] = links[l].split(' ')[0]
-      if (
-        !links[l].includes('.jpg') &&
-        !links[l].includes('.jpeg') &&
-        !links[l].includes('.png') &&
-        !links[l].includes('.gif') &&
-        !links[l].includes('.webp') &&
-        !links[l].includes('.svg') &&
-        !links[l].includes('cdn.cobaltfairy.online') &&
-        !links[l].includes('cdn.cobaltfairy.com') && 
-        !links[l].includes('pixel.fairymail.app')
-      ) {
-        if (links[l].includes('"')) links[l] = links[l].split('"')[0]
-        if (!links[l].startsWith('http')) links[l] = `http://${links[l]}`
-        content = content
-          .split(links[l])
-          .join(
-            `${PIXEL_URL}/redir?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
-          )
-      }
-      content = content.split('https://https://').join('https://').split('https://http://').join('https://')
-    }
+  // if (links)
+  //   for (let l = 0; l < links.length; l++) {
+  //     if (links[l].includes('fairymail.cobaltfairy.com') || links[l].includes('cdn.cobaltfairy.online') || links[l].includes('cdn.cobaltfairy.com') || links[l].includes('fairymail.app')) {
+  //       continue
+  //     }
+  //     if (links[l].includes(' ')) links[l] = links[l].split(' ')[0]
+  //     if (
+  //       !links[l].includes('.jpg') &&
+  //       !links[l].includes('.jpeg') &&
+  //       !links[l].includes('.png') &&
+  //       !links[l].includes('.gif') &&
+  //       !links[l].includes('.webp') &&
+  //       !links[l].includes('.svg') &&
+  //       !links[l].includes('cdn.cobaltfairy.online') &&
+  //       !links[l].includes('cdn.cobaltfairy.com') && 
+  //       !links[l].includes('pixel.fairymail.app')
+  //     ) {
+  //       if (links[l].includes('"')) links[l] = links[l].split('"')[0]
+  //       if (!links[l].startsWith('http')) links[l] = `http://${links[l]}`
+  //       content = content
+  //         .split(links[l])
+  //         .join(
+  //           `${PIXEL_URL}/redir?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
+  //         )
+  //     }
+  //   }
+  content = content.split('https://https://').join('https://').split('https://http://').join('https://')
   let fontStyles = "";
   let fontMediaStyles = "";
   let pixel = `${PIXEL_URL}/pixel.gif?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}`
@@ -356,8 +356,7 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
       margin-bottom:20px;
     }
   }
-  ${styles}
-  <img alt="Fairy Mail tracking pixel" src=${pixel}/>
+
 </style>
   </head>
   <body style="background-color:${bodySettings.styles.backgroundColor};${backgroundImageString}">
