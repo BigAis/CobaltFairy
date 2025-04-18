@@ -22,6 +22,7 @@ import EditSubscriber from './pages/subscribers/EditSubscriber'
 import EditGroup from './pages/subscribers/EditGroup'
 import BookFunnel from './pages/integrations/BookFunnel'
 import EditCustomField from './pages/subscribers/EditCustomField'
+import NewCustomField from './pages/subscribers/NewCustomField'
 
 function App() {
 	const navigate = useNavigate()
@@ -60,6 +61,7 @@ function App() {
 				<Route path="/subscribers" element={<Subscribers />} />
 				<Route path="/subscribers/:uuid" element={<EditSubscriber />} />
 				<Route path="/subscribers/custom-field/:uuid" element={<EditCustomField />} />
+				<Route path="/subscribers/custom-field/new" element={<NewCustomField />} />
 				<Route path="/subscribers/filters/:filterString" element={<Subscribers />} />
 				<Route path="/subscribers/group/new" element={<EditGroup />} />
 				<Route path="/subscribers/group/:uuid" element={<EditGroup />} />
