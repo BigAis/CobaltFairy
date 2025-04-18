@@ -60,8 +60,8 @@ function App() {
 				<Route path="/campaigns/overview/:uuid" element={<EditCampaign />} />
 				<Route path="/subscribers" element={<Subscribers />} />
 				<Route path="/subscribers/:uuid" element={<EditSubscriber />} />
-				<Route path="/subscribers/custom-field/:uuid" element={<EditCustomField />} />
-				<Route path="/subscribers/custom-field/new" element={<NewCustomField />} />
+				<Route path="/subscribers/field/:uuid" element={<EditCustomField />} />
+				<Route path="/subscribers/field/new" element={<NewCustomField />} />
 				<Route path="/subscribers/filters/:filterString" element={<Subscribers />} />
 				<Route path="/subscribers/group/new" element={<EditGroup />} />
 				<Route path="/subscribers/group/:uuid" element={<EditGroup />} />

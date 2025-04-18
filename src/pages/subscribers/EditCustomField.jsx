@@ -19,12 +19,6 @@ const EditCustomField = () => {
 	const [subscriber] = useState(null)
 	const [field, setField] = useState(null)
 
-	const customFields = [
-		{ uuid: 'kDyvIO1kzX', fieldName: 'Birthday', type: 'date', format: 'DD/MM/YYYY' },
-		{ uuid: 'gLCodNrUoo', fieldName: 'Age', type: 'number' },
-		{ uuid: 'f5zZltwTs1', fieldName: 'Name Day', type: 'string' },
-	]
-
 	const typeOptions = [
 		{ label: 'String', value: 'string' },
 		{ label: 'Date', value: 'date' },

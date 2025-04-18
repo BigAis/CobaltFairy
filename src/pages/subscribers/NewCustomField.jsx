@@ -34,11 +34,12 @@ const NewCustomField = () => {
 
 	const createCustomField = async () => {
 		try {
-			const response = await ApiService.post(`fairymailer/createCustomField`, { data: field }, user.jwt)
+			const response = await ApiService.post(`fairymailer/updateCustomField`, { data: field }, user.jwt)
 			if (response.data && response.data.code == 200) {
 				navigate('/subscribers/')
 			}
 		} catch (error) {
+			alert('Failed to create field.');// TODO: implement notification component usage
 			console.error('Error creating custom field:', error)
 		}
 	}
@@ -51,7 +52,7 @@ const NewCustomField = () => {
 					{user && account && <PageHeader user={user.user} account={{ plan: 'Free Plan', ...(account || {}) }} />}
 
 					<div className="page-name-container">
-						<div className="page-name">New Custom Field</div>
+						<div className="page-name">New Field</div>
 					</div>
 					<Card className={'d-flex flex-column gap-10'}>
 						<InputText label={'Name'} value={field.fieldName} onChange={(e) => setField({ ...field, fieldName: e.target.value })} />

@@ -148,10 +148,6 @@ const Subscribers = () => {
 		}
 	}
 
-	// const handlePageChange = (newPage) => {
-	// 	getGroups(newPage)
-	// }
-
 	useEffect(() => {
 		if (user) {
 			getGroups()
@@ -174,9 +170,9 @@ const Subscribers = () => {
 						Add Group{' '}
 					</Button>
 				)
-			case 'custom_fields':
+			case 'fields':
 				return (
-					<Button onClick={() => navigate('/subscribers/group/new')} icon={'Plus'} type="action">
+					<Button onClick={() => navigate('/subscribers/field/new')} icon={'Plus'} type="action">
 						{' '}
 						Add Custom Field{' '}
 					</Button>
@@ -217,6 +213,11 @@ const Subscribers = () => {
 		}
 	}, [filterString, groups])
 
+	useEffect(()=>{
+		if(account){
+			
+		}
+	},[account])
 	return (
 		<>
 			<div className="fm-page-wrapper">
@@ -226,7 +227,7 @@ const Subscribers = () => {
 					<div className="page-name-container">
 						{view === 'subs' && <div className="page-name">Subscribers</div>}
 						{view === 'groups' && <div className="page-name">Groups</div>}
-						{view === 'custom_fields' && <div className="page-name">Custom Fields</div>}
+						{view === 'fields' && <div className="page-name">Fields</div>}
 						{renderAddButton()}
 					</div>
 					<div className="filters-container">
@@ -236,11 +237,10 @@ const Subscribers = () => {
 									{ value: 'subs', label: `All Subscribers (${totalSubs})` },
 									{ value: null, label: `Segments (0)` },
 									{ value: 'groups', label: `Groups (${totalGroups})` },
-									{ value: null, label: `Fields (0)` },
+									{ value: 'fields', label: `Fields` },
 									{ value: null, label: `History` },
 									{ value: null, label: `Stats` },
 									{ value: null, label: `Clean up` },
-									{ value: 'custom_fields', label: `Custom Fields` },
 								]}
 								onChange={(value) => {
 									if (value) setView(value)
@@ -358,7 +358,7 @@ const Subscribers = () => {
 						</div>
 					)}
 
-					{view === 'custom_fields' && (
+					{view === 'fields' && (
 						<div className="groups">
 							{/* <GroupsTable
 								groups={groups}
