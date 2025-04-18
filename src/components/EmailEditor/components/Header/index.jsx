@@ -397,7 +397,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 						<div className="header-drawer-head-item"></div>
 					</div>
 					<div className="header-drawer-content">
-						<iframe src={'data:text/html,' + encodeURIComponent(dataToHtml({ bodySettings, blockList, campaignUUID:currentCampaign.uuid }))} title="preview" scrolling="no" className="header-drawer-iframe"></iframe>
+						<iframe src={'data:text/html,' + encodeURIComponent(dataToHtml({ bodySettings, blockList, isPreview:true }))} title="preview" scrolling="no" className="header-drawer-iframe"></iframe>
 					</div>
 				</div>
 			</Drawer>

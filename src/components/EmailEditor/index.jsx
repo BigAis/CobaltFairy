@@ -30,7 +30,7 @@ const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = 
 	useImperativeHandle(ref, () => ({
 		blockList: state.blockList,
 		actionType: state.actionType,
-		exportHtml: (fontList = []) => dataToHtml({ bodySettings: state.bodySettings, blockList: state.blockList, fontList, campaignUUID:currentCampaign.uuid }),
+		exportHtml: (fontList = []) => dataToHtml({ bodySettings: state.bodySettings, blockList: state.blockList, fontList }),
 		exportData: (fontList = []) => {
 			return { bodySettings: state.bodySettings, blockList: state.blockList, fontList }
 		},

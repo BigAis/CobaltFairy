@@ -235,7 +235,7 @@ const extractUrls = (htmlText) => {
   const matches = htmlText.match(urlRegex)
   return [...new Set(matches)]
 }
-const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
+const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
   const fontList = extractFonts(blockList); //recursively itterate blocklist to export all fonts, and find the required urls to add.
   let content = "";
   const { newBlockList, styles } = createStyleTag(blockList);
@@ -271,7 +271,7 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
   content = content.split('https://https://').join('https://').split('https://http://').join('https://')
   let fontStyles = "";
   let fontMediaStyles = "";
-  let pixel = `${PIXEL_URL}/pixel.gif?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}`
+  let pixel = `${PIXEL_URL}/pixel.gif?cid=${''}&uid={{pixel_uid}}&v={{cmp_version}}`
   if(fontList.length>0) {
     fontStyles += `
       <!--[if mso]>
@@ -317,13 +317,20 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
         box-sizing: border-box;
       }
 
-      body {
-        margin: 0;
-        padding: 0;
-        width: 100% !important;
-        -webkit-text-size-adjust: 100%;
-        -ms-text-size-adjust: 100%;
-      }
+      ${isPreview ? `
+        html,body {
+            height:100%;
+            overflow-y:auto;
+          }
+        ` : `
+        body {
+          margin: 0;
+          padding: 0;
+          width: 100% !important;
+          -webkit-text-size-adjust: 100%;
+          -ms-text-size-adjust: 100%;
+        }
+      `}
 
       table {
         width: 100%;
