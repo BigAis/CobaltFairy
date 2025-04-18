@@ -9,12 +9,13 @@ import Card from '../../components/Card'
 import InputText from '../../components/InputText/InputText'
 import Button from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
+import PopupText from '../../components/PopupText/PopupText'
 
 const NewCustomField = () => {
 	const navigate = useNavigate()
-	const { user, account } = useAccount()
+	const { user, account, setAccount } = useAccount()
 	const [field, setField] = useState({
-		fieldName: '',
+		name: '',
 		type: 'string',
 		format: 'DD/MM/YYYY',
 	})
@@ -34,13 +35,35 @@ const NewCustomField = () => {
 
 	const createCustomField = async () => {
 		try {
-			const response = await ApiService.post(`fairymailer/updateCustomField`, { data: field }, user.jwt)
+			const response = await ApiService.post(
+				`fairymailer/updateCustomField`,
+				{
+					data: field,
+				},
+				user.jwt
+			)
+
 			if (response.data && response.data.code == 200) {
-				navigate('/subscribers/')
+				// Ενημερώνουμε το account στο context με τα νέα δεδομένα
+				if (response.data.data) {
+					setAccount(response.data.data)
+				}
+
+				PopupText.fire({
+					text: `Custom field "${field.name}" created successfully!`,
+					confirmButtonText: 'OK',
+					icon: 'success',
+				}).then(() => {
+					navigate('/subscribers/')
+				})
 			}
 		} catch (error) {
-			alert('Failed to create field.');// TODO: implement notification component usage
 			console.error('Error creating custom field:', error)
+			PopupText.fire({
+				text: `Error creating custom field: ${error.message}`,
+				confirmButtonText: 'OK',
+				icon: 'error',
+			})
 		}
 	}
 
@@ -55,7 +78,7 @@ const NewCustomField = () => {
 						<div className="page-name">New Field</div>
 					</div>
 					<Card className={'d-flex flex-column gap-10'}>
-						<InputText label={'Name'} value={field.fieldName} onChange={(e) => setField({ ...field, fieldName: e.target.value })} />
+						<InputText label={'Name'} value={field.name} onChange={(e) => setField({ ...field, name: e.target.value })} />
 
 						<Dropdown
 							selectedValue={typeOptions.find((option) => option.value === field.type)}

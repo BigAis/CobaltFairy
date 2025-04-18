@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 
@@ -13,10 +12,9 @@ import PopupText from '../../components/PopupText/PopupText'
 import Dropdown from '../../components/Dropdown'
 
 const EditCustomField = () => {
-	const { uuid } = useParams()
 	const navigate = useNavigate()
-	const { user, account } = useAccount()
-	const [subscriber] = useState(null)
+	const location = useLocation()
+	const { user, account, setAccount } = useAccount()
 	const [field, setField] = useState(null)
 
 	const typeOptions = [
@@ -33,31 +31,66 @@ const EditCustomField = () => {
 	]
 
 	useEffect(() => {
-		if (user && account) {
-			const field = customFields.find((field) => field.uuid === uuid)
-			if (field) {
-				setField(field)
-			}
+		console.log('location.state.fieldData', location)
+		if (location.state?.fieldData) {
+			setField(location.state.fieldData)
+		} else if (account?.fields && account.fields.length > 0) {
+			const firstField = account.fields[0]
+			console.log('Using field from account context:', firstField)
+			setField(firstField)
 		}
-	}, [uuid, user, account])
+	}, [location, account])
 
-	const saveSubscriber = async () => {
-		const response = await ApiService.post(`fairymailer/updateSubscriber`, { data: subscriber }, user.jwt)
-		if (response.data && response.data.code == 200) {
-			navigate('/subscribers/')
+	const saveField = async () => {
+		try {
+			const response = await ApiService.post(
+				`fairymailer/updateCustomField`,
+				{
+					data: field,
+				},
+				user.jwt
+			)
+
+			if (response.data && response.data.code == 200) {
+				if (response.data.data) {
+					setAccount(response.data.data)
+				}
+
+				PopupText.fire({
+					text: `Custom field "${field.name}" saved successfully!`,
+					confirmButtonText: 'OK',
+					icon: 'success',
+				}).then(() => {
+					navigate('/subscribers/')
+				})
+			}
+		} catch (error) {
+			console.error('Error updating custom field:', error)
+			PopupText.fire({
+				text: `Error updating custom field: ${error.message}`,
+				confirmButtonText: 'OK',
+				icon: 'error',
+			})
 		}
 	}
 
-	const deleteSubscriber = async () => {
+	const deleteField = async () => {
 		PopupText.fire({
-			text: `Do you really want to remove subscriber ${subscriber.email}? This action will unsubscribe them from all groups until they subscribe again manually.`,
+			text: `Do you really want to remove custom field "${field.name}"? This action cannot be undone.`,
 			confirmButtonText: 'Yes, delete.',
 		}).then(async (result) => {
 			if (result.isConfirmed) {
-				console.log('Confirmed with input:', result)
-				const response = await ApiService.post(`fairymailer/removeSubscriber`, { data: subscriber }, user.jwt)
-				if (response.data && response.data.code == 200) {
-					navigate('/subscribers/')
+				try {
+					const response = await ApiService.post(`fairymailer/removeCustomField`, { data: field }, user.jwt)
+					if (response.data && response.data.code == 200) {
+						navigate('/subscribers/')
+					}
+				} catch (error) {
+					console.error('Error deleting custom field:', error)
+					PopupText.fire({
+						text: `Error deleting custom field: ${error.message}`,
+						confirmButtonText: 'OK',
+					})
 				}
 			}
 		})
@@ -75,10 +108,19 @@ const EditCustomField = () => {
 					</div>
 					{field && (
 						<Card className={'d-flex flex-column gap-10'}>
-							<InputText label={'Name'} value={field.fieldName} />
+							<InputText
+								label={'Name'}
+								value={field.name}
+								onChange={(e) => {
+									setField((prevState) => ({
+										...prevState,
+										name: e.target.value,
+									}))
+								}}
+							/>
 
 							<Dropdown
-								selectedValue={typeOptions.find((option) => option.value === field.type)}
+								selectedValue={typeOptions.find((option) => option.value.toLowerCase() === field.type.toLowerCase())}
 								options={typeOptions}
 								active
 								onOptionSelect={(value) => {
@@ -90,10 +132,10 @@ const EditCustomField = () => {
 									})
 								}}
 							>
-								{'Select Condition'}
+								{'Select Type'}
 							</Dropdown>
 
-							{field.type === 'date' && (
+							{field.type.toLowerCase() === 'date' && (
 								<Dropdown
 									selectedValue={dateFormatOptions.find((option) => option.value === field.format)}
 									options={dateFormatOptions}
@@ -112,10 +154,10 @@ const EditCustomField = () => {
 							)}
 
 							<div className="d-flex gap-20">
-								<Button type="secondary" onClick={deleteSubscriber}>
+								<Button type="secondary" onClick={deleteField}>
 									Delete
 								</Button>
-								<Button onClick={saveSubscriber}>Save</Button>
+								<Button onClick={saveField}>Save</Button>
 							</div>
 						</Card>
 					)}

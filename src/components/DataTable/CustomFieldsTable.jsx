@@ -38,7 +38,10 @@ const CustomFieldsTable = ({ setView }) => {
 	const paginatedData = fields.slice(startIndex, endIndex)
 
 	useEffect(() => {
-		if(account?.fields) setFields(account.fields)
+		if (account?.fields) {
+			console.log('account.fields', account.fields)
+			setFields(account.fields)
+		}
 	}, [account])
 
 	const handlePageChange = (newPage) => {
@@ -58,8 +61,10 @@ const CustomFieldsTable = ({ setView }) => {
 		}
 	}
 
-	const handleLeftClick = (uuid) => {
-		navigate(`/subscribers/custom-field/${uuid}`)
+	const handleLeftClick = (rowData) => {
+		navigate(`/subscribers/field/edit`, {
+			state: { fieldData: rowData },
+		})
 	}
 
 	const actionsBodyTemplate = (rowData) => {
@@ -69,7 +74,7 @@ const CustomFieldsTable = ({ setView }) => {
 					withDivider={true}
 					icon={'Plus'}
 					options={dropdownOptions}
-					onLeftClick={() => handleLeftClick(rowData.uuid)}
+					onLeftClick={() => handleLeftClick(rowData)}
 					onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, rowData)}
 				>
 					Edit
@@ -82,10 +87,17 @@ const CustomFieldsTable = ({ setView }) => {
 		setTotalResults(fields.length)
 	}, [])
 
-
 	return (
 		<>
-			<DataTable value={fields} paginator={false} selection={selectedFields} onSelectionChange={(e) => setSelectedFields(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
+			<DataTable
+				value={fields}
+				paginator={false}
+				selection={selectedFields}
+				onSelectionChange={(e) => setSelectedFields(e.value)}
+				dataKey="name"
+				rowClassName={() => 'p-table-row'}
+				emptyMessage="No available fields"
+			>
 				<Column
 					body={(rowData) => (
 						<div style={{ position: 'relative' }}>
@@ -118,7 +130,7 @@ const CustomFieldsTable = ({ setView }) => {
 					)}
 					headerStyle={{ width: '80px' }}
 				/>
-				<Column field="fieldName" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.fieldName)} />
+				<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
 				<Column field="type" header="Type" body={(rowData) => (loading ? <Skeleton /> : rowData.type)} />
 				<Column field="format" header="Format" body={(rowData) => (loading ? <Skeleton /> : rowData.format ?? '-')} />
 				<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />

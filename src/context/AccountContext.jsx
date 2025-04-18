@@ -31,5 +31,5 @@ export const AccountProvider = ({ children }) => {
 		getAccount()
 	}, [user])
 
-	return <AccountContext.Provider value={{ user, account, loading, error }}>{children}</AccountContext.Provider>
+	return <AccountContext.Provider value={{ user, account, loading, error, setAccount }}>{children}</AccountContext.Provider>
 }
