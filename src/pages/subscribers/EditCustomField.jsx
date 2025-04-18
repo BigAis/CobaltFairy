@@ -32,16 +32,6 @@ const EditCustomField = () => {
 	]
 
 	useEffect(() => {
-		// const fetchSubscriber = async () => {
-		// 	try {
-		// 		const response = await ApiService.get(`fairymailer/getSubscribers/?filters[udid]=${uuid}&populate=*`, user.jwt)
-		// 		console.log('Subscriber is : ', response)
-		// 		if (response && response.data && response.data.data) setSubscriber(response.data.data[0])
-		// 	} catch (error) {
-		// 		console.error('Error fetching subscriber:', error)
-		// 	}
-		// }
-
 		if (user && account) {
 			const field = customFields.find((field) => field.uuid === uuid)
 			if (field) {
