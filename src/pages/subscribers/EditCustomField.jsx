@@ -16,11 +16,11 @@ const EditCustomField = () => {
 	const { uuid } = useParams()
 	const navigate = useNavigate()
 	const { user, account } = useAccount()
-	const [subscriber, setSubscriber] = useState(null)
+	const [subscriber] = useState(null)
 	const [field, setField] = useState(null)
 
 	const customFields = [
-		{ uuid: 'kDyvIO1kzX', fieldName: 'Birthday', type: 'date', format: 'DD-MM-YYYY' },
+		{ uuid: 'kDyvIO1kzX', fieldName: 'Birthday', type: 'date', format: 'DD/MM/YYYY' },
 		{ uuid: 'gLCodNrUoo', fieldName: 'Age', type: 'number' },
 		{ uuid: 'f5zZltwTs1', fieldName: 'Name Day', type: 'string' },
 	]
@@ -29,6 +29,13 @@ const EditCustomField = () => {
 		{ label: 'String', value: 'string' },
 		{ label: 'Date', value: 'date' },
 		{ label: 'Number', value: 'number' },
+	]
+
+	const dateFormatOptions = [
+		{ label: 'DD/MM/YYYY', value: 'DD/MM/YYYY' },
+		{ label: 'MM/DD/YYYY', value: 'MM/DD/YYYY' },
+		{ label: 'YYYY/MM/DD', value: 'YYYY/MM/DD' },
+		{ label: 'YYYY-DD-MM', value: 'YYYY-DD-MM' },
 	]
 
 	useEffect(() => {
@@ -42,17 +49,6 @@ const EditCustomField = () => {
 
 	const saveSubscriber = async () => {
 		const response = await ApiService.post(`fairymailer/updateSubscriber`, { data: subscriber }, user.jwt)
-		if (response.data && response.data.code == 200) {
-			navigate('/subscribers/')
-		}
-	}
-
-	const unsubscribeSubscriber = async () => {
-		const subscriberData = {
-			...subscriber,
-			active: !subscriber.active,
-		}
-		const response = await ApiService.post(`fairymailer/updateSubscriber`, { data: subscriberData }, user.jwt)
 		if (response.data && response.data.code == 200) {
 			navigate('/subscribers/')
 		}
@@ -72,10 +68,6 @@ const EditCustomField = () => {
 			}
 		})
 	}
-
-	// if (!subscriber) {
-	// 	return <div>Loading...</div>
-	// }
 
 	return (
 		<>
@@ -107,7 +99,23 @@ const EditCustomField = () => {
 								{'Select Condition'}
 							</Dropdown>
 
-							{field.type === 'date' && <InputText label={'Format'} value={field.format} />}
+							{field.type === 'date' && (
+								<Dropdown
+									selectedValue={dateFormatOptions.find((option) => option.value === field.format)}
+									options={dateFormatOptions}
+									active
+									onOptionSelect={(value) => {
+										setField((prevState) => {
+											return {
+												...prevState,
+												format: value.value,
+											}
+										})
+									}}
+								>
+									{'Select Date Format'}
+								</Dropdown>
+							)}
 
 							<div className="d-flex gap-20">
 								<Button type="secondary" onClick={deleteSubscriber}>

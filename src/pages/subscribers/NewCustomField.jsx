@@ -16,13 +16,20 @@ const NewCustomField = () => {
 	const [field, setField] = useState({
 		fieldName: '',
 		type: 'string',
-		format: '',
+		format: 'DD/MM/YYYY',
 	})
 
 	const typeOptions = [
 		{ label: 'String', value: 'string' },
 		{ label: 'Date', value: 'date' },
 		{ label: 'Number', value: 'number' },
+	]
+
+	const dateFormatOptions = [
+		{ label: 'DD/MM/YYYY', value: 'DD/MM/YYYY' },
+		{ label: 'MM/DD/YYYY', value: 'MM/DD/YYYY' },
+		{ label: 'YYYY/MM/DD', value: 'YYYY/MM/DD' },
+		{ label: 'YYYY-DD-MM', value: 'YYYY-DD-MM' },
 	]
 
 	const createCustomField = async () => {
@@ -65,7 +72,23 @@ const NewCustomField = () => {
 							{'Select Type'}
 						</Dropdown>
 
-						{field.type === 'date' && <InputText label={'Format'} value={field.format} onChange={(e) => setField({ ...field, format: e.target.value })} />}
+						{field.type === 'date' && (
+							<Dropdown
+								selectedValue={dateFormatOptions.find((option) => option.value === field.format)}
+								options={dateFormatOptions}
+								active
+								onOptionSelect={(value) => {
+									setField((prevState) => {
+										return {
+											...prevState,
+											format: value.value,
+										}
+									})
+								}}
+							>
+								{'Select Date Format'}
+							</Dropdown>
+						)}
 
 						<div className="d-flex gap-20">
 							<Button type="secondary" onClick={() => navigate('/subscribers/')}>

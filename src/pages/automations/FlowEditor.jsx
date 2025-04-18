@@ -31,48 +31,48 @@ const FlowEditor = () => {
 
 	const isDragging = useRef(false)
 	const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
-	
+
 	useEffect(() => {
-	  const el = automationContainerRef.current
-	  if (!el) return
-	
-	  const onMouseDown = (e) => {
-		isDragging.current = true
-		el.style.cursor = 'grabbing'
-		el.style.userSelect = 'none'
-	
-		dragStart.current = {
-		  x: e.pageX,
-		  y: e.pageY,
-		  scrollLeft: el.scrollLeft,
-		  scrollTop: el.scrollTop,
+		const el = automationContainerRef.current
+		if (!el) return
+
+		const onMouseDown = (e) => {
+			isDragging.current = true
+			el.style.cursor = 'grabbing'
+			el.style.userSelect = 'none'
+
+			dragStart.current = {
+				x: e.pageX,
+				y: e.pageY,
+				scrollLeft: el.scrollLeft,
+				scrollTop: el.scrollTop,
+			}
 		}
-	  }
-	
-	  const onMouseMove = (e) => {
-		if (!isDragging.current) return
-		const dx = e.pageX - dragStart.current.x
-		const dy = e.pageY - dragStart.current.y
-		el.scrollLeft = dragStart.current.scrollLeft - dx
-		el.scrollTop = dragStart.current.scrollTop - dy
-	  }
-	
-	  const stopDragging = () => {
-		isDragging.current = false
-		el.style.cursor = 'grab'
-		el.style.removeProperty('user-select')
-	  }
-	
-	  el.addEventListener('mousedown', onMouseDown)
-	  window.addEventListener('mousemove', onMouseMove)
-	  window.addEventListener('mouseup', stopDragging)
-	
-	  // Clean up
-	  return () => {
-		el.removeEventListener('mousedown', onMouseDown)
-		window.removeEventListener('mousemove', onMouseMove)
-		window.removeEventListener('mouseup', stopDragging)
-	  }
+
+		const onMouseMove = (e) => {
+			if (!isDragging.current) return
+			const dx = e.pageX - dragStart.current.x
+			const dy = e.pageY - dragStart.current.y
+			el.scrollLeft = dragStart.current.scrollLeft - dx
+			el.scrollTop = dragStart.current.scrollTop - dy
+		}
+
+		const stopDragging = () => {
+			isDragging.current = false
+			el.style.cursor = 'grab'
+			el.style.removeProperty('user-select')
+		}
+
+		el.addEventListener('mousedown', onMouseDown)
+		window.addEventListener('mousemove', onMouseMove)
+		window.addEventListener('mouseup', stopDragging)
+
+		// Clean up
+		return () => {
+			el.removeEventListener('mousedown', onMouseDown)
+			window.removeEventListener('mousemove', onMouseMove)
+			window.removeEventListener('mouseup', stopDragging)
+		}
 	}, [])
 
 	const { user, account } = useAccount()
@@ -102,43 +102,56 @@ const FlowEditor = () => {
 		setData(resp.data.data[0])
 	}
 
-	const transformNodes = (nodes)=> { //tranforms old fairy mail automations to new version.
-		nodes = nodes.map((node)=>{
-			switch(node.type){
-				case "email": 
-					if(!node.meta) node.meta = {}; 
-					if(!node.meta.label && node.templateName){
-						node.meta.label = node.templateName;
+	const transformNodes = (nodes) => {
+		//tranforms old fairy mail automations to new version.
+		nodes = nodes.map((node) => {
+			switch (node.type) {
+				case 'email':
+					if (!node.meta) node.meta = {}
+					if (!node.meta.label && node.templateName) {
+						node.meta.label = node.templateName
 					}
-				break;
-				case "delay": 
-					if(!node.data) node.data = {}; 
-					if(!node.data.meta) node.data.meta = {}; 
-					if(!node.data.meta.label && node.data?.meta?.label){ node.data.meta.label = node.meta.label; }
-					if((!node.data.delay || isNaN(node.data.delay)) && node.data.delayValue){ node.data.delay = [node.data.delayValue]; }
-				break;
-				case "condition": 
-					if(!node.meta) node.meta = {};
-					if(!node.meta.cmpname && node.meta.label){
-						node.meta.cmpname = node.meta.label;
-						node.meta.label = node.name=="workflow-activity" ? 'Workflow Activity' : 'Campaign Activity'
+					break
+				case 'delay':
+					if (!node.data) node.data = {}
+					if (!node.data.meta) node.data.meta = {}
+					if (!node.data.meta.label && node.data?.meta?.label) {
+						node.data.meta.label = node.meta.label
 					}
-					if(!node.data.cmp && node.data.email_node_id)node.data.cmp = node.data.email_node_id
-					if(!node.meta.triggerName && node.data.trigger) {
-						switch(node.data.trigger){
-							case "cmp_open": node.meta.triggerName = 'was opened'; break;
-							case "cmp_not_open": node.meta.triggerName = 'was not opened'; break;
-							case "cmp_link_clicked": node.meta.triggerName = 'had a specific link clicked'; break;
-							case "cmp_link_not_clicked": node.meta.triggerName = 'had a specific link not clicked'; break;
+					if ((!node.data.delay || isNaN(node.data.delay)) && node.data.delayValue) {
+						node.data.delay = [node.data.delayValue]
+					}
+					break
+				case 'condition':
+					if (!node.meta) node.meta = {}
+					if (!node.meta.cmpname && node.meta.label) {
+						node.meta.cmpname = node.meta.label
+						node.meta.label = node.name == 'workflow-activity' ? 'Workflow Activity' : 'Campaign Activity'
+					}
+					if (!node.data.cmp && node.data.email_node_id) node.data.cmp = node.data.email_node_id
+					if (!node.meta.triggerName && node.data.trigger) {
+						switch (node.data.trigger) {
+							case 'cmp_open':
+								node.meta.triggerName = 'was opened'
+								break
+							case 'cmp_not_open':
+								node.meta.triggerName = 'was not opened'
+								break
+							case 'cmp_link_clicked':
+								node.meta.triggerName = 'had a specific link clicked'
+								break
+							case 'cmp_link_not_clicked':
+								node.meta.triggerName = 'had a specific link not clicked'
+								break
 						}
-						
+
 						//
 					}
-				break;
+					break
 			}
-			return node;
+			return node
 		})
-		return nodes;
+		return nodes
 	}
 
 	const loadGroups = async () => {
@@ -673,7 +686,7 @@ const FlowEditor = () => {
 				})
 			}
 		})
-		console.log('before setExcludeNodes',tmp)
+		console.log('before setExcludeNodes', tmp)
 		setExcludeNodes(tmp)
 	}
 
@@ -685,18 +698,18 @@ const FlowEditor = () => {
 		if (container) {
 			// const centerPosition = (container.clientWidth/2) +300
 			// container.scrollLeft = centerPosition
-			const contentWidth = container.scrollWidth;
-			const containerWidth = container.clientWidth;
-			const sidebarWidth = 200;
+			const contentWidth = container.scrollWidth
+			const containerWidth = container.clientWidth
+			const sidebarWidth = 200
 
-			const centerPosition = (contentWidth - containerWidth) / 2 + sidebarWidth;
-			container.scrollLeft = centerPosition;
+			const centerPosition = (contentWidth - containerWidth) / 2 + sidebarWidth
+			container.scrollLeft = centerPosition
 		}
 	}, [])
 
 	const validateNode = (node) => {
 		let result = true
-		console.log('validateNode',node)
+		console.log('validateNode', node)
 		switch (node.type) {
 			case 'trigger':
 				if (!node.name || !node.name.length > 0) {
@@ -870,11 +883,11 @@ const FlowEditor = () => {
 							} else {
 								children = []
 							}
-							if (excludeNodes.map(Number).includes(node.id)) return '';
-							console.log('node.id',node.id,excludeNodes,excludeNodes.includes(node.id))
+							if (excludeNodes.map(Number).includes(node.id)) return ''
+							console.log('node.id', node.id, excludeNodes, excludeNodes.includes(node.id))
 							return (
 								<>
-									{console.log('Renders',node.id)}
+									{console.log('Renders', node.id)}
 									<NodeItem
 										onSelect={(_node) => selectNode(_node)}
 										key={node.id}
@@ -899,7 +912,6 @@ const FlowEditor = () => {
 									/>
 								</>
 							)
-							
 						})}
 					</ul>
 				</div>
