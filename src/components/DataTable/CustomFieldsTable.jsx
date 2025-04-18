@@ -16,18 +16,12 @@ import { ApiService } from '../../service/api-service'
 import qs from 'qs'
 
 // const GroupsTable = ({ groups, resultsPerPage, onUpdate, setView, currentPage, totalResults, onPageChange }) => {
-const CustomFieldsTable = ({ groupSearchValue, onUpdate, setView }) => {
+const CustomFieldsTable = ({ setView }) => {
 	const navigate = useNavigate()
-	const { user } = useAccount()
+	const { user, account } = useAccount()
 
 	const [loading, setLoading] = useState(false)
-	const [groups, setGroups] = useState([])
-
-	const fields = [
-		{ uuid: 'kDyvIO1kzX', fieldName: 'Birthday', type: 'date', format: 'DD-MM-YYYY' },
-		{ uuid: 'gLCodNrUoo', fieldName: 'Age', type: 'number' },
-		{ uuid: 'f5zZltwTs1', fieldName: 'Name Day', type: 'string' },
-	]
+	const [fields, setFields] = useState([])
 
 	const [totalResults, setTotalResults] = useState(0)
 	const [currentPage, setCurrentPage] = useState(1)
@@ -43,9 +37,9 @@ const CustomFieldsTable = ({ groupSearchValue, onUpdate, setView }) => {
 	const endIndex = startIndex + rowsPerPage
 	const paginatedData = fields.slice(startIndex, endIndex)
 
-	// useEffect(() => {
-	// 	getGroups(currentPage)
-	// }, [currentPage, groupSearchValue])
+	useEffect(() => {
+		if(account?.fields) setFields(account.fields)
+	}, [account])
 
 	const handlePageChange = (newPage) => {
 		setCurrentPage(newPage)
@@ -88,53 +82,8 @@ const CustomFieldsTable = ({ groupSearchValue, onUpdate, setView }) => {
 		setTotalResults(fields.length)
 	}, [])
 
-	// const deleteGroup = async (rowData) => {
-	// 	PopupText.fire({
-	// 		text: `Do you really want to remove group ${rowData.name}? `,
-	// 		confirmButtonText: 'Yes, delete.',
-	// 	}).then(async (result) => {
-	// 		if (result.isConfirmed) {
-	// 			const deleteResponse = await ApiService.post(`fairymailer/deleteGroupByGuid/${rowData.udid}`, { data: {} }, user.jwt)
-	// 			if (deleteResponse) {
-	// 				onUpdate()
-	// 				getGroups()
-	// 			}
-	// 		}
-	// 	})
-	// }
-
-	// const getGroups = async (page = 1) => {
-	// 	setLoading(true)
-	// 	const query = {
-	// 		filters: {
-	// 			name: {
-	// 				$contains: groupSearchValue,
-	// 			},
-	// 		},
-	// 		pagination: {
-	// 			pageSize: resultsPerPage,
-	// 			page,
-	// 		},
-	// 	}
-	// 	const queryString = qs.stringify(query, { encode: false })
-
-	// 	try {
-	// 		const resp = await ApiService.get(`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true`, user.jwt)
-
-	// 		if (resp.data && resp.data.data) {
-	// 			setGroups(resp.data.data)
-	// 			setTotalResults(resp.data.meta.pagination.total)
-	// 		}
-	// 		setCurrentPage(page)
-	// 	} catch (error) {
-	// 		console.error('Error fetching groups:', error)
-	// 	} finally {
-	// 		setLoading(false)
-	// 	}
-	// }
 
 	return (
-		// <div>
 		<>
 			<DataTable value={fields} paginator={false} selection={selectedFields} onSelectionChange={(e) => setSelectedFields(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
 				<Column

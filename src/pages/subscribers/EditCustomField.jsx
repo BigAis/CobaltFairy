@@ -18,12 +18,7 @@ const EditCustomField = () => {
 	const { user, account } = useAccount()
 	const [subscriber, setSubscriber] = useState(null)
 	const [field, setField] = useState(null)
-
-	const customFields = [
-		{ uuid: 'kDyvIO1kzX', fieldName: 'Birthday', type: 'date', format: 'DD-MM-YYYY' },
-		{ uuid: 'gLCodNrUoo', fieldName: 'Age', type: 'number' },
-		{ uuid: 'f5zZltwTs1', fieldName: 'Name Day', type: 'string' },
-	]
+	
 
 	const typeOptions = [
 		{ label: 'String', value: 'string' },
@@ -42,17 +37,6 @@ const EditCustomField = () => {
 
 	const saveSubscriber = async () => {
 		const response = await ApiService.post(`fairymailer/updateSubscriber`, { data: subscriber }, user.jwt)
-		if (response.data && response.data.code == 200) {
-			navigate('/subscribers/')
-		}
-	}
-
-	const unsubscribeSubscriber = async () => {
-		const subscriberData = {
-			...subscriber,
-			active: !subscriber.active,
-		}
-		const response = await ApiService.post(`fairymailer/updateSubscriber`, { data: subscriberData }, user.jwt)
 		if (response.data && response.data.code == 200) {
 			navigate('/subscribers/')
 		}
