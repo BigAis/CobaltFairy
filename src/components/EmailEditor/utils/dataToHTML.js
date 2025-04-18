@@ -242,33 +242,33 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
   content = blockListToHtml(newBlockList, bodySettings);
   let links = extractUrls(content)
 
-  if (links)
-    for (let l = 0; l < links.length; l++) {
-      if (links[l].includes('fairymail.cobaltfairy.com') || links[l].includes('cdn.cobaltfairy.online') || links[l].includes('cdn.cobaltfairy.com') || links[l].includes('fairymail.app')) {
-        continue
-      }
-      if (links[l].includes(' ')) links[l] = links[l].split(' ')[0]
-      if (
-        !links[l].includes('.jpg') &&
-        !links[l].includes('.jpeg') &&
-        !links[l].includes('.png') &&
-        !links[l].includes('.gif') &&
-        !links[l].includes('.webp') &&
-        !links[l].includes('.svg') &&
-        !links[l].includes('cdn.cobaltfairy.online') &&
-        !links[l].includes('cdn.cobaltfairy.com') && 
-        !links[l].includes('pixel.fairymail.app')
-      ) {
-        if (links[l].includes('"')) links[l] = links[l].split('"')[0]
-        if (!links[l].startsWith('http')) links[l] = `http://${links[l]}`
-        content = content
-          .split(links[l])
-          .join(
-            `${PIXEL_URL}/redir?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
-          )
-      }
-      content = content.split('https://https://').join('https://').split('https://http://').join('https://')
-    }
+  // if (links)
+  //   for (let l = 0; l < links.length; l++) {
+  //     if (links[l].includes('fairymail.cobaltfairy.com') || links[l].includes('cdn.cobaltfairy.online') || links[l].includes('cdn.cobaltfairy.com') || links[l].includes('fairymail.app')) {
+  //       continue
+  //     }
+  //     if (links[l].includes(' ')) links[l] = links[l].split(' ')[0]
+  //     if (
+  //       !links[l].includes('.jpg') &&
+  //       !links[l].includes('.jpeg') &&
+  //       !links[l].includes('.png') &&
+  //       !links[l].includes('.gif') &&
+  //       !links[l].includes('.webp') &&
+  //       !links[l].includes('.svg') &&
+  //       !links[l].includes('cdn.cobaltfairy.online') &&
+  //       !links[l].includes('cdn.cobaltfairy.com') && 
+  //       !links[l].includes('pixel.fairymail.app')
+  //     ) {
+  //       if (links[l].includes('"')) links[l] = links[l].split('"')[0]
+  //       if (!links[l].startsWith('http')) links[l] = `http://${links[l]}`
+  //       content = content
+  //         .split(links[l])
+  //         .join(
+  //           `${PIXEL_URL}/redir?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}&r=${encodeURIComponent(links[l])}`
+  //         )
+  //     }
+  //   }
+  content = content.split('https://https://').join('https://').split('https://http://').join('https://')
   let fontStyles = "";
   let fontMediaStyles = "";
   let pixel = `${PIXEL_URL}/pixel.gif?cid=${campaignUUID}&uid={{pixel_uid}}&v={{cmp_version}}`
@@ -304,65 +304,67 @@ const dataToHtml = ({ bodySettings, blockList, campaignUUID="" }) => {
   } 
   const backgroundImageString = bodySettings.styles.backgroundImage && bodySettings.styles.backgroundImage.length>0 ? `background-image:${bodySettings.styles.backgroundImage}; background-size:${bodySettings.styles.backgroundSize ?? 'auto'}; background-position:${bodySettings.styles.backgroundPosition ?? 'center center'};` : ''
   return `<html>
-  <head>
-  <meta charset="UTF-8">
-  <title>email</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  ${fontStyles}
-  <style type="text/css">
-  *{
-    margin: 0;
-    padding: 0;
-    border: none;
-    box-sizing: border-box;
-  }
+    <head>
+      <meta charset="UTF-8">
+      <title>email</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      ${fontStyles}
+      <style type="text/css">
+      *{
+        margin: 0;
+        padding: 0;
+        border: none;
+        box-sizing: border-box;
+      }
 
-  html,body {
-    height:100%;
-    overflow-y:auto;
-  }
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100% !important;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
 
-  table {
-    width: 100%;
-    color:unset;
-  }
+      table {
+        width: 100%;
+        color:unset;
+      }
 
-  table, tr, td {
-    vertical-align: top;
-    border-collapse: collapse;
- }
-
-  h1,h2,h3,h4 {
-    display: block;
-    margin-block-start: 0px;
-    margin-block-end: 0px;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-    font-weight: bold;
-  }
-  .image-content-about_the_book{
-    width:50%;
-  }
-  .image-content-about_the_book img{
-    width:100%!important;
-  }
-  @media(max-width:620px){
-    td {
-      display:inline-block;
-      width:100% !important;
+      table, tr, td {
+        vertical-align: top;
+        border-collapse: collapse;
     }
-    .image-content-about_the_book, .image-content-about_the_book img{
-      width:100%!important;
-      margin-bottom:20px;
-    }
-  }
-  ${styles}
-  <img alt="Fairy Mail tracking pixel" src=${pixel}/>
-</style>
+
+      h1,h2,h3,h4 {
+        display: block;
+        margin-block-start: 0px;
+        margin-block-end: 0px;
+        margin-inline-start: 0px;
+        margin-inline-end: 0px;
+        font-weight: bold;
+      }
+      .image-content-about_the_book{
+        width:50%;
+      }
+      .image-content-about_the_book img{
+        width:100%!important;
+      }
+      @media(max-width:620px){
+        td {
+          display:inline-block;
+          width:100% !important;
+        }
+        .image-content-about_the_book, .image-content-about_the_book img{
+          width:100%!important;
+          margin-bottom:20px;
+        }
+      }
+
+    </style>
   </head>
   <body style="background-color:${bodySettings.styles.backgroundColor};${backgroundImageString}">
-  <div style="opacity:0;height:0;overflow:hidden;">${bodySettings.preHeader}</div>
-  <div style="color:${bodySettings.styles.color}; font-family:${bodySettings.styles.fontFamily.attribute};"> ${content}</div>
+      <div style="opacity:0;height:0;overflow:hidden;">${bodySettings.preHeader}</div>
+      <div style="color:${bodySettings.styles.color}; font-family:${bodySettings.styles.fontFamily.attribute};"> ${content}</div>
   </body>
   </html>`;
 };

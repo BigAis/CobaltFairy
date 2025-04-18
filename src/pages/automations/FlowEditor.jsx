@@ -29,6 +29,52 @@ const FlowEditor = () => {
 	const [excludeNodes, setExcludeNodes] = useState([])
 	const [nodes, setNodes] = useState([])
 
+	const isDragging = useRef(false)
+	const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
+	
+	useEffect(() => {
+	  const el = automationContainerRef.current
+	  if (!el) return
+	
+	  const onMouseDown = (e) => {
+		isDragging.current = true
+		el.style.cursor = 'grabbing'
+		el.style.userSelect = 'none'
+	
+		dragStart.current = {
+		  x: e.pageX,
+		  y: e.pageY,
+		  scrollLeft: el.scrollLeft,
+		  scrollTop: el.scrollTop,
+		}
+	  }
+	
+	  const onMouseMove = (e) => {
+		if (!isDragging.current) return
+		const dx = e.pageX - dragStart.current.x
+		const dy = e.pageY - dragStart.current.y
+		el.scrollLeft = dragStart.current.scrollLeft - dx
+		el.scrollTop = dragStart.current.scrollTop - dy
+	  }
+	
+	  const stopDragging = () => {
+		isDragging.current = false
+		el.style.cursor = 'grab'
+		el.style.removeProperty('user-select')
+	  }
+	
+	  el.addEventListener('mousedown', onMouseDown)
+	  window.addEventListener('mousemove', onMouseMove)
+	  window.addEventListener('mouseup', stopDragging)
+	
+	  // Clean up
+	  return () => {
+		el.removeEventListener('mousedown', onMouseDown)
+		window.removeEventListener('mousemove', onMouseMove)
+		window.removeEventListener('mouseup', stopDragging)
+	  }
+	}, [])
+
 	const { user, account } = useAccount()
 	const steps = [{ label: 'Automations' }, { label: 'Edit Automation' }, { label: 'Editor' }]
 	//State for Sidebar Setting
@@ -266,9 +312,6 @@ const FlowEditor = () => {
 						if (node.data) return { value: node.id, label: node.data.emailSubject }
 					})
 			: []
-	console.log('updated workflowCampaigns', workflowCampaigns)
-
-	console.log('workflow campaigns are : ', workflowCampaigns)
 
 	const handleTriggerSelectChange = (ev) => {
 		// Update the `name` and reset additional settings in `selectedNode`
@@ -625,18 +668,14 @@ const FlowEditor = () => {
 							if (!excludeNodes.includes(c)) tmp.push(c)
 						})
 					} else {
-						console.log('No o', o)
+						console.log('No o.id', o)
 					}
 				})
 			}
 		})
+		console.log('before setExcludeNodes',tmp)
 		setExcludeNodes(tmp)
 	}
-
-	useEffect(() => {
-		console.log('Selected Node is : ', selectedNode)
-		console.log('Nodes are : ', nodes)
-	}, [selectedNode])
 
 	useEffect(() => {
 		refreshNodes()
@@ -644,8 +683,14 @@ const FlowEditor = () => {
 	useEffect(() => {
 		const container = automationContainerRef.current
 		if (container) {
-			const centerPosition = container.clientWidth
-			container.scrollLeft = centerPosition
+			// const centerPosition = (container.clientWidth/2) +300
+			// container.scrollLeft = centerPosition
+			const contentWidth = container.scrollWidth;
+			const containerWidth = container.clientWidth;
+			const sidebarWidth = 200;
+
+			const centerPosition = (contentWidth - containerWidth) / 2 + sidebarWidth;
+			container.scrollLeft = centerPosition;
 		}
 	}, [])
 
@@ -733,7 +778,7 @@ const FlowEditor = () => {
 								result = false
 							} else {
 								if (node.data.trigger === 'cmp_link_clicked' || node.data.trigger === 'cmp_link_not_clicked') {
-									if (!node.data.link || !node.data.link.length > 0) result = false
+									if (!node.data.link || !node.data.link.value || !node.data.link.value.length > 0) result = false
 								}
 							}
 
@@ -817,7 +862,7 @@ const FlowEditor = () => {
 			</div>
 			<div className="body">
 				<div id="automation-builder" ref={automationContainerRef}>
-					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '90vw', paddingBottom: '200px' }}>
+					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '4500px', paddingBottom: '200px' }}>
 						{nodes.map((node, idx) => {
 							let children
 							if (node.type == 'condition') {
@@ -825,8 +870,11 @@ const FlowEditor = () => {
 							} else {
 								children = []
 							}
-							if (!excludeNodes.includes(node.id))
-								return (
+							if (excludeNodes.map(Number).includes(node.id)) return '';
+							console.log('node.id',node.id,excludeNodes,excludeNodes.includes(node.id))
+							return (
+								<>
+									{console.log('Renders',node.id)}
 									<NodeItem
 										onSelect={(_node) => selectNode(_node)}
 										key={node.id}
@@ -841,7 +889,6 @@ const FlowEditor = () => {
 										data={{ groups, avlCampaigns, workflowCampaigns, templates, cmpLinks }}
 										setSideBarShown={setSideBarShown}
 										onUpdate={(data) => {
-											console.log('OnUpdate Node: ', data)
 											setNodes(
 												nodes.map((n) => {
 													if (n.id == data.id) return data
@@ -850,7 +897,9 @@ const FlowEditor = () => {
 											)
 										}}
 									/>
-								)
+								</>
+							)
+							
 						})}
 					</ul>
 				</div>

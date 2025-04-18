@@ -63,6 +63,28 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 		})
 		return links
 	}
+	// const getTplIdLinks = (nodeId) => {
+	// 	let links = []
+	// 	const tplNode = nodes.filter((node) => node.id === nodeId)[0]
+	// 	if(!tplNode) return [];
+	// 	const tplId = tplNode?.data?.tplId
+	// 	let templates = data.templates;
+	// 	if (templates.length > 0 && tplId) {
+	// 		const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
+	// 		console.log('tplId: ',tplDesign)
+	// 		const templateLinks = extractLinksFromCampaignDesign(tplDesign.components ?? tplDesign.blockList)
+	// 		if (templateLinks.length > 0) {
+	// 			templateLinks.forEach((ll) => {
+	// 				if (!links.includes(ll)) links.push(ll)
+	// 			})
+	// 		}
+	// 		links = links.map((link) => ({
+	// 			value: link,
+	// 			label: link,
+	// 		}))
+	// 	}
+	// 	return links
+	// }
 	const getTplIdLinks = (nodeId) => {
 		let links = []
 		const tplNode = nodes.filter((node) => node.id === nodeId)[0]
@@ -486,7 +508,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 			]
 			let howManyConditions = 0
 			howManyConditions += children && children[0] ? countConditions(children[0], 0) : 0
-			// console.log(node.id, howManyConditions)
+			const isFirstCondition = nodes.filter((n) => n.type == 'condition')[0].id == node.id
 			content = (
 				<li
 					className="d-flex flex-column align-items-center automation-node-item"
@@ -598,7 +620,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 																}}
 															>
 																{' '}
-																{node.data?.link.value ?? 'Select a link'}
+																{node.data?.link?.value ?? 'Select a link'}
 															</Dropdown>
 														</>
 													)}
@@ -640,11 +662,12 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 							</div>
 						</Card>
 					</div>
-					<div className="d-flex flex-column align-items-center">
+					<div className="d-flex flex-column align-items-center" style={{ minWidth: isFirstCondition ? '1000px' : '1px' }}>
 						<div className="automation-node-vertical-line"></div>
-						<div className="automation-node-horizontal-line" style={{ width: 550 + howManyConditions * 50 + 'px' }} />
+						<div className="automation-node-horizontal-line" style={{ width: 650 + howManyConditions * 50 + (isFirstCondition ? 300 : 0) + 'px' }} />
 
 						<div className="d-flex flex-row w-100" style={{ justifyContent: 'space-between', alignItems: 'start' }}>
+							{/* START OF LEFT LEG (true) */}
 							<div style={{ alignItems: 'center', display: 'flex', flexDirection: 'column', marginLeft: '-40px' }}>
 								<div className="automation-node-vertical-line"></div>
 								<Card
@@ -668,28 +691,29 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											let children0 = [0, 1].map((index) => {
 												if (child && child.id) return getChildrenOfCondition(nodes, child.id, index)
 											})
-											// if (closestCondition(child.id) == node.id)
-											return (
-												<NodeItem
-													key={child ? child.id : 0}
-													node={child}
-													type={child ? child.type : ''}
-													onAdd={onAdd}
-													onSelect={onSelect} // Use onSelect here, not selectNode
-													nodes={nodes}
-													removeNode={removeNode}
-													children={children0}
-													getChildrenOfCondition={getChildrenOfCondition}
-													handleAdditionalChange={handleAdditionalChange}
-													setSideBarShown={setSideBarShown}
-													data={data}
-													onUpdate={onUpdate}
-												/>
-											)
+											if (closestCondition(child.id) == node.id)
+												return (
+													<NodeItem
+														key={child ? child.id : 0}
+														node={child}
+														type={child ? child.type : ''}
+														onAdd={onAdd}
+														onSelect={onSelect} // Use onSelect here, not selectNode
+														nodes={nodes}
+														removeNode={removeNode}
+														children={children0}
+														getChildrenOfCondition={getChildrenOfCondition}
+														handleAdditionalChange={handleAdditionalChange}
+														setSideBarShown={setSideBarShown}
+														data={data}
+														onUpdate={onUpdate}
+													/>
+												)
 										})}
 								</ul>
 							</div>
-
+							{/* END OF LEFT LEG (true) */}
+							{/* START OF RIGHT LEG (true) */}
 							<div className="d-flex flex-column align-items-end" style={{ alignItems: 'center', marginRight: '-40px' }}>
 								<div className="automation-node-vertical-line"></div>
 								<Card
@@ -736,6 +760,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 										})}
 								</ul>
 							</div>
+							{/* END OF RIGHT LEG (true) */}
 						</div>
 					</div>
 				</li>

@@ -294,7 +294,11 @@ const NewCampaign = () => {
 	const sendTestEmail = async () => {
 		const campaignUdid = uuid
 		const response = await ApiService.post(`fairymail/sendDraft`, { campaign_id: campaignUdid }, user.jwt)
-		setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Test email was sent successfully.', autoClose: 3000 }])
+		if(response?.data?.code && response?.data?.code==200){
+			setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Test email was sent successfully.', autoClose: 3000 }])
+		}else{
+			setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Could not send test email. If the problem persists please contact our support team.', autoClose: 90000 }])
+		}
 
 		console.log('response from sendTestEmail is : ', response)
 	}
