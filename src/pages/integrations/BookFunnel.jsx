@@ -67,7 +67,7 @@ const BookFunnel = () => {
 				'bookfunnel-maps',
 				{
 					data: {
-						bf_page: selectedBookFunnelBook,
+						bf_page: selectedBookFunnelBook.value,
 						group: selectedGroup.value,
 						account: account.id,
 					},
