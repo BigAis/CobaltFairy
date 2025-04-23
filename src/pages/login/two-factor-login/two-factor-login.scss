@@ -12,14 +12,19 @@
     width: 100%;
     max-width: 450px;
     padding: 50px;
+    position: relative;
+  }
+
+  .action-links {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
   }
 
   .change-email {
-    position: absolute;
-    right: 52px; 
     font-size: 0.9rem; 
     color: #333; 
-    margin-top: 10px;
     cursor: pointer;
     &:hover {
       color: #e45016; 
@@ -27,14 +32,15 @@
   }
 
   .resend-code {
-    position: absolute;
-    left: 52px; 
     font-size: 0.9rem; 
     color: #333; 
-    margin-top: 10px;
     cursor: pointer;
     &:hover {
       color: #e45016; 
+    }
+    
+    &.disabled {
+      cursor: not-allowed;
     }
   }
 
@@ -43,6 +49,7 @@
     font-weight: bold;
     font-size: 32px; 
     color: #333; 
+    margin-bottom: 10px;
   }
 
   p {
@@ -51,5 +58,14 @@
     font-size: 16px; 
     margin-top: 0;
     color: #777; 
+  }
+  
+  .email-form {
+    margin: 20px 0;
+  }
+  
+  .complete-button {
+    margin-top: 20px;
+    width: 100%;
   }
 }

@@ -11,7 +11,7 @@
   .inputsContainer {
     display: flex;
     justify-content: space-between;
-    width: 108%;
+    width: 100%;
   }
 
   .codeInputCellContainer {
@@ -30,16 +30,23 @@
     border-color: rgb(255, 166, 0);
   }
   
-  .error-message {
-		margin-top: 4px;
-		font-size: 14px;
-		color: rgba(255, 166, 0, 1);
-		font-weight: 500px;
-		line-height: 16.94px;
-		path{
-			fill:rgba(255, 166, 0, 1)!important;
-		}
-	}
+  .error-message-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    color: rgba(255, 166, 0, 1);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16.94px;
+    
+    svg path {
+      fill: rgba(255, 166, 0, 1) !important;
+    }
+    
+    span {
+      margin-left: 5px;
+    }
+  }
 
   .codeInputCellContainer.focused {
     border-color: rgb(218, 30, 30);
@@ -49,8 +56,6 @@
     font-size: 1rem; 
     color: gray;
   }
-
-
 
   .hiddenCodeInput {
     position: absolute;

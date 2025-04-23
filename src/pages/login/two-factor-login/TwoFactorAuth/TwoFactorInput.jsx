@@ -48,13 +48,15 @@ const TwoFactorInput = ({ value, onChange, onIncompleteSubmit }) => {
     if (e.key === 'Enter') {
       if (value.length < CELL_COUNT) {
         setIsError(true);
-        onIncompleteSubmit(); // Trigger incomplete submission handling
+        if (onIncompleteSubmit) {
+          onIncompleteSubmit(); // Trigger incomplete submission handling
+        }
       }
     }
   };
 
   useEffect(() => {
-    ref.current.focus();
+    ref?.current?.focus();
   }, []);
 
   return (
@@ -63,7 +65,7 @@ const TwoFactorInput = ({ value, onChange, onIncompleteSubmit }) => {
         <div className="inputsContainer">{codeDigitsArray.map(toDigitInput)}</div>
         <input
           ref={ref}
-          value={value}
+          value={value || ''}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           type="text"
@@ -71,7 +73,12 @@ const TwoFactorInput = ({ value, onChange, onIncompleteSubmit }) => {
           className="hiddenCodeInput"
         />
       </div>
-      {isError && <p className="error-message"><Icon name="Attention" size={16} />Please enter all 6 digits.</p>}
+      {isError && (
+        <div className="error-message-container">
+          <Icon name="Attention" size={16} />
+          <span>Please enter all 6 digits.</span>
+        </div>
+      )}
     </div>
   );
 };

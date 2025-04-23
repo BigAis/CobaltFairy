@@ -24,57 +24,92 @@ import BookFunnel from './pages/integrations/BookFunnel'
 import EditCustomField from './pages/subscribers/EditCustomField'
 import NewCustomField from './pages/subscribers/NewCustomField'
 
+// A wrapper component to handle authentication check
+const ProtectedRoute = ({ children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+// src/App.jsx
+// Find and update the useEffect hook that checks for authentication:
+
+// src/App.jsx
+// Update the authentication useEffect:
+
+useEffect(() => {
+    const fairymail_session = localStorage.getItem('fairymail_session');
+    
+    // Don't redirect if we're on login or 2FA pages
+    if (location.pathname === '/login' || location.pathname === '/login/2FA' || location.pathname === '/register') {
+        return;
+    }
+    
+    if (!fairymail_session) {
+        navigate('/login');
+        return;
+    }
+    
+    try {
+        const userData = JSON.parse(decodeURIComponent(fairymail_session));
+        if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
+            localStorage.removeItem('fairymail_session');
+            navigate('/login');
+        }
+    } catch (error) {
+        console.error("Error parsing session data:", error);
+        localStorage.removeItem('fairymail_session');
+        navigate('/login');
+    }
+}, [navigate, location.pathname])
+
+  return children;
+};
+
 function App() {
-	const navigate = useNavigate()
-	const location = useLocation()
-
-	useEffect(() => {
-		const fairymail_session = localStorage.getItem('fairymail_session')
-		//ckesisis fix
-		if (!fairymail_session) navigate('/login')
-		//ckesisis fix
-		if (fairymail_session) {
-			const userData = JSON.parse(decodeURIComponent(fairymail_session))
-			if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
-				localStorage.removeItem('fairymail_session')
-				navigate('/login')
-			}
-		}
-	}, [navigate])
-
-	return (
-		<div className="App">
-			<Routes>
-				<Route path="/" element={<Navigate to={localStorage.getItem('fairymail_session') ? '/dashboard' : '/login'} />} />
-				<Route path="/dashboard" element={<Dashboard />} />
-				<Route path="/login" element={<LogIn />} />
-				<Route path="/login/2FA" element={<TwoFactorLogin />} />
-				<Route path="/register" element={<User />} />
-				<Route path="/design" element={<Desing />} />
-				<Route path="/reset-password/:id" element={<ResetPassword />} />
-				<Route path="/payment-plan" element={<PaymentPlan />} />
-				<Route path="/campaigns" element={<Campaigns />} />
-				<Route path="/campaigns/new" element={<NewCampaign />} />
-				<Route path="/campaigns/edit/:uuid" element={<NewCampaign />} />
-				<Route path="/templates/edit/:uuid" element={<EditTemplate />} />
-				<Route path="/campaigns/overview/:uuid" element={<EditCampaign />} />
-				<Route path="/subscribers" element={<Subscribers />} />
-				<Route path="/subscribers/:uuid" element={<EditSubscriber />} />
-				<Route path="/subscribers/field/edit" element={<EditCustomField />} />
-				<Route path="/subscribers/field/new" element={<NewCustomField />} />
-				<Route path="/subscribers/filters/:filterString" element={<Subscribers />} />
-				<Route path="/subscribers/group/new" element={<EditGroup />} />
-				<Route path="/subscribers/group/:uuid" element={<EditGroup />} />
-				<Route path="/integrations" element={<Integrations />} />
-				<Route path="/integrations/bookfunnel/:mode?" element={<BookFunnel />} />
-				<Route path="/automations" element={<Automations />} />
-				<Route path="/automations/:autId" element={<EditAutomation />} />
-				<Route path="/automations/editor/:autId" element={<FlowEditor />} />
-				<Route path="/choose-account" element={<AccountPicker />} />
-				<Route path="/stats" element={<Dashboard />} />
-			</Routes>
-		</div>
-	)
+  return (
+    <div className="App">
+      <Routes>
+        {/* Public routes that don't require authentication */}
+        <Route path="/login" element={<LogIn />} />
+        <Route path="/login/2FA" element={<TwoFactorLogin />} />
+        <Route path="/register" element={<User />} />
+        <Route path="/reset-password/:id" element={<ResetPassword />} />
+        
+        {/* Default route - redirect based on auth status */}
+        <Route 
+          path="/" 
+          element={
+            localStorage.getItem('fairymail_session') 
+              ? <Navigate to='/dashboard' replace /> 
+              : <Navigate to='/login' replace />
+          } 
+        />
+        
+        {/* Protected routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/design" element={<ProtectedRoute><Desing /></ProtectedRoute>} />
+        <Route path="/payment-plan" element={<ProtectedRoute><PaymentPlan /></ProtectedRoute>} />
+        <Route path="/campaigns" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
+        <Route path="/campaigns/new" element={<ProtectedRoute><NewCampaign /></ProtectedRoute>} />
+        <Route path="/campaigns/edit/:uuid" element={<ProtectedRoute><NewCampaign /></ProtectedRoute>} />
+        <Route path="/templates/edit/:uuid" element={<ProtectedRoute><EditTemplate /></ProtectedRoute>} />
+        <Route path="/campaigns/overview/:uuid" element={<ProtectedRoute><EditCampaign /></ProtectedRoute>} />
+        <Route path="/subscribers" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
+        <Route path="/subscribers/:uuid" element={<ProtectedRoute><EditSubscriber /></ProtectedRoute>} />
+        <Route path="/subscribers/field/edit" element={<ProtectedRoute><EditCustomField /></ProtectedRoute>} />
+        <Route path="/subscribers/field/new" element={<ProtectedRoute><NewCustomField /></ProtectedRoute>} />
+        <Route path="/subscribers/filters/:filterString" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
+        <Route path="/subscribers/group/new" element={<ProtectedRoute><EditGroup /></ProtectedRoute>} />
+        <Route path="/subscribers/group/:uuid" element={<ProtectedRoute><EditGroup /></ProtectedRoute>} />
+        <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
+        <Route path="/integrations/bookfunnel/:mode?" element={<ProtectedRoute><BookFunnel /></ProtectedRoute>} />
+        <Route path="/automations" element={<ProtectedRoute><Automations /></ProtectedRoute>} />
+        <Route path="/automations/:autId" element={<ProtectedRoute><EditAutomation /></ProtectedRoute>} />
+        <Route path="/automations/editor/:autId" element={<ProtectedRoute><FlowEditor /></ProtectedRoute>} />
+        <Route path="/choose-account" element={<ProtectedRoute><AccountPicker /></ProtectedRoute>} />
+        <Route path="/stats" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      </Routes>
+    </div>
+  );
 }
 
-export default App
+export default App;

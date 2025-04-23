@@ -27,14 +27,19 @@ const LogIn = () => {
 	const navigate = useNavigate()
 
 	useEffect(() => {
-		if (isUserLoggedIn()) navigate('/dashboard')
-	},[])
+		// Check if user is already logged in
+		if (isUserLoggedIn()) {
+			navigate('/dashboard', { replace: true })
+		}
+	}, [navigate])
 
 	const handleRemoveNotification = (id) => {
 		setNotifications((prev) => prev.filter((n) => n.id !== id))
 	}
 
-	const checkEmail = async () => {
+	const checkEmail = async (e) => {
+		if (e) e.preventDefault()
+		
 		setIsLoading(true)
 
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -45,14 +50,38 @@ const LogIn = () => {
 			return
 		}
 
-		const respone = await checkUserExists(email)
-		console.log(respone)
-		respone ? setIsValidUser(true) : navigate('/register', { state: { email } })
-
-		setIsLoading(false)
+		try {
+			console.log("Checking if email exists:", email)
+			const response = await checkUserExists(email)
+			console.log("Email check response:", response)
+			
+			if (response === true) {
+				// Email exists, show password screen
+				setIsValidUser(true)
+			} else {
+				// Email doesn't exist, redirect to register
+				console.log("Email doesn't exist, redirecting to register")
+				navigate('/register', { 
+					state: { email }, 
+					replace: true 
+				})
+				return // Stop execution here to prevent setIsLoading(false)
+			}
+		} catch (error) {
+			console.error("Error checking email:", error)
+			setNotifications([{ 
+				id: Date.now(), 
+				message: 'Error checking email. Please try again.', 
+				type: 'warning' 
+			}])
+		} finally {
+			setIsLoading(false)
+		}
 	}
 
-	const checkValidPassword = async () => {
+	const checkValidPassword = async (e) => {
+		if (e) e.preventDefault()
+		
 		setIsLoading(true)
 
 		if (!password || password.length < 6) {
@@ -61,46 +90,123 @@ const LogIn = () => {
 			return
 		}
 
-		const response = await checkUserCrendentials(email, password, reCaptchaToken)
-		if (response === true) {
-			navigate('/login/2FA', { state: { email } })
-		} else {
-			console.error()
+		try {
+			console.log("Checking credentials for:", email)
+			const response = await checkUserCrendentials(email, password, reCaptchaToken)
+			console.log("Credentials check response:", response)
+			
+			if (response === true) {
+				// Credentials are valid, proceed to 2FA
+				navigate('/login/2FA', { 
+					state: { email },
+					replace: true
+				})
+			} else {
+				// Invalid credentials
+				setRefreshReCaptcha(!refreshReCaptcha)
+				setNotifications([{ 
+					id: Date.now(), 
+					message: 'Wrong Credentials.', 
+					type: 'warning' 
+				}])
+			}
+		} catch (error) {
+			console.error("Error validating password:", error)
 			setRefreshReCaptcha(!refreshReCaptcha)
-			setNotifications([{ id: 1, message: 'Wrong Crendetials.', type: 'warning' }])
+			setNotifications([{ 
+				id: Date.now(), 
+				message: 'Error validating credentials. Please try again.', 
+				type: 'warning' 
+			}])
+		} finally {
+			setIsLoading(false)
 		}
-
-		setIsLoading(false)
 	}
 
 	const resetPassword = async () => {
+		if (!email) {
+			setNotifications([{ 
+				id: Date.now(), 
+				message: 'Email is required for password reset.', 
+				type: 'warning' 
+			}])
+			return
+		}
+		
 		setIsLoading(true)
 
-		const respone = await forgotPassword(email)
-		if (respone === true) {
-			setNotifications([{ id: 1, message: `We've sent you an email with a password reset link, Please check your inbox and follow the instructions.`, type: 'default' }])
-		} else {
-			setNotifications([{ id: 1, message: `${error}`, type: 'warning' }])
+		try {
+			const response = await forgotPassword(email)
+			console.log("Password reset response:", response)
+			
+			if (response === true) {
+				setNotifications([{ 
+					id: Date.now(), 
+					message: `We've sent you an email with a password reset link. Please check your inbox and follow the instructions.`, 
+					type: 'default' 
+				}])
+			} else {
+				throw new Error("Failed to send reset email")
+			}
+		} catch (error) {
+			console.error("Error resetting password:", error)
+			setNotifications([{ 
+				id: Date.now(), 
+				message: 'Failed to send reset email. Please try again.', 
+				type: 'warning' 
+			}])
 			setRefreshReCaptcha(!refreshReCaptcha)
+		} finally {
+			setIsLoading(false)
 		}
-		setIsLoading(false)
 	}
 
 	const login = useGoogleLogin({
 		onSuccess: (tokenResponse) => googleSignIn(tokenResponse),
+		onError: (error) => {
+			console.error("Google login error:", error)
+			setNotifications([{ 
+				id: Date.now(), 
+				message: 'Google login failed. Please try again.', 
+				type: 'warning' 
+			}])
+		}
 	})
 
 	const googleSignIn = async (tokenResponse) => {
 		setIsLoading(true)
 
-		const respone = await googleLogIn(tokenResponse)
+		try {
+			console.log("Attempting Google sign in")
+			const response = await googleLogIn(tokenResponse)
+			console.log("Google sign in response:", response)
 
-		if (respone.data.code == 200) {
-			window.location.href="/dashboard"
-		} else if (respone.data.code == 201) {
-			navigate('/register', { state: { isGoogleSignIn: true, userData: respone.data.data, googleSignInToken: tokenResponse } })
+			if (response.data.code === 200) {
+				// Successfully authenticated with Google
+				window.location.href = "/dashboard"
+			} else if (response.data.code === 201) {
+				// New Google user, redirect to register
+				navigate('/register', { 
+					state: { 
+						isGoogleSignIn: true, 
+						userData: response.data.data, 
+						googleSignInToken: tokenResponse 
+					},
+					replace: true
+				})
+			} else {
+				throw new Error("Unexpected response from Google sign in")
+			}
+		} catch (error) {
+			console.error("Error during Google Sign In:", error)
+			setNotifications([{ 
+				id: Date.now(), 
+				message: 'Error during Google Sign In. Please try again.', 
+				type: 'warning' 
+			}])
+		} finally {
+			setIsLoading(false)
 		}
-		setIsLoading(false)
 	}
 
 	return (
@@ -109,9 +215,14 @@ const LogIn = () => {
 
 			<div className="login-component">
 				<div className="login-wrapper">
-					<div style={{ position: 'fixed', left: 0, right: 0, top: 0, background: 'white' }}>
+					<div style={{position:'fixed', left:0, right:0, top:0, background:'white', zIndex: 1000}}>
 						{notifications.map((notification) => (
-							<NotificationBar key={notification.id} message={notification.message} type={notification.type} onClose={() => handleRemoveNotification(notification.id)} />
+							<NotificationBar 
+								key={notification.id} 
+								message={notification.message} 
+								type={notification.type} 
+								onClose={() => handleRemoveNotification(notification.id)} 
+							/>
 						))}
 					</div>
 					<Logo />
@@ -133,25 +244,23 @@ const LogIn = () => {
 										<div className="breakpoint-or">
 											<span>or</span>
 										</div>
-										<form
-											className="email-form"
-											onSubmit={(e) => {
-												e.preventDefault()
-												checkEmail(email)
-											}}
-										>
+										<form className="email-form" onSubmit={checkEmail}>
 											<InputText
 												onChange={(e) => {
 													setEmail(e.target.value)
 													setEmailError('')
-													setIsLoading(false)
 												}}
 												placeholder="Enter your email"
 												label="Enter your email"
 												hasError={emailError.length > 0}
 												errorMessage={emailError}
+												value={email}
 											/>
-											<Button disabled={isLoading} loading={isLoading} type="submit">
+											<Button 
+												disabled={isLoading} 
+												loading={isLoading} 
+												type="submit"
+											>
 												Continue
 											</Button>
 										</form>
@@ -159,7 +268,12 @@ const LogIn = () => {
 								</>
 							) : (
 								<>
-									<Button className="back-button" onClick={() => setIsValidUser(!isValidUser)} type={'link'} icon="Caret">
+									<Button 
+										className="back-button" 
+										onClick={() => setIsValidUser(false)} 
+										type={'link'} 
+										icon="Caret"
+									>
 										Back
 									</Button>
 
@@ -171,11 +285,7 @@ const LogIn = () => {
 										</header>
 									</div>
 
-									<form
-										onSubmit={(e) => {
-											e.preventDefault()
-										}}
-									>
+									<form onSubmit={checkValidPassword}>
 										<div className="input-rows">
 											<div className="input-groups">
 												<InputText
@@ -190,6 +300,7 @@ const LogIn = () => {
 														setPassword(e.target.value)
 														setPasswordError('')
 													}}
+													value={password}
 												/>
 
 												<button
@@ -205,23 +316,18 @@ const LogIn = () => {
 
 												<p
 													className="forgot-password"
-													onClick={() => {
-														resetPassword()
-													}}
+													onClick={resetPassword}
 												>
 													Forgot Password
 												</p>
 											</div>
 										</div>
 
-										<label class="remember-me">
+										<label className="remember-me">
 											<Checkbox className="remember-me" checked={true} label="Remember Me"></Checkbox>
 										</label>
 
 										<Button
-											onClick={() => {
-												checkValidPassword()
-											}}
 											className="complete-button"
 											disabled={isLoading}
 											loading={isLoading}
