@@ -83,45 +83,42 @@ const LogIn = () => {
 		if (e) e.preventDefault()
 		
 		setIsLoading(true)
-
+	  
+		// Clear any previous error
+		setPasswordError('')
+	  
+		// First check for minimum length
 		if (!password || password.length < 6) {
-			setPasswordError('Invalid Password')
-			setIsLoading(false)
-			return
+		  setPasswordError('Invalid Password')
+		  setIsLoading(false)
+		  return
 		}
-
+	  
 		try {
-			console.log("Checking credentials for:", email)
-			const response = await checkUserCrendentials(email, password, reCaptchaToken)
-			console.log("Credentials check response:", response)
-			
-			if (response === true) {
-				// Credentials are valid, proceed to 2FA
-				navigate('/login/2FA', { 
-					state: { email },
-					replace: true
-				})
-			} else {
-				// Invalid credentials
-				setRefreshReCaptcha(!refreshReCaptcha)
-				setNotifications([{ 
-					id: Date.now(), 
-					message: 'Wrong Credentials.', 
-					type: 'warning' 
-				}])
-			}
-		} catch (error) {
-			console.error("Error validating password:", error)
+		  console.log("Checking credentials for:", email)
+		  const response = await checkUserCrendentials(email, password, reCaptchaToken)
+		  console.log("Credentials check response:", response)
+		  
+		  if (response === true) {
+			// Credentials are valid, proceed to 2FA
+			navigate('/login/2FA', { 
+			  state: { email },
+			  replace: true
+			})
+		  } else {
+			// Show error under the input field instead of notification
+			setPasswordError('Incorrect password. Please try again.')
 			setRefreshReCaptcha(!refreshReCaptcha)
-			setNotifications([{ 
-				id: Date.now(), 
-				message: 'Error validating credentials. Please try again.', 
-				type: 'warning' 
-			}])
+		  }
+		} catch (error) {
+		  console.error("Error validating password:", error)
+		  // Show error under the input field
+		  setPasswordError('Error validating credentials. Please try again.')
+		  setRefreshReCaptcha(!refreshReCaptcha)
 		} finally {
-			setIsLoading(false)
+		  setIsLoading(false)
 		}
-	}
+	  }
 
 	const resetPassword = async () => {
 		if (!email) {
