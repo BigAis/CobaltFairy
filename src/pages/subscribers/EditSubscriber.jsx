@@ -10,6 +10,8 @@ import Card from '../../components/Card'
 import InputText from '../../components/InputText/InputText'
 import Button from '../../components/Button'
 import PopupText from '../../components/PopupText/PopupText'
+import DatePicker from '../../components/DatePicker'
+import dayjs from 'dayjs'
 
 const EditSubscriber = () => {
 	const { uuid } = useParams()
@@ -22,7 +24,15 @@ const EditSubscriber = () => {
 			try {
 				const response = await ApiService.get(`fairymailer/getSubscribers/?filters[udid]=${uuid}&populate=*`, user.jwt)
 				console.log('Subscriber is : ', response)
-				if (response && response.data && response.data.data) setSubscriber(response.data.data[0])
+				if (response && response.data && response.data.data) {
+					const subscriberData = response.data.data[0]
+
+					if (!subscriberData.fields && account && account.fields) {
+						subscriberData.fields = []
+					}
+
+					setSubscriber(subscriberData)
+				}
 			} catch (error) {
 				console.error('Error fetching subscriber:', error)
 			}
@@ -66,9 +76,123 @@ const EditSubscriber = () => {
 		})
 	}
 
+	const handleCustomFieldChange = (fieldUuid, value) => {
+		setSubscriber((prevState) => {
+			const existingFields = prevState.fields || []
+			const fieldIndex = existingFields.findIndex((field) => field.uuid === fieldUuid)
+
+			const updatedFields = [...existingFields]
+			if (fieldIndex !== -1) {
+				updatedFields[fieldIndex] = { ...updatedFields[fieldIndex], value }
+			} else {
+				updatedFields.push({ uuid: fieldUuid, value })
+			}
+
+			return {
+				...prevState,
+				fields: updatedFields,
+			}
+		})
+	}
+
+	const formatDateForField = (date, format) => {
+		if (!date) return ''
+
+		let d
+		// Αν είναι ήδη αντικείμενο Date
+		if (date instanceof Date) {
+			d = date
+		} else {
+			// Προσπάθησε να μετατρέψεις το string σε Date
+			try {
+				d = new Date(date)
+			} catch (e) {
+				console.error('Invalid date format:', e)
+				return ''
+			}
+		}
+
+		// Έλεγχος εγκυρότητας
+		if (isNaN(d.getTime())) {
+			console.error('Invalid date')
+			return ''
+		}
+
+		const year = d.getFullYear()
+		const month = String(d.getMonth() + 1).padStart(2, '0')
+		const day = String(d.getDate()).padStart(2, '0')
+
+		// Εφαρμογή του format
+		let formatted = format || 'Y-m-d'
+		formatted = formatted.replace('YYYY', year).replace('Y', year)
+		formatted = formatted.replace('MM', month).replace('m', month)
+		formatted = formatted.replace('DD', day).replace('d', day)
+
+		return formatted
+	}
+
 	// if (!subscriber) {
 	// 	return <div>Loading...</div>
 	// }
+
+	const getDateFormat = (format) => {
+		if (format === 'YYYY/MM/DD') {
+			return 'Y/m/d'
+		} else if (format === 'YYYY-DD-MM') {
+			return 'Y-d-m'
+		} else if (format === 'DD/MM/YYYY') {
+			return 'd/m/Y'
+		} else if (format === 'MM/DD/YYYY') {
+			return 'm/d/Y'
+		}
+		return 'Y/m/d'
+	}
+
+	const renderCustomFields = () => {
+		if (!account || !account.fields || account.fields.length === 0 || !subscriber) {
+			return null
+		}
+
+		console.log('Subscriber is : ', subscriber)
+		console.log('AccountFields is : ', account.fields)
+		return (
+			<>
+				{account.fields.map((field) => {
+					const fieldData = subscriber.fields?.find((f) => f.uuid === field.uuid) || { value: '' }
+					const fieldValue = fieldData.value
+
+					if (field.type.toLowerCase() === 'date') {
+						let dateValue = fieldValue
+						console.log('fieldValue is : ', fieldValue)
+						if (fieldValue && typeof fieldValue === 'string') {
+							try {
+								dateValue = dayjs(fieldValue)
+							} catch (e) {
+								console.error('Error parsing date:', e)
+							}
+						}
+
+						return (
+							<DatePicker
+								key={field.uuid}
+								label={field.name}
+								value={dateValue}
+								dateFormat={getDateFormat(field.format)}
+								timeFormat="H:i:s"
+								pickerType="date"
+								onChange={(date) => {
+									const formattedDate = dayjs(date).toISOString()
+									handleCustomFieldChange(field.uuid, formattedDate)
+								}}
+							/>
+						)
+					} else {
+						return <InputText key={field.uuid} label={field.name} value={fieldValue} onChange={(e) => handleCustomFieldChange(field.uuid, e.target.value)} />
+					}
+				})}
+			</>
+		)
+	}
 
 	return (
 		<>
@@ -93,6 +217,9 @@ const EditSubscriber = () => {
 									}))
 								}}
 							/>
+
+							{renderCustomFields()}
+
 							<p>History</p>
 							<div className="d-flex gap-20">
 								<Button type="secondary" onClick={unsubscribeSubscriber}>
