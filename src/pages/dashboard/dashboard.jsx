@@ -26,6 +26,7 @@ const Dashboard = () => {
 	const [latestCampaigns, setLatestCampaigns] = useState([{}, {}, {}, {}])
 	const [stats, setStats] = useState([])
 	const [isLoading, setIsLoading] = useState(true)
+	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   
 	// Chart data and options
 	const isPositive = true
@@ -76,6 +77,16 @@ const Dashboard = () => {
 			},
 		},
 	}
+
+	// Handle responsive layout
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth <= 768)
+		}
+		
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [])
 
 	// Improved loadStats function with retry mechanism
 	const loadStats = async () => {
@@ -218,7 +229,7 @@ const Dashboard = () => {
 							></ButtonGroup>
 						</div>
 						<div>
-							<div className="campaign-charts d-flex gap-30">
+							<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
 								{stats && (
 									<>
 										<Stat stats={stats} hasChart={true} defaultLabel={'Emails Sent'} />
@@ -230,23 +241,23 @@ const Dashboard = () => {
 							</div>
 						</div>
 					</Card>
-					<div className="dashboard-ctas">
+					<div className={`dashboard-ctas ${isMobile ? 'mobile-ctas' : ''}`}>
 						<Button type={'secondary'} onClick={()=>{navigate(`/campaigns/new`)}}>
 							<Icon name="Campaigns" />
-							Create Campaign
+							<span>Create Campaign</span>
 						</Button>
 						<Button type={'secondary'} onClick={()=>{
 							PopupText.fire({text:'Under Construction',showCancelButton:false,confirmButtonText:'OK'})
 						}}>
 							<Icon name="Contacts" />
-							Import Contacts
+							<span>Import Contacts</span>
 						</Button>
 						<Button type={'secondary'}  onClick={()=>{navigate(`/automations/new`)}}>
 							<Icon name="Automations" />
-							Create Automation
+							<span>Create Automation</span>
 						</Button>
 					</div>
-					<div className="columns-2">
+					<div className={`columns-2 ${isMobile ? 'mobile-columns' : ''}`}>
 						<Card className="subscribers-stats">
 							<div className="stats-head">
 								<span className="stats-title">Subscribers</span>
@@ -263,7 +274,7 @@ const Dashboard = () => {
 								></ButtonGroup>
 							</div>
 							<br></br>
-							<div className="campaign-charts d-flex gap-30">
+							<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
 								{subsStats && (
 									<>
 										<div>
@@ -276,7 +287,7 @@ const Dashboard = () => {
 								)}
 							</div>
 							<br></br>
-							<div style={{ height: '350px' }}>
+							<div style={{ height: isMobile ? '200px' : '350px' }}>
 								<Line data={subsChartData} options={subsChartOptions} />
 							</div>
 							<br></br>
@@ -289,7 +300,7 @@ const Dashboard = () => {
 								All Subscribers
 							</Button>
 						</Card>
-						<Card className="subscribers-stats">
+						<Card className="subscribers-stats latest-campaigns-card">
 							<div className="stats-head">
 								<span className="stats-title">Latest Campaigns</span>
 							</div>
