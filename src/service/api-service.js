@@ -3,12 +3,13 @@ import { jwtDecode } from 'jwt-decode'
 const APP_VERSION = '0.3.2'
 const BASE_URL = 'https://fairymail.cobaltfairy.com/api'
 // const BASE_URL = 'http://localhost:1337/api'
+
 export const checkUserExists = async (useremail) => {
 	try {
 		const response = await axios.post(`${BASE_URL}/check-user-exists`, { email: useremail, })
 		return response.data.exists
 	} catch (error) {
-		console.error()
+		console.error("Error checking if user exists:", error)
 		return false
 	}
 }
@@ -24,7 +25,7 @@ export const checkUserCrendentials = async (useremail, password, reCaptchaToken)
 		saveDataToLocalStorage(data)
 		return true
 	} catch (error) {
-		console.error()
+		console.error("Error checking user credentials:", error)
 		return false
 	}
 }
@@ -53,6 +54,7 @@ export const registerUser = async (user, reCaptchaToken, googleSignInToken) => {
 		console.log(response)
 		return true
 	} catch (error) {
+		console.error("Error registering user:", error)
 		return false
 	}
 }
@@ -66,16 +68,29 @@ const saveDataToLocalStorage = (response) => {
 	const serialized = encodeURIComponent(JSON.stringify(dataToStore))
 	localStorage.setItem('fairymail_session', serialized)
 
-	const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')))
+	console.log("Session data saved to localStorage")
 }
 
 const unserializeLocalStorage = () => {
-	const unserialized = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')))
-	return unserialized
+	try {
+		const serialized = localStorage.getItem('fairymail_session')
+		if (!serialized) {
+			console.error("No session data found in localStorage")
+			return null
+		}
+		return JSON.parse(decodeURIComponent(serialized))
+	} catch (error) {
+		console.error("Error unserializing localStorage:", error)
+		return null
+	}
 }
 
 export const generate2FA = async () => {
 	const fairymail_session = unserializeLocalStorage()
+	if (!fairymail_session || !fairymail_session.jwt) {
+		throw new Error("No valid session found")
+	}
+	
 	const jtwToken = fairymail_session.jwt
 	try {
 		const response = await axios.post(
@@ -89,45 +104,50 @@ export const generate2FA = async () => {
 		)
 		return response
 	} catch (error) {
-		throw new Error('Error during  request', error)
+		console.error("Error generating 2FA:", error)
+		throw new Error('Error during 2FA generation request')
 	}
 }
 
 export const verify2FA = async (code_2FA) => {
 	const fairymail_session = unserializeLocalStorage();
+	if (!fairymail_session || !fairymail_session.jwt) {
+		throw new Error("No valid session found")
+	}
+	
 	const jtwToken = fairymail_session.jwt;
 	try {
-	  const response = await axios.post(
-		`${BASE_URL}/verify-2fa`,
-		{
-		  confirmationToken: code_2FA,
-		},
-		{
-		  headers: {
-			Authorization: `Bearer ${jtwToken}`,
-		  },
-		}
-	  );
-	  
-	  // IMPORTANT: Check if the response contains updated token data
-	  // If so, update the local storage with the new session data
-	  if (response.data && response.data.jwt) {
-		const updatedSession = {
-		  jwt: response.data.jwt,
-		  user: response.data.user || fairymail_session.user
-		};
+		const response = await axios.post(
+			`${BASE_URL}/verify-2fa`,
+			{
+				confirmationToken: code_2FA,
+			},
+			{
+				headers: {
+					Authorization: `Bearer ${jtwToken}`,
+				},
+			}
+		);
 		
-		// Update localStorage with the new session
-		localStorage.setItem('fairymail_session', encodeURIComponent(JSON.stringify(updatedSession)));
-		console.log('Updated session after 2FA verification');
-	  }
-	  
-	  return response.data;
+		// IMPORTANT: Check if the response contains updated token data
+		// If so, update the local storage with the new session data
+		if (response.data && response.data.jwt) {
+			const updatedSession = {
+				jwt: response.data.jwt,
+				user: response.data.user || fairymail_session.user
+			};
+			
+			// Update localStorage with the new session
+			localStorage.setItem('fairymail_session', encodeURIComponent(JSON.stringify(updatedSession)));
+			console.log('Updated session after 2FA verification');
+		}
+		
+		return response.data;
 	} catch (error) {
-	  console.error('Error during 2FA verification:', error);
-	  throw new Error('Error during request: ' + (error.response?.data?.message || error.message));
+		console.error('Error during 2FA verification:', error);
+		throw new Error('Error during request: ' + (error.response?.data?.message || error.message));
 	}
-  };
+};
 
 export const forgotPassword = async (email) => {
 	try {
@@ -136,7 +156,7 @@ export const forgotPassword = async (email) => {
 		})
 		return true
 	} catch (error) {
-		console.error()
+		console.error("Error requesting password reset:", error)
 		return false
 	}
 }
@@ -151,7 +171,8 @@ export const googleLogIn = async (googleAccessToken) => {
 
 		return response
 	} catch (error) {
-		console.error(error)
+		console.error("Error during Google sign in:", error)
+		throw error
 	}
 }
 
@@ -160,7 +181,8 @@ export const getPaymentPlans = async () => {
 		const response = await axios.get(`${BASE_URL}/payment-plans`)
 		return response.data
 	} catch (error) {
-		console.error(error)
+		console.error("Error fetching payment plans:", error)
+		throw error
 	}
 }
 
@@ -180,15 +202,16 @@ export const isJwtTokenExpired = (jwtToken) => {
 export const isUserLoggedIn = () => {
 	const fairymail_session = localStorage.getItem('fairymail_session')
 
-	if (fairymail_session) {
-		const userData = JSON.parse(decodeURIComponent(fairymail_session))
-		if (fairymail_session == null) return false
+	if (!fairymail_session) {
+		return false
+	}
 
-		console.log(fairymail_session)
-		if (fairymail_session != null && fairymail_session.length > 0) {
-			const userData = JSON.parse(decodeURIComponent(fairymail_session))
-			if (userData.jwt && !isJwtTokenExpired(userData.jwt)) return true
-		}
+	try {
+		const userData = JSON.parse(decodeURIComponent(fairymail_session))
+		return userData && userData.jwt && !isJwtTokenExpired(userData.jwt)
+	} catch (error) {
+		console.error("Error checking if user is logged in:", error)
+		return false
 	}
 }
 
@@ -203,14 +226,41 @@ const ApiService = {
 	},
 	get: (endpoint, jwt) => {
 		const url = `${BASE_URL}/${endpoint}`
+		console.log(`Making GET request to: ${url}`)
+		
 		return axios.get(url, {
 			headers: {
 				Authorization: 'Bearer ' + jwt,
 			},
 		})
+		.then(response => {
+			console.log(`Successful response from ${endpoint}:`, response.status)
+			return response
+		})
+		.catch(error => {
+			console.error(`Error in GET request to ${endpoint}:`, error.response || error)
+			
+			// Check for specific error types
+			if (error.response) {
+				console.error(`Status: ${error.response.status}, Data:`, error.response.data)
+				
+				// Handle 401 Unauthorized errors (session might be invalid)
+				if (error.response.status === 401) {
+					console.error('Authentication error - JWT might be invalid or expired')
+				}
+			} else if (error.request) {
+				console.error('No response received from server')
+			} else {
+				console.error('Error setting up the request:', error.message)
+			}
+			
+			throw error
+		})
 	},
 	post: (endpoint, data, jwt, headers = null) => {
 		const url = `${BASE_URL}/${endpoint}`
+		console.log(`Making POST request to: ${url}`)
+		
 		return axios.post(url, data, {
 			headers: headers
 				? headers
@@ -218,11 +268,20 @@ const ApiService = {
 						Authorization: 'Bearer ' + jwt,
 				  },
 		})
+		.then(response => {
+			console.log(`Successful response from ${endpoint}:`, response.status)
+			return response
+		})
+		.catch(error => {
+			console.error(`Error in POST request to ${endpoint}:`, error.response || error)
+			throw error
+		})
 	},
 	login: (credentials) => {
 		credentials.identifier = credentials.username
 		const url = `${BASE_URL}/auth/local/`
-		console.log(url, credentials)
+		console.log(`Making login request to: ${url}`)
+		
 		return axios.post(url, credentials, {
 			headers: {
 				'Content-Type': 'application/json',

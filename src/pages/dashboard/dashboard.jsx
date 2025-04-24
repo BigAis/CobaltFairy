@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import PopupText from '../../components/PopupText/PopupText'
+
 const Dashboard = () => {
 	const navigate = useNavigate()
 	const { user, account, loading: accountLoading, dataInitialized } = useAccount()
@@ -24,8 +25,9 @@ const Dashboard = () => {
 	const [subsStatsKey, setSubsStatsKey] = useState('d7')
 	const [latestCampaigns, setLatestCampaigns] = useState([{}, {}, {}, {}])
 	const [stats, setStats] = useState([])
-	const [isLoading, setIsLoading] = useState(true) // Add component loading state
-
+	const [isLoading, setIsLoading] = useState(true)
+  
+	// Chart data and options
 	const isPositive = true
 	const subsChartData = {
 		labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -75,13 +77,13 @@ const Dashboard = () => {
 		},
 	}
 
+	// Improved loadStats function with retry mechanism
 	const loadStats = async () => {
 		if (!user || !user.jwt || !account) {
 		  console.log('User or account data not available, skipping stats load');
 		  return;
 		}
 		
-		// Add explicit retry mechanism for post-2FA loading
 		let retries = 0;
 		const maxRetries = 3;
 		
@@ -124,7 +126,8 @@ const Dashboard = () => {
 		}
 		
 		setIsLoading(false);
-	  };
+	};
+
 	const createStatsMetrics = () => {
 		let key = statsKey
 		if (!key || !statsData || !statsData[key]) return
@@ -136,6 +139,7 @@ const Dashboard = () => {
 		console.log('stats data', data)
 		setStats(data)
 	}
+	
 	const createSubsStatsMetrics = () => {
 		let key = statsKey
 		if (!key || !statsData || !statsData[key]) {
@@ -148,9 +152,11 @@ const Dashboard = () => {
 		setSubsStats(data)
 		console.log(data)
 	}
+	
 	useEffect(() => {
 		createStatsMetrics()
 	}, [statsData, statsKey])
+	
 	useEffect(() => {
 		createSubsStatsMetrics()
 	}, [statsData, subsStatsKey])
@@ -158,14 +164,14 @@ const Dashboard = () => {
 	useEffect(() => {
 		// Only load stats when account is fully initialized and not in loading state
 		if (user && account && dataInitialized && !accountLoading) {
-			console.log('Account initialized, loading stats')
-			loadStats()
+			console.log('Account initialized, loading stats');
+			loadStats();
 		} else {
-			console.log('Waiting for account data initialization')
+			console.log('Waiting for account data initialization');
 		}
-	}, [user, account, dataInitialized, accountLoading])
+	}, [user, account, dataInitialized, accountLoading]);
 
-	// Add loading UI state rendering
+	// Loading state UI
 	if (accountLoading || isLoading) {
 		return (
 			<div className="dashboard-wrapper">

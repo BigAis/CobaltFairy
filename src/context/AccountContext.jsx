@@ -56,49 +56,10 @@ export const AccountProvider = ({ children }) => {
 			
 			await attemptGetAccount();
 			setLoading(false);
-		  };
-		  
-		  // 5. Add debug code to help identify API issues in the ApiService.get method
-		  
-		  get: (endpoint, jwt) => {
-			const url = `${BASE_URL}/${endpoint}`;
-			console.log(`Making GET request to: ${url}`);
-			
-			return axios.get(url, {
-			  headers: {
-				Authorization: 'Bearer ' + jwt,
-			  },
-			})
-			.then(response => {
-			  console.log(`Successful response from ${endpoint}:`, response.status);
-			  return response;
-			})
-			.catch(error => {
-			  console.error(`Error in GET request to ${endpoint}:`, error.response || error);
-			  
-			  // Check for specific error types
-			  if (error.response) {
-				// The request was made and the server responded with a status code
-				// that falls out of the range of 2xx
-				console.error(`Status: ${error.response.status}, Data:`, error.response.data);
-				
-				// Handle 401 Unauthorized errors (session might be invalid)
-				if (error.response.status === 401) {
-				  console.error('Authentication error - JWT might be invalid or expired');
-				}
-			  } else if (error.request) {
-				// The request was made but no response was received
-				console.error('No response received from server');
-			  } else {
-				// Something happened in setting up the request that triggered an Error
-				console.error('Error setting up the request:', error.message);
-			  }
-			  
-			  throw error;
-			});
-		  },
-		getAccount()
-	}, [user, userLoading]) // Add userLoading as dependency
+		};
+		
+		getAccount();
+	}, [user, userLoading]); // Add userLoading as dependency
 
 	return <AccountContext.Provider value={{ user, account, loading, error, dataInitialized, setAccount }}>{children}</AccountContext.Provider>
 }
