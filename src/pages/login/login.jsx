@@ -29,6 +29,7 @@ const LogIn = () => {
 	useEffect(() => {
 		// Check if user is already logged in
 		if (isUserLoggedIn()) {
+			console.log('User already logged in, redirecting to dashboard')
 			navigate('/dashboard', { replace: true })
 		}
 	}, [navigate])
@@ -100,7 +101,7 @@ const LogIn = () => {
 		  console.log("Credentials check response:", response)
 		  
 		  if (response === true) {
-			// Credentials are valid, proceed to 2FA
+			// Credentials are valid, proceed to 2FA using React Router navigation
 			navigate('/login/2FA', { 
 			  state: { email },
 			  replace: true
@@ -118,7 +119,7 @@ const LogIn = () => {
 		} finally {
 		  setIsLoading(false)
 		}
-	  }
+	}
 
 	const resetPassword = async () => {
 		if (!email) {
@@ -179,8 +180,8 @@ const LogIn = () => {
 			console.log("Google sign in response:", response)
 
 			if (response.data.code === 200) {
-				// Successfully authenticated with Google
-				window.location.href = "/dashboard"
+				// Successfully authenticated with Google - use React Router navigation instead of page reload
+				navigate('/dashboard', { replace: true })
 			} else if (response.data.code === 201) {
 				// New Google user, redirect to register
 				navigate('/register', { 

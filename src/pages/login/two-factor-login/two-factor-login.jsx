@@ -83,7 +83,7 @@ const TwoFactorLogin = () => {
     }
   };
 
-  // The key function where the issue likely is
+  // Modified submit handler to force a page reload to ensure correct context initialization
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     
@@ -103,13 +103,9 @@ const TwoFactorLogin = () => {
         throw new Error("Incorrect verification code");
       }
       
-      // Only navigate to dashboard if verification was successful
-      if (form != null && form.length > 0) {
-        await registerUser();
-      } else {
-        // Successfully verified, now navigate to dashboard
-        navigate("/dashboard", { replace: true });
-      }
+      // Force a page reload to ensure contexts are properly initialized
+      window.location.href = "/dashboard";
+      
     } catch (error) {
       console.error("Verification error:", error);
       setNotifications([{ 
@@ -117,7 +113,6 @@ const TwoFactorLogin = () => {
         message: error.message || 'Verification failed', 
         type: 'warning' 
       }]);
-    } finally {
       setIsLoading(false);
     }
   };

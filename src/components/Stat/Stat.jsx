@@ -19,6 +19,7 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 	const defaultOption = stats.find((stat) => stat.label === defaultLabel) || stats[0]
 	const [selectedOption, setSelectedOption] = useState(defaultOption)
 	const [isOpen, setIsOpen] = useState(false)
+	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
 	const isPositive = selectedOption && selectedOption.percentage > 0
 
@@ -94,19 +95,31 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 			},
 		},
 	}
-	useEffect(()=>{
+	
+	// Handle responsive layout
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth <= 768)
+		}
+		
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [])
+	
+	useEffect(() => {
 		for(const ss of stats){
 			if(ss.label===defaultLabel){
 				setSelectedOption(ss)
 			}
 		}
 	},[stats])
+	
 	return (
 		<div className={computedClassName}>
 			<div className="stat-select" onClick={toggleDropdown}>
 				<span className="stat-selected-option">{selectedOption?.label}</span>
 				<span className="arrow">
-					<Icon name="ArrowDown" size={24} />
+					<Icon name="ArrowDown" size={isMobile ? 16 : 24} />
 				</span>
 			</div>
 
@@ -121,16 +134,21 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 			)}
 
 			<div>
-				{selectedOption &&  parseFloat(selectedOption.value)>=0 ? (<p className="stat-value">{formatNumber(selectedOption.value)}</p>) : (<Skeleton style={{minHeight:'40px'}}/>)}
+				{selectedOption && parseFloat(selectedOption.value)>=0 ? 
+					(<p className="stat-value">{formatNumber(selectedOption.value)}</p>) : 
+					(<Skeleton style={{minHeight: isMobile ? '30px' : '40px'}}/>)
+				}
 			</div>
 			{hasChart && (
 				<div>
-					<div style={{ height: '70px' }}>
+					<div style={{ height: isMobile ? '50px' : '70px' }}>
 						<Line data={chartData} options={chartOptions} />
 					</div>
 
-					{selectedOption && selectedOption.value ? (<p style={{ color: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)' }} className="stat-percentage"> {selectedOption.percentage}% </p>) : (<></>)}
-					
+					{selectedOption && selectedOption.value ? 
+						(<p style={{ color: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)' }} className="stat-percentage"> {selectedOption.percentage}% </p>) : 
+						(<></>)
+					}
 				</div>
 			)}
 		</div>

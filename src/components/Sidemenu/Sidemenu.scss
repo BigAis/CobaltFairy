@@ -9,6 +9,8 @@
     padding: 1em 0;
     justify-content: space-between;
     padding-bottom:3em;
+    position: relative;
+    z-index: 100;
 
     .sidemenu-inner{
         width: 265px;
@@ -19,47 +21,56 @@
         padding: 1em 0;
         justify-content: space-between;
         padding-bottom:3em;
+        position: relative;
+        
         .menu_upper, .menu_lower{
-        padding:0 2em;
-        min-width:220px;
-        text-align: left;
+            padding:0 2em;
+            min-width:220px;
+            text-align: left;
 
-        ul{
-            list-style: none;
-            padding:0;
-            li{
-                font-family: 'Bitter';
-                color:#343037;
-                display: flex;
-                align-items: center;
-                margin-bottom:20px;
-                font-weight: 600;
-                font-size: 18px;;
-            }
-            svg {
-                margin-right:10px;
-                path {
-                    fill: #343037;
+            ul{
+                list-style: none;
+                padding:0;
+                li{
+                    font-family: 'Bitter';
+                    color:#343037;
+                    display: flex;
+                    align-items: center;
+                    margin-bottom:20px;
+                    font-weight: 600;
+                    font-size: 18px;
+                    border-radius: 8px;
+                    padding: 8px 12px;
+                    transition: background-color 0.2s ease;
                 }
-            }
+                svg {
+                    margin-right:10px;
+                    path {
+                        fill: #343037;
+                    }
+                }
 
-            li:hover, li.active{
-                color: rgba(255, 76, 73, 1);;
-                cursor:pointer;
-                svg path {
-                    fill:  rgba(255, 76, 73, 1);
+                li:hover, li.active{
+                    color: rgba(255, 76, 73, 1);
+                    cursor:pointer;
+                    background-color: rgba(255, 255, 255, 0.7);
+                    svg path {
+                        fill: rgba(255, 76, 73, 1);
+                    }
                 }
             }
         }
-    }
 
-    .menu_upper li[disabled], .menu_lower li[disabled] {
-        opacity: .4;
-        pointer-events: none;
-        cursor: not-allowed;
-    }
-    .menu_bottom {
-        padding: 0 .5em;
+        .menu_upper li[disabled], .menu_lower li[disabled] {
+            opacity: .4;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+        
+        .menu_bottom {
+            padding: 0 1em;
+            width: 90%;
+        }
     }
 
     @media (max-width: 768px) {
@@ -67,61 +78,104 @@
         top: 0;
         left: 0;
         width: 100%;
-        height: auto;
+        height: 60px;
         min-height: unset;
-        background: rgba(255, 255, 255,1);
+        background: rgba(255, 255, 255, 1);
         border-bottom: 2px solid rgba(218, 209, 197, 1);
+        border-right: none;
         display: flex;
         flex-direction: row;
         align-items: center;
-        padding: 0.5em 1em;
+        padding: 0;
         justify-content: space-between;
         z-index: 1000;
+        transition: height 0.3s ease;
 
+        .sidemenu-inner {
+            width: 100%;
+            height: auto;
+            flex-direction: row;
+            align-items: center;
+            padding: 0 1em;
+            justify-content: space-between;
 
-        .fairymail-logo-container {
-            display: flex;
-            justify-content: center;  
-            align-items: center;     
-            flex-grow: 1;            
-            text-align: center;
-        }
+            .fairymail-logo-container {
+                display: flex;
+                justify-content: center;  
+                align-items: center;     
+                flex-grow: 1;            
+                text-align: center;
+            }
 
-        .menu_upper, .menu_lower {
-            display: none;
-        }
+            .mobile-title {
+                font-family: 'Bitter';
+                font-weight: 600;
+                font-size: 20px;
+                flex-grow: 1;
+                text-align: center;
+                color: #343037;
+            }
 
-        
-        .menu_bottom {
-            display: none;
+            .menu_upper, .menu_lower, .menu_bottom {
+                display: none;
+            }
+
+            .menu-toggle {
+                background: none;
+                border: none;
+                font-size: 24px;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 1001;
+                color: #343037;
+                padding: 0;
+                
+                .menu-icon {
+                    font-size: 24px;
+                    line-height: 1;
+                }
+            }
         }
 
         &.open {
-            flex-direction: column;
-            height: auto;
-            position: absolute;
-            background: (255, 255, 255, 1);
-            width: 100%;
-            padding-bottom: 1em;
-
-            .menu_upper, .menu_lower, .menu_bottom {
-                display: block;
-            }
-
-            .fairymail-logo-container {
-                display: none; 
+            height: 100vh;
+            overflow-y: auto;
+            background: #FFF8EF;
+            
+            .sidemenu-inner {
+                flex-direction: column;
+                height: 100%;
+                padding: 1em;
+                
+                .fairymail-logo-container {
+                    margin: 20px 0;
+                }
+                
+                .menu_upper, .menu_lower, .menu_bottom {
+                    display: block;
+                    margin-top: 30px;
+                }
+                
+                .menu_bottom {
+                    margin-top: auto;
+                    margin-bottom: 20px;
+                    width: 80%;
+                }
             }
         }
-
-        .menu-toggle {
-            font-size: 24px;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
     }
-    }
+}
 
-
-    
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
 }

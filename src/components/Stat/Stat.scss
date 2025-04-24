@@ -1,6 +1,12 @@
 .stat-wrapper {
 	position: relative;
+	
+	@media (max-width: 768px) {
+		width: 100%;
+		margin-bottom: 10px;
+	}
 }
+
 .stat-select {
 	display: flex;
 	justify-content: space-between;
@@ -14,18 +20,34 @@
 		line-height: 16.94px;
 		text-wrap: nowrap;
 	}
+	
+	@media (max-width: 768px) {
+		padding: 5px 0;
+		
+		.stat-selected-option {
+			font-size: 13px;
+		}
+	}
 }
 
 .stat-menu {
 	position: absolute;
-	left: 100%;
+	left: 0;
+	top: 100%;
 	background-color: #fff;
 	border: 2px solid rgba(218, 209, 197, 1);
 	border-radius: 8px;
 	z-index: 10;
 	margin-top: 5px;
-	padding: 26px;
+	padding: 10px 20px;
 	text-align: left;
+	min-width: 180px;
+	
+	@media (max-width: 768px) {
+		width: 100%;
+		left: 0;
+	}
+	
 	.stat-option {
 		padding: 10px;
 		cursor: pointer;
@@ -38,6 +60,11 @@
 		&:hover {
 			color: rgba(255, 76, 73, 1);
 		}
+		
+		@media (max-width: 768px) {
+			font-size: 16px;
+			padding: 8px;
+		}
 	}
 }
 
@@ -47,10 +74,21 @@
 	font-weight: 600;
 	line-height: 38.73px;
 	text-align: left;
+	
+	@media (max-width: 768px) {
+		font-size: 26px;
+		line-height: 30px;
+		margin: 5px 0;
+	}
 }
+
 .stat-percentage {
 	text-align: left;
-	// color: rgba(96, 199, 0, 1);
 	font-size: 16px;
 	font-weight: 500;
+	
+	@media (max-width: 768px) {
+		font-size: 14px;
+		margin: 2px 0;
+	}
 }

@@ -9,13 +9,32 @@
 		line-height: 39px;
 		text-align: left;
 		margin: 1em 0;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		
+		@media (max-width: 768px) {
+			margin-top: 70px; /* Add space for the fixed mobile menu */
+			font-size: 24px;
+			line-height: 30px;
+			padding: 0 1em;
+		}
 	}
 	.fm-page-wrapper {
 		display: flex;
+		
+		@media (max-width: 768px) {
+			flex-direction: column;
+		}
+		
 		.fm-page-container {
 			padding: 3em;
 			width: 100%;
-		
+			
+			@media (max-width: 768px) {
+				padding: 1em;
+			}
 		}
 	}	
 	
@@ -23,6 +42,11 @@
 		width: 100%;
 		display: flex;
 		justify-content: space-between;
+		
+		@media (max-width: 768px) {
+			flex-direction: column;
+			padding: 0 1em;
+		}
 
 		.account-info-card {
 			padding: 1em;
@@ -31,12 +55,23 @@
 			align-items: center;
 			display: flex;
 			break-inside: avoid-column;
+			
+			@media (max-width: 768px) {
+				margin-bottom: 1em;
+				width: 100%;
+			}
+			
 			.account-info {
 				display: flex;
 				min-width: 200px;
 				text-align: left;
 				justify-content: space-between;
 				align-items: center;
+				
+				@media (max-width: 768px) {
+					width: 100%;
+				}
+				
 				h4 {
 					font-size: 16px;
 					font-weight: 500;
@@ -62,7 +97,13 @@
 			align-items: center;
 			justify-content: space-between;
 			min-width: 270px;
-			cursor: pointer;;
+			cursor: pointer;
+			position: relative;
+			
+			@media (max-width: 768px) {
+				width: 100%;
+			}
+			
 			svg {
 				transform: rotate(90deg);
 				path {
@@ -93,15 +134,41 @@
 			}
 			.user-menu{
 				position: absolute;
-				right:50px;
-				top:110px;
-				padding:0.5em;
+				right: 0;
+				top: 60px;
+				padding: 0.5em;
 				min-width: 180px;
-				.user-menu-option:hover{
-					color:#FF4D4A;
+				z-index: 1000;
+				
+				.user-menu-option {
+					padding: 10px;
+					cursor: pointer;
+					
+					&:hover{
+						color: #FF4D4A;
+					}
 				}
 			}
 		}
+	}
+	
+	/* Adjust for mobile layout */
+	@media (max-width: 768px) {
+		.dashboard-container,
+		.fm-page-container {
+			padding-top: 70px !important; /* Ensure content doesn't hide under fixed mobile header */
+		}
 		
+		.filters-container {
+			padding: 0 1em;
+		}
+		
+		.card {
+			margin-bottom: 1em;
+		}
+		
+		.btn {
+			margin-bottom: 0.5em;
+		}
 	}
 }

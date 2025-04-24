@@ -40,6 +40,7 @@ const NewCampaign = () => {
 	const location = useLocation()
 
 	const [isEdit, setIsEdit] = useState(false)
+	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
 	const [currentCampaign, setCurrentCampaign] = useState({
 		name: '',
@@ -90,6 +91,45 @@ const NewCampaign = () => {
 					{ label: 'Was Clicked', value: 'ocmp' },
 					{ label: 'Was Not Clicked', value: 'link' },
 			  ]
+
+	// Add mobile detection
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth <= 768)
+		}
+
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [])
+
+	// Handle mobile restrictions
+	useEffect(() => {
+		if (isMobile) {
+			// For campaign creation on mobile
+			if (step === 3) {
+				PopupText.fire({
+					icon: 'warning',
+					text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
+					showCancelButton: false,
+					confirmButtonText: 'OK',
+				}).then(() => {
+					setStep(4) // Skip to next step
+				})
+			}
+			
+			// For editing draft campaigns on mobile
+			if (isEdit && currentCampaign && currentCampaign.status === 'draft') {
+				PopupText.fire({
+					icon: 'warning',
+					text: 'Draft campaigns cannot be edited on mobile devices. Please use a desktop to edit your campaign.',
+					showCancelButton: false,
+					confirmButtonText: 'OK',
+				}).then(() => {
+					navigate('/campaigns')
+				})
+			}
+		}
+	}, [isMobile, step, isEdit, currentCampaign, navigate])
 
 	//Validation for the first step
 	const validationSchema = Yup.object().shape({
@@ -263,8 +303,12 @@ const NewCampaign = () => {
 				const response = await ApiService.post('fairymailer/updateCampaign', { assignses: true, data: campaignData }, user.jwt)
 				console.log('response is : ', response)
 				if (response && response.data && response.data.code === 200) {
-					navigate(`/campaigns/edit/${campaignData.udid}`)
-					setStep(step + 1)
+					if (isMobile) {
+						setStep(4) // Skip the editor step on mobile
+					} else {
+						navigate(`/campaigns/edit/${campaignData.udid}`)
+						setStep(step + 1)
+					}
 				}
 			} else {
 				campaignData.udid = uuidv4()
@@ -273,8 +317,12 @@ const NewCampaign = () => {
 				const response = await ApiService.post('fairymailer/createCampaign', { assignses: true, data: campaignData }, user.jwt)
 				console.log('response is : ', response)
 				if (response && response.data && response.data.code === 200) {
-					navigate(`/campaigns/edit/${campaignData.udid}`)
-					setStep(step + 1)
+					if (isMobile) {
+						setStep(4) // Skip the editor step on mobile
+					} else {
+						navigate(`/campaigns/edit/${campaignData.udid}`)
+						setStep(step + 1)
+					}
 				}
 			}
 		} catch (err) {
@@ -286,6 +334,7 @@ const NewCampaign = () => {
 			setErrors(newErrors)
 		}
 	}
+
 
 	const handleCheckAbSplit = () => {
 		setAbSplit(!abSplit)

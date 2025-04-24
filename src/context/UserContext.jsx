@@ -12,11 +12,12 @@ export const UserProvider = ({ children }) => {
 
 	useEffect(() => {
 		const getUser = async () => {
+			setLoading(true) // Ensure loading is true
 			try {
-				const user = User.get()
-				// console.log('user from the context is : ', user)
-				setUser(user)
+				const userData = User.get()
+				setUser(userData)
 			} catch (error) {
+				console.error('Error loading user data:', error)
 				setError(error)
 			} finally {
 				setLoading(false)
@@ -26,5 +27,5 @@ export const UserProvider = ({ children }) => {
 		getUser()
 	}, [])
 
-	return <UserContext.Provider value={{ user, loading, error }}>{children}</UserContext.Provider>
+	return <UserContext.Provider value={{ user, loading: loading, userLoading: loading, error }}>{children}</UserContext.Provider>
 }

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAccount } from '../../context/AccountContext'
 import PopupText from '../../components/PopupText/PopupText'
 
-const getNameInitials = (name) =>{
+const getNameInitials = (name) => {
 	if(!name) return "";
 	return name
 		.split(' ')
@@ -19,8 +19,20 @@ const PageHeader = () => {
 	const [userMenuOpen, setUserMenuOpen] = useState(false);
 	const userMenuOptions = [
 		{
+			label:'Profile',
+			callback: () => {
+				setUserMenuOpen(false);
+			}
+		},
+		{
+			label:'Change Password',
+			callback: () => {
+				setUserMenuOpen(false);
+			}
+		},
+		{
 			label:'Sign out',
-			callback: async ()=>{
+			callback: async () => {
 				const result = await PopupText.fire({
 					icon: 'question',
 					text: 'Are you sure you want to sign out?',
@@ -39,7 +51,7 @@ const PageHeader = () => {
 		}
 	]
 	return (
-		<div className="fm-page-head" onClick={()=>{setUserMenuOpen(false)}}>
+		<div className="fm-page-head" onClick={() => {setUserMenuOpen(false)}}>
 			<Card className="account-info-card">
 				<div
 					className="account-info"
@@ -54,8 +66,8 @@ const PageHeader = () => {
 					<Icon name="Caret" size={16} />
 				</div>
 			</Card>
-			<div className="user-info" onClick={(e)=>{setUserMenuOpen(true);e.stopPropagation()}}>
-				<Card style={{marginRight:'20px', cursor:'pointer'}} onClick={()=>{}}>{getNameInitials(user?.user?.name)}</Card>
+			<div className="user-info" onClick={(e) => {setUserMenuOpen(true); e.stopPropagation()}}>
+				<Card style={{marginRight:'20px', cursor:'pointer'}}>{getNameInitials(user?.user?.name)}</Card>
 				<div className="user">
 					<h4>{user?.user?.name}</h4>
 					<span>{user?.user?.email}</span>

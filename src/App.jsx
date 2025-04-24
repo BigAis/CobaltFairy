@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { ApiService, isJwtTokenExpired } from './service/api-service'
 import Dashboard from './pages/dashboard/dashboard'
 import LogIn from './pages/login/login'
@@ -28,40 +28,54 @@ import NewCustomField from './pages/subscribers/NewCustomField'
 const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-// src/App.jsx
-// Find and update the useEffect hook that checks for authentication:
-
-// src/App.jsx
-// Update the authentication useEffect:
-
-useEffect(() => {
-    const fairymail_session = localStorage.getItem('fairymail_session');
-    
-    // Don't redirect if we're on login or 2FA pages
-    if (location.pathname === '/login' || location.pathname === '/login/2FA' || location.pathname === '/register') {
+  useEffect(() => {
+    const checkAuthentication = () => {
+      const fairymail_session = localStorage.getItem('fairymail_session');
+      
+      // Don't redirect if we're on login or 2FA pages
+      if (location.pathname === '/login' || location.pathname === '/login/2FA' || location.pathname === '/register') {
+        setIsCheckingAuth(false);
         return;
-    }
-    
-    if (!fairymail_session) {
-        navigate('/login');
+      }
+      
+      if (!fairymail_session) {
+        console.log('No session found, redirecting to login');
+        navigate('/login', { replace: true });
+        setIsCheckingAuth(false);
         return;
-    }
-    
-    try {
+      }
+      
+      try {
         const userData = JSON.parse(decodeURIComponent(fairymail_session));
         if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
-            localStorage.removeItem('fairymail_session');
-            navigate('/login');
+          console.log('JWT token expired or invalid, redirecting to login');
+          localStorage.removeItem('fairymail_session');
+          navigate('/login', { replace: true });
+        } else {
+          console.log('Valid session found');
+          setIsAuthenticated(true);
         }
-    } catch (error) {
+      } catch (error) {
         console.error("Error parsing session data:", error);
         localStorage.removeItem('fairymail_session');
-        navigate('/login');
-    }
-}, [navigate, location.pathname])
+        navigate('/login', { replace: true });
+      }
+      
+      setIsCheckingAuth(false);
+    };
 
-  return children;
+    checkAuthentication();
+  }, [navigate, location.pathname]);
+
+  if (isCheckingAuth) {
+    // Show loading state while checking authentication
+    return <div>Checking authentication...</div>;
+  }
+
+  return isAuthenticated ? children : null;
 };
 
 function App() {

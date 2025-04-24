@@ -15,16 +15,20 @@ import { useNavigate } from 'react-router-dom'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import PopupText from '../../components/PopupText/PopupText'
+
 const Dashboard = () => {
 	const navigate = useNavigate()
-	const { user, account, loading, error } = useAccount()
+	const { user, account, loading: accountLoading, dataInitialized } = useAccount()
 	const [statsData, setStatsData] = useState({})
 	const [statsKey, setStatsKey] = useState('d7')
 	const [subsStats, setSubsStats] = useState(null)
 	const [subsStatsKey, setSubsStatsKey] = useState('d7')
 	const [latestCampaigns, setLatestCampaigns] = useState([{}, {}, {}, {}])
 	const [stats, setStats] = useState([])
-
+	const [isLoading, setIsLoading] = useState(true)
+	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  
+	// Chart data and options
 	const isPositive = true
 	const subsChartData = {
 		labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -74,17 +78,67 @@ const Dashboard = () => {
 		},
 	}
 
+	// Handle responsive layout
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth <= 768)
+		}
+		
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [])
+
+	// Improved loadStats function with retry mechanism
 	const loadStats = async () => {
-		if (!user) return
-		let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt)
-		console.log('stats', stats.data)
-		setStatsData(stats.data)
-		let resp = await ApiService.get(
-			`fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
-			user.jwt
-		)
-		// setLatestCampaigns(resp.data.data)
-	}
+		if (!user || !user.jwt || !account) {
+		  console.log('User or account data not available, skipping stats load');
+		  return;
+		}
+		
+		let retries = 0;
+		const maxRetries = 3;
+		
+		setIsLoading(true);
+		
+		const attemptLoadStats = async () => {
+		  try {
+			console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`);
+			let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt);
+			console.log('Stats loaded successfully:', stats.data);
+			setStatsData(stats.data);
+			
+			let resp = await ApiService.get(
+			  `fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
+			  user.jwt
+			);
+			console.log('Campaigns loaded:', resp.data);
+			if (resp.data && resp.data.data) {
+			  setLatestCampaigns(resp.data.data);
+			}
+			return true; // Success
+		  } catch (error) {
+			console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error);
+			retries++;
+			
+			if (retries < maxRetries) {
+			  console.log(`Retrying in 1 second... (${retries}/${maxRetries})`);
+			  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+			  return await attemptLoadStats(); // Recursively retry
+			}
+			return false; // Failed after max retries
+		  }
+		};
+		
+		const success = await attemptLoadStats();
+		
+		if (!success) {
+		  console.error('Failed to load dashboard data after multiple attempts');
+		  // You could show an error message to the user here
+		}
+		
+		setIsLoading(false);
+	};
+
 	const createStatsMetrics = () => {
 		let key = statsKey
 		if (!key || !statsData || !statsData[key]) return
@@ -96,6 +150,7 @@ const Dashboard = () => {
 		console.log('stats data', data)
 		setStats(data)
 	}
+	
 	const createSubsStatsMetrics = () => {
 		let key = statsKey
 		if (!key || !statsData || !statsData[key]) {
@@ -108,18 +163,45 @@ const Dashboard = () => {
 		setSubsStats(data)
 		console.log(data)
 	}
+	
 	useEffect(() => {
 		createStatsMetrics()
 	}, [statsData, statsKey])
+	
 	useEffect(() => {
 		createSubsStatsMetrics()
 	}, [statsData, subsStatsKey])
 
 	useEffect(() => {
-		if (user && account) {
-			loadStats()
+		// Only load stats when account is fully initialized and not in loading state
+		if (user && account && dataInitialized && !accountLoading) {
+			console.log('Account initialized, loading stats');
+			loadStats();
+		} else {
+			console.log('Waiting for account data initialization');
 		}
-	}, [user, account])
+	}, [user, account, dataInitialized, accountLoading]);
+
+	// Loading state UI
+	if (accountLoading || isLoading) {
+		return (
+			<div className="dashboard-wrapper">
+				<Sidemenu />
+				<div className="dashboard-container">
+					<PageHeader />
+					<div className="page-name-container">
+						<div className="page-name">Dashboard <small style={{fontSize:'14px',letterSpacing: '.2em'}}>v{APP_VERSION}</small></div>
+					</div>
+					<Card className="dashboard-stats">
+						<div style={{ textAlign: 'center', padding: '20px' }}>
+							<p>Loading dashboard data...</p>
+							{/* You could add a spinner here */}
+						</div>
+					</Card>
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<>
@@ -147,7 +229,7 @@ const Dashboard = () => {
 							></ButtonGroup>
 						</div>
 						<div>
-							<div className="campaign-charts d-flex gap-30">
+							<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
 								{stats && (
 									<>
 										<Stat stats={stats} hasChart={true} defaultLabel={'Emails Sent'} />
@@ -159,23 +241,23 @@ const Dashboard = () => {
 							</div>
 						</div>
 					</Card>
-					<div className="dashboard-ctas">
+					<div className={`dashboard-ctas ${isMobile ? 'mobile-ctas' : ''}`}>
 						<Button type={'secondary'} onClick={()=>{navigate(`/campaigns/new`)}}>
 							<Icon name="Campaigns" />
-							Create Campaign
+							<span>Create Campaign</span>
 						</Button>
 						<Button type={'secondary'} onClick={()=>{
 							PopupText.fire({text:'Under Construction',showCancelButton:false,confirmButtonText:'OK'})
 						}}>
 							<Icon name="Contacts" />
-							Import Contacts
+							<span>Import Contacts</span>
 						</Button>
 						<Button type={'secondary'}  onClick={()=>{navigate(`/automations/new`)}}>
 							<Icon name="Automations" />
-							Create Automation
+							<span>Create Automation</span>
 						</Button>
 					</div>
-					<div className="columns-2">
+					<div className={`columns-2 ${isMobile ? 'mobile-columns' : ''}`}>
 						<Card className="subscribers-stats">
 							<div className="stats-head">
 								<span className="stats-title">Subscribers</span>
@@ -192,7 +274,7 @@ const Dashboard = () => {
 								></ButtonGroup>
 							</div>
 							<br></br>
-							<div className="campaign-charts d-flex gap-30">
+							<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
 								{subsStats && (
 									<>
 										<div>
@@ -205,7 +287,7 @@ const Dashboard = () => {
 								)}
 							</div>
 							<br></br>
-							<div style={{ height: '350px' }}>
+							<div style={{ height: isMobile ? '200px' : '350px' }}>
 								<Line data={subsChartData} options={subsChartOptions} />
 							</div>
 							<br></br>
@@ -218,7 +300,7 @@ const Dashboard = () => {
 								All Subscribers
 							</Button>
 						</Card>
-						<Card className="subscribers-stats">
+						<Card className="subscribers-stats latest-campaigns-card">
 							<div className="stats-head">
 								<span className="stats-title">Latest Campaigns</span>
 							</div>

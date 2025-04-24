@@ -1,8 +1,41 @@
 .btn-group {
 	text-align: left;
+	display: flex;
+	flex-wrap: wrap;
+	
 	.btn {
 		margin-right: 3px;
 		padding: 7px 12px;
 		background: rgba(255, 255, 255, 0.25);
+	}
+	
+	@media (max-width: 768px) {
+		width: 100%;
+		margin-bottom: 10px;
+		overflow-x: auto;
+		display: flex;
+		flex-wrap: nowrap;
+		
+		.btn {
+			font-size: 12px;
+			padding: 5px 8px;
+			min-width: 80px;
+			white-space: nowrap;
+			flex-shrink: 0;
+		}
+		
+		&.btn-sm {
+			justify-content: space-between;
+			
+			.btn {
+				flex: 1;
+				margin-right: 2px;
+				margin-left: 0;
+				text-align: center;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
 	}
 }
