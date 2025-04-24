@@ -17,13 +17,14 @@ import { Line } from 'react-chartjs-2'
 import PopupText from '../../components/PopupText/PopupText'
 const Dashboard = () => {
 	const navigate = useNavigate()
-	const { user, account, loading, error } = useAccount()
+	const { user, account, loading: accountLoading, dataInitialized } = useAccount()
 	const [statsData, setStatsData] = useState({})
 	const [statsKey, setStatsKey] = useState('d7')
 	const [subsStats, setSubsStats] = useState(null)
 	const [subsStatsKey, setSubsStatsKey] = useState('d7')
 	const [latestCampaigns, setLatestCampaigns] = useState([{}, {}, {}, {}])
 	const [stats, setStats] = useState([])
+	const [isLoading, setIsLoading] = useState(true) // Add component loading state
 
 	const isPositive = true
 	const subsChartData = {
@@ -75,16 +76,55 @@ const Dashboard = () => {
 	}
 
 	const loadStats = async () => {
-		if (!user) return
-		let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt)
-		console.log('stats', stats.data)
-		setStatsData(stats.data)
-		let resp = await ApiService.get(
-			`fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
-			user.jwt
-		)
-		// setLatestCampaigns(resp.data.data)
-	}
+		if (!user || !user.jwt || !account) {
+		  console.log('User or account data not available, skipping stats load');
+		  return;
+		}
+		
+		// Add explicit retry mechanism for post-2FA loading
+		let retries = 0;
+		const maxRetries = 3;
+		
+		setIsLoading(true);
+		
+		const attemptLoadStats = async () => {
+		  try {
+			console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`);
+			let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt);
+			console.log('Stats loaded successfully:', stats.data);
+			setStatsData(stats.data);
+			
+			let resp = await ApiService.get(
+			  `fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
+			  user.jwt
+			);
+			console.log('Campaigns loaded:', resp.data);
+			if (resp.data && resp.data.data) {
+			  setLatestCampaigns(resp.data.data);
+			}
+			return true; // Success
+		  } catch (error) {
+			console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error);
+			retries++;
+			
+			if (retries < maxRetries) {
+			  console.log(`Retrying in 1 second... (${retries}/${maxRetries})`);
+			  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+			  return await attemptLoadStats(); // Recursively retry
+			}
+			return false; // Failed after max retries
+		  }
+		};
+		
+		const success = await attemptLoadStats();
+		
+		if (!success) {
+		  console.error('Failed to load dashboard data after multiple attempts');
+		  // You could show an error message to the user here
+		}
+		
+		setIsLoading(false);
+	  };
 	const createStatsMetrics = () => {
 		let key = statsKey
 		if (!key || !statsData || !statsData[key]) return
@@ -116,10 +156,35 @@ const Dashboard = () => {
 	}, [statsData, subsStatsKey])
 
 	useEffect(() => {
-		if (user && account) {
+		// Only load stats when account is fully initialized and not in loading state
+		if (user && account && dataInitialized && !accountLoading) {
+			console.log('Account initialized, loading stats')
 			loadStats()
+		} else {
+			console.log('Waiting for account data initialization')
 		}
-	}, [user, account])
+	}, [user, account, dataInitialized, accountLoading])
+
+	// Add loading UI state rendering
+	if (accountLoading || isLoading) {
+		return (
+			<div className="dashboard-wrapper">
+				<Sidemenu />
+				<div className="dashboard-container">
+					<PageHeader />
+					<div className="page-name-container">
+						<div className="page-name">Dashboard <small style={{fontSize:'14px',letterSpacing: '.2em'}}>v{APP_VERSION}</small></div>
+					</div>
+					<Card className="dashboard-stats">
+						<div style={{ textAlign: 'center', padding: '20px' }}>
+							<p>Loading dashboard data...</p>
+							{/* You could add a spinner here */}
+						</div>
+					</Card>
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<>

@@ -94,25 +94,40 @@ export const generate2FA = async () => {
 }
 
 export const verify2FA = async (code_2FA) => {
-	const fairymail_session = unserializeLocalStorage()
-	const jtwToken = fairymail_session.jwt
+	const fairymail_session = unserializeLocalStorage();
+	const jtwToken = fairymail_session.jwt;
 	try {
-		const response = await axios.post(
-			`${BASE_URL}/verify-2fa`,
-			{
-				confirmationToken: code_2FA,
-			},
-			{
-				headers: {
-					Authorization: `Bearer ${jtwToken}`,
-				},
-			}
-		)
-		return response.data
+	  const response = await axios.post(
+		`${BASE_URL}/verify-2fa`,
+		{
+		  confirmationToken: code_2FA,
+		},
+		{
+		  headers: {
+			Authorization: `Bearer ${jtwToken}`,
+		  },
+		}
+	  );
+	  
+	  // IMPORTANT: Check if the response contains updated token data
+	  // If so, update the local storage with the new session data
+	  if (response.data && response.data.jwt) {
+		const updatedSession = {
+		  jwt: response.data.jwt,
+		  user: response.data.user || fairymail_session.user
+		};
+		
+		// Update localStorage with the new session
+		localStorage.setItem('fairymail_session', encodeURIComponent(JSON.stringify(updatedSession)));
+		console.log('Updated session after 2FA verification');
+	  }
+	  
+	  return response.data;
 	} catch (error) {
-		throw new Error('Error during  request', error)
+	  console.error('Error during 2FA verification:', error);
+	  throw new Error('Error during request: ' + (error.response?.data?.message || error.message));
 	}
-}
+  };
 
 export const forgotPassword = async (email) => {
 	try {

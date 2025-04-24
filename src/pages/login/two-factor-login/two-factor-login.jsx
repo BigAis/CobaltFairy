@@ -83,44 +83,66 @@ const TwoFactorLogin = () => {
     }
   };
 
-  // The key function where the issue likely is
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
+// For proper session handling
+const handleSubmit = async (e) => {
+  if (e) e.preventDefault();
+  
+  if (code.length !== 6) {
+    setNotifications([{ id: Date.now(), message: 'Please enter all 6 digits', type: 'warning' }]);
+    return;
+  }
+  
+  setIsLoading(true);
+  
+  try {
+    const response = await verify2FA(code);
+    console.log("Verification response:", response);
     
-    if (code.length !== 6) {
-      setNotifications([{ id: Date.now(), message: 'Please enter all 6 digits', type: 'warning' }]);
-      return;
+    // Check for error response
+    if (response && response.code === 400) {
+      throw new Error("Incorrect verification code");
     }
     
-    setIsLoading(true);
+    // Add explicit refresh of the session data after 2FA verification
+    // This ensures the session is properly updated before redirecting
+    const updatedSession = localStorage.getItem('fairymail_session');
     
-    try {
-      const response = await verify2FA(code);
-      console.log("Verification response:", response);
-      
-      // Check for error response
-      if (response && response.code === 400) {
-        throw new Error("Incorrect verification code");
+    if (updatedSession) {
+      try {
+        // Force refresh of user session data
+        const userData = JSON.parse(decodeURIComponent(updatedSession));
+        // Ensure we have a valid session with JWT before proceeding
+        if (userData && userData.jwt) {
+          console.log("Valid session after 2FA, redirecting to dashboard");
+          
+          // Redirect with page reload to ensure contexts reinitialize properly
+          window.location.href = "/dashboard";
+          return;
+        }
+      } catch (error) {
+        console.error("Error parsing session after 2FA:", error);
+        throw new Error("Invalid session data after verification");
       }
-      
-      // Only navigate to dashboard if verification was successful
-      if (form != null && form.length > 0) {
-        await registerUser();
-      } else {
-        // Successfully verified, now navigate to dashboard
-        navigate("/dashboard", { replace: true });
-      }
-    } catch (error) {
-      console.error("Verification error:", error);
-      setNotifications([{ 
-        id: Date.now(), 
-        message: error.message || 'Verification failed', 
-        type: 'warning' 
-      }]);
-    } finally {
-      setIsLoading(false);
     }
-  };
+    
+    // If form data exists, register user
+    if (form != null && form.length > 0) {
+      await registerUser();
+    } else {
+      // Redirect with full page reload to ensure all contexts are reinitialized
+      window.location.href = "/dashboard";
+    }
+  } catch (error) {
+    console.error("Verification error:", error);
+    setNotifications([{ 
+      id: Date.now(), 
+      message: error.message || 'Verification failed', 
+      type: 'warning' 
+    }]);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const registerUser = async () => {
     try {

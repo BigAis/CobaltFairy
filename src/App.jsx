@@ -36,30 +36,34 @@ const ProtectedRoute = ({ children }) => {
 // Update the authentication useEffect:
 
 useEffect(() => {
-    const fairymail_session = localStorage.getItem('fairymail_session');
-    
-    // Don't redirect if we're on login or 2FA pages
-    if (location.pathname === '/login' || location.pathname === '/login/2FA' || location.pathname === '/register') {
-        return;
-    }
-    
-    if (!fairymail_session) {
-        navigate('/login');
-        return;
-    }
-    
-    try {
-        const userData = JSON.parse(decodeURIComponent(fairymail_session));
-        if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
-            localStorage.removeItem('fairymail_session');
-            navigate('/login');
-        }
-    } catch (error) {
-        console.error("Error parsing session data:", error);
-        localStorage.removeItem('fairymail_session');
-        navigate('/login');
-    }
-}, [navigate, location.pathname])
+  const fairymail_session = localStorage.getItem('fairymail_session');
+  
+  // Don't redirect if we're on login or 2FA pages
+  if (location.pathname === '/login' || location.pathname === '/login/2FA' || location.pathname === '/register') {
+      return;
+  }
+  
+  if (!fairymail_session) {
+      console.log('No session found, redirecting to login');
+      navigate('/login');
+      return;
+  }
+  
+  try {
+      const userData = JSON.parse(decodeURIComponent(fairymail_session));
+      if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
+          console.log('JWT token expired or invalid, redirecting to login');
+          localStorage.removeItem('fairymail_session');
+          navigate('/login');
+      } else {
+          console.log('Valid session found');
+      }
+  } catch (error) {
+      console.error("Error parsing session data:", error);
+      localStorage.removeItem('fairymail_session');
+      navigate('/login');
+  }
+}, [navigate, location.pathname]);
 
   return children;
 };
