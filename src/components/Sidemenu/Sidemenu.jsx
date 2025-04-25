@@ -4,7 +4,10 @@ import Logo from '../Logo/Logo'
 import SubsCounter from '../SubsCounter'
 import Button from '../Button'
 import Icon from '../Icon/Icon'
+import Card from '../Card'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useAccount } from '../../context/AccountContext'
+import PopupText from '../PopupText/PopupText'
 
 const menu_items_upper = [
 	{ label: 'Dashboard', path: '/dashboard', icon: 'Dashboard' },
@@ -24,8 +27,10 @@ const menu_items_lower = [
 const Sidemenu = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
+	const { user, account } = useAccount()
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 	const [menuOpen, setMenuOpen] = useState(false)
+	const [userMenuOpen, setUserMenuOpen] = useState(false)
 
 	// Determine active menu item
 	const getActiveItem = () => {
@@ -39,11 +44,46 @@ const Sidemenu = () => {
 		return activeUpperItem || activeLowerItem || null;
 	}
 
+	const userMenuOptions = [
+		{
+			label: 'Profile',
+			callback: () => {
+				setUserMenuOpen(false);
+			}
+		},
+		{
+			label: 'Change Password',
+			callback: () => {
+				setUserMenuOpen(false);
+			}
+		},
+		{
+			label: 'Sign out',
+			callback: async () => {
+				const result = await PopupText.fire({
+					icon: 'question',
+					text: 'Are you sure you want to sign out?',
+					focusCancel: false,
+					showConfirmButton: true,
+					showDenyButton: false,
+					showCancelButton: true,
+					confirmButtonText: 'Yes, Sign Out',
+					cancelButtonText: 'Cancel',
+				})
+				if (result.isConfirmed) {
+					window.localStorage.removeItem('fairymail_session');
+					navigate('/login')
+				}
+			}
+		}
+	]
+
 	useEffect(() => {
 		const handleResize = () => {
 			setIsMobile(window.innerWidth <= 768)
 			if (window.innerWidth > 768) {
 				setMenuOpen(false)
+				setUserMenuOpen(false)
 			}
 		}
 
@@ -57,13 +97,25 @@ const Sidemenu = () => {
 			if (isMobile && menuOpen && !e.target.closest('.sidemenu')) {
 				setMenuOpen(false)
 			}
+			if (isMobile && userMenuOpen && !e.target.closest('.user-menu-wrapper')) {
+				setUserMenuOpen(false)
+			}
 		}
 		
 		document.addEventListener('click', handleClickOutside)
 		return () => document.removeEventListener('click', handleClickOutside)
-	}, [isMobile, menuOpen])
+	}, [isMobile, menuOpen, userMenuOpen])
 
 	const activeItem = getActiveItem();
+	
+	// Helper function to get user initials
+	const getNameInitials = (name) => {
+		if(!name) return "";
+		return name
+			.split(' ')
+			.map((word) => word[0].toUpperCase())
+			.join('')
+	}
 
 	return (
 		<>
@@ -77,78 +129,120 @@ const Sidemenu = () => {
 							}}>
 								<span className="menu-icon">{menuOpen ? '×' : '☰'}</span>
 							</button>
-							{menuOpen ? null : (
-								<div className="mobile-title">
-									{activeItem && activeItem.label}
+							
+							<div className="mobile-logo">
+								<Logo />
+							</div>
+							
+							<div className="user-menu-wrapper">
+								<div className="user-avatar" onClick={(e) => {
+									e.stopPropagation();
+									setUserMenuOpen(!userMenuOpen);
+								}}>
+									{getNameInitials(user?.user?.name)}
 								</div>
-							)}
+								
+								{userMenuOpen && (
+									<Card className="user-menu">
+										{userMenuOptions.map((option) => (
+											<div key={option.label} className="user-menu-option" onClick={() => option.callback()}>
+												{option.label}
+											</div>
+										))}
+									</Card>
+								)}
+							</div>
 						</>
 					)}
 
-					<Logo />
+					{!isMobile && <Logo />}
 
-					<div className="menu_upper">
-						<ul>
-							{menu_items_upper.map((item, index) => {
-								const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-								return (
-									<li 
-										key={index}
-										onClick={() => {
-											navigate(item.path)
-											if(isMobile) setMenuOpen(false)
-										}}
-										disabled={item.disabled}
-										className={isActive ? 'active' : ''}
-									>
-										<Icon name={item.icon}></Icon>
-										<a className="menu-entry">{item.label}</a>
-									</li>
-								)
-							})}
-						</ul>
-					</div>
-					<div className="menu_lower">
-						<ul>
-							{menu_items_lower.map((item, index) => {
-								const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-								return (
-									<li 
-										key={index}
-										onClick={() => {
-											if (!item.disabled) {
-												navigate(item.path)
-												if(isMobile) setMenuOpen(false)
-											}
-										}}
-										disabled={item.disabled}
-										className={isActive ? 'active' : ''}
-									>
-										<Icon name={item.icon}></Icon>
-										<a className="menu-entry">{item.label}</a>
-									</li>
-								)
-							})}
-						</ul>
-					</div>
-					<div className="menu_bottom">
-						<SubsCounter
-							currentSubs={200}
-							subsLimit={500}
-							onClick={() => {
-								console.log('SubsCounter clicked!')
-							}}
-						/>
-						<Button 
-							style={{ width: '100%', marginTop: '15px' }} 
-							onClick={() => {
-								navigate('/campaigns/new');
-								if(isMobile) setMenuOpen(false);
-							}}
-						>
-							+ Create
-						</Button>
-					</div>
+					{(!isMobile || menuOpen) && (
+						<>
+							{menuOpen && isMobile && (
+								<div className="mobile-account-picker">
+									<Card className="account-info-card">
+										<div 
+											className="account-info"
+											onClick={() => {
+												navigate('/choose-account', { replace: true });
+												setMenuOpen(false);
+											}}
+										>
+											<div>
+												<h4>{account?.name}</h4>
+												<span>{account?.payment_plan?.name || ''}</span>
+											</div>
+											<Icon name="Caret" />
+										</div>
+									</Card>
+								</div>
+							)}
+							
+							<div className="menu_upper">
+								<ul>
+									{menu_items_upper.map((item, index) => {
+										const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+										return (
+											<li 
+												key={index}
+												onClick={() => {
+													navigate(item.path)
+													if(isMobile) setMenuOpen(false)
+												}}
+												disabled={item.disabled}
+												className={isActive ? 'active' : ''}
+											>
+												<Icon name={item.icon}></Icon>
+												<a className="menu-entry">{item.label}</a>
+											</li>
+										)
+									})}
+								</ul>
+							</div>
+							<div className="menu_lower">
+								<ul>
+									{menu_items_lower.map((item, index) => {
+										const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+										return (
+											<li 
+												key={index}
+												onClick={() => {
+													if (!item.disabled) {
+														navigate(item.path)
+														if(isMobile) setMenuOpen(false)
+													}
+												}}
+												disabled={item.disabled}
+												className={isActive ? 'active' : ''}
+											>
+												<Icon name={item.icon}></Icon>
+												<a className="menu-entry">{item.label}</a>
+											</li>
+										)
+									})}
+								</ul>
+							</div>
+							<div className="menu_bottom">
+								<SubsCounter
+									currentSubs={200}
+									subsLimit={500}
+									onClick={() => {
+										console.log('SubsCounter clicked!')
+									}}
+								/>
+								<Button 
+									style={{ width: '100%', marginTop: '15px' }} 
+									onClick={() => {
+										navigate('/campaigns/new');
+										if(isMobile) setMenuOpen(false);
+									}}
+								>
+									+ Create
+								</Button>
+							</div>
+						</>
+					)}
 				</div>
 			</div>
 			{isMobile && menuOpen && <div className="menu-overlay" onClick={() => setMenuOpen(false)}></div>}
