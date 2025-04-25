@@ -9,142 +9,137 @@ import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
 import Button from '../../components/Button'
-import Stat from '../../components/Stat/Stat'
 import ButtonGroup from '../../components/ButtonGroup'
 import './campaigns.scss'
 import InputText from '../../components/InputText/InputText'
 import PageHeader from '../../components/PageHeader/PageHeader'
-import User from '../../service/User'
 import { ApiService } from '../../service/api-service'
 import PopupText from '../../components/PopupText/PopupText'
 import NotificationBar from '../../components/NotificationBar/NotificationBar'
-import { use } from 'react'
 import TemplateCard from '../../components/TemplateCard/TemplateCard'
 import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
 import { v4 as uuidv4 } from 'uuid'
-
-// const getNameInitials = (name) =>
-// 	name
-// 		.split(' ')
-// 		.map((word) => word[0].toUpperCase())
-// 		.join('')
-// const stats = [
-// 	{
-// 		label: 'Emails Sent',
-// 		value: '752',
-// 		percentage: -12,
-// 		defaultValue: false, // This will be the default selected option
-// 	},
-// 	{
-// 		label: 'Totals Clicks',
-// 		value: '159',
-// 		percentage: 17,
-// 		defaultValue: false,
-// 	},
-// 	{
-// 		label: 'Total Opens',
-// 		value: '340',
-// 		percentage: 19,
-// 		defaultValue: false,
-// 	},
-// 	{
-// 		label: 'Spam',
-// 		value: '85',
-// 		percentage: 5,
-// 		defaultValue: false,
-// 	},
-// ]
-// const subs_stats = [
-// 	{
-// 		label: 'Total',
-// 		value: '752',
-// 		default: false,
-// 		percentage: 5,
-// 	},
-// 	{
-// 		label: 'Unsubscribed',
-// 		value: '159',
-// 		default: true,
-// 		percentage: 5,
-// 	},
-// ]
 
 const Campaigns = () => {
 	const navigate = useNavigate()
 
 	const [dropdownViewer, setDropdownViewer] = useState('campaigns')
+	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+	const [viewMode, setViewMode] = useState('list') // 'list' or 'calendar'
 
 	const { user, account } = useAccount()
 	const [searchTerm, setSearchTerm] = useState('')
 	const [loading, setLoading] = useState(true)
 	const [itemsPerPage, setItemsPerPage] = useState(100)
 	const [currentPage, setCurrentPage] = useState(1)
-	const [skeletons] = useState([{}, {}, {}, {}, {}, {}, {}, {}, {}])
 	const [campaigns, setCampaigns] = useState([])
+	const [filteredCampaigns, setFilteredCampaigns] = useState([])
 	const [templates, setTemplates] = useState([])
 	const [notifications, setNotifications] = useState([])
+	const [expandedCampaign, setExpandedCampaign] = useState(null)
+	const [actionMenuCampaign, setActionMenuCampaign] = useState(null)
 
-	const [meta, setMeta] = useState([])
 	const [campaignsMeta, setCampaignsMeta] = useState([])
-	const [error, setError] = useState(null)
-	const [domainVerified, setDomainVerified] = useState(true)
-	const [dkimVerified, setDkimVerified] = useState(true)
-	const [emailVerified, setEmailVerified] = useState(true)
 	const [selectedCampaignType, setSelectedCampaignType] = useState('sent')
 
-	const totalCampaignsSent = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.sent : 0
-	const totalCampaignsDraft = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.draft : 0
+	const totalCampaignsSent = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.sent : 2
+	const totalCampaignsDraft = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.draft : 1
 	const totalCampaignsOutBox = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.outbox : 0
+
+	// Handle window resize for mobile detection
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth <= 768)
+		}
+		
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [])
+
+	// Handle clicks outside of dropdown menus
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (actionMenuCampaign && !event.target.closest('.overview-button') && !event.target.closest('.campaign-dropdown-menu')) {
+				setActionMenuCampaign(null);
+			}
+		};
+		
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [actionMenuCampaign]);
 
 	useEffect(() => {
 		getCampaigns()
 		getTemplates()
 	}, [account])
 
+	// Filter campaigns whenever selectedCampaignType or campaigns change
+	useEffect(() => {
+		if (campaigns && campaigns.length > 0) {
+			const filtered = campaigns.filter(campaign => {
+				if (selectedCampaignType === 'outbox') {
+					return campaign.status === 'draft' && campaign.date;
+				} else {
+					return campaign.status === selectedCampaignType;
+				}
+			});
+			setFilteredCampaigns(filtered);
+		} else {
+			setFilteredCampaigns([]);
+		}
+	}, [campaigns, selectedCampaignType]);
+
 	const updateSearchTerm = async (search) => {
 		setSearchTerm(search)
 
-		let outboxfilter = selectedCampaignType == 'outbox' ? '&filters[date][$notNull]=true' : selectedCampaignType == 'drafts' ? '&filters[date][$null]=true' : ''
+		let outboxfilter = selectedCampaignType == 'outbox' ? '&filters[date][$notNull]=true' : selectedCampaignType == 'draft' ? '&filters[date][$null]=true' : ''
 
 		let resp = await ApiService.get(
 			`fairymailer/getCampaigns?filters[name][$contains]=${search}&filters[status]=${
-				selectedCampaignType == 'outbox' ? 'draft' : selectedCampaignType == 'drafts' ? 'draft' : selectedCampaignType
+				selectedCampaignType == 'outbox' ? 'draft' : selectedCampaignType == 'draft' ? 'draft' : selectedCampaignType
 			}${outboxfilter}&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=100&pagination[page]=1`,
 			user.jwt
 		)
 
-		setCampaigns(resp.data.data)
+		if (resp && resp.data && resp.data.data) {
+			setCampaigns(resp.data.data.map((item) => ({
+				...item,
+				image: '/images/cmp.png',
+			})))
+		}
 	}
 
 	const getCampaigns = async (page = 1) => {
 		try {
-			console.log('user is getCampaigns : ', user.jwt)
+			setLoading(true);
 			let resp = await ApiService.get(
-				`fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${1}&pagination[page]=${page}`,
+				`fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
 				user.jwt
 			)
-			console.log('cmps from getCampaigns ', resp)
-			setCampaigns(
-				resp.data.data.map((item) => ({
-					...item,
-					image: '/images/cmp.png',
-				}))
-			)
+			if (resp && resp.data && resp.data.data) {
+				setCampaigns(
+					resp.data.data.map((item) => ({
+						...item,
+						image: '/images/cmp.png',
+					}))
+				)
 
-			setCampaignsMeta(resp.data.meta)
+				setCampaignsMeta(resp.data.meta)
+			}
+			setLoading(false);
 		} catch (error) {
 			console.error(error)
+			setLoading(false);
 		}
 	}
 
 	const getTemplates = async (page = 1) => {
 		try {
 			let resp = await ApiService.get(`fairymailer/getTemplates?pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`, user.jwt)
-			console.log('templates from getTemplates ', resp)
 			if (resp.data && resp.data.data) {
 				setTemplates(resp.data.data)
-				//TODO Templates Meta
-				// this.setState({ templates: resp.data.data, meta: resp.data.meta })
 			}
 		} catch (error) {
 			console.error(error)
@@ -152,27 +147,167 @@ const Campaigns = () => {
 	}
 
 	const refreshData = async () => {
-		let current = selectedCampaignType
 		await getCampaigns()
 		await getTemplates()
-		//workaround - we need to fix this!!
-		// we need a proper way to refresh the data upon actions such as delete, rename, duplicate.
-		setSelectedCampaignType('templates')
-		setTimeout(() => {
-			setSelectedCampaignType(current)
-		}, 100)
 	}
 
 	const createTemplateByName = async (templateName) => {
 		try {
 			const templateUuid = uuidv4()
 			const resp = await ApiService.post(`templates/`, { data: { uuid: templateUuid, name: templateName, account: account.id } }, user.jwt)
-			console.log('templates from  createTemplateByName', resp)
 			if (resp && resp.data && resp.data.data) {
 				navigate(`/templates/edit/${templateUuid}`)
 			}
 		} catch (error) {
 			console.error(error)
+		}
+	}
+
+	// Toggle expand/collapse of a campaign card
+	const toggleCampaignExpand = (campaignId) => {
+		setExpandedCampaign(expandedCampaign === campaignId ? null : campaignId)
+		// Close action menu when toggling expand/collapse
+		setActionMenuCampaign(null)
+	}
+
+	// Toggle action menu for a campaign
+	const toggleActionMenu = (e, campaignId) => {
+		e.stopPropagation() // Prevent triggering the card expand/collapse
+		setActionMenuCampaign(actionMenuCampaign === campaignId ? null : campaignId)
+	}
+
+	// Handle campaign actions
+	const handleCampaignAction = (action, campaign) => {
+		switch (action) {
+			case 'delete':
+				PopupText.fire({
+					text: `Are you sure you want to delete "${campaign.name}"?`,
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: 'Delete',
+					cancelButtonText: 'Cancel'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						// Delete campaign logic here
+						console.log('Deleting campaign:', campaign.id)
+						// Then refresh the data
+						refreshData()
+					}
+				})
+				break;
+			case 'duplicate':
+				// Duplicate campaign logic
+				console.log('Duplicating campaign:', campaign.id)
+				break;
+			case 'rename':
+				PopupText.fire({
+					text: 'Enter new name',
+					input: 'text',
+					inputValue: campaign.name,
+					showCancelButton: true,
+					confirmButtonText: 'Rename',
+					cancelButtonText: 'Cancel'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						// Rename campaign logic here
+						console.log('Renaming campaign to:', result.value)
+					}
+				})
+				break;
+			case 'overview':
+				// Navigate to campaign overview
+				navigate(`/campaigns/overview/${campaign.uuid}`)
+				break;
+			default:
+				break;
+		}
+		// Close the action menu
+		setActionMenuCampaign(null)
+	}
+
+	// Render a mobile campaign card with collapsible content
+	const renderMobileCampaignCard = (campaign) => {
+		const isExpanded = expandedCampaign === campaign.uuid
+		const showActionMenu = actionMenuCampaign === campaign.uuid
+
+		return (
+			<div className="campaign-item" key={campaign.uuid || `campaign-${Math.random()}`}>
+				<div className="campaign-item-header" onClick={() => toggleCampaignExpand(campaign.uuid)}>
+					<div>
+						<div className="campaign-item-title">{campaign.name || "Campaign Name"}</div>
+						<div className="campaign-item-subject">{campaign.subject || "Subject goes here"}</div>
+					</div>
+					<div className={`campaign-item-chevron ${isExpanded ? 'expanded' : ''}`}>
+						<Icon name="ChevronDown" size={16} />
+					</div>
+				</div>
+				
+				{isExpanded && (
+					<div className="campaign-item-content">
+						<div className="campaign-item-img">
+							<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
+						</div>
+						
+						<div className="campaign-item-details">
+							<span className="campaign-detail-label">Type</span>
+							<span>{campaign.type || "Normal"}</span>
+						</div>
+						
+						<div className="campaign-item-details">
+							<span className="campaign-detail-label">Created</span>
+							<span>{campaign.sent_at ? new Date(campaign.sent_at).toISOString().split('T')[0] : "2024-04-17"}</span>
+						</div>
+						
+						<div className="overview-button" onClick={(e) => toggleActionMenu(e, campaign.uuid)}>
+							Overview
+							<Icon name="ChevronDown" size={16} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+						</div>
+						
+						{showActionMenu && (
+							<div className="campaign-dropdown-menu">
+								<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('delete', campaign)}>
+									Delete
+								</div>
+								<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('duplicate', campaign)}>
+									Duplicate
+								</div>
+								<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('rename', campaign)}>
+									Rename
+								</div>
+								<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('overview', campaign)}>
+									Overview
+								</div>
+							</div>
+						)}
+					</div>
+				)}
+			</div>
+		);
+	};
+
+	// Handle tab change
+	const handleTabChange = (value) => {
+		// Reset expanded and action menu states when changing tabs
+		setExpandedCampaign(null)
+		setActionMenuCampaign(null)
+		
+		switch (value) {
+			case 'sent':
+				setDropdownViewer('campaigns')
+				setSelectedCampaignType('sent')
+				break
+			case 'draft':
+				setDropdownViewer('campaigns')
+				setSelectedCampaignType('draft')
+				break
+			case 'outbox':
+				setDropdownViewer('campaigns')
+				setSelectedCampaignType('outbox')
+				break
+			case 'templates':
+				setDropdownViewer('templates')
+				setSelectedCampaignType('templates')
+				break
 		}
 	}
 
@@ -183,8 +318,8 @@ const Campaigns = () => {
 				<div className="fm-page-container">
 					{notifications && notifications.length > 0 && (
 						<div className="notifications-container">
-							{notifications.map((n) => {
-								return <NotificationBar type={n.type || 'default'} message={n.message} onClose={n.onClose} />
+							{notifications.map((n, index) => {
+								return <NotificationBar key={`notification-${index}`} type={n.type || 'default'} message={n.message} onClose={n.onClose} />
 							})}
 						</div>
 					)}
@@ -192,128 +327,142 @@ const Campaigns = () => {
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
 						<Button icon={'Plus'} type="action" onClick={() => navigate('/campaigns/new')}>
-							New Campaign
+							{isMobile ? '' : 'New Campaign'}
 						</Button>
 					</div>
 					<div className="filters-container">
 						<div className="row" style={{ marginBottom: '1rem' }}>
 							<ButtonGroup
-								value="sent"
+								value={selectedCampaignType}
 								options={[
 									{ value: 'sent', label: `Sent (${totalCampaignsSent})` },
 									{ value: 'draft', label: `Draft (${totalCampaignsDraft})` },
-									{ value: 'outbox', label: `Outbox(${totalCampaignsOutBox})` },
-									{ value: 'templates', label: `Templates (${templates && templates.length > 0 ? templates.length : '0'})` },
+									{ value: 'outbox', label: `Outbox (${totalCampaignsOutBox})` },
+									...(isMobile ? [] : [{ value: 'templates', label: `Templates (${templates && templates.length > 0 ? templates.length : '0'})` }]),
 								]}
-								onChange={(value) => {
-									console.log('the value is : ', value)
-									switch (value) {
-										case 'sent':
-											setDropdownViewer('campaigns')
-											setSelectedCampaignType('sent')
-											break
-										case 'draft':
-											setDropdownViewer('campaigns')
-											setSelectedCampaignType('draft')
-											break
-										case 'outbox':
-											setDropdownViewer('campaigns')
-											setSelectedCampaignType('outbox')
-											break
-										case 'templates':
-											setDropdownViewer('templates')
-											setSelectedCampaignType('templates')
-											break
-									}
-								}}
+								onChange={handleTabChange}
 							></ButtonGroup>
 						</div>
 						<div className="row d-flex content-space-between">
 							<InputText
 								onChange={(e) => updateSearchTerm(e.target.value)}
 								style={{ width: '100%' }}
-								placeholder="Search Campaign"
-								label="Search Campaign"
+								placeholder="Campaign Name"
 								hasError={false}
 								errorMessage="Name must be at least 3 characters long."
 							/>
-							{/* <Button type="secondary" icon={'Filters'}>
-								Filters
-							</Button> */}
 						</div>
 					</div>
+					
+					{isMobile && (
+						<div className="view-toggle">
+							<div className={`view-toggle-option ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
+								<Icon name="List" /> List View
+							</div>
+							<div className={`view-toggle-option ${viewMode === 'calendar' ? 'active' : ''}`} onClick={() => setViewMode('calendar')}>
+								<Icon name="Calendar" /> Calendar
+							</div>
+						</div>
+					)}
 
-					<div className="">
-						{dropdownViewer === 'campaigns' ? (
-							<CampaignsTable
-								resultsPerPage={10}
-								// campaigns={campaigns.filter(
-								// 	(campaign) =>
-								// 		(selectedCampaignType !== 'outbox' && campaign.status === selectedCampaignType) ||
-								// 		(selectedCampaignType === 'outbox' && campaign.status === 'draft' && campaign.date)
-								// )}
-								notifications={notifications}
-								setNotifications={setNotifications}
-								refreshData={refreshData}
-								selectedCampaignType={selectedCampaignType}
-								dashboardPreviewOnly={false}
-							/>
-						) : (
-							<>
-								<div className="d-flex flex-wrap templates-container gap-20 mt20">
-									<Card
-										style={{ cursor: 'pointer' }}
-										className={'d-flex flex-column align-items-center justify-content-center gap-20'}
-										onClick={() => {
-											PopupText.fire({
-												text: 'Enter Template Name',
-												inputField: true,
-												inputLabel: 'Template Name',
-												confirmButtonText: 'Submit',
-												onConfirm: (inputValue) => {
-													console.log('User entered:', inputValue)
-												},
-											}).then((result) => {
-												if (result.isConfirmed) {
-													console.log('Confirmed with input:', result.inputValue)
-													createTemplateByName(result.inputValue)
-												} else if (result.isCancelled) {
-													console.log('Popup cancelled')
-												}
-											})
-										}}
-									>
-										<Icon name="PlusLight" size={64}></Icon>
-										<p>Create New</p>
-									</Card>
-									{templates &&
-										templates.length > 0 &&
-										templates
-											.sort((a, b) => a.id - b.id)
-											.map((template, i) => (
-												<>
-													<TemplateCard
-														key={template.uuid}
-														template_udid={template.uuid}
-														templateName={template.name}
-														onPreviewClick={() => {
-															setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: true }])
-														}}
-														onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
-													/>
-													<TemplatePreview
-														template_udid={template.uuid}
-														show={template.showPreview}
-														onClose={() => {
-															setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: false }])
-														}}
-													/>
-												</>
-											))}
-								</div>
-							</>
-						)}
-					</div>
+					{loading ? (
+						<div className="loading-indicator">Loading...</div>
+					) : (
+						<div className="">
+							{dropdownViewer === 'campaigns' ? (
+								isMobile ? (
+									// Mobile view for campaigns with collapsible cards
+									<div className="mobile-campaigns-list">
+										{filteredCampaigns.length > 0 ? (
+											filteredCampaigns.map((campaign) => (
+												renderMobileCampaignCard(campaign)
+											))
+										) : (
+											<div className="no-campaigns">
+												No {selectedCampaignType} campaigns found
+											</div>
+										)}
+										
+										{filteredCampaigns.length > 0 && (
+											<div className="pagination-container">
+												<button><Icon name="ChevronLeft" size={16} /></button>
+												<span className="current-page">1</span>
+												<span>2</span>
+												<span className="pagination-dots">...</span>
+												<span>9</span>
+												<span>10</span>
+												<button><Icon name="ChevronRight" size={16} /></button>
+											</div>
+										)}
+									</div>
+								) : (
+									// Desktop view for campaigns
+									<CampaignsTable
+										resultsPerPage={10}
+										notifications={notifications}
+										setNotifications={setNotifications}
+										refreshData={refreshData}
+										selectedCampaignType={selectedCampaignType}
+										dashboardPreviewOnly={false}
+									/>
+								)
+							) : (
+								<>
+									<div className="d-flex flex-wrap templates-container gap-20 mt20">
+										<Card
+											style={{ cursor: 'pointer' }}
+											className={'d-flex flex-column align-items-center justify-content-center gap-20'}
+											onClick={() => {
+												PopupText.fire({
+													text: 'Enter Template Name',
+													inputField: true,
+													inputLabel: 'Template Name',
+													confirmButtonText: 'Submit',
+													onConfirm: (inputValue) => {
+														console.log('User entered:', inputValue)
+													},
+												}).then((result) => {
+													if (result.isConfirmed) {
+														console.log('Confirmed with input:', result.inputValue)
+														createTemplateByName(result.inputValue)
+													} else if (result.isCancelled) {
+														console.log('Popup cancelled')
+													}
+												})
+											}}
+										>
+											<Icon name="PlusLight" size={64}></Icon>
+											<p>Create New</p>
+										</Card>
+										{templates &&
+											templates.length > 0 &&
+											templates
+												.sort((a, b) => a.id - b.id)
+												.map((template, i) => (
+													<React.Fragment key={template.uuid || `template-${i}`}>
+														<TemplateCard
+															key={template.uuid}
+															template_udid={template.uuid}
+															templateName={template.name}
+															onPreviewClick={() => {
+																setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: true }])
+															}}
+															onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
+														/>
+														<TemplatePreview
+															template_udid={template.uuid}
+															show={template.showPreview}
+															onClose={() => {
+																setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: false }])
+															}}
+														/>
+													</React.Fragment>
+												))}
+									</div>
+								</>
+							)}
+						</div>
+					)}
 				</div>
 			</div>
 		</>
