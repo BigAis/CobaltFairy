@@ -92,12 +92,12 @@ const NewCampaign = () => {
 					{ label: 'Was Not Clicked', value: 'link' },
 			  ]
 
-	// Add mobile detection
+	// Handle mobile detection
 	useEffect(() => {
 		const handleResize = () => {
 			setIsMobile(window.innerWidth <= 768)
 		}
-
+		
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
 	}, [])
@@ -105,7 +105,7 @@ const NewCampaign = () => {
 	// Handle mobile restrictions
 	useEffect(() => {
 		if (isMobile) {
-			// For campaign creation on mobile
+			// For campaign creation on mobile - prevent editor access
 			if (step === 3) {
 				PopupText.fire({
 					icon: 'warning',
@@ -117,7 +117,7 @@ const NewCampaign = () => {
 				})
 			}
 			
-			// For editing draft campaigns on mobile
+			// For editing draft campaigns on mobile - redirect back to campaigns page
 			if (isEdit && currentCampaign && currentCampaign.status === 'draft') {
 				PopupText.fire({
 					icon: 'warning',

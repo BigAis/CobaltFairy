@@ -320,6 +320,20 @@ const Campaigns = () => {
 				break
 		}
 	}
+	
+	// Handle "New Campaign" button click with mobile restriction check
+	const handleNewCampaignClick = () => {
+		if (isMobile) {
+			PopupText.fire({
+				icon: 'warning',
+				text: 'Campaign creation is not available on mobile devices. Please use a desktop to create and design your campaigns.',
+				showCancelButton: false,
+				confirmButtonText: 'OK',
+			});
+		} else {
+			navigate('/campaigns/new');
+		}
+	}
 
 	return (
 		<>
@@ -336,7 +350,7 @@ const Campaigns = () => {
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
-						<Button icon={'Plus'} type="action" onClick={() => navigate('/campaigns/new')}>
+						<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
 							{isMobile ? '' : 'New Campaign'}
 						</Button>
 					</div>
