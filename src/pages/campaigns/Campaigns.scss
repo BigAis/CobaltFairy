@@ -442,6 +442,31 @@ p.template-card-label {
 		transform: translateY(-50%);
 	}
 	
+	/* Arrow styling for campaign items */
+	.campaign-item-chevron {
+		transition: transform 0.3s ease;
+		width: 24px;
+		height: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.campaign-item-chevron img {
+		width: 16px;
+		height: 16px;
+		transition: transform 0.3s ease;
+	}
+
+	.campaign-item-chevron.expanded img {
+		transform: rotate(180deg);
+	}
+
+	/* Arrow styling for overview button */
+	.overview-button img {
+		width: 16px;
+		height: 16px;
+	}
 	/* Loading indicator */
 	.loading-indicator {
 		text-align: center;

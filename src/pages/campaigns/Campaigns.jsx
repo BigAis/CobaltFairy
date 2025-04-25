@@ -226,6 +226,7 @@ const Campaigns = () => {
 	}
 
 	// Render a mobile campaign card with collapsible content
+
 	const renderMobileCampaignCard = (campaign) => {
 		const isExpanded = expandedCampaign === campaign.uuid
 		const showActionMenu = actionMenuCampaign === campaign.uuid
@@ -238,7 +239,7 @@ const Campaigns = () => {
 						<div className="campaign-item-subject">{campaign.subject || "Subject goes here"}</div>
 					</div>
 					<div className={`campaign-item-chevron ${isExpanded ? 'expanded' : ''}`}>
-						<Icon name="ChevronDown" size={16} />
+						<img src="/src/components/arrow.svg" alt="Arrow" />
 					</div>
 				</div>
 				
@@ -260,7 +261,16 @@ const Campaigns = () => {
 						
 						<div className="overview-button" onClick={(e) => toggleActionMenu(e, campaign.uuid)}>
 							Overview
-							<Icon name="ChevronDown" size={16} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+							<img 
+								src="/src/components/arrow.svg" 
+								alt="Arrow" 
+								style={{ 
+									position: 'absolute', 
+									right: '10px', 
+									top: '50%', 
+									transform: 'translateY(-50%)' 
+								}} 
+							/>
 						</div>
 						
 						{showActionMenu && (
