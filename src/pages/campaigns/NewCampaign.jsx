@@ -105,31 +105,52 @@ const NewCampaign = () => {
 	// Handle mobile restrictions
 	useEffect(() => {
 		if (isMobile) {
-			// For campaign creation on mobile - prevent editor access
-			if (step === 3) {
-				PopupText.fire({
-					icon: 'warning',
-					text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
-					showCancelButton: false,
-					confirmButtonText: 'OK',
-				}).then(() => {
-					setStep(4) // Skip to next step
-				})
-			}
-			
-			// For editing draft campaigns on mobile - redirect back to campaigns page
-			if (isEdit && currentCampaign && currentCampaign.status === 'draft') {
-				PopupText.fire({
-					icon: 'warning',
-					text: 'Draft campaigns cannot be edited on mobile devices. Please use a desktop to edit your campaign.',
-					showCancelButton: false,
-					confirmButtonText: 'OK',
-				}).then(() => {
-					navigate('/campaigns')
-				})
-			}
+		// For campaign creation on mobile - prevent editor access
+		if (step === 3) {
+			PopupText.fire({
+			icon: 'warning',
+			text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
+			showCancelButton: false,
+			confirmButtonText: 'OK',
+			}).then(() => {
+			setStep(4); // Skip to next step
+			});
 		}
-	}, [isMobile, step, isEdit, currentCampaign, navigate])
+		
+		// For going back from step 4 to step 3 on mobile
+		if (step === 4 && typeof window !== 'undefined' && window.sessionStorage) {
+			// Store a flag to indicate we'd need to skip step 3
+			window.sessionStorage.setItem('skipEditorStep', 'true');
+		}
+		
+		// For editing draft campaigns on mobile - redirect back to campaigns page
+		if (isEdit && currentCampaign && currentCampaign.status === 'draft') {
+			PopupText.fire({
+			icon: 'warning',
+			text: 'Draft campaigns cannot be edited on mobile devices. Please use a desktop to edit your campaign.',
+			showCancelButton: false,
+			confirmButtonText: 'OK',
+			}).then(() => {
+			navigate('/campaigns');
+			});
+		}
+		}
+	}, [isMobile, step, isEdit, currentCampaign, navigate]);
+	
+	// Function to handle the next and back buttons with mobile compatibility
+	const handleStepChange = (direction) => {
+		if (direction === 'next') {
+		// Handle next button logic (your existing code)
+		// ...
+		} else if (direction === 'back') {
+		// Going back
+		if (isMobile && step === 4) {
+			setStep(2); // Skip step 3 (editor) and go directly to step 2
+		} else {
+			setStep(step - 1); // Normal back behavior
+		}
+		}
+	};
 
 	//Validation for the first step
 	const validationSchema = Yup.object().shape({

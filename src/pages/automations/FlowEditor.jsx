@@ -89,16 +89,16 @@ const FlowEditor = () => {
 	// Add this useEffect to redirect mobile users away from the editor
 	useEffect(() => {
 		if (isMobile) {
-		PopupText.fire({
+		  PopupText.fire({
 			icon: 'warning',
 			text: 'The automation flow editor is not available on mobile devices. Please use a desktop computer to edit your automation flow.',
 			showCancelButton: false,
 			confirmButtonText: 'OK',
-		}).then(() => {
+		  }).then(() => {
 			navigate(`/automations/${autId}`);
-		});
+		  });
 		}
-	}, [isMobile, autId, navigate]);
+	  }, [isMobile, autId, navigate]);
 
 	const { user, account } = useAccount()
 	const steps = [{ label: 'Automations' }, { label: 'Edit Automation' }, { label: 'Editor' }]
