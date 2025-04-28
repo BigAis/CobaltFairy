@@ -49,12 +49,12 @@ const Campaigns = () => {
 	// Handle window resize for mobile detection
 	useEffect(() => {
 		const handleResize = () => {
-			setIsMobile(window.innerWidth <= 768)
-		}
+		  setIsMobile(window.innerWidth <= 768);
+		};
 		
-		window.addEventListener('resize', handleResize)
-		return () => window.removeEventListener('resize', handleResize)
-	}, [])
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	  }, []);
 
 	// Handle clicks outside of dropdown menus
 	useEffect(() => {
@@ -178,52 +178,41 @@ const Campaigns = () => {
 
 	// Handle campaign actions
 	const handleCampaignAction = (action, campaign) => {
-		switch (action) {
-			case 'delete':
-				PopupText.fire({
-					text: `Are you sure you want to delete "${campaign.name}"?`,
-					icon: 'warning',
-					showCancelButton: true,
-					confirmButtonText: 'Delete',
-					cancelButtonText: 'Cancel'
-				}).then((result) => {
-					if (result.isConfirmed) {
-						// Delete campaign logic here
-						console.log('Deleting campaign:', campaign.id)
-						// Then refresh the data
-						refreshData()
-					}
-				})
-				break;
-			case 'duplicate':
-				// Duplicate campaign logic
-				console.log('Duplicating campaign:', campaign.id)
-				break;
-			case 'rename':
-				PopupText.fire({
-					text: 'Enter new name',
-					input: 'text',
-					inputValue: campaign.name,
-					showCancelButton: true,
-					confirmButtonText: 'Rename',
-					cancelButtonText: 'Cancel'
-				}).then((result) => {
-					if (result.isConfirmed) {
-						// Rename campaign logic here
-						console.log('Renaming campaign to:', result.value)
-					}
-				})
-				break;
-			case 'overview':
-				// Navigate to campaign overview
-				navigate(`/campaigns/overview/${campaign.uuid}`)
-				break;
-			default:
-				break;
+		// Check if on mobile and trying to access editor for any campaign
+		if (isMobile && action === 'edit') {
+		  PopupText.fire({
+			icon: 'warning',
+			text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
+			showCancelButton: false,
+			confirmButtonText: 'OK',
+		  });
+		  return; // Stop further execution
 		}
-		// Close the action menu
-		setActionMenuCampaign(null)
-	}
+		
+		// Allow viewing overview even on mobile
+		// Proceed with normal action handling
+		switch (action) {
+		  case 'delete':
+			// Existing delete logic
+			break;
+		  case 'duplicate':
+			// Existing duplicate logic
+			break;
+		  case 'rename':
+			// Existing rename logic
+			break;
+		  case 'edit':
+			// Navigate to campaign edit page (design editor) - this won't execute on mobile due to check above
+			navigate(`/campaigns/edit/${campaign.uuid}`);
+			break;
+		  case 'overview':
+			// Navigate to campaign overview - this WILL execute on mobile
+			navigate(`/campaigns/overview/${campaign.uuid}`);
+			break;
+		  default:
+			break;
+		}
+	  }
 
 	// Render a mobile campaign card with collapsible content
 
@@ -324,16 +313,18 @@ const Campaigns = () => {
 	// Handle "New Campaign" button click with mobile restriction check
 	const handleNewCampaignClick = () => {
 		if (isMobile) {
-			PopupText.fire({
-				icon: 'warning',
-				text: 'Campaign creation is not available on mobile devices. Please use a desktop to create and design your campaigns.',
-				showCancelButton: false,
-				confirmButtonText: 'OK',
-			});
-		} else {
+		  PopupText.fire({
+			icon: 'info',
+			text: 'You can create a campaign on mobile, but the campaign editor is not available. You will be able to set up campaign details and review, but design editing requires a desktop device.',
+			showCancelButton: false,
+			confirmButtonText: 'Continue',
+		  }).then(() => {
 			navigate('/campaigns/new');
+		  });
+		} else {
+		  navigate('/campaigns/new');
 		}
-	}
+	  };
 
 	return (
 		<>

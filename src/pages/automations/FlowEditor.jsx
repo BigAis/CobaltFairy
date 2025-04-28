@@ -28,6 +28,7 @@ const FlowEditor = () => {
 	const [sidebarShown, setSideBarShown] = useState(true)
 	const [excludeNodes, setExcludeNodes] = useState([])
 	const [nodes, setNodes] = useState([])
+	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
 	const isDragging = useRef(false)
 	const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
@@ -74,6 +75,30 @@ const FlowEditor = () => {
 			window.removeEventListener('mouseup', stopDragging)
 		}
 	}, [])
+
+	// Add this useEffect for mobile detection
+	useEffect(() => {
+		const handleResize = () => {
+		setIsMobile(window.innerWidth <= 768);
+		};
+		
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
+	// Add this useEffect to redirect mobile users away from the editor
+	useEffect(() => {
+		if (isMobile) {
+		PopupText.fire({
+			icon: 'warning',
+			text: 'The automation flow editor is not available on mobile devices. Please use a desktop computer to edit your automation flow.',
+			showCancelButton: false,
+			confirmButtonText: 'OK',
+		}).then(() => {
+			navigate(`/automations/${autId}`);
+		});
+		}
+	}, [isMobile, autId, navigate]);
 
 	const { user, account } = useAccount()
 	const steps = [{ label: 'Automations' }, { label: 'Edit Automation' }, { label: 'Editor' }]

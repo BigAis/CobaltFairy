@@ -242,17 +242,41 @@ const Dashboard = () => {
 						</div>
 					</Card>
 					<div className={`dashboard-ctas ${isMobile ? 'mobile-ctas' : ''}`}>
-						<Button type={'secondary'} onClick={()=>{navigate(`/campaigns/new`)}}>
-							<Icon name="Campaigns" />
-							<span>Create Campaign</span>
-						</Button>
+					<Button type={'secondary'} onClick={() => {
+					if (isMobile) {
+						PopupText.fire({
+						icon: 'info',
+						text: 'You can create a campaign on mobile, but the campaign editor is not available. You will be able to set up campaign details and review, but design editing requires a desktop device.',
+						showCancelButton: false,
+						confirmButtonText: 'Continue',
+						}).then(() => {
+						navigate('/campaigns/new');
+						});
+					} else {
+						navigate('/campaigns/new');
+					}
+					}}>
+					<Icon name="Campaigns" />
+					<span>Create Campaign</span>
+					</Button>
 						<Button type={'secondary'} onClick={()=>{
 							PopupText.fire({text:'Under Construction',showCancelButton:false,confirmButtonText:'OK'})
 						}}>
 							<Icon name="Contacts" />
 							<span>Import Contacts</span>
 						</Button>
-						<Button type={'secondary'}  onClick={()=>{navigate(`/automations/new`)}}>
+						<Button type={'secondary'} onClick={() => {
+							if (isMobile) {
+							PopupText.fire({
+								icon: 'warning',
+								text: 'Automation editor is not available on mobile devices. Please use a desktop to design your automations.',
+								showCancelButton: false,
+								confirmButtonText: 'OK',
+							});
+							} else {
+							navigate('/automations/new');
+							}
+						}}>
 							<Icon name="Automations" />
 							<span>Create Automation</span>
 						</Button>

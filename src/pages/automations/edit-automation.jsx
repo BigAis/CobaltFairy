@@ -24,6 +24,7 @@ const EditAutomation = ()=>{
         {label:'Editor'},
     ];
     const [automationData, setAutomationData] = useState(null)
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const navigate = useNavigate();
     const params = useParams();
     const isEdit = params.autId!=="new";
@@ -59,6 +60,14 @@ const EditAutomation = ()=>{
         console.log('respdata',resp.data);
         return true
     }
+    useEffect(() => {
+        const handleResize = () => {
+          setIsMobile(window.innerWidth <= 768);
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+      }, []);
     useEffect(()=>{
         loadData();
     },[user])
@@ -77,9 +86,20 @@ const EditAutomation = ()=>{
                             let result = await saveAutomation();
                             if(result) navigate('/automations')
                         }}>Save & back</Button>
-                        <Button type="primary" style={{fontSize:'16px'}} onClick={ async ()=>{
-                            let result = await saveAutomation();
-                            if(result) navigate(`/automations/editor/${automationData.uuid}`)
+                        <Button type="primary" style={{fontSize:'16px'}} onClick={async () => {
+                        let result = await saveAutomation();
+                        if (result) {
+                            if (isMobile) {
+                            PopupText.fire({
+                                icon: 'warning',
+                                text: 'The automation flow editor is not available on mobile devices. Please use a desktop computer to edit your automation flow.',
+                                showCancelButton: false,
+                                confirmButtonText: 'OK',
+                            });
+                            } else {
+                            navigate(`/automations/editor/${automationData.uuid}`);
+                            }
+                        }
                         }}>Edit flow</Button>
                     </div>
                 </>

@@ -290,50 +290,52 @@ const NewCampaign = () => {
 
 	const handleNext = async () => {
 		try {
-			await validationSchema.validate({ subject: currentCampaign.subject, subjectB: currentCampaign.subject_b }, { abortEarly: false })
-			setErrors({})
-
-			const campaignData = {
-				...currentCampaign,
-				account: account.id,
+		  await validationSchema.validate({ subject: currentCampaign.subject, subjectB: currentCampaign.subject_b }, { abortEarly: false });
+		  setErrors({});
+	  
+		  const campaignData = {
+			...currentCampaign,
+			account: account.id,
+		  };
+	  
+		  if (isEdit) {
+			campaignData.udid = uuid;
+			const response = await ApiService.post('fairymailer/updateCampaign', { assignses: true, data: campaignData }, user.jwt);
+			
+			if (response && response.data && response.data.code === 200) {
+			  if (isMobile && step === 2) {
+				// If on mobile and moving from step 2 to step 3, skip directly to step 4
+				setStep(4);
+			  } else {
+				navigate(`/campaigns/edit/${campaignData.udid}`);
+				setStep(step + 1);
+			  }
 			}
-
-			if (isEdit) {
-				campaignData.udid = uuid
-				const response = await ApiService.post('fairymailer/updateCampaign', { assignses: true, data: campaignData }, user.jwt)
-				console.log('response is : ', response)
-				if (response && response.data && response.data.code === 200) {
-					if (isMobile) {
-						setStep(4) // Skip the editor step on mobile
-					} else {
-						navigate(`/campaigns/edit/${campaignData.udid}`)
-						setStep(step + 1)
-					}
-				}
-			} else {
-				campaignData.udid = uuidv4()
-				campaignData.uuid_b = uuidv4()
-
-				const response = await ApiService.post('fairymailer/createCampaign', { assignses: true, data: campaignData }, user.jwt)
-				console.log('response is : ', response)
-				if (response && response.data && response.data.code === 200) {
-					if (isMobile) {
-						setStep(4) // Skip the editor step on mobile
-					} else {
-						navigate(`/campaigns/edit/${campaignData.udid}`)
-						setStep(step + 1)
-					}
-				}
+		  } else {
+			campaignData.udid = uuidv4();
+			campaignData.uuid_b = uuidv4();
+	  
+			const response = await ApiService.post('fairymailer/createCampaign', { assignses: true, data: campaignData }, user.jwt);
+			
+			if (response && response.data && response.data.code === 200) {
+			  if (isMobile && step === 2) {
+				// If on mobile and moving from step 2 to step 3, skip directly to step 4
+				setStep(4);
+			  } else {
+				navigate(`/campaigns/edit/${campaignData.udid}`);
+				setStep(step + 1);
+			  }
 			}
+		  }
 		} catch (err) {
-			console.log('error is : ', err)
-			const newErrors = {}
-			err.inner.forEach((error) => {
-				newErrors[error.path] = error.message
-			})
-			setErrors(newErrors)
+		  console.log('error is : ', err);
+		  const newErrors = {};
+		  err.inner.forEach((error) => {
+			newErrors[error.path] = error.message;
+		  });
+		  setErrors(newErrors);
 		}
-	}
+	  };
 
 
 	const handleCheckAbSplit = () => {
