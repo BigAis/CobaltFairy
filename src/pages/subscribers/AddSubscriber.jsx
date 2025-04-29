@@ -8,11 +8,10 @@ import User from '../../service/User';
 import PopupText from '../../components/PopupText/PopupText';
 import './AddSubscriber.scss';
 
-const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields = [] }) => {
+const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {} }) => {
   const [subscriber, setSubscriber] = useState({
     email: '',
-    name: '',
-    customFields: []
+    name: ''
   });
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,24 +49,6 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
     }));
   };
   
-  const handleCustomFieldChange = (fieldUuid, value) => {
-    setSubscriber(prev => {
-      const updatedCustomFields = [...prev.customFields];
-      const existingIndex = updatedCustomFields.findIndex(field => field.uuid === fieldUuid);
-      
-      if (existingIndex !== -1) {
-        updatedCustomFields[existingIndex] = { ...updatedCustomFields[existingIndex], value };
-      } else {
-        updatedCustomFields.push({ uuid: fieldUuid, value });
-      }
-      
-      return {
-        ...prev,
-        customFields: updatedCustomFields
-      };
-    });
-  };
-  
   const handleGroupSelect = (option) => {
     setSelectedGroup(option);
     if (validationErrors.group) {
@@ -99,8 +80,7 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
   const clearForm = () => {
     setSubscriber({
       email: '',
-      name: '',
-      customFields: []
+      name: ''
     });
     setValidationErrors({});
     setRunAutomations(false);
@@ -133,11 +113,6 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
         group: selectedGroup.value, // Using the UDID directly
         automations: runAutomations
       };
-      
-      // Add custom fields if any
-      if (subscriber.customFields && subscriber.customFields.length > 0) {
-        requestPayload.customFields = subscriber.customFields;
-      }
       
       console.log('Adding subscriber with payload:', requestPayload);
       
@@ -198,44 +173,6 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
       }))
     : [];
   
-  const renderCustomFields = () => {
-    if (!customFields || customFields.length === 0) return null;
-    
-    return (
-      <div className="custom-fields-section">
-        <h4>Custom Fields</h4>
-        <div className="custom-fields-container">
-          {customFields.map(field => {
-            if (!field || !field.uuid) return null; // Skip invalid fields
-            
-            const fieldValue = subscriber.customFields.find(f => f.uuid === field.uuid)?.value || '';
-            
-            if (field.type && field.type.toLowerCase() === 'date') {
-              return (
-                <InputText
-                  key={field.uuid}
-                  label={field.name || 'Date Field'}
-                  value={fieldValue}
-                  placeholder="YYYY-MM-DD"
-                  onChange={(e) => handleCustomFieldChange(field.uuid, e.target.value)}
-                />
-              );
-            } else {
-              return (
-                <InputText
-                  key={field.uuid}
-                  label={field.name || 'Custom Field'}
-                  value={fieldValue}
-                  onChange={(e) => handleCustomFieldChange(field.uuid, e.target.value)}
-                />
-              );
-            }
-          })}
-        </div>
-      </div>
-    );
-  };
-  
   return (
     <Card className="add-subscriber-card">
       <h3>Add Subscriber</h3>
@@ -270,8 +207,6 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
           </Dropdown>
           {validationErrors.group && <div className="error-message">{validationErrors.group}</div>}
         </div>
-        
-        {renderCustomFields()}
         
         <div className="automation-toggle">
           <label className="switch">
