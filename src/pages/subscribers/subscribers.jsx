@@ -46,6 +46,9 @@ const Subscribers = () => {
 	const [totalSubs, setTotalSubs] = useState(0)
 	const [groups, setGroups] = useState([])
 
+	// State to track selected subscribers
+	const [selectedSubscribers, setSelectedSubscribers] = useState([])
+
 	const [view, setView] = useState('subs')
 	const [importMode, setImportMode] = useState('manual') // 'manual' or 'bulk'
 	const [subscriberSearchValue, setSubscriberSearchValue] = useState('')
@@ -116,6 +119,50 @@ const Subscribers = () => {
 		setSubscribersQueryFilter(query)
 	}
 
+	// Delete selected subscribers function - using the same logic as single delete
+	const deleteSelectedSubscribers = async () => {
+		if (selectedSubscribers.length === 0) return
+
+		PopupText.fire({
+			text: `Do you really want to remove ${selectedSubscribers.length} subscriber(s)? This action will unsubscribe them from all groups until they subscribe again manually.`,
+			confirmButtonText: 'Yes, delete.',
+			showCancelButton: true,
+			cancelButtonText: 'No, abort'
+		}).then(async (result) => {
+			if (result.isConfirmed) {
+				let successCount = 0;
+				
+				// Process each subscriber sequentially
+				for (const subscriber of selectedSubscribers) {
+					try {
+						const deleteResponse = await ApiService.post(
+							`fairymailer/removeSubscriber`, 
+							{ data: subscriber }, 
+							user.jwt
+						)
+						if (deleteResponse) {
+							successCount++;
+						}
+					} catch (error) {
+						console.error(`Error deleting subscriber ${subscriber.email}:`, error)
+					}
+				}
+
+				// Clear selection and refresh the list
+				setSelectedSubscribers([])
+				onUpdate()
+				
+				// Only show success message if at least one deletion was successful
+				if (successCount > 0) {
+					PopupText.fire({
+						text: `${successCount} subscriber(s) removed successfully.`,
+						icon: 'success',
+					})
+				}
+			}
+		})
+	}
+
 	const getSubscribers = async () => {
 		try {
 			const resp = await ApiService.get(
@@ -175,9 +222,20 @@ const Subscribers = () => {
 		switch (view) {
 			case 'subs':
 				return (
-					<Button icon={'Plus'} type="action" onClick={handleAddSubscribersClick}>
-						Add Subscribers
-					</Button>
+					<div className="action-buttons">
+						{selectedSubscribers.length > 0 && (
+							<Button 
+								type="secondary" 
+								onClick={deleteSelectedSubscribers}
+								style={{ marginRight: '10px' }}
+							>
+								Delete Selected ({selectedSubscribers.length})
+							</Button>
+						)}
+						<Button icon={'Plus'} type="action" onClick={handleAddSubscribersClick}>
+							Add Subscribers
+						</Button>
+					</div>
 				)
 			case 'groups':
 				return (
@@ -202,7 +260,7 @@ const Subscribers = () => {
 		}
 	}
 
-	const handleOnUpdate = async () => {
+	const onUpdate = async () => {
 		getGroups()
 		autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
 	}
@@ -290,7 +348,7 @@ const Subscribers = () => {
 						groups={groups} 
 						customFields={account?.fields || []}
 						onSubscriberAdded={() => {
-							handleOnUpdate();
+							onUpdate();
 							// Optionally return to the subscribers list after adding
 							// setView('subs');
 						}}
@@ -300,7 +358,7 @@ const Subscribers = () => {
 						groups={groups} 
 						onImportComplete={() => {
 							setView('subs');
-							handleOnUpdate();
+							onUpdate();
 						}} 
 					/>
 				)}
@@ -437,13 +495,20 @@ const Subscribers = () => {
 
 					{view === 'subs' && (
 						<div className="subscribers">
-							<SubscribersTable subscriberSearchValue={subscriberSearchValue} subscribersQueryFilter={subscribersQueryFilter} onUpdate={handleOnUpdate} setView={setView} />
+							<SubscribersTable 
+								subscriberSearchValue={subscriberSearchValue} 
+								subscribersQueryFilter={subscribersQueryFilter} 
+								onUpdate={onUpdate} 
+								setView={setView}
+								selectedSubscribers={selectedSubscribers}
+								setSelectedSubscribers={setSelectedSubscribers}
+							/>
 						</div>
 					)}
 
 					{view === 'groups' && (
 						<div className="groups">
-							<GroupsTable groupSearchValue={groupSearchValue} onUpdate={handleOnUpdate} setView={setView} />
+							<GroupsTable groupSearchValue={groupSearchValue} onUpdate={onUpdate} setView={setView} />
 						</div>
 					)}
 

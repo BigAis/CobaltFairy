@@ -19,8 +19,16 @@ import timezone from 'dayjs/plugin/timezone'
 
 import qs from 'qs'
 
-// const SubscribersTable = ({ subscribers, resultsPerPage = 10, onUpdate }) => {
-const SubscribersTable = ({ subscriberSearchValue, subscribersQueryFilter, onUpdate, setView, setTotalSubs }) => {
+// Accept selectedSubscribers and setSelectedSubscribers as props for managing selection state from parent component
+const SubscribersTable = ({ 
+  subscriberSearchValue, 
+  subscribersQueryFilter, 
+  onUpdate, 
+  setView, 
+  setTotalSubs,
+  selectedSubscribers,
+  setSelectedSubscribers 
+}) => {
 	const navigate = useNavigate()
 	const { user } = useAccount()
 
@@ -30,7 +38,8 @@ const SubscribersTable = ({ subscriberSearchValue, subscribersQueryFilter, onUpd
 	const [currentPage, setCurrentPage] = useState(1)
 	const resultsPerPage = 10
 
-	const [selectedSubscribers, setSelectedSubscribers] = useState([])
+	// Remove local state if using props
+	// const [selectedSubscribers, setSelectedSubscribers] = useState([])
 	const rowsPerPage = resultsPerPage
 
 	const handlePageChange = (newPage) => {
@@ -162,12 +171,12 @@ const SubscribersTable = ({ subscriberSearchValue, subscribersQueryFilter, onUpd
 							{/* Checkbox in the Top-Left Corner */}
 							<div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
 								<Checkbox
-									checked={selectedSubscribers.some((subscribers) => subscribers.name === rowData.name)}
+									checked={selectedSubscribers.some((sub) => sub.udid === rowData.udid)}
 									onChange={(e) => {
 										if (e) {
 											setSelectedSubscribers((prev) => [...prev, rowData])
 										} else {
-											setSelectedSubscribers((prev) => prev.filter((subscribers) => subscribers.name !== rowData.name))
+											setSelectedSubscribers((prev) => prev.filter((sub) => sub.udid !== rowData.udid))
 										}
 									}}
 								/>
