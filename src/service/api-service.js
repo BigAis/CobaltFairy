@@ -220,10 +220,22 @@ const ApiService = {
 		const url = `${endpoint}`
 		return axios.get(url)
 	},
-	post_external: (endpoint, data) => {
+	post_external: (endpoint, data, headers = {}) => {
 		const url = `${endpoint}`
-		return axios.post(url, data)
-	},
+		console.log(`Making external POST request to: ${url}`)
+		
+		return axios.post(url, data, {
+		  headers: headers.headers || {},
+		})
+		.then(response => {
+		  console.log(`Successful response from external endpoint:`, response.status)
+		  return response
+		})
+		.catch(error => {
+		  console.error(`Error in external POST request:`, error.response || error)
+		  throw error
+		})
+	  },
 	get: (endpoint, jwt) => {
 		const url = `${BASE_URL}/${endpoint}`
 		console.log(`Making GET request to: ${url}`)
@@ -261,12 +273,19 @@ const ApiService = {
 		const url = `${BASE_URL}/${endpoint}`
 		console.log(`Making POST request to: ${url}`)
 		
+		// Custom headers object handling
+		const requestHeaders = headers || {
+			Authorization: 'Bearer ' + jwt,
+			'Content-Type': 'application/json'
+		};
+		
+		// If we're dealing with FormData, let the browser set the content type
+		if (data instanceof FormData) {
+			delete requestHeaders['Content-Type'];
+		}
+		
 		return axios.post(url, data, {
-			headers: headers
-				? headers
-				: {
-						Authorization: 'Bearer ' + jwt,
-				  },
+			headers: requestHeaders,
 		})
 		.then(response => {
 			console.log(`Successful response from ${endpoint}:`, response.status)
@@ -274,6 +293,25 @@ const ApiService = {
 		})
 		.catch(error => {
 			console.error(`Error in POST request to ${endpoint}:`, error.response || error)
+			throw error
+		})
+	},
+	put: (endpoint, data, jwt) => {
+		const url = `${BASE_URL}/${endpoint}`
+		console.log(`Making PUT request to: ${url}`)
+		
+		return axios.put(url, data, {
+			headers: {
+				Authorization: 'Bearer ' + jwt,
+				'Content-Type': 'application/json'
+			},
+		})
+		.then(response => {
+			console.log(`Successful response from ${endpoint}:`, response.status)
+			return response
+		})
+		.catch(error => {
+			console.error(`Error in PUT request to ${endpoint}:`, error.response || error)
 			throw error
 		})
 	},
@@ -288,14 +326,6 @@ const ApiService = {
 			},
 		})
 	},
-	put: (endpoint, data, jwt) => {
-		const url = `${BASE_URL}/${endpoint}`
-		return axios.put(url, data, {
-			headers: {
-				Authorization: 'Bearer ' + jwt,
-			},
-		})
-	},
 	delete: (endpoint, jwt) => {
 		const url = `${BASE_URL}/${endpoint}`
 		return axios.delete(url, {
@@ -304,6 +334,38 @@ const ApiService = {
 			},
 		})
 	},
+	// Method specifically for uploading files with correct Content-Type
+	uploadCsv: async (file, emailColumn, nameColumn, groupId, jwt) => {
+		const url = `${BASE_URL}/fairymailer/upload-csv`;
+		console.log(`Making CSV upload request to: ${url}`);
+		
+		const formData = new FormData();
+		formData.append('file', file);
+		
+		const metadata = {
+			email: emailColumn,
+			name: nameColumn,
+			group: groupId
+		};
+		
+		formData.append('meta', JSON.stringify(metadata));
+		
+		// Use the exact headers format from the working example
+		try {
+			const response = await axios.post(url, formData, {
+				headers: {
+					'Authorization': 'Bearer ' + jwt,
+					'Content-Type': 'multipart/form-data'
+				}
+			});
+			
+			console.log(`Successful CSV upload:`, response.status);
+			return response;
+		} catch (error) {
+			console.error(`Error in CSV upload:`, error.response || error);
+			throw error;
+		}
+	}
 }
 
 export { ApiService, BASE_URL, APP_VERSION }

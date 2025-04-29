@@ -22,6 +22,9 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import CustomFieldsTable from '../../components/DataTable/CustomFieldsTable'
+import ImportCSV from './ImportCSV'
+import AddSubscriber from './AddSubscriber'
+import PopupText from '../../components/PopupText/PopupText'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -44,6 +47,7 @@ const Subscribers = () => {
 	const [groups, setGroups] = useState([])
 
 	const [view, setView] = useState('subs')
+	const [importMode, setImportMode] = useState('manual') // 'manual' or 'bulk'
 	const [subscriberSearchValue, setSubscriberSearchValue] = useState('')
 	const [groupSearchValue, setGroupSearchValue] = useState('')
 	const [showFilters, setShowFilters] = useState(false)
@@ -110,20 +114,23 @@ const Subscribers = () => {
 		})
 
 		setSubscribersQueryFilter(query)
-		// const queryString = qs.stringify(query, { encode: false })
-
-		// const subscribersResponse = await ApiService.get(`fairymailer/getSubscribers?${queryString}&pagination[page]=${1}&pagination[pageSize]=${100}&populate[groups][count]=1`, user.jwt) ///?page=${page}&pageSize=${pageSize}
-		// console.log('Subscribers', subscribersResponse)
-		// if (subscribersResponse && subscribersResponse.data && subscribersResponse.data.data) setSubscribers(subscribersResponse.data.data)
 	}
 
 	const getSubscribers = async () => {
-		const resp = await ApiService.get(
-			`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[active]=true&[email][$contains]=${subscriberSearchValue}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
-			user.jwt
-		)
-		if (resp.data && resp.data.data) setSubscribers(resp.data.data)
-		if (resp.data && resp.data.meta) setTotalSubs(resp.data.meta.pagination.total)
+		try {
+			const resp = await ApiService.get(
+				`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[active]=true&[email][$contains]=${subscriberSearchValue}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
+				user.jwt
+			)
+			if (resp.data && resp.data.data) setSubscribers(resp.data.data)
+			if (resp.data && resp.data.meta) setTotalSubs(resp.data.meta.pagination.total)
+		} catch (error) {
+			console.error('Error fetching subscribers:', error)
+			PopupText.fire({
+				text: 'Error fetching subscribers. Please try again later.',
+				icon: 'error'
+			})
+		}
 	}
 
 	const getGroups = async (page = 1) => {
@@ -145,6 +152,10 @@ const Subscribers = () => {
 			}
 		} catch (error) {
 			console.error('Error fetching groups:', error)
+			PopupText.fire({
+				text: 'Error fetching groups. Please try again later.',
+				icon: 'error'
+			})
 		}
 	}
 
@@ -154,27 +165,36 @@ const Subscribers = () => {
 		}
 	}, [user])
 
+	const handleAddSubscribersClick = () => {
+		// Reset to manual mode when opening the add subscribers view
+		setImportMode('manual')
+		setView('import')
+	}
+
 	const renderAddButton = () => {
 		switch (view) {
 			case 'subs':
 				return (
-					<Button icon={'Plus'} type="action">
-						{' '}
-						Add Subscribers{' '}
+					<Button icon={'Plus'} type="action" onClick={handleAddSubscribersClick}>
+						Add Subscribers
 					</Button>
 				)
 			case 'groups':
 				return (
 					<Button onClick={() => navigate('/subscribers/group/new')} icon={'Plus'} type="action">
-						{' '}
-						Add Group{' '}
+						Add Group
 					</Button>
 				)
 			case 'fields':
 				return (
 					<Button onClick={() => navigate('/subscribers/field/new')} icon={'Plus'} type="action">
-						{' '}
-						Add Custom Field{' '}
+						Add Custom Field
+					</Button>
+				)
+			case 'import':
+				return (
+					<Button onClick={() => setView('subs')} icon={'ArrowLeft'} type="action">
+						Back to Subscribers
 					</Button>
 				)
 			default:
@@ -199,17 +219,23 @@ const Subscribers = () => {
 		if (filterString && groups && groups.length > 0) {
 			setShowFilters(true)
 
-			const objfrombase64 = JSON.parse(atob(filterString))
-			console.log('Filter String:', objfrombase64)
-			const groupIdToFilter = groupOptions.find((grp) => {
-				return grp.value === objfrombase64.group_udid
-			})
-			console.log('groupIdToFilter', groupIdToFilter)
-			setSubscribersFilters((prev) => ({
-				...prev,
-				groups: [groupIdToFilter],
-			}))
-			setAutoAppliedFilters(true)
+			try {
+				const objfrombase64 = JSON.parse(atob(filterString))
+				console.log('Filter String:', objfrombase64)
+				const groupIdToFilter = groupOptions.find((grp) => {
+					return grp.value === objfrombase64.group_udid
+				})
+				console.log('groupIdToFilter', groupIdToFilter)
+				if (groupIdToFilter) {
+					setSubscribersFilters((prev) => ({
+						...prev,
+						groups: [groupIdToFilter],
+					}))
+					setAutoAppliedFilters(true)
+				}
+			} catch (error) {
+				console.error('Error parsing filter string:', error)
+			}
 		}
 	}, [filterString, groups])
 
@@ -218,6 +244,70 @@ const Subscribers = () => {
 			
 		}
 	},[account])
+	
+	const renderImportOptions = () => {
+		// Only render this section if we're in the import view
+		if (view !== 'import') return null;
+		
+		// Make sure we have a valid user and account before rendering
+		if (!user) {
+			return <Card>Please log in to continue</Card>;
+		}
+		
+		// Check if groups array is available to prevent errors
+		if (!groups || groups.length === 0) {
+			return (
+				<Card>
+					<div className="text-center p-4">
+						<p>You need to create a group before adding subscribers.</p>
+						<Button 
+							onClick={() => navigate('/subscribers/group/new')} 
+							style={{ marginTop: '15px' }}
+						>
+							Create Group
+						</Button>
+					</div>
+				</Card>
+			);
+		}
+		
+		// Render the import options with proper checks
+		return (
+			<div className="import-options">
+				<div className="button-group-wrapper">
+					<ButtonGroup
+						options={[
+							{ value: 'manual', label: 'Add Single Subscriber' },
+							{ value: 'bulk', label: 'Bulk Import from CSV' }
+						]}
+						onChange={(value) => setImportMode(value)}
+						value={importMode}
+					/>
+				</div>
+				
+				{importMode === 'manual' ? (
+					<AddSubscriber 
+						groups={groups} 
+						customFields={account?.fields || []}
+						onSubscriberAdded={() => {
+							handleOnUpdate();
+							// Optionally return to the subscribers list after adding
+							// setView('subs');
+						}}
+					/>
+				) : (
+					<ImportCSV 
+						groups={groups} 
+						onImportComplete={() => {
+							setView('subs');
+							handleOnUpdate();
+						}} 
+					/>
+				)}
+			</div>
+		);
+	};
+	
 	return (
 		<>
 			<div className="fm-page-wrapper">
@@ -228,73 +318,81 @@ const Subscribers = () => {
 						{view === 'subs' && <div className="page-name">Subscribers</div>}
 						{view === 'groups' && <div className="page-name">Groups</div>}
 						{view === 'fields' && <div className="page-name">Fields</div>}
+						{view === 'import' && (
+							<div className="page-name">
+								{importMode === 'manual' ? 'Add Subscriber' : 'Import Subscribers'}
+							</div>
+						)}
 						{renderAddButton()}
 					</div>
-					<div className="filters-container">
-						<div className="button-group-wrapper">
-							<ButtonGroup
-								options={[
-									{ value: 'subs', label: `All Subscribers (${totalSubs})` },
-									{ value: null, label: `Segments (0)` },
-									{ value: 'groups', label: `Groups (${totalGroups})` },
-									{ value: 'fields', label: `Fields` },
-									{ value: null, label: `History` },
-									{ value: null, label: `Stats` },
-									{ value: null, label: `Clean up` },
-								]}
-								onChange={(value) => {
-									if (value) setView(value)
-									setShowFilters(false)
-								}}
-								value={view}
-							></ButtonGroup>
+					
+					{view !== 'import' && (
+						<div className="filters-container">
+							<div className="button-group-wrapper">
+								<ButtonGroup
+									options={[
+										{ value: 'subs', label: `All Subscribers (${totalSubs})` },
+										{ value: null, label: `Segments (0)` },
+										{ value: 'groups', label: `Groups (${totalGroups})` },
+										{ value: 'fields', label: `Fields` },
+										{ value: null, label: `History` },
+										{ value: null, label: `Stats` },
+										{ value: null, label: `Clean up` },
+									]}
+									onChange={(value) => {
+										if (value) setView(value)
+										setShowFilters(false)
+									}}
+									value={view}
+								></ButtonGroup>
+							</div>
+
+							{view === 'subs' && (
+								<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+									<InputText
+										style={{ width: '100%', margin: 0, marginRight: '20px' }}
+										placeholder="Search Subscribers"
+										label="Search Subscribers"
+										hasError={false}
+										errorMessage="Name must be at least 3 characters long."
+										value={subscriberSearchValue}
+										onChange={(e) => {
+											setSubscriberSearchValue(e.target.value)
+										}}
+									/>
+									<Button
+										type="secondary"
+										icon={'Filters'}
+										className="button-filters"
+										onClick={() => {
+											setShowFilters((prev) => {
+												return !prev
+											})
+										}}
+									>
+										Filters
+									</Button>
+								</div>
+							)}
+
+							{view === 'groups' && (
+								<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+									<InputText
+										style={{ width: '100%', margin: 0, marginRight: '20px' }}
+										placeholder="Search Groups"
+										label="Search Groups"
+										hasError={false}
+										errorMessage="Name must be at least 3 characters long."
+										value={groupSearchValue}
+										onChange={(e) => {
+											setGroupSearchValue(e.target.value)
+										}}
+									/>
+								</div>
+							)}
 						</div>
-
-						{view === 'subs' && (
-							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-								<InputText
-									style={{ width: '100%', margin: 0, marginRight: '20px' }}
-									placeholder="Search Subscribers"
-									label="Search Subscribers"
-									hasError={false}
-									errorMessage="Name must be at least 3 characters long."
-									value={subscriberSearchValue}
-									onChange={(e) => {
-										setSubscriberSearchValue(e.target.value)
-									}}
-								/>
-								<Button
-									type="secondary"
-									icon={'Filters'}
-									className="button-filters"
-									onClick={() => {
-										setShowFilters((prev) => {
-											return !prev
-										})
-									}}
-								>
-									{' '}
-									Filters{' '}
-								</Button>
-							</div>
-						)}
-
-						{view === 'groups' && (
-							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-								<InputText
-									style={{ width: '100%', margin: 0, marginRight: '20px' }}
-									placeholder="Search Groups"
-									label="Search Groups"
-									hasError={false}
-									errorMessage="Name must be at least 3 characters long."
-									value={groupSearchValue}
-									onChange={(e) => {
-										setGroupSearchValue(e.target.value)
-									}}
-								/>
-							</div>
-						)}
-					</div>
+					)}
+					
 					<Card style={{ display: showFilters ? 'flex' : 'none' }} className={'d-flex flex-column subscriber-filters-card gap-20 mt20'}>
 						<div className="d-flex gap-20 ">
 							<InputText value={subscribersFilters.email} onChange={(e) => handleFilterChange('email', e.target.value)} label={'Email Contains'}></InputText>
@@ -345,33 +443,18 @@ const Subscribers = () => {
 
 					{view === 'groups' && (
 						<div className="groups">
-							{/* <GroupsTable
-								groups={groups}
-								resultsPerPage={resultsPerPage}
-								currentPage={currentGroupPage}
-								totalResults={totalGroups}
-								onPageChange={handlePageChange}
-								onUpdate={handleOnUpdate}
-								setView={setView}
-							/> */}
 							<GroupsTable groupSearchValue={groupSearchValue} onUpdate={handleOnUpdate} setView={setView} />
 						</div>
 					)}
 
 					{view === 'fields' && (
 						<div className="groups">
-							{/* <GroupsTable
-								groups={groups}
-								resultsPerPage={resultsPerPage}
-								currentPage={currentGroupPage}
-								totalResults={totalGroups}
-								onPageChange={handlePageChange}
-								onUpdate={handleOnUpdate}
-								setView={setView}
-							/> */}
 							<CustomFieldsTable setView={setView} />
 						</div>
 					)}
+					
+					{/* Import options section with proper rendering */}
+					{renderImportOptions()}
 				</div>
 			</div>
 		</>

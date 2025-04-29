@@ -17,3 +17,42 @@ div.subscriber-filters-card > div,
 div.subscriber-filters-card > div > div {
 	flex: 1;
 }
+
+.import-options {
+  margin-top: 20px;
+  
+  .button-group-wrapper {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    
+    .btn-group {
+      justify-content: center;
+      
+      .btn {
+        min-width: 170px;
+        text-align: center;
+      }
+    }
+  }
+}
+
+/* Add some responsive fixes for mobile */
+@media (max-width: 768px) {
+  .button-filters {
+    min-width: 120px;
+  }
+  
+  .import-options {
+    .button-group-wrapper {
+      .btn-group {
+        flex-direction: column;
+        
+        .btn {
+          width: 100%;
+          margin-bottom: 5px;
+        }
+      }
+    }
+  }
+}
