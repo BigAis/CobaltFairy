@@ -215,6 +215,46 @@ export const isUserLoggedIn = () => {
 	}
 }
 
+// Helper function to get session data
+export const getSessionData = () => {
+    try {
+        const fairymail_session = localStorage.getItem('fairymail_session');
+        if (!fairymail_session) {
+            return null;
+        }
+        return JSON.parse(decodeURIComponent(fairymail_session));
+    } catch (error) {
+        console.error("Error getting session data:", error);
+        return null;
+    }
+}
+
+// Add a subscriber with new endpoint
+export const insertSubscriber = async (subscriberData) => {
+    try {
+        const userData = getSessionData();
+        if (!userData || !userData.jwt) {
+            throw new Error("Authentication required");
+        }
+
+        const response = await axios.post(
+            `${BASE_URL}/fairymailer/insert-subscriber`,
+            subscriberData,
+            {
+                headers: {
+                    Authorization: 'Bearer ' + userData.jwt,
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+
+        return response;
+    } catch (error) {
+        console.error("Error adding subscriber:", error);
+        throw error;
+    }
+}
+
 const ApiService = {
 	get_external: (endpoint) => {
 		const url = `${endpoint}`
@@ -334,38 +374,16 @@ const ApiService = {
 			},
 		})
 	},
-	// Method specifically for uploading files with correct Content-Type
-	uploadCsv: async (file, emailColumn, nameColumn, groupId, jwt) => {
-		const url = `${BASE_URL}/fairymailer/upload-csv`;
-		console.log(`Making CSV upload request to: ${url}`);
-		
-		const formData = new FormData();
-		formData.append('file', file[0]);
-		
-		const metadata = {
-			email: emailColumn,
-			name: nameColumn,
-			group: groupId
-		};
-		
-		formData.append('meta', JSON.stringify(metadata));
-		
-		// Use the exact headers format from the working example
-		try {
-			const response = await axios.post(url, formData, {
-				headers: {
-					'Authorization': 'Bearer ' + jwt,
-					'Content-Type': 'multipart/form-data'
-				}
-			});
-			
-			console.log(`Successful CSV upload:`, response.status);
-			return response;
-		} catch (error) {
-			console.error(`Error in CSV upload:`, error.response || error);
-			throw error;
-		}
-	}
+
+    // Helper method for new subscriber endpoint
+    insertSubscriber: (subscriberData) => {
+        return insertSubscriber(subscriberData);
+    },
+    
+    // Method to get session data
+    getSessionData: () => {
+        return getSessionData();
+    }
 }
 
 export { ApiService, BASE_URL, APP_VERSION }

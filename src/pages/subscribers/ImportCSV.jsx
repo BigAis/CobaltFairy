@@ -19,6 +19,7 @@ const ImportCSV = ({ groups = [], onImportComplete = () => {} }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewData, setPreviewData] = useState([]);
+  const [runAutomations, setRunAutomations] = useState(false);
   
   // Auto-select first group if only one exists
   useEffect(() => {
@@ -96,7 +97,6 @@ const ImportCSV = ({ groups = [], onImportComplete = () => {} }) => {
     });
   };
   
-  // Server-only upload using the exact format from the working example
   const uploadCSV = async () => {
     if (!file || !mapping.email || !selectedGroup) {
       PopupText.fire({
@@ -109,57 +109,100 @@ const ImportCSV = ({ groups = [], onImportComplete = () => {} }) => {
     setIsUploading(true);
     
     try {
-      // Find the actual group ID from the selected group
-      const selectedGroupObj = groups.find(g => g.udid === selectedGroup.value);
-      if (!selectedGroupObj || !selectedGroupObj.id) {
-        throw new Error('Could not find the group ID');
-      }
+      // Parse the entire CSV file to determine the number of rows
+      const csvData = await new Promise((resolve, reject) => {
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: resolve,
+          error: reject
+        });
+      });
       
-      // Create form data exactly as shown in the working example
-      const formData = new FormData();
+      const rowCount = csvData.data.length;
       
-      // Use file[0] if it's an array, otherwise use file directly
-      if (Array.isArray(file)) {
-        formData.append('file', file[0]);
-      } else {
-        formData.append('file', file);
-      }
-      
-      // Create metadata using the exact format expected by server
-      const metadata = {
-        email: mapping.email,           // header value for subscriber email
-        name: mapping.name || '',       // header value for subscriber name
-        group: selectedGroupObj.id,     // numeric id of the group
-      };
-      
-      // Log what we're sending
-      console.log('Uploading CSV with metadata:', metadata);
-      
-      formData.append('meta', JSON.stringify(metadata));
-      
-      // Get the user's JWT
-      const userData = User.get();
+      // Authentication
+      const userData = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')));
       if (!userData || !userData.jwt) {
         throw new Error("Authentication required");
       }
       
-      // Follow the exact pattern from the working example
-      const response = await ApiService.post(
-        'fairymailer/upload-csv',
-        formData,
-        userData.jwt,
-        {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': 'Bearer ' + userData.jwt
+      if (rowCount <= 10) {
+        // Small file - process directly
+        for (const row of csvData.data) {
+          if (!row[mapping.email]) {
+            console.warn('Skipping row with no email');
+            continue;
+          }
+          
+          const subscriberData = {
+            email: row[mapping.email],
+            name: row[mapping.name] || '',
+            group: selectedGroup.value, // Using UDID directly
+            automations: runAutomations
+          };
+          
+          await ApiService.post(
+            'fairymailer/insert-subscriber',
+            subscriberData,
+            userData.jwt
+          );
         }
-      );
-      
-      console.log('CSV upload response:', response);
-      
-      PopupText.fire({
-        text: 'Subscribers imported successfully!',
-        icon: 'success'
-      });
+        
+        PopupText.fire({
+          text: `${rowCount} subscribers imported successfully!`,
+          icon: 'success'
+        });
+        
+      } else {
+        // Large file - use the server endpoint for batch processing
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        // Create metadata for the upload
+        const metadata = {
+          email: mapping.email,
+          name: mapping.name || '',
+          group: selectedGroup.value, // Using UDID directly
+          automations: runAutomations
+        };
+        
+        console.log('Uploading CSV with metadata:', metadata);
+        
+        formData.append('meta', JSON.stringify(metadata));
+        
+        // Send the CSV file to server for processing
+        const response = await ApiService.post(
+          'fairymailer/upload-csv',
+          formData,
+          userData.jwt,
+          {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': 'Bearer ' + userData.jwt
+          }
+        );
+        
+        console.log('CSV upload response:', response);
+        
+        // Check the response
+        if (response.data && response.data.code === 200) {
+          const isFinished = response.data.finished === true;
+          
+          if (isFinished) {
+            PopupText.fire({
+              text: 'All subscribers imported successfully!',
+              icon: 'success'
+            });
+          } else {
+            PopupText.fire({
+              text: 'Your CSV file is being processed in the background. You will receive an email when it\'s complete.',
+              icon: 'info'
+            });
+          }
+        } else {
+          throw new Error('Unexpected response from server');
+        }
+      }
       
       // Notify parent and reset form
       onImportComplete();
@@ -167,11 +210,12 @@ const ImportCSV = ({ groups = [], onImportComplete = () => {} }) => {
       setHeaders([]);
       setPreviewData([]);
       setMapping({ email: '', name: '' });
+      setRunAutomations(false);
       
     } catch (error) {
       console.error('Error uploading CSV:', error);
       
-      let errorMessage = 'Error uploading CSV to server';
+      let errorMessage = 'Error uploading CSV';
       
       if (error.response?.data?.error?.message) {
         errorMessage += `: ${error.response.data.error.message}`;
@@ -319,6 +363,18 @@ const ImportCSV = ({ groups = [], onImportComplete = () => {} }) => {
                 Select Group
               </Dropdown>
             </div>
+          </div>
+          
+          <div className="automation-toggle">
+            <label className="switch">
+              <input 
+                type="checkbox" 
+                checked={runAutomations}
+                onChange={() => setRunAutomations(!runAutomations)}
+              />
+              <span className="slider round"></span>
+            </label>
+            <span className="toggle-label">Run automations for these subscribers</span>
           </div>
           
           {renderPreview()}

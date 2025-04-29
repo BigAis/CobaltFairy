@@ -17,6 +17,7 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [runAutomations, setRunAutomations] = useState(false);
   
   // If we only have one group, auto-select it
   useEffect(() => {
@@ -102,6 +103,7 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
       customFields: []
     });
     setValidationErrors({});
+    setRunAutomations(false);
     
     // Don't reset the group if there's only one
     if (groups.length > 1) {
@@ -115,80 +117,51 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
     setIsSubmitting(true);
     
     try {
-      const userData = User.get();
+      const userData = JSON.parse(decodeURIComponent(localStorage.getItem('fairymail_session')));
       if (!userData || !userData.jwt) {
         throw new Error("Authentication required");
       }
       
-      // Step 1: Create subscriber
-      const subscriberData = {
-        email: subscriber.email,
+      if (!selectedGroup || !selectedGroup.value) {
+        throw new Error("Group selection required");
+      }
+      
+      // Create the request payload according to the new format
+      const requestPayload = {
         name: subscriber.name || '',
-        active: true,
-        fields: subscriber.customFields || []
+        email: subscriber.email,
+        group: selectedGroup.value, // Using the UDID directly
+        automations: runAutomations
       };
       
-      console.log('Creating subscriber with data:', subscriberData);
+      // Add custom fields if any
+      if (subscriber.customFields && subscriber.customFields.length > 0) {
+        requestPayload.customFields = subscriber.customFields;
+      }
       
-      // Strapi uses a different data structure for POST requests
-      const createResponse = await ApiService.post(
-        'subscribers', 
-        { 
-          data: subscriberData
-        },
+      console.log('Adding subscriber with payload:', requestPayload);
+      
+      // Use the new endpoint
+      const response = await ApiService.post(
+        'fairymailer/insert-subscriber',
+        requestPayload,
         userData.jwt
       );
       
-      console.log('Subscriber creation response:', createResponse);
+      console.log('Subscriber addition response:', response);
       
-      // Check if response has the expected format from Strapi
-      let subscriberId;
-      if (createResponse?.data?.data?.id) {
-        // New Strapi format
-        subscriberId = createResponse.data.data.id;
-      } else if (createResponse?.data?.id) {
-        // Old format
-        subscriberId = createResponse.data.id;
+      // Check for success
+      if (response.data && (response.data.code === 200 || response.status === 200)) {
+        PopupText.fire({
+          text: 'Subscriber added successfully!',
+          icon: 'success'
+        });
+        
+        clearForm();
+        onSubscriberAdded();
       } else {
-        console.error('Unexpected response format:', createResponse);
-        throw new Error('Failed to extract subscriber ID from response');
+        throw new Error('Unexpected response from server');
       }
-      
-      console.log('Extracted subscriber ID:', subscriberId);
-      
-      // Step 2: Find the selected group
-      const selectedGroupObj = groups.find(g => g.udid === selectedGroup.value);
-      if (!selectedGroupObj) {
-        throw new Error('Selected group not found');
-      }
-      
-      console.log('Found group:', selectedGroupObj);
-      
-      // Step 3: Link the subscriber to the group using PUT with the format that worked
-      console.log(`Linking subscriber ${subscriberId} to group ${selectedGroupObj.id}`);
-      
-      const updateGroupResponse = await ApiService.put(
-        'groups/' + selectedGroupObj.id, 
-        {
-          data: {
-            subscribers: {
-              connect: [subscriberId]
-            }
-          }
-        },
-        userData.jwt
-      );
-      
-      console.log('Group update response:', updateGroupResponse);
-      
-      // Success! Clear form and show message
-      PopupText.fire({
-        text: 'Subscriber added successfully!',
-        icon: 'success'
-      });
-      
-      clearForm();
-      onSubscriberAdded();
       
     } catch (error) {
       console.error('Error in add subscriber process:', error);
@@ -299,6 +272,18 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
         </div>
         
         {renderCustomFields()}
+        
+        <div className="automation-toggle">
+          <label className="switch">
+            <input 
+              type="checkbox" 
+              checked={runAutomations}
+              onChange={() => setRunAutomations(!runAutomations)}
+            />
+            <span className="slider round"></span>
+          </label>
+          <span className="toggle-label">Run automations for this subscriber</span>
+        </div>
         
         <div className="submit-container">
           <Button 
