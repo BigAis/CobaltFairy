@@ -120,7 +120,7 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
         throw new Error("Authentication required");
       }
       
-      // Create subscriber
+      // Step 1: Create subscriber
       const subscriberData = {
         email: subscriber.email,
         name: subscriber.name || '',
@@ -156,7 +156,7 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
       
       console.log('Extracted subscriber ID:', subscriberId);
       
-      // Find the selected group
+      // Step 2: Find the selected group
       const selectedGroupObj = groups.find(g => g.udid === selectedGroup.value);
       if (!selectedGroupObj) {
         throw new Error('Selected group not found');
@@ -164,9 +164,11 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
       
       console.log('Found group:', selectedGroupObj);
       
-      // Try different payload formats for the PUT request
-      const formats = [
-        // Format 1: Strapi connect format
+      // Step 3: Link the subscriber to the group using PUT with the format that worked
+      console.log(`Linking subscriber ${subscriberId} to group ${selectedGroupObj.id}`);
+      
+      const updateGroupResponse = await ApiService.put(
+        'groups/' + selectedGroupObj.id, 
         {
           data: {
             subscribers: {
@@ -174,62 +176,20 @@ const AddSubscriber = ({ groups = [], onSubscriberAdded = () => {}, customFields
             }
           }
         },
-        // Format 2: Direct array format
-        {
-          data: {
-            subscribers: [subscriberId]
-          }
-        },
-        // Format 3: Simple array append format
-        {
-          subscribers: [subscriberId]
-        }
-      ];
+        userData.jwt
+      );
       
-      let success = false;
-      let lastError = null;
+      console.log('Group update response:', updateGroupResponse);
       
-      // Try each format until one works
-      for (const format of formats) {
-        try {
-          console.log(`Trying group update with format:`, format);
-          
-          const updateResponse = await ApiService.put(
-            'groups/' + selectedGroupObj.id, 
-            format,
-            userData.jwt
-          );
-          
-          console.log('Group update successful with format:', format, updateResponse);
-          success = true;
-          
-          PopupText.fire({
-            text: 'Subscriber added successfully!',
-            icon: 'success'
-          });
-          
-          clearForm();
-          onSubscriberAdded();
-          break; // Exit loop on success
-        } catch (error) {
-          console.warn(`Group update failed with format:`, format, error);
-          lastError = error;
-        }
-      }
+      // Success! Clear form and show message
+      PopupText.fire({
+        text: 'Subscriber added successfully!',
+        icon: 'success'
+      });
       
-      // If all formats failed
-      if (!success) {
-        console.error('All group update formats failed, last error:', lastError);
-        
-        // Show partial success since subscriber was created but not added to group
-        PopupText.fire({
-          text: 'Subscriber created, but could not be added to group. Please try again or add them to the group manually.',
-          icon: 'warning'
-        });
-        
-        clearForm();
-        onSubscriberAdded();
-      }
+      clearForm();
+      onSubscriberAdded();
+      
     } catch (error) {
       console.error('Error in add subscriber process:', error);
       

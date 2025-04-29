@@ -340,7 +340,7 @@ const ApiService = {
 		console.log(`Making CSV upload request to: ${url}`);
 		
 		const formData = new FormData();
-		formData.append('file', file);
+		formData.append('file', file[0]);
 		
 		const metadata = {
 			email: emailColumn,
