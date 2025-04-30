@@ -5,21 +5,19 @@ import PopupText from '../../components/PopupText/PopupText'
 import { useAccount } from '../../context/AccountContext'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import PageHeader from '../../components/PageHeader/PageHeader'
-import NotificationBar from '../../components/NotificationBar/NotificationBar'
 import Button from '../../components/Button'
 import BookFunnelIntegrationsTable from '../../components/DataTable/IntegrationBookFunnelTable'
 import InputText from '../../components/InputText/InputText'
 import Dropdown from '../../components/Dropdown'
 
 const BookFunnel = () => {
-	const { user, account } = useAccount()
+	const { user, account, createNotification } = useAccount()
 	const navigate = useNavigate()
 	const { mode } = useParams()
 	const [currentPage, setCurrentPage] = useState(1)
 	const [itemsPerPage, setItemsPerPage] = useState(20)
 	const [integrations, setIntegrations] = useState([])
 	const [meta, setMeta] = useState(null)
-	const [notifications, setNotifications] = useState([])
 
 	const [bookFunnelBooks, setBookFunnelBooks] = useState([])
 	const [groups, setGroups] = useState([])
@@ -48,6 +46,10 @@ const BookFunnel = () => {
 			setBookFunnelBooks(refresh.data.data)
 		} catch (error) {
 			console.error('Error fetching book funnel books:', error)
+			createNotification({
+				message: 'Error fetching Book Funnel books. Please try again.',
+				type: 'warning'
+			})
 		}
 	}
 
@@ -58,11 +60,23 @@ const BookFunnel = () => {
 			setGroups(groups.data.data)
 		} catch (error) {
 			console.error('Error fetching groups:', error)
+			createNotification({
+				message: 'Error fetching groups. Please try again.',
+				type: 'warning'
+			})
 		}
 	}
 
 	const saveBookFunnelIntegration = async () => {
 		try {
+			if (!selectedBookFunnelBook || !selectedGroup) {
+				createNotification({
+					message: 'Please select both a Book Funnel page and a group',
+					type: 'warning'
+				})
+				return
+			}
+			
 			await ApiService.post(
 				'bookfunnel-maps',
 				{
@@ -75,10 +89,19 @@ const BookFunnel = () => {
 				user.jwt
 			).then((res) => {
 				console.log('saveResult', res)
+				createNotification({
+					message: 'Book Funnel integration saved successfully!',
+					type: 'default',
+					autoClose: 3000
+				})
 				window.location.reload()
 			})
 		} catch (error) {
 			console.error('Error saving integration:', error)
+			createNotification({
+				message: 'Error saving integration. Please try again.',
+				type: 'warning'
+			})
 		}
 	}
 
@@ -94,13 +117,7 @@ const BookFunnel = () => {
 			<div className="fm-page-wrapper">
 				<Sidemenu />
 				<div className="fm-page-container">
-					{notifications && notifications.length > 0 && (
-						<div className="notifications-container">
-							{notifications.map((n, i) => {
-								return <NotificationBar key={i} type={n.type || 'default'} message={n.message} onClose={n.onClose} />
-							})}
-						</div>
-					)}
+					{/* Removed local notifications container */}
 					<PageHeader user={user} account={account} />
 
 					{mode !== 'new' ? (

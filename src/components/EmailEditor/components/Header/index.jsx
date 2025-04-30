@@ -11,7 +11,6 @@ import { deepClone } from '../../utils/helpers'
 import Icon from '../../../Icon/Icon'
 import { ApiService } from '../../../../service/api-service'
 import { useAccount } from '../../../../context/AccountContext'
-import NotificationBar from '../../../NotificationBar/NotificationBar'
 import PopupText from '../../../PopupText/PopupText'
 import { v4 as uuidv4 } from 'uuid'
 import { useNavigate } from 'react-router-dom'
@@ -19,10 +18,9 @@ import Dropdown from '../../../Dropdown'
 // import { setTime } from 'react-datepicker/dist/date_utils'
 
 const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
-	const { user, account } = useAccount()
+	const { user, account, createNotification } = useAccount()
 	const navigate = useNavigate()
 	const { previewMode, setPreviewMode, bodySettings, blockList, actionType, setBlockList, setBodySettings, editorRef } = useContext(GlobalContext)
-	const [notifications, setNotifications] = useState([])
 	const [fontsIncluded, setFontsIncluded] = useState([])
 	const [modalPreview, setModalPreview] = useState(previewMode)
 	const [blockListHistory, setBlockListHistory] = useState({
@@ -45,7 +43,11 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 			const data = editorRef.current.exportData(['Inter:400,700'])
 			let updResp = await ApiService.post(`fairymailer/updateCampaign`, { assignses:true, data: { uuid: currentCampaign.uuid, design: JSON.stringify(data), html } }, user.jwt)
 			console.log('updresp', updResp)
-			setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Email data saved successfully.', autoClose: 3000 }])
+			createNotification({ 
+				message: 'Email data saved successfully.', 
+				type: 'default',
+				autoClose: 3000 
+			})
 		}
 		return true
 	}
@@ -57,7 +59,11 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 			const data = editorRef.current.exportData(['Inter:400,700'])
 			let updResp = await ApiService.put(`templates/${currentCampaign.id}`, { data: { design: JSON.stringify(data), html } }, user.jwt)
 			console.log('updresp', updResp)
-			setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Email data saved successfully.', autoClose: 3000 }])
+			createNotification({ 
+				message: 'Email data saved successfully.', 
+				type: 'default',
+				autoClose: 3000 
+			})
 		}
 		return true
 	}
@@ -71,9 +77,18 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 				const data = editorRef.current.exportData(['Inter:400,700'])
 				let updResp = await ApiService.post(`templates/`, { data: { uuid: templateUuid, name: templateName, design: JSON.stringify(data), html, account: account.id } }, user.jwt)
 				console.log('updresp', updResp)
-				setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Template Saved Successfully!', autoClose: 3000 }])
+				createNotification({ 
+					message: 'Template Saved Successfully!', 
+					type: 'default',
+					autoClose: 3000 
+				})
 			} catch (error) {
 				console.error(error)
+				createNotification({ 
+					message: 'Error saving template', 
+					type: 'warning',
+					autoClose: 5000 
+				})
 			}
 		}
 	}
@@ -156,22 +171,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 	return (
 		<>
 			<div className="header">
-				<div className="email-editor-notifications">
-					{notifications.map((n, i) => {
-						return (
-							<NotificationBar
-								key={i}
-								type="warning"
-								message={n.message}
-								onClose={() => {
-									setNotifications(notifications.filter((not) => not.id != n.id))
-								}}
-								autoClose={n.autoClose}
-							/>
-						)
-					})}
-					{}
-				</div>
+				{/* Removed local notifications div */}
 				<div className="header-box d-flex align-items-center" style={{ textAlign: 'left' }}>
 					<Button
 						type="secondary"

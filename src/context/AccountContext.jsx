@@ -13,6 +13,41 @@ export const AccountProvider = ({ children }) => {
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
 	const [dataInitialized, setDataInitialized] = useState(false) // Add initialization flag
+	
+	// Notification system state and handlers
+	const [notifications, setNotifications] = useState([])
+	
+	// Generate a random ID for notifications
+	const generateRandomId = (length = 8) => {
+		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		let result = '';
+		const charactersLength = characters.length;
+		for (let i = 0; i < length; i++) {
+			result += characters.charAt(Math.floor(Math.random() * charactersLength));
+		}
+		return result;
+	};
+	
+	// Create a new notification
+	const createNotification = (notificationData) => {
+		const id = generateRandomId();
+		const notification = {
+			id,
+			type: notificationData.type || 'default',
+			message: notificationData.message,
+			autoClose: notificationData.autoClose || -1
+		};
+		
+		setNotifications(prevNotifications => [...prevNotifications, notification]);
+		return id;
+	};
+	
+	// Dismiss a notification by ID
+	const dismissNotification = (id) => {
+		setNotifications(prevNotifications => 
+			prevNotifications.filter(notification => notification.id !== id)
+		);
+	};
 
 	useEffect(() => {
 		// Only try to load account data if user is loaded and has JWT
@@ -61,5 +96,22 @@ export const AccountProvider = ({ children }) => {
 		getAccount();
 	}, [user, userLoading]); // Add userLoading as dependency
 
-	return <AccountContext.Provider value={{ user, account, loading, error, dataInitialized, setAccount }}>{children}</AccountContext.Provider>
+	return (
+		<AccountContext.Provider 
+			value={{ 
+				user, 
+				account, 
+				loading, 
+				error, 
+				dataInitialized, 
+				setAccount,
+				// Notification system
+				notifications,
+				createNotification,
+				dismissNotification
+			}}
+		>
+			{children}
+		</AccountContext.Provider>
+	)
 }

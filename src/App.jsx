@@ -23,6 +23,7 @@ import EditGroup from './pages/subscribers/EditGroup'
 import BookFunnel from './pages/integrations/BookFunnel'
 import EditCustomField from './pages/subscribers/EditCustomField'
 import NewCustomField from './pages/subscribers/NewCustomField'
+import NotificationContainer from './components/NotificationContainer/NotificationContainer'
 
 // A wrapper component to handle authentication check
 const ProtectedRoute = ({ children }) => {
@@ -81,6 +82,9 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <div className="App">
+      {/* Global notification container */}
+      <NotificationContainer />
+      
       <Routes>
         {/* Public routes that don't require authentication */}
         <Route path="/login" element={<LogIn />} />

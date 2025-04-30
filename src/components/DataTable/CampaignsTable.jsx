@@ -23,9 +23,9 @@ dayjs.extend(timezone)
 
 import qs from 'qs'
 
-const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, resultsPerPage = 20, refreshData=()=>{}, notifications=[], setNotifications=()=>{} }) => {
+const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, resultsPerPage = 20, refreshData=()=>{} }) => {
 	const navigate = useNavigate()
-	const { user,account } = useAccount()
+	const { user, account, createNotification } = useAccount()
 
 	const [loading, setLoading] = useState(false)
 	const [campaigns, setCampaigns] = useState([])
@@ -67,8 +67,11 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 			let sendResp = await ApiService.post(`fairymailer/removeCampaign`, { data: { udid: uuid } }, user.jwt)
 			setTimeout(() => {
 				refreshData();
-				const key = new Date().getTime();
-				setNotifications([...notifications,{id:key, type:'warning', message:'Deleted successfully.', onClose:()=>{setNotifications(notifications.filter(n=>n.id!=key))}}]);
+				createNotification({
+					message: 'Deleted successfully.',
+					type: 'warning',
+					autoClose: 3000
+				});
 			}, 500)
 		}
 	}
@@ -104,30 +107,42 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 				recp_filters:null,
 			}
 			delete(newCampaign.id);
-			let resp = await ApiService.post(
-				'campaigns/',
-				{
-					data: newCampaign,
-				},
-				user.jwt
-			)
+			try {
+				let resp = await ApiService.post(
+					'campaigns/',
+					{
+						data: newCampaign,
+					},
+					user.jwt
+				)
 
-			console.log('resp duplicate campaign is : ', resp)
-			if(resp.data && resp.data.data && resp.data.data.id){
-				refreshData();
-				setTimeout(() => {
-					const key = new Date().getTime();
-					setNotifications([...notifications,{id:key, type:'warning', message:'Campaign duplicated successfully.', onClose:()=>{setNotifications(notifications.filter(n=>n.id!=key))}}]);
-				}, 500)
+				console.log('resp duplicate campaign is : ', resp)
+				if(resp.data && resp.data.data && resp.data.data.id){
+					refreshData();
+					setTimeout(() => {
+						createNotification({
+							message: 'Campaign duplicated successfully.',
+							type: 'default',
+							autoClose: 3000
+						});
+					}, 500)
+				}
+			} catch (error) {
+				console.error('Error duplicating campaign:', error);
+				createNotification({
+					message: 'Failed to duplicate campaign. Please try again.',
+					type: 'warning',
+					autoClose: 5000
+				});
 			}
 		}
 	}
 
-	const renameCampaign = async(campaign)=>{
+	const renameCampaign = async(campaign) => {
 		const result = await PopupText.fire({
 			icon: 'question',
 			text: 'Please type a title for the new campaign',
-			inputField:true,
+			inputField: true,
 			initialInputValue: campaign.name,
 			focusCancel: false,
 			showConfirmButton: true,
@@ -138,24 +153,36 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 		})
 
 		if (result.isConfirmed) {
-			const updCampaign = {
-				uuid: campaign.uuid,
-				name: `${result.inputValue}`,
-			}
-			let resp = await ApiService.post(
-				'fairymailer/updateCampaign',
-				{
-					data: updCampaign,
-				},
-				user.jwt
-			)
-			console.log('renamed resp: ',resp)
-			if(resp.data && resp.data.code && resp.data.code==200){
-				refreshData();
-				setTimeout(() => {
-					const key = new Date().getTime();
-					setNotifications([...notifications,{id:key, type:'warning', message:'Campaign renamed successfully.', onClose:()=>{setNotifications(notifications.filter(n=>n.id!=key))}}]);
-				}, 500)
+			try {
+				const updCampaign = {
+					uuid: campaign.uuid,
+					name: `${result.inputValue}`,
+				}
+				let resp = await ApiService.post(
+					'fairymailer/updateCampaign',
+					{
+						data: updCampaign,
+					},
+					user.jwt
+				)
+				console.log('renamed resp: ',resp)
+				if(resp.data && resp.data.code && resp.data.code==200){
+					refreshData();
+					setTimeout(() => {
+						createNotification({
+							message: 'Campaign renamed successfully.',
+							type: 'default',
+							autoClose: 3000
+						});
+					}, 500)
+				}
+			} catch (error) {
+				console.error('Error renaming campaign:', error);
+				createNotification({
+					message: 'Failed to rename campaign. Please try again.',
+					type: 'warning',
+					autoClose: 5000
+				});
 			}
 		}
 	}
@@ -259,7 +286,12 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 			}
 			setCurrentPage(page)
 		} catch (error) {
-			console.error('Error fetching groups:', error)
+			console.error('Error fetching campaigns:', error)
+			createNotification({
+				message: 'Error loading campaigns. Please try again.',
+				type: 'warning',
+				autoClose: 5000
+			});
 		} finally {
 			setLoading(false)
 		}

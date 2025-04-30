@@ -15,19 +15,29 @@ const getNameInitials = (name) => {
 
 const PageHeader = () => {
 	const navigate = useNavigate()
-	const { user, account, loading, error } = useAccount()
+	const { user, account, loading, error, createNotification } = useAccount()
 	const [userMenuOpen, setUserMenuOpen] = useState(false);
 	const userMenuOptions = [
 		{
 			label:'Profile',
 			callback: () => {
 				setUserMenuOpen(false);
+				createNotification({
+					message: 'Profile feature coming soon!',
+					type: 'default',
+					autoClose: 3000
+				});
 			}
 		},
 		{
 			label:'Change Password',
 			callback: () => {
 				setUserMenuOpen(false);
+				createNotification({
+					message: 'Password change feature coming soon!',
+					type: 'default',
+					autoClose: 3000
+				});
 			}
 		},
 		{
@@ -45,6 +55,11 @@ const PageHeader = () => {
 				})
 				if (result.isConfirmed) {
 					window.localStorage.removeItem('fairymail_session');
+					createNotification({
+						message: 'You have been signed out successfully',
+						type: 'default',
+						autoClose: 3000
+					});
 					navigate('/login')
 				}
 			}

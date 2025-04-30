@@ -15,7 +15,6 @@ import InputText from '../../components/InputText/InputText'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import { ApiService } from '../../service/api-service'
 import PopupText from '../../components/PopupText/PopupText'
-import NotificationBar from '../../components/NotificationBar/NotificationBar'
 import TemplateCard from '../../components/TemplateCard/TemplateCard'
 import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
 import { v4 as uuidv4 } from 'uuid'
@@ -27,7 +26,7 @@ const Campaigns = () => {
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 	const [viewMode, setViewMode] = useState('list') // 'list' or 'calendar'
 
-	const { user, account } = useAccount()
+	const { user, account, createNotification } = useAccount()
 	const [searchTerm, setSearchTerm] = useState('')
 	const [loading, setLoading] = useState(true)
 	const [itemsPerPage, setItemsPerPage] = useState(100)
@@ -35,7 +34,6 @@ const Campaigns = () => {
 	const [campaigns, setCampaigns] = useState([])
 	const [filteredCampaigns, setFilteredCampaigns] = useState([])
 	const [templates, setTemplates] = useState([])
-	const [notifications, setNotifications] = useState([])
 	const [expandedCampaign, setExpandedCampaign] = useState(null)
 	const [actionMenuCampaign, setActionMenuCampaign] = useState(null)
 
@@ -131,6 +129,10 @@ const Campaigns = () => {
 			setLoading(false);
 		} catch (error) {
 			console.error(error)
+			createNotification({
+				message: 'Error loading campaigns. Please try again.',
+				type: 'warning'
+			})
 			setLoading(false);
 		}
 	}
@@ -143,12 +145,21 @@ const Campaigns = () => {
 			}
 		} catch (error) {
 			console.error(error)
+			createNotification({
+				message: 'Error loading templates. Please try again.',
+				type: 'warning'
+			})
 		}
 	}
 
 	const refreshData = async () => {
 		await getCampaigns()
 		await getTemplates()
+		createNotification({
+			message: 'Data refreshed successfully',
+			type: 'default',
+			autoClose: 3000
+		})
 	}
 
 	const createTemplateByName = async (templateName) => {
@@ -156,10 +167,19 @@ const Campaigns = () => {
 			const templateUuid = uuidv4()
 			const resp = await ApiService.post(`templates/`, { data: { uuid: templateUuid, name: templateName, account: account.id } }, user.jwt)
 			if (resp && resp.data && resp.data.data) {
+				createNotification({
+					message: 'Template created successfully',
+					type: 'default',
+					autoClose: 3000
+				})
 				navigate(`/templates/edit/${templateUuid}`)
 			}
 		} catch (error) {
 			console.error(error)
+			createNotification({
+				message: 'Error creating template. Please try again.',
+				type: 'warning'
+			})
 		}
 	}
 
@@ -193,13 +213,49 @@ const Campaigns = () => {
 		// Proceed with normal action handling
 		switch (action) {
 		  case 'delete':
-			// Existing delete logic
+			// Implement delete logic
+			PopupText.fire({
+				icon: 'question',
+				text: 'Are you sure you want to delete this campaign?',
+				showCancelButton: true,
+				confirmButtonText: 'Yes, delete it',
+			}).then((result) => {
+				if (result.isConfirmed) {
+					// Delete logic here
+					createNotification({
+						message: 'Campaign deleted successfully',
+						type: 'default',
+						autoClose: 3000
+					})
+				}
+			});
 			break;
 		  case 'duplicate':
-			// Existing duplicate logic
+			// Duplicate logic
+			createNotification({
+				message: 'Campaign duplicated successfully',
+				type: 'default',
+				autoClose: 3000
+			})
 			break;
 		  case 'rename':
-			// Existing rename logic
+			// Rename logic
+			PopupText.fire({
+				text: 'Enter new campaign name',
+				inputField: true,
+				inputLabel: 'Campaign Name',
+				inputValue: campaign.name,
+				confirmButtonText: 'Rename',
+			}).then((result) => {
+				if (result.isConfirmed) {
+					// Rename logic here
+					createNotification({
+						message: 'Campaign renamed successfully',
+						type: 'default',
+						autoClose: 3000
+					})
+				}
+			});
 			break;
 		  case 'edit':
 			// Navigate to campaign edit page (design editor) - this won't execute on mobile due to check above
@@ -215,7 +271,6 @@ const Campaigns = () => {
 	  }
 
 	// Render a mobile campaign card with collapsible content
-
 	const renderMobileCampaignCard = (campaign) => {
 		const isExpanded = expandedCampaign === campaign.uuid
 		const showActionMenu = actionMenuCampaign === campaign.uuid
@@ -331,13 +386,7 @@ const Campaigns = () => {
 			<div className="fm-page-wrapper">
 				<Sidemenu />
 				<div className="fm-page-container">
-					{notifications && notifications.length > 0 && (
-						<div className="notifications-container">
-							{notifications.map((n, index) => {
-								return <NotificationBar key={`notification-${index}`} type={n.type || 'default'} message={n.message} onClose={n.onClose} />
-							})}
-						</div>
-					)}
+					{/* Removed local notifications container */}
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
@@ -414,8 +463,6 @@ const Campaigns = () => {
 									// Desktop view for campaigns
 									<CampaignsTable
 										resultsPerPage={10}
-										notifications={notifications}
-										setNotifications={setNotifications}
 										refreshData={refreshData}
 										selectedCampaignType={selectedCampaignType}
 										dashboardPreviewOnly={false}

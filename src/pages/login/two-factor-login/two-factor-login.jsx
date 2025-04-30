@@ -7,6 +7,7 @@ import Card from "../../../components/Card";
 import Button from "../../../components/Button";
 import TwoFactorInput from "./TwoFactorAuth/TwoFactorInput";
 import NotificationBar from "../../../components/NotificationBar/NotificationBar";
+import { useAccount } from '../../../context/AccountContext'
 
 const TwoFactorLogin = () => {
   const [code, setCode] = useState("");
@@ -14,8 +15,8 @@ const TwoFactorLogin = () => {
   const [timeLeft, setTimeLeft] = useState(30); 
   const [canResend, setCanResend] = useState(false);
   const location = useLocation();
-  const [notifications, setNotifications] = useState([]);
-  
+  const { createNotification } = useAccount()
+
   const navigate = useNavigate();
 
   const data = location.state;
@@ -88,7 +89,10 @@ const TwoFactorLogin = () => {
     if (e) e.preventDefault();
     
     if (code.length !== 6) {
-      setNotifications([{ id: Date.now(), message: 'Please enter all 6 digits', type: 'warning' }]);
+      createNotification({ 
+        message: 'Please enter all 6 digits', 
+        type: 'warning' 
+      });
       return;
     }
     
@@ -108,11 +112,10 @@ const TwoFactorLogin = () => {
       
     } catch (error) {
       console.error("Verification error:", error);
-      setNotifications([{ 
-        id: Date.now(), 
+      createNotification({ 
         message: error.message || 'Verification failed', 
         type: 'warning' 
-      }]);
+      });
       setIsLoading(false);
     }
   };
@@ -141,16 +144,6 @@ const TwoFactorLogin = () => {
 
   return (
     <div className="two-factor-login-component">
-      <div style={{position:'fixed', left:0, right:0, top:0, background:'white', zIndex: 1000}}>
-        {notifications.map((notification) => (
-          <NotificationBar
-            key={notification.id}
-            message={notification.message}
-            type={notification.type} 
-            onClose={() => handleRemoveNotification(notification.id)} 
-          />
-        ))}
-      </div>
       <Logo />
       <Card>
       <Button

@@ -10,6 +10,7 @@ import InputText from '../../components/InputText/InputText'
 import Checkbox from '../../components/Checkbox'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
+import { useAccount } from '../../context/AccountContext'
 import NotificationBar from '../../components/NotificationBar/NotificationBar'
 
 const LogIn = () => {
@@ -22,7 +23,7 @@ const LogIn = () => {
 	const [isValidUser, setIsValidUser] = useState(false)
 	const [reCaptchaToken, setReCaptchaToken] = useState('')
 	const [refreshReCaptcha, setRefreshReCaptcha] = useState(false)
-	const [notifications, setNotifications] = useState([])
+	const { createNotification } = useAccount()
 
 	const navigate = useNavigate()
 
@@ -69,14 +70,13 @@ const LogIn = () => {
 				return // Stop execution here to prevent setIsLoading(false)
 			}
 		} catch (error) {
-			console.error("Error checking email:", error)
-			setNotifications([{ 
-				id: Date.now(), 
-				message: 'Error checking email. Please try again.', 
-				type: 'warning' 
-			}])
+		console.error("Error checking email:", error)
+		createNotification({ 
+			message: 'Error checking email. Please try again.', 
+			type: 'warning'
+		})
 		} finally {
-			setIsLoading(false)
+		setIsLoading(false)
 		}
 	}
 
@@ -213,16 +213,6 @@ const LogIn = () => {
 
 			<div className="login-component">
 				<div className="login-wrapper">
-					<div style={{position:'fixed', left:0, right:0, top:0, background:'white', zIndex: 1000}}>
-						{notifications.map((notification) => (
-							<NotificationBar 
-								key={notification.id} 
-								message={notification.message} 
-								type={notification.type} 
-								onClose={() => handleRemoveNotification(notification.id)} 
-							/>
-						))}
-					</div>
 					<Logo />
 					<Card className="card">
 						<div className="container">

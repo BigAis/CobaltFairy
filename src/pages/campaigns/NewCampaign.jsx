@@ -38,6 +38,7 @@ const NewCampaign = () => {
 	const { uuid } = useParams()
 	const navigate = useNavigate()
 	const location = useLocation()
+	const { createNotification } = useAccount()
 
 	const [isEdit, setIsEdit] = useState(false)
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
@@ -62,7 +63,6 @@ const NewCampaign = () => {
 	const [selectedFilterTrigger, setSelectedFilterTrigger] = useState(null)
 	const [scheduleCampaign, setScheduleCampaign] = useState(false)
 	const [errors, setErrors] = useState({})
-	const [notifications, setNotifications] = useState([])
 
 	const [abSplit, setAbSplit] = useState((currentCampaign?.type === 'absplit' ? true : false) || false)
 
@@ -366,14 +366,23 @@ const NewCampaign = () => {
 	const sendTestEmail = async () => {
 		const campaignUdid = uuid
 		const response = await ApiService.post(`fairymail/sendDraft`, { campaign_id: campaignUdid }, user.jwt)
+		
 		if(response?.data?.code && response?.data?.code==200){
-			setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Test email was sent successfully.', autoClose: 3000 }])
-		}else{
-			setNotifications([...notifications, { id: new Date().getTime() / 1000, message: 'Could not send test email. If the problem persists please contact our support team.', autoClose: 90000 }])
+		  createNotification({ 
+			message: 'Test email was sent successfully.', 
+			type: 'default',
+			autoClose: 3000 
+		  })
+		} else {
+		  createNotification({ 
+			message: 'Could not send test email. If the problem persists please contact our support team.', 
+			type: 'warning',
+			autoClose: 90000 
+		  })
 		}
-
+	
 		console.log('response from sendTestEmail is : ', response)
-	}
+	  }
 
 	const updateRecpFilter = (id, filter, meta) => {
 		console.log('meta inside updateRecpFilter is : ', meta)
@@ -490,22 +499,6 @@ const NewCampaign = () => {
 
 	return (
 		<>
-			<div className="new-campaign-notifications">
-				{notifications.map((n, i) => {
-					return (
-						<NotificationBar
-							key={i}
-							type="warning"
-							message={n.message}
-							onClose={() => {
-								setNotifications(notifications.filter((not) => not.id != n.id))
-							}}
-							autoClose={n.autoClose}
-						/>
-					)
-				})}
-				{}
-			</div>
 			<div className="fm-page-wrapper justify-content-center" style={{ background: step === 3 ? '#FFF8EF' : '' }}>
 				<div className="fm-content-outer-wrapper d-flex flex-column align-items-center" style={{ width: step === 3 ? '100%' : '' }}>
 					<Stepper steps={steps} current={step - 1} setStep={setStep} hasBack={true} minStep={{ step: 2, url: '/campaigns' }} style={{ marginTop: '30px' }} />
