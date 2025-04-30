@@ -5,7 +5,14 @@
 		fill:#100F1C!important;
 	}
 }
-.icon:hover{
+
+li:hover .icon {
+	path{
+		fill:#FF635D!important;
+	}
+}
+
+li.active .icon {
 	path{
 		fill:#FF635D!important;
 	}
