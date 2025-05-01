@@ -14,8 +14,10 @@ export const AccountProvider = ({ children }) => {
 	const [error, setError] = useState(null)
 	const [dataInitialized, setDataInitialized] = useState(false) // Add initialization flag
 	
-	// Notification system state and handlers
-	const [notifications, setNotifications] = useState([])
+	// Enhanced notification system state and handlers
+	const [notifications, setNotifications] = useState([]);
+	const [notificationQueue, setNotificationQueue] = useState([]);
+	const MAX_VISIBLE_NOTIFICATIONS = 3;
 	
 	// Generate a random ID for notifications
 	const generateRandomId = (length = 8) => {
@@ -28,6 +30,17 @@ export const AccountProvider = ({ children }) => {
 		return result;
 	};
 	
+	// Process the notification queue
+	useEffect(() => {
+		// If we have space for more notifications and there are items in the queue
+		if (notifications.length < MAX_VISIBLE_NOTIFICATIONS && notificationQueue.length > 0) {
+			// Move the first item from queue to active notifications
+			const nextNotification = notificationQueue[0];
+			setNotifications(prev => [...prev, nextNotification]);
+			setNotificationQueue(prev => prev.slice(1));
+		}
+	}, [notifications, notificationQueue]);
+	
 	// Create a new notification
 	const createNotification = (notificationData) => {
 		const id = generateRandomId();
@@ -35,11 +48,45 @@ export const AccountProvider = ({ children }) => {
 			id,
 			type: notificationData.type || 'default',
 			message: notificationData.message,
-			autoClose: notificationData.autoClose || -1
+			autoClose: notificationData.autoClose || -1,
+			count: 1, // Initialize count for duplicate tracking
+			timestamp: Date.now()
 		};
 		
-		setNotifications(prevNotifications => [...prevNotifications, notification]);
-		return id;
+		// Check if we already have this message in notifications or queue
+		const existingNotificationIndex = notifications.findIndex(
+			n => n.message === notification.message
+		);
+		
+		const existingQueuedNotificationIndex = notificationQueue.findIndex(
+			n => n.message === notification.message
+		);
+		
+		if (existingNotificationIndex !== -1) {
+			// Update the count of existing notification
+			setNotifications(prev => prev.map((n, index) => 
+				index === existingNotificationIndex 
+					? {...n, count: n.count + 1, timestamp: Date.now()}
+					: n
+			));
+			return notifications[existingNotificationIndex].id;
+		} else if (existingQueuedNotificationIndex !== -1) {
+			// Update the count of existing queued notification
+			setNotificationQueue(prev => prev.map((n, index) => 
+				index === existingQueuedNotificationIndex 
+					? {...n, count: n.count + 1, timestamp: Date.now()}
+					: n
+			));
+			return notificationQueue[existingQueuedNotificationIndex].id;
+		} else if (notifications.length < MAX_VISIBLE_NOTIFICATIONS) {
+			// Add as a new notification if we have space
+			setNotifications(prev => [...prev, notification]);
+			return id;
+		} else {
+			// Queue the notification if we're at max capacity
+			setNotificationQueue(prev => [...prev, notification]);
+			return id;
+		}
 	};
 	
 	// Dismiss a notification by ID
@@ -47,6 +94,12 @@ export const AccountProvider = ({ children }) => {
 		setNotifications(prevNotifications => 
 			prevNotifications.filter(notification => notification.id !== id)
 		);
+	};
+	
+	// Clear all notifications
+	const clearAllNotifications = () => {
+		setNotifications([]);
+		setNotificationQueue([]);
 	};
 
 	useEffect(() => {
@@ -105,10 +158,11 @@ export const AccountProvider = ({ children }) => {
 				error, 
 				dataInitialized, 
 				setAccount,
-				// Notification system
+				// Enhanced notification system
 				notifications,
 				createNotification,
-				dismissNotification
+				dismissNotification,
+				clearAllNotifications
 			}}
 		>
 			{children}

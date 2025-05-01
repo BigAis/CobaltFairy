@@ -23,6 +23,22 @@
 	.notification-message {
 		flex: 1;
 		font-size: 16px;
+		display: flex;
+		align-items: center;
+		
+		.notification-count {
+			background-color: rgba(0, 0, 0, 0.1);
+			border-radius: 12px;
+			padding: 0 8px;
+			margin-left: 10px;
+			font-size: 0.85rem;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			height: 20px;
+			min-width: 20px;
+			font-weight: 600;
+		}
 	}
 
 	.close-button {
