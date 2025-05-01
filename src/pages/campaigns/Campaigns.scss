@@ -180,6 +180,39 @@ p.template-card-label {
 	left: 15px;
 }
 
+/* Desktop view toggle */
+.desktop-view-toggle {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+  border-bottom: none;
+  padding-bottom: 0;
+  
+  .view-toggle-option {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    margin-left: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(218, 209, 197, 1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &.active {
+      background-color: rgba(255, 195, 173, 0.5);
+      border-color: #FF635D;
+      font-weight: 500;
+    }
+    
+    &:hover:not(.active) {
+      background-color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
 /* Mobile styles for campaigns page */
 @media(max-width: 768px) {
 	.fm-content-wrapper {
@@ -246,7 +279,7 @@ p.template-card-label {
 	}
 	
 	/* View toggle */
-	.view-toggle {
+	.mobile-view-toggle {
 		display: flex;
 		justify-content: space-between;
 		margin: 1rem 0;

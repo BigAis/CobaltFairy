@@ -2,7 +2,7 @@ import CampaignsTable from '../../components/DataTable/CampaignsTable'
 import '../dashboard/dashboard.scss'
 import '../../fullpage.scss'
 
-import { React, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAccount } from '../../context/AccountContext'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
@@ -17,6 +17,7 @@ import { ApiService } from '../../service/api-service'
 import PopupText from '../../components/PopupText/PopupText'
 import TemplateCard from '../../components/TemplateCard/TemplateCard'
 import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
+import CampaignCalendar from './CampaignCalendar'
 import { v4 as uuidv4 } from 'uuid'
 
 const Campaigns = () => {
@@ -379,14 +380,31 @@ const Campaigns = () => {
 		} else {
 		  navigate('/campaigns/new');
 		}
-	  };
+	};
+	
+	// Handle campaign click in calendar view
+	const handleCalendarCampaignClick = (campaign) => {
+	  if (campaign.status === 'sent') {
+		navigate(`/campaigns/overview/${campaign.uuid}`);
+	  } else {
+		if (isMobile) {
+		  PopupText.fire({
+			icon: 'warning',
+			text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
+			showCancelButton: false,
+			confirmButtonText: 'OK',
+		  });
+		} else {
+		  navigate(`/campaigns/edit/${campaign.uuid}`);
+		}
+	  }
+	};
 
 	return (
 		<>
 			<div className="fm-page-wrapper">
 				<Sidemenu />
 				<div className="fm-page-container">
-					{/* Removed local notifications container */}
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
@@ -418,12 +436,19 @@ const Campaigns = () => {
 						</div>
 					</div>
 					
-					{isMobile && (
-						<div className="view-toggle">
-							<div className={`view-toggle-option ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
+					{/* View toggle for both mobile and desktop */}
+					{dropdownViewer === 'campaigns' && (
+						<div className={`view-toggle ${isMobile ? 'mobile-view-toggle' : 'desktop-view-toggle'}`}>
+							<div 
+								className={`view-toggle-option ${viewMode === 'list' ? 'active' : ''}`} 
+								onClick={() => setViewMode('list')}
+							>
 								<Icon name="List" /> List View
 							</div>
-							<div className={`view-toggle-option ${viewMode === 'calendar' ? 'active' : ''}`} onClick={() => setViewMode('calendar')}>
+							<div 
+								className={`view-toggle-option ${viewMode === 'calendar' ? 'active' : ''}`} 
+								onClick={() => setViewMode('calendar')}
+							>
 								<Icon name="Calendar" /> Calendar
 							</div>
 						</div>
@@ -435,93 +460,108 @@ const Campaigns = () => {
 						<div className="">
 							{dropdownViewer === 'campaigns' ? (
 								isMobile ? (
-									// Mobile view for campaigns with collapsible cards
-									<div className="mobile-campaigns-list">
-										{filteredCampaigns.length > 0 ? (
-											filteredCampaigns.map((campaign) => (
-												renderMobileCampaignCard(campaign)
-											))
-										) : (
-											<div className="no-campaigns">
-												No {selectedCampaignType} campaigns found
-											</div>
-										)}
-										
-										{filteredCampaigns.length > 0 && (
-											<div className="pagination-container">
-												<button><Icon name="ChevronLeft" size={16} /></button>
-												<span className="current-page">1</span>
-												<span>2</span>
-												<span className="pagination-dots">...</span>
-												<span>9</span>
-												<span>10</span>
-												<button><Icon name="ChevronRight" size={16} /></button>
-											</div>
-										)}
-									</div>
+									// Mobile view for campaigns with collapsible cards or calendar
+									viewMode === 'list' ? (
+										<div className="mobile-campaigns-list">
+											{filteredCampaigns.length > 0 ? (
+												filteredCampaigns.map((campaign) => (
+													renderMobileCampaignCard(campaign)
+												))
+											) : (
+												<div className="no-campaigns">
+													No {selectedCampaignType} campaigns found
+												</div>
+											)}
+											
+											{filteredCampaigns.length > 0 && (
+												<div className="pagination-container">
+													<button><Icon name="ChevronLeft" size={16} /></button>
+													<span className="current-page">1</span>
+													<span>2</span>
+													<span className="pagination-dots">...</span>
+													<span>9</span>
+													<span>10</span>
+													<button><Icon name="ChevronRight" size={16} /></button>
+												</div>
+											)}
+										</div>
+									) : (
+										<CampaignCalendar 
+											campaigns={filteredCampaigns}
+											selectedCampaignType={selectedCampaignType}
+											onCampaignClick={handleCalendarCampaignClick}
+										/>
+									)
 								) : (
-									// Desktop view for campaigns
-									<CampaignsTable
-										resultsPerPage={10}
-										refreshData={refreshData}
-										selectedCampaignType={selectedCampaignType}
-										dashboardPreviewOnly={false}
-									/>
+									// Desktop view for campaigns (list or calendar)
+									viewMode === 'list' ? (
+										<CampaignsTable
+											resultsPerPage={10}
+											refreshData={refreshData}
+											selectedCampaignType={selectedCampaignType}
+											dashboardPreviewOnly={false}
+										/>
+									) : (
+										<CampaignCalendar 
+											campaigns={filteredCampaigns}
+											selectedCampaignType={selectedCampaignType}
+											onCampaignClick={handleCalendarCampaignClick}
+										/>
+									)
 								)
 							) : (
-								<>
-									<div className="d-flex flex-wrap templates-container gap-20 mt20">
-										<Card
-											style={{ cursor: 'pointer' }}
-											className={'d-flex flex-column align-items-center justify-content-center gap-20'}
-											onClick={() => {
-												PopupText.fire({
-													text: 'Enter Template Name',
-													inputField: true,
-													inputLabel: 'Template Name',
-													confirmButtonText: 'Submit',
-													onConfirm: (inputValue) => {
-														console.log('User entered:', inputValue)
-													},
-												}).then((result) => {
-													if (result.isConfirmed) {
-														console.log('Confirmed with input:', result.inputValue)
-														createTemplateByName(result.inputValue)
-													} else if (result.isCancelled) {
-														console.log('Popup cancelled')
-													}
-												})
-											}}
-										>
-											<Icon name="PlusLight" size={64}></Icon>
-											<p>Create New</p>
-										</Card>
-										{templates &&
-											templates.length > 0 &&
-											templates
-												.sort((a, b) => a.id - b.id)
-												.map((template, i) => (
-													<React.Fragment key={template.uuid || `template-${i}`}>
-														<TemplateCard
-															key={template.uuid}
-															template_udid={template.uuid}
-															templateName={template.name}
-															onPreviewClick={() => {
-																setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: true }])
-															}}
-															onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
-														/>
-														<TemplatePreview
-															template_udid={template.uuid}
-															show={template.showPreview}
-															onClose={() => {
-																setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: false }])
-															}}
-														/>
-													</React.Fragment>
-												))}
-									</div>
-								</>
+								// Templates view
+								<div className="d-flex flex-wrap templates-container gap-20 mt20">
+									<Card
+										style={{ cursor: 'pointer' }}
+										className={'d-flex flex-column align-items-center justify-content-center gap-20'}
+										onClick={() => {
+											PopupText.fire({
+												text: 'Enter Template Name',
+												inputField: true,
+												inputLabel: 'Template Name',
+												confirmButtonText: 'Submit',
+												onConfirm: (inputValue) => {
+													console.log('User entered:', inputValue)
+												},
+											}).then((result) => {
+												if (result.isConfirmed) {
+													console.log('Confirmed with input:', result.inputValue)
+													createTemplateByName(result.inputValue)
+												} else if (result.isCancelled) {
+													console.log('Popup cancelled')
+												}
+											})
+										}}
+									>
+										<Icon name="PlusLight" size={64}></Icon>
+										<p>Create New</p>
+									</Card>
+									{templates &&
+										templates.length > 0 &&
+										templates
+											.sort((a, b) => a.id - b.id)
+											.map((template, i) => (
+												<React.Fragment key={template.uuid || `template-${i}`}>
+													<TemplateCard
+														key={template.uuid}
+														template_udid={template.uuid}
+														templateName={template.name}
+														onPreviewClick={() => {
+															setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: true }])
+														}}
+														onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
+													/>
+													<TemplatePreview
+														template_udid={template.uuid}
+														show={template.showPreview}
+														onClose={() => {
+															setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: false }])
+														}}
+													/>
+												</React.Fragment>
+											))}
+								</div>
 							)}
 						</div>
 					)}
