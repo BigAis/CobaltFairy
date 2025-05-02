@@ -37,20 +37,34 @@
       color: #100F1C;
     }
     
+    /* Button styling to match ButtonGroup */
     .fc-button-primary {
-      background-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.5);
       border: 2px solid rgba(218, 209, 197, 1);
       color: #000;
       font-weight: 500;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 14px;
+      margin-right: 3px;
       
       &:hover {
         background-color: rgba(255, 255, 255, 0.7);
         box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+        border-color: rgba(218, 209, 197, 1);
       }
       
       &.fc-button-active {
-        background-color: rgba(255, 195, 173, 0.5);
+        background-color: rgba(255, 255, 255, 0.7);
         border-color: #FF635D;
+        color: #000;
+      }
+    }
+    
+    .fc-button-group {
+      .fc-button-primary {
+        border-radius: 8px;
+        margin-right: 3px;
       }
     }
     
@@ -161,12 +175,23 @@
         width: 100%;
         display: flex;
         justify-content: center;
-      }
-      
-      .fc-button-group {
-        width: 100%;
-        display: flex;
-        justify-content: center;
+        
+        .fc-button {
+          font-size: 12px;
+          padding: 5px 8px;
+        }
+        
+        .fc-button-group {
+          display: flex;
+          width: 100%;
+          
+          .fc-button {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
       }
     }
     

@@ -11,8 +11,19 @@ const CampaignCalendar = ({ campaigns, selectedCampaignType, onCampaignClick }) 
   
   useEffect(() => {
     if (campaigns && campaigns.length > 0) {
+      // Filter out draft campaigns that don't have a date
+      const filteredCampaigns = campaigns.filter(campaign => {
+        // Only include campaigns with dates
+        if (selectedCampaignType === 'sent' && campaign.sent_at) {
+          return true;
+        } else if (selectedCampaignType === 'outbox' && campaign.date) {
+          return true;
+        }
+        return false;
+      });
+      
       // Transform campaigns to calendar events
-      const formattedEvents = campaigns.map(campaign => {
+      const formattedEvents = filteredCampaigns.map(campaign => {
         // Determine the date for the event
         let eventDate;
         
@@ -21,18 +32,16 @@ const CampaignCalendar = ({ campaigns, selectedCampaignType, onCampaignClick }) 
         } else if (selectedCampaignType === 'outbox' && campaign.date) {
           eventDate = campaign.date;
         } else {
-          // For drafts with no date or fallback case
+          // Fallback to created date
           eventDate = campaign.createdAt || new Date();
         }
         
         // Determine color based on campaign type
         let color;
         if (campaign.status === 'sent') {
-          color = '#FF635D'; // Primary color for sent campaigns
+          color = '#FFCEB5'; // Lighter color for sent campaigns (swapped)
         } else if (campaign.status === 'draft' && campaign.date) {
-          color = '#FFCEB5'; // Lighter color for scheduled/outbox campaigns
-        } else {
-          color = '#DAD1C5'; // Neutral color for drafts
+          color = '#FF635D'; // Primary color for scheduled/outbox campaigns (swapped)
         }
         
         return {
@@ -87,16 +96,12 @@ const CampaignCalendar = ({ campaigns, selectedCampaignType, onCampaignClick }) 
     <div className="campaign-calendar">
       <div className="calendar-legend">
         <div className="legend-item">
-          <div className="legend-color" style={{backgroundColor: '#FF635D'}}></div>
-          <span>Sent Campaigns</span>
-        </div>
-        <div className="legend-item">
           <div className="legend-color" style={{backgroundColor: '#FFCEB5'}}></div>
-          <span>Scheduled Campaigns</span>
+          <span>Sent</span>
         </div>
         <div className="legend-item">
-          <div className="legend-color" style={{backgroundColor: '#DAD1C5'}}></div>
-          <span>Draft Campaigns</span>
+          <div className="legend-color" style={{backgroundColor: '#FF635D'}}></div>
+          <span>Outbox</span>
         </div>
       </div>
       

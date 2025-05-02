@@ -425,6 +425,21 @@ const Campaigns = () => {
 								onChange={handleTabChange}
 							></ButtonGroup>
 						</div>
+						
+						{/* View mode toggle moved above the search bar and converted to ButtonGroup */}
+						{dropdownViewer === 'campaigns' && (
+							<div className="row" style={{ marginBottom: '1rem' }}>
+								<ButtonGroup
+									value={viewMode}
+									options={[
+										{ value: 'list', label: 'List View' },
+										{ value: 'calendar', label: 'Calendar' },
+									]}
+									onChange={setViewMode}
+								/>
+							</div>
+						)}
+						
 						<div className="row d-flex content-space-between">
 							<InputText
 								onChange={(e) => updateSearchTerm(e.target.value)}
@@ -435,24 +450,6 @@ const Campaigns = () => {
 							/>
 						</div>
 					</div>
-					
-					{/* View toggle for both mobile and desktop */}
-					{dropdownViewer === 'campaigns' && (
-						<div className={`view-toggle ${isMobile ? 'mobile-view-toggle' : 'desktop-view-toggle'}`}>
-							<div 
-								className={`view-toggle-option ${viewMode === 'list' ? 'active' : ''}`} 
-								onClick={() => setViewMode('list')}
-							>
-								<Icon name="List" /> List View
-							</div>
-							<div 
-								className={`view-toggle-option ${viewMode === 'calendar' ? 'active' : ''}`} 
-								onClick={() => setViewMode('calendar')}
-							>
-								<Icon name="Calendar" /> Calendar
-							</div>
-						</div>
-					)}
 
 					{loading ? (
 						<div className="loading-indicator">Loading...</div>
