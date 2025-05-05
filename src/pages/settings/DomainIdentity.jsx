@@ -75,12 +75,12 @@ const DomainIdentity = () => {
         } catch (error) {
             console.error('Error adding domain:', error)
             createNotification({
-                message: 'Error adding domain: ' + (error.response?.data?.message || error.message),
+                message: 'Error adding domain: The API endpoint may not be implemented yet or is not accepting POST requests. Please check with your backend team about the /fairymailer/aws/add-domain endpoint.',
                 type: 'warning',
-                autoClose: 3000
+                autoClose: 5000
             })
         } finally {
-            setDomainSettings({...domainSettings, isAddingDomain: false})
+            setDomainSettings(prev => ({...prev, isAddingDomain: false}))
         }
     }
     
@@ -105,10 +105,10 @@ const DomainIdentity = () => {
             )
             
             if (response.data && response.data.success) {
-                setDomainSettings({
-                    ...domainSettings,
+                setDomainSettings(prev => ({
+                    ...prev,
                     emailStatus: 'PENDING'
-                })
+                }))
                 
                 createNotification({
                     message: 'Email added successfully. Verification pending.',
@@ -125,12 +125,12 @@ const DomainIdentity = () => {
         } catch (error) {
             console.error('Error adding email:', error)
             createNotification({
-                message: 'Error adding email: ' + (error.response?.data?.message || error.message),
+                message: 'Error adding email: The API endpoint may not be implemented yet. Please check with your backend team about the /fairymailer/aws/add-email endpoint.',
                 type: 'warning',
-                autoClose: 3000
+                autoClose: 5000
             })
         } finally {
-            setDomainSettings({...domainSettings, isAddingEmail: false})
+            setDomainSettings(prev => ({...prev, isAddingEmail: false}))
         }
     }
     
@@ -177,9 +177,9 @@ const DomainIdentity = () => {
         } catch (error) {
             console.error('Error detaching domain:', error)
             createNotification({
-                message: 'Error detaching domain: ' + (error.response?.data?.message || error.message),
+                message: 'Error detaching domain: The API endpoint may not be implemented yet. Please check with your backend team about the /fairymailer/aws/remove-domain endpoint.',
                 type: 'warning',
-                autoClose: 3000
+                autoClose: 5000
             })
         }
     }
@@ -195,10 +195,10 @@ const DomainIdentity = () => {
             )
             
             if (response.data && response.data.success) {
-                setDomainSettings({
-                    ...domainSettings,
+                setDomainSettings(prev => ({
+                    ...prev,
                     dkimStatus: response.data.verified ? 'VERIFIED' : 'PENDING'
-                })
+                }))
                 
                 createNotification({
                     message: response.data.verified 
@@ -217,12 +217,12 @@ const DomainIdentity = () => {
         } catch (error) {
             console.error('Error verifying DKIM:', error)
             createNotification({
-                message: 'Error verifying DKIM: ' + (error.response?.data?.message || error.message),
+                message: 'Error verifying DKIM: The API endpoint may not be implemented yet. Please check with your backend team about the /fairymailer/aws/verify-domain-dkim endpoint.',
                 type: 'warning',
-                autoClose: 3000
+                autoClose: 5000
             })
         } finally {
-            setDomainSettings({...domainSettings, isVerifyingDkim: false})
+            setDomainSettings(prev => ({...prev, isVerifyingDkim: false}))
         }
     }
     
@@ -237,10 +237,10 @@ const DomainIdentity = () => {
             )
             
             if (response.data) {
-                setDomainSettings({
-                    ...domainSettings,
+                setDomainSettings(prev => ({
+                    ...prev,
                     emailStatus: response.data.verified ? 'VERIFIED' : 'PENDING'
-                })
+                }))
                 
                 createNotification({
                     message: response.data.verified 
@@ -259,12 +259,12 @@ const DomainIdentity = () => {
         } catch (error) {
             console.error('Error checking email verification:', error)
             createNotification({
-                message: 'Error checking email verification: ' + (error.response?.data?.message || error.message),
+                message: 'Error checking email verification: The API endpoint may not be implemented yet. Please check with your backend team about the /fairymailer/aws/verify-email-status endpoint.',
                 type: 'warning',
-                autoClose: 3000
+                autoClose: 5000
             })
         } finally {
-            setDomainSettings({...domainSettings, isVerifyingEmail: false})
+            setDomainSettings(prev => ({...prev, isVerifyingEmail: false}))
         }
     }
     
@@ -295,6 +295,8 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error checking domain status:', error)
+            // Don't show a notification here as this is part of the initial load
+            // and we don't want to annoy users with errors on page load
         }
     }
     
@@ -320,6 +322,7 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error getting DKIM records:', error)
+            // Don't show a notification here as this is part of the initial load
         }
     }
     
@@ -340,6 +343,7 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error checking email status:', error)
+            // Don't show a notification here as this is part of the initial load
         }
     }
     
