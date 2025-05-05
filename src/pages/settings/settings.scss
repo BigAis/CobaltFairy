@@ -1,0 +1,344 @@
+.settings-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    
+    .settings-tab {
+        padding: 12px 20px;
+        margin-right: 10px;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid rgba(218, 209, 197, 1);
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        
+        &:hover {
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+        }
+        
+        &.active {
+            background: rgba(255, 195, 173, 0.5);
+            border-color: #FF635D;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .settings-tab {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+    }
+}
+
+.settings-content-card {
+    padding: 30px;
+    margin-bottom: 30px;
+    
+    @media (max-width: 768px) {
+        padding: 15px;
+    }
+}
+
+.profile-content {
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.settings-tab-content {
+    .section-title {
+        font-family: 'Bitter', serif;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        margin-top: 30px;
+        text-align: left;
+        
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+    
+    .profile-title {
+        font-family: 'Bitter', serif;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        text-align: left;
+    }
+    
+    .input-section {
+        margin-bottom: 20px;
+        width: 100%;
+        
+        .input-text-wrapper {
+            width: 100%;
+            margin-bottom: 0;
+        }
+    }
+    
+    .verification-badge-container {
+        &.standalone {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+        }
+    }
+    
+    .action-button {
+        margin: 15px 0;
+    }
+    
+    .info-text {
+        color: #666;
+        margin: 15px 0 25px 0;
+        text-align: left;
+        
+        p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+    }
+    
+    .settings-action-buttons {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        
+        .btn {
+            min-width: 150px;
+            background-color: rgba(255, 195, 173, 0.5);
+            border: 2px solid #FF635D;
+        }
+    }
+    
+    .color-picker-section {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        
+        .color-field {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            
+            .color-display {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                margin-right: 10px;
+                border: 2px solid rgba(218, 209, 197, 1);
+            }
+            
+            .color-input {
+                width: 100px;
+                height: 40px;
+                padding: 0 10px;
+                font-size: 14px;
+                border: 2px solid rgba(218, 209, 197, 1);
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.5);
+            }
+        }
+        
+        .opacity-field {
+            display: flex;
+            align-items: center;
+            
+            .opacity-input {
+                width: 60px;
+                height: 40px;
+                padding: 0 10px;
+                font-size: 14px;
+                border: 2px solid rgba(218, 209, 197, 1);
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.5);
+                margin-right: 5px;
+            }
+            
+            .percentage-sign {
+                font-size: 16px;
+                font-weight: 500;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            flex-wrap: wrap;
+            
+            .color-field, .opacity-field {
+                margin-bottom: 10px;
+                width: 100%;
+            }
+        }
+    }
+    
+    .container-settings {
+        margin-bottom: 20px;
+    }
+    
+    .dropdown-section {
+        position: relative;
+        margin-bottom: 20px;
+        
+        .input-text-wrapper {
+            width: 100%;
+        }
+        
+        .dropdown-arrow {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #666;
+            pointer-events: none;
+        }
+    }
+    
+    .dropdown-row {
+        display: flex;
+        gap: 20px;
+        
+        .dropdown-item {
+            flex: 1;
+            position: relative;
+            
+            .input-text-wrapper {
+                width: 100%;
+            }
+            
+            .dropdown-arrow {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 12px;
+                color: #666;
+                pointer-events: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+    
+    .font-button-group {
+        margin: 20px 0;
+        
+        .btn {
+            margin-right: 0;
+        }
+    }
+    
+    .heading-button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 30px;
+        
+        .btn {
+            flex: 0 0 auto;
+            margin-bottom: 10px;
+        }
+    }
+    
+    .logo-upload-section {
+        margin-bottom: 30px;
+    }
+    
+    .add-link-button {
+        margin: 15px 0 30px 0;
+    }
+    
+    .notification-setting {
+        margin: 20px 0;
+        
+        .toggle-switch {
+            margin-bottom: 0;
+        }
+    }
+    
+    .notification-email {
+        margin: 15px 0 30px 0;
+        
+        .input-text-wrapper {
+            width: 100%;
+        }
+    }
+    
+    .profile-photo-section {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        
+        .profile-initials {
+            width: 56px;
+            height: 56px;
+            background: #FFF;
+            border: 2px solid rgba(218, 209, 197, 1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bitter', serif;
+            font-size: 24px;
+            font-weight: 600;
+            margin-right: 20px;
+        }
+        
+        .btn {
+            height: 40px;
+        }
+    }
+    
+    .password-section {
+        position: relative;
+        margin-bottom: 30px;
+        
+        .password-field {
+            position: relative;
+            margin-bottom: 15px;
+            
+            .input-text-wrapper {
+                width: 100%;
+            }
+            
+            .password-icon {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                cursor: pointer;
+                
+                svg {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+        }
+        
+        .update-password-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            
+            .btn {
+                width: auto;
+            }
+        }
+    }
+    
+    &.profile-tab {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px 0;
+    }
+}
