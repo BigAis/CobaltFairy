@@ -1,0 +1,212 @@
+.domain-identity-container {
+    width: 100%;
+    
+    .domain-section,
+    .dkim-section,
+    .email-section {
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid rgba(218, 209, 197, 1);
+        margin-bottom: 20px;
+        
+        .section-title {
+            font-family: 'Bitter', serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .input-section {
+            margin-bottom: 15px;
+            
+            .input-text {
+                background: rgba(255, 255, 255, 0.5);
+                border: 2px solid rgba(218, 209, 197, 1);
+            }
+        }
+        
+        .verification-badge-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            
+            .verified-badge {
+                display: inline-flex;
+                padding: 5px 10px;
+                
+                .badge-verified {
+                    background: #99EA0F;
+                }
+                
+                .badge-unverified {
+                    background: #FFA600;
+                }
+            }
+        }
+        
+        .info-text {
+            color: #666;
+            margin: 15px 0;
+            text-align: left;
+            
+            p {
+                margin: 0;
+                font-size: 14px;
+                color: #666;
+                line-height: 1.5;
+            }
+        }
+        
+        .record-group {
+            margin-bottom: 20px;
+            
+            .record-heading {
+                text-align: left;
+                margin-bottom: 10px;
+                font-weight: 500;
+            }
+            
+            .record-item {
+                display: flex;
+                margin-bottom: 10px;
+                
+                .record-label {
+                    min-width: 80px;
+                    text-align: left;
+                    font-weight: 500;
+                }
+                
+                .record-value {
+                    flex: 1;
+                    text-align: left;
+                    background-color: rgba(255, 255, 255, 0.5);
+                    padding: 8px 15px;
+                    border-radius: 5px;
+                    border: 1px dashed #DAD1C5;
+                    word-break: break-all;
+                    font-family: monospace;
+                    font-size: 14px;
+                }
+            }
+        }
+        
+        .record-instructions {
+            text-align: left;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .dkim-records-container {
+            margin-bottom: 25px;
+        }
+        
+        .action-button {
+            margin: 15px 0;
+            
+            .btn {
+                font-weight: 500;
+                
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.7);
+                    box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+                }
+            }
+        }
+        
+        .verification-buttons {
+            display: flex;
+            margin: 15px 0;
+            
+            .btn {
+                background: rgba(255, 255, 255, 0.5);
+                border: 2px solid rgba(218, 209, 197, 1);
+                
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.7);
+                    box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+                }
+                
+                &.loading {
+                    cursor: not-allowed;
+                }
+            }
+            
+            .ml-10 {
+                margin-left: 10px;
+            }
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            
+            .btn {
+                min-width: 150px;
+                
+                &.btn-primary {
+                    background-color: rgba(255, 195, 173, 0.5);
+                    border: 2px solid #FF635D;
+                    
+                    &:hover {
+                        background-color: rgba(255, 195, 173, 0.75);
+                        box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+                    }
+                }
+            }
+        }
+    }
+    
+    .status-pending {
+        color: #FF4D4D;
+        font-weight: 500;
+    }
+    
+    .status-verified {
+        color: #99EA0F;
+        font-weight: 500;
+    }
+    
+    .mt-10 {
+        margin-top: 10px;
+    }
+    
+    .mt-20 {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .domain-identity-container {
+        .domain-section,
+        .dkim-section,
+        .email-section {
+            padding: 15px;
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .record-item {
+                flex-direction: column;
+                
+                .record-label {
+                    margin-bottom: 5px;
+                }
+            }
+            
+            .verification-buttons {
+                flex-direction: column;
+                
+                .btn {
+                    margin-bottom: 10px;
+                }
+                
+                .ml-10 {
+                    margin-left: 0;
+                    margin-top: 10px;
+                }
+            }
+        }
+    }
+}

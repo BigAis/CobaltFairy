@@ -15,6 +15,7 @@ import VerificationBadge from '../../components/VerificationBadge'
 import Icon from '../../components/Icon/Icon'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
+import DomainIdentity from './DomainIdentity'
 
 const Settings = () => {
     const { user, account, createNotification } = useAccount()
@@ -44,12 +45,6 @@ const Settings = () => {
         email: '',
         timezone: null,
         timeformat: null
-    })
-    
-    // Domain & Identity state
-    const [domainSettings, setDomainSettings] = useState({
-        sendingDomain: '',
-        sendingEmail: ''
     })
     
     // Container settings state
@@ -182,11 +177,6 @@ const Settings = () => {
                 timeformat: dateFormatOptions[1] // Default to dd/mm/yyyy
             })
             
-            setDomainSettings({
-                sendingDomain: account?.domain || 'cobaltfairy.online',
-                sendingEmail: user?.user?.email || 'johndoe@gmail.com'
-            })
-            
             setProfileSettings({
                 email: user?.user?.email || 'johndoe@gmail.com',
                 password: '••••••••',
@@ -226,30 +216,6 @@ const Settings = () => {
             })
             setIsLoading(false)
         }
-    }
-
-    const handleDetach = () => {
-        createNotification({
-            message: 'Domain detached successfully',
-            type: 'default',
-            autoClose: 3000
-        })
-    }
-
-    const handleAddLink = () => {
-        setContainerSettings({
-            ...containerSettings,
-            socialLinks: [...containerSettings.socialLinks, '']
-        })
-    }
-
-    const handleLinkChange = (index, value) => {
-        const updatedLinks = [...containerSettings.socialLinks]
-        updatedLinks[index] = value
-        setContainerSettings({
-            ...containerSettings,
-            socialLinks: updatedLinks
-        })
     }
 
     // Handle section changes via ButtonGroup
@@ -325,59 +291,7 @@ const Settings = () => {
                     </div>
                 )
             case 'domain':
-                return (
-                    <div className="settings-tab-content">
-                        <h3 className="section-title">Sending domain & identity</h3>
-                        
-                        <div className="input-section">
-                            <InputText
-                                label="Sending domain"
-                                value={domainSettings.sendingDomain}
-                                onChange={(e) => setDomainSettings({...domainSettings, sendingDomain: e.target.value})}
-                            />
-                        </div>
-                        
-                        <div className="verification-badge-container standalone">
-                            <VerificationBadge isVerified={true} />
-                        </div>
-                        
-                        <div className="action-button">
-                            <Button type="secondary" onClick={handleDetach}>Detatch</Button>
-                        </div>
-                        
-                        <div className="info-text">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.</p>
-                        </div>
-                        
-                        <h3 className="section-title">DKIM Verification for domain {domainSettings.sendingDomain}</h3>
-                        
-                        <div className="info-text">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.</p>
-                        </div>
-                        
-                        <div className="verification-badge-container standalone">
-                            <VerificationBadge isVerified={true} />
-                        </div>
-                        
-                        <h3 className="section-title">Sending email</h3>
-                        
-                        <div className="input-section">
-                            <InputText
-                                label="Enter email"
-                                value={domainSettings.sendingEmail}
-                                onChange={(e) => setDomainSettings({...domainSettings, sendingEmail: e.target.value})}
-                            />
-                        </div>
-                        
-                        <div className="verification-badge-container standalone">
-                            <VerificationBadge isVerified={false} />
-                        </div>
-                        
-                        <div className="settings-action-buttons">
-                            <Button type="primary" onClick={handleSaveChanges} loading={isLoading}>Save Changes</Button>
-                        </div>
-                    </div>
-                )
+                return <DomainIdentity />
             case 'presets':
                 return (
                     <div className="settings-tab-content">
