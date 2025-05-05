@@ -7,6 +7,8 @@
         background: rgba(255, 255, 255, 0.5);
         border: 2px solid rgba(218, 209, 197, 1);
         margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 8px;
         
         .section-title {
             font-family: 'Bitter', serif;
@@ -22,6 +24,11 @@
             .input-text {
                 background: rgba(255, 255, 255, 0.5);
                 border: 2px solid rgba(218, 209, 197, 1);
+                
+                &:focus {
+                    outline: none;
+                    box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+                }
             }
         }
         
@@ -81,7 +88,7 @@
                     text-align: left;
                     background-color: rgba(255, 255, 255, 0.5);
                     padding: 8px 15px;
-                    border-radius: 5px;
+                    border-radius: 5px; // Fixed potential SCSS syntax error
                     border: 1px dashed #DAD1C5;
                     word-break: break-all;
                     font-family: monospace;

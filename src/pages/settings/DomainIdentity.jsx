@@ -37,28 +37,34 @@ const DomainIdentity = () => {
             return
         }
         
-        setDomainSettings({...domainSettings, isAddingDomain: true})
+        // Prevent duplicate requests while loading
+        if (domainSettings.isAddingDomain) {
+            return;
+        }
+        
+        setDomainSettings(prevState => ({...prevState, isAddingDomain: true}))
         
         try {
             const response = await ApiService.post(
-                'fairymailer/aws/add-domain',
+                'aws/add-domain',
                 { domain_name: domainSettings.sendingDomain },
                 user.jwt
             )
             
             if (response.data && response.data.success) {
                 // Set domain status to pending initially
-                const updatedSettings = {
-                    ...domainSettings,
+                setDomainSettings(prevState => ({
+                    ...prevState,
                     domainStatus: 'PENDING',
-                    domainTxtName: response.data.txtRecord?.name || `_amazon.${domainSettings.sendingDomain}`,
+                    domainTxtName: response.data.txtRecord?.name || `_amazon.${prevState.sendingDomain}`,
                     domainTxtValue: response.data.txtRecord?.value || 'S01zjkZ3LpQjfd2Nr8TnyAmsNkpI4DGcBX2jc3UhsgY=',
-                }
-                
-                setDomainSettings(updatedSettings)
+                    isAddingDomain: false
+                }))
                 
                 // Fetch DKIM records after adding domain
-                getDkimRecords()
+                setTimeout(() => {
+                    getDkimRecords()
+                }, 500)
                 
                 createNotification({
                     message: 'Domain added successfully. Please verify the DNS records.',
@@ -66,6 +72,7 @@ const DomainIdentity = () => {
                     autoClose: 3000
                 })
             } else {
+                setDomainSettings(prevState => ({...prevState, isAddingDomain: false}))
                 createNotification({
                     message: 'Failed to add domain. Please try again.',
                     type: 'warning',
@@ -74,13 +81,12 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error adding domain:', error)
+            setDomainSettings(prevState => ({...prevState, isAddingDomain: false}))
             createNotification({
-                message: 'Error adding domain: The API endpoint may not be implemented yet or is not accepting POST requests. Please check with your backend team about the /fairymailer/aws/add-domain endpoint.',
+                message: 'Error adding domain: ' + (error.response?.data?.message || error.message),
                 type: 'warning',
-                autoClose: 5000
+                autoClose: 3000
             })
-        } finally {
-            setDomainSettings(prev => ({...prev, isAddingDomain: false}))
         }
     }
     
@@ -95,19 +101,25 @@ const DomainIdentity = () => {
             return
         }
         
-        setDomainSettings({...domainSettings, isAddingEmail: true})
+        // Prevent duplicate requests
+        if (domainSettings.isAddingEmail) {
+            return;
+        }
+        
+        setDomainSettings(prevState => ({...prevState, isAddingEmail: true}))
         
         try {
             const response = await ApiService.post(
-                'fairymailer/aws/add-email',
+                'aws/add-email',
                 { email: domainSettings.sendingEmail },
                 user.jwt
             )
             
             if (response.data && response.data.success) {
-                setDomainSettings(prev => ({
-                    ...prev,
-                    emailStatus: 'PENDING'
+                setDomainSettings(prevState => ({
+                    ...prevState,
+                    emailStatus: 'PENDING',
+                    isAddingEmail: false
                 }))
                 
                 createNotification({
@@ -116,6 +128,7 @@ const DomainIdentity = () => {
                     autoClose: 3000
                 })
             } else {
+                setDomainSettings(prevState => ({...prevState, isAddingEmail: false}))
                 createNotification({
                     message: 'Failed to add email. Please try again.',
                     type: 'warning',
@@ -124,13 +137,12 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error adding email:', error)
+            setDomainSettings(prevState => ({...prevState, isAddingEmail: false}))
             createNotification({
-                message: 'Error adding email: The API endpoint may not be implemented yet. Please check with your backend team about the /fairymailer/aws/add-email endpoint.',
+                message: 'Error adding email: ' + (error.response?.data?.message || error.message),
                 type: 'warning',
-                autoClose: 5000
+                autoClose: 3000
             })
-        } finally {
-            setDomainSettings(prev => ({...prev, isAddingEmail: false}))
         }
     }
     
@@ -146,7 +158,7 @@ const DomainIdentity = () => {
         
         try {
             const response = await ApiService.post(
-                'fairymailer/aws/remove-domain',
+                'aws/remove-domain',
                 { domain_name: domainSettings.sendingDomain },
                 user.jwt
             )
@@ -177,27 +189,33 @@ const DomainIdentity = () => {
         } catch (error) {
             console.error('Error detaching domain:', error)
             createNotification({
-                message: 'Error detaching domain: The API endpoint may not be implemented yet. Please check with your backend team about the /fairymailer/aws/remove-domain endpoint.',
+                message: 'Error detaching domain: ' + (error.response?.data?.message || error.message),
                 type: 'warning',
-                autoClose: 5000
+                autoClose: 3000
             })
         }
     }
     
     // Function to verify domain DKIM
     const handleVerifyDomainDkim = async () => {
-        setDomainSettings({...domainSettings, isVerifyingDkim: true})
+        // Prevent duplicate requests
+        if (domainSettings.isVerifyingDkim) {
+            return;
+        }
+        
+        setDomainSettings(prevState => ({...prevState, isVerifyingDkim: true}))
         
         try {
             const response = await ApiService.get(
-                'fairymailer/aws/verify-domain-dkim',
+                'aws/verify-domain-dkim',
                 user.jwt
             )
             
             if (response.data && response.data.success) {
-                setDomainSettings(prev => ({
-                    ...prev,
-                    dkimStatus: response.data.verified ? 'VERIFIED' : 'PENDING'
+                setDomainSettings(prevState => ({
+                    ...prevState,
+                    dkimStatus: response.data.verified ? 'VERIFIED' : 'PENDING',
+                    isVerifyingDkim: false
                 }))
                 
                 createNotification({
@@ -208,6 +226,7 @@ const DomainIdentity = () => {
                     autoClose: 3000
                 })
             } else {
+                setDomainSettings(prevState => ({...prevState, isVerifyingDkim: false}))
                 createNotification({
                     message: 'Failed to verify DKIM. Please try again later.',
                     type: 'warning',
@@ -216,30 +235,35 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error verifying DKIM:', error)
+            setDomainSettings(prevState => ({...prevState, isVerifyingDkim: false}))
             createNotification({
-                message: 'Error verifying DKIM: The API endpoint may not be implemented yet. Please check with your backend team about the /fairymailer/aws/verify-domain-dkim endpoint.',
+                message: 'Error verifying DKIM: ' + (error.response?.data?.message || error.message),
                 type: 'warning',
-                autoClose: 5000
+                autoClose: 3000
             })
-        } finally {
-            setDomainSettings(prev => ({...prev, isVerifyingDkim: false}))
         }
     }
     
     // Function to verify email
     const handleVerifyEmail = async () => {
-        setDomainSettings({...domainSettings, isVerifyingEmail: true})
+        // Prevent duplicate requests
+        if (domainSettings.isVerifyingEmail) {
+            return;
+        }
+        
+        setDomainSettings(prevState => ({...prevState, isVerifyingEmail: true}))
         
         try {
             const response = await ApiService.get(
-                'fairymailer/aws/verify-email-status',
+                'aws/verify-email-status',
                 user.jwt
             )
             
             if (response.data) {
-                setDomainSettings(prev => ({
-                    ...prev,
-                    emailStatus: response.data.verified ? 'VERIFIED' : 'PENDING'
+                setDomainSettings(prevState => ({
+                    ...prevState,
+                    emailStatus: response.data.verified ? 'VERIFIED' : 'PENDING',
+                    isVerifyingEmail: false
                 }))
                 
                 createNotification({
@@ -250,6 +274,7 @@ const DomainIdentity = () => {
                     autoClose: 3000
                 })
             } else {
+                setDomainSettings(prevState => ({...prevState, isVerifyingEmail: false}))
                 createNotification({
                     message: 'Failed to verify email status. Please try again later.',
                     type: 'warning',
@@ -258,13 +283,12 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error checking email verification:', error)
+            setDomainSettings(prevState => ({...prevState, isVerifyingEmail: false}))
             createNotification({
-                message: 'Error checking email verification: The API endpoint may not be implemented yet. Please check with your backend team about the /fairymailer/aws/verify-email-status endpoint.',
+                message: 'Error checking email verification: ' + (error.response?.data?.message || error.message),
                 type: 'warning',
-                autoClose: 5000
+                autoClose: 3000
             })
-        } finally {
-            setDomainSettings(prev => ({...prev, isVerifyingEmail: false}))
         }
     }
     
@@ -272,7 +296,7 @@ const DomainIdentity = () => {
     const checkDomainStatus = async () => {
         try {
             const response = await ApiService.get(
-                'fairymailer/aws/get-domain-status',
+                'aws/get-domain-status',
                 user.jwt
             )
             
@@ -287,16 +311,12 @@ const DomainIdentity = () => {
                     domainTxtValue: response.data.txtRecord?.value || 'S01zjkZ3LpQjfd2Nr8TnyAmsNkpI4DGcBX2jc3UhsgY='
                 }))
                 
-                // If domain exists, check DKIM status
-                getDkimRecords()
-                
-                // Also check email status
-                checkEmailStatus()
+                return true;
             }
+            return false;
         } catch (error) {
             console.error('Error checking domain status:', error)
-            // Don't show a notification here as this is part of the initial load
-            // and we don't want to annoy users with errors on page load
+            return false;
         }
     }
     
@@ -304,7 +324,7 @@ const DomainIdentity = () => {
     const getDkimRecords = async () => {
         try {
             const response = await ApiService.get(
-                'fairymailer/aws/get-domain-dkim',
+                'aws/get-domain-dkim',
                 user.jwt
             )
             
@@ -322,7 +342,6 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error getting DKIM records:', error)
-            // Don't show a notification here as this is part of the initial load
         }
     }
     
@@ -330,7 +349,7 @@ const DomainIdentity = () => {
     const checkEmailStatus = async () => {
         try {
             const response = await ApiService.get(
-                'fairymailer/aws/verify-email-status',
+                'aws/verify-email-status',
                 user.jwt
             )
             
@@ -343,16 +362,44 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error checking email status:', error)
-            // Don't show a notification here as this is part of the initial load
         }
     }
     
     // Initial loading of domain & email settings
     useEffect(() => {
-        if (user && user.jwt) {
-            checkDomainStatus()
-        }
-    }, [user])
+        let isMounted = true;
+        
+        const fetchDomainData = async () => {
+            if (user && user.jwt) {
+                try {
+                    const domainExists = await checkDomainStatus();
+                    
+                    // Only fetch additional data if domain exists and component is still mounted
+                    if (isMounted && domainExists) {
+                        // If domain exists, check DKIM status with a slight delay to avoid race conditions
+                        setTimeout(() => {
+                            if (isMounted) getDkimRecords();
+                        }, 300);
+                        
+                        // Also check email status
+                        setTimeout(() => {
+                            if (isMounted) checkEmailStatus();
+                        }, 600);
+                    }
+                } catch (error) {
+                    console.error('Error during initial data fetch:', error);
+                    // Don't show error notification on initial load
+                }
+            }
+        };
+        
+        fetchDomainData();
+        
+        // Cleanup function
+        return () => {
+            isMounted = false;
+        };
+    }, [user]);
 
     return (
         <div className="domain-identity-container">
@@ -400,7 +447,7 @@ const DomainIdentity = () => {
                 )}
                 
                 <div className="info-text">
-                    <p>BLABLABLA INFO.</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.</p>
                 </div>
                 
                 {!domainSettings.domainStatus && (
