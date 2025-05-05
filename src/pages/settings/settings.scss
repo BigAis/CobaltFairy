@@ -77,6 +77,34 @@
         }
     }
     
+    .dropdown-section {
+        margin-bottom: 20px;
+        
+        .dropdown-row {
+            display: flex;
+            gap: 20px;
+            
+            .dropdown-item {
+                flex: 1;
+                position: relative;
+                
+                /* Specific styles for the dropdown to match Figma */
+                .dropdown-wrapper {
+                    width: 100%;
+                }
+                
+                @media (max-width: 768px) {
+                    margin-bottom: 10px;
+                }
+            }
+            
+            @media (max-width: 768px) {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    }
+    
     .verification-badge-container {
         &.standalone {
             margin: 15px 0;
@@ -176,54 +204,6 @@
     
     .container-settings {
         margin-bottom: 20px;
-    }
-    
-    .dropdown-section {
-        position: relative;
-        margin-bottom: 20px;
-        
-        .input-text-wrapper {
-            width: 100%;
-        }
-        
-        .dropdown-arrow {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 12px;
-            color: #666;
-            pointer-events: none;
-        }
-    }
-    
-    .dropdown-row {
-        display: flex;
-        gap: 20px;
-        
-        .dropdown-item {
-            flex: 1;
-            position: relative;
-            
-            .input-text-wrapper {
-                width: 100%;
-            }
-            
-            .dropdown-arrow {
-                position: absolute;
-                right: 15px;
-                top: 50%;
-                transform: translateY(-50%);
-                font-size: 12px;
-                color: #666;
-                pointer-events: none;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            flex-direction: column;
-            gap: 10px;
-        }
     }
     
     .font-button-group {
