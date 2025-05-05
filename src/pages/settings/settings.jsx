@@ -1,5 +1,5 @@
 import { React, useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import '../../fullpage.scss'
@@ -7,20 +7,34 @@ import './settings.scss'
 
 import Card from '../../components/Card'
 import Button from '../../components/Button'
+import ButtonGroup from '../../components/ButtonGroup'
 import InputText from '../../components/InputText/InputText'
 import Switch from '../../components/Switch'
 import VerificationBadge from '../../components/VerificationBadge'
 import Icon from '../../components/Icon/Icon'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
-import Dropdown from '../../components/Dropdown'
 
 const Settings = () => {
     const { user, account, createNotification } = useAccount()
     const navigate = useNavigate()
     const location = useLocation()
-    const isProfilePage = location.pathname === '/profile'
-    const [activeTab, setActiveTab] = useState(isProfilePage ? 'profile' : 'personal')
+    const { section } = useParams()
+    
+    // Define available sections
+    const sections = {
+        details: 'details',
+        domain: 'domain',
+        presets: 'presets',
+        notifications: 'notifications',
+        profile: 'profile'
+    }
+    
+    // Determine the active section based on URL route
+    const [activeSection, setActiveSection] = useState(
+        section && sections[section] ? sections[section] : 'details'
+    )
+    
     const [isLoading, setIsLoading] = useState(false)
     
     // Personal Details state
@@ -63,6 +77,13 @@ const Settings = () => {
         firstName: '',
         lastName: ''
     })
+
+    useEffect(() => {
+        // Update active section when route changes
+        if (section && sections[section]) {
+            setActiveSection(sections[section])
+        }
+    }, [section])
 
     useEffect(() => {
         // Load initial settings
@@ -153,9 +174,15 @@ const Settings = () => {
         })
     }
 
+    // Handle section changes via ButtonGroup
+    const handleSectionChange = (value) => {
+        navigate(`/settings/${value}`)
+        setActiveSection(value)
+    }
+
     const renderTabContent = () => {
-        switch (activeTab) {
-            case 'personal':
+        switch (activeSection) {
+            case 'details':
                 return (
                     <div className="settings-tab-content">
                         <div className="input-section">
@@ -252,109 +279,6 @@ const Settings = () => {
                         
                         <div className="settings-action-buttons">
                             <Button type="primary" onClick={handleSaveChanges} loading={isLoading}>Save Changes</Button>
-                        </div>
-                    </div>
-                )
-            case 'container':
-                return (
-                    <div className="settings-tab-content">
-                        <h3 className="section-title">Default Container</h3>
-                        
-                        <div className="color-picker-section">
-                            <div className="color-field">
-                                <div className="color-display" style={{ backgroundColor: containerSettings.backgroundColor }}></div>
-                                <input 
-                                    type="text" 
-                                    className="color-input" 
-                                    value={containerSettings.backgroundColor} 
-                                    onChange={(e) => setContainerSettings({...containerSettings, backgroundColor: e.target.value})}
-                                />
-                            </div>
-                            <div className="opacity-field">
-                                <input 
-                                    type="text" 
-                                    className="opacity-input" 
-                                    value={containerSettings.opacity} 
-                                    onChange={(e) => setContainerSettings({...containerSettings, opacity: e.target.value})}
-                                />
-                                <span className="percentage-sign">%</span>
-                            </div>
-                        </div>
-                        
-                        <div className="container-settings">
-                            <div className="dropdown-section">
-                                <InputText
-                                    label="Container width"
-                                    value={containerSettings.width}
-                                    onChange={(e) => {}} // This would be a dropdown in the real UI
-                                />
-                                <div className="dropdown-arrow">▼</div>
-                            </div>
-                            
-                            <div className="dropdown-section">
-                                <InputText
-                                    label="Container padding"
-                                    value={containerSettings.padding}
-                                    onChange={(e) => {}} // This would be a dropdown in the real UI
-                                />
-                                <div className="dropdown-arrow">▼</div>
-                            </div>
-                            
-                            <div className="dropdown-section">
-                                <InputText
-                                    label="Container margin"
-                                    value={containerSettings.margin}
-                                    onChange={(e) => {}} // This would be a dropdown in the real UI
-                                />
-                                <div className="dropdown-arrow">▼</div>
-                            </div>
-                        </div>
-                        
-                        <h3 className="section-title">Default Container</h3>
-                        
-                        <div className="dropdown-section">
-                            <InputText
-                                label="Font"
-                                value={containerSettings.font}
-                                onChange={(e) => {}} // This would be a dropdown in the real UI
-                            />
-                            <div className="dropdown-arrow">▼</div>
-                        </div>
-                        
-                        <div className="font-button-group">
-                            <Button type="secondary">Load Google Fonts</Button>
-                        </div>
-                        
-                        <div className="heading-button-group">
-                            <Button type="secondary">H₁ Heading 1</Button>
-                            <Button type="secondary">H₂ Heading 2</Button>
-                            <Button type="secondary">H₃ Heading 3</Button>
-                            <Button type="secondary">B Subtitle</Button>
-                            <Button type="secondary">Text</Button>
-                            <Button type="secondary">Link</Button>
-                            <Button type="secondary">— Divider</Button>
-                        </div>
-                        
-                        <h3 className="section-title">Default Logo</h3>
-                        
-                        <div className="logo-upload-section">
-                            <Button type="secondary">Upload</Button>
-                        </div>
-                        
-                        <h3 className="section-title">Social Links</h3>
-                        
-                        {containerSettings.socialLinks.map((link, index) => (
-                            <div className="input-section" key={index}>
-                                <InputText
-                                    label={`Link ${index + 1}`}
-                                    value={link}
-                                    onChange={(e) => handleLinkChange(index, e.target.value)}
-                                />
-                            </div>
-                        ))}
-                        
-                        <div className="add-link-button">
-                            <Button type="secondary" onClick={handleAddLink}>Add Link</Button>
                         </div>
                     </div>
                 )
@@ -476,15 +400,6 @@ const Settings = () => {
         }
     }
 
-    // Handle navigation between settings and profile
-    const handleProfileNavigate = () => {
-        if (isProfilePage) {
-            navigate('/settings')
-        } else {
-            navigate('/profile')
-        }
-    }
-
     return (
         <>
             <div className="fm-page-wrapper">
@@ -492,68 +407,27 @@ const Settings = () => {
                 <div className="fm-page-container">
                     <PageHeader />
                     
-                    {activeTab !== 'profile' && (
-                        <div className="page-name-container">
-                            <div className="page-name">Settings</div>
-                            <Button 
-                                type="secondary" 
-                                onClick={handleProfileNavigate}
-                            >
-                                My Profile
-                            </Button>
-                        </div>
-                    )}
+                    <div className="page-name-container">
+                        <div className="page-name">Settings</div>
+                    </div>
                     
-                    {activeTab === 'profile' && (
-                        <div className="page-name-container">
-                            <Button 
-                                type="secondary" 
-                                icon="Caret"
-                                onClick={handleProfileNavigate}
-                            >
-                                Back to Settings
-                            </Button>
-                        </div>
-                    )}
+                    <div className="settings-tabs">
+                        <ButtonGroup
+                            value={activeSection}
+                            options={[
+                                { value: 'details', label: 'Personal Details' },
+                                { value: 'domain', label: 'Domain & Identity' },
+                                { value: 'presets', label: 'Campaign Presets' },
+                                { value: 'notifications', label: 'Notifications' },
+                                { value: 'profile', label: 'Profile' }
+                            ]}
+                            onChange={handleSectionChange}
+                        />
+                    </div>
                     
-                    {activeTab !== 'profile' && (
-                        <div className="settings-tabs">
-                            <button 
-                                className={`settings-tab ${activeTab === 'personal' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('personal')}
-                            >
-                                Personal Details
-                            </button>
-                            <button 
-                                className={`settings-tab ${activeTab === 'domain' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('domain')}
-                            >
-                                Domain & Identity
-                            </button>
-                            <button 
-                                className={`settings-tab ${activeTab === 'presets' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('presets')}
-                            >
-                                Campaign Presets
-                            </button>
-                            <button 
-                                className={`settings-tab ${activeTab === 'notifications' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('notifications')}
-                            >
-                                Notifications
-                            </button>
-                        </div>
-                    )}
-                    
-                    {activeTab === 'profile' ? (
-                        <div className="profile-content">
-                            {renderTabContent()}
-                        </div>
-                    ) : (
-                        <Card className="settings-content-card">
-                            {renderTabContent()}
-                        </Card>
-                    )}
+                    <Card className="settings-content-card">
+                        {renderTabContent()}
+                    </Card>
                 </div>
             </div>
         </>

@@ -127,6 +127,7 @@ function App() {
         <Route path="/choose-account" element={<ProtectedRoute><AccountPicker /></ProtectedRoute>} />
         <Route path="/stats" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/settings/:section" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Routes>
     </div>

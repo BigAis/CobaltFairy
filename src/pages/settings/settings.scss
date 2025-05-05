@@ -3,34 +3,30 @@
     margin-bottom: 20px;
     overflow-x: auto;
     
-    .settings-tab {
-        padding: 12px 20px;
-        margin-right: 10px;
-        background: rgba(255, 255, 255, 0.5);
-        border: 2px solid rgba(218, 209, 197, 1);
-        border-radius: 8px;
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        white-space: nowrap;
+    .btn-group {
+        width: 100%;
         
-        &:hover {
-            background: rgba(255, 255, 255, 0.7);
-            box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+        .btn {
+            margin-right: 10px;
+            flex: 1;
+            min-width: auto;
+            font-size: 14px;
+            white-space: nowrap;
+            
+            &.active {
+                background: rgba(255, 195, 173, 0.5);
+                border-color: #FF635D;
+            }
         }
         
-        &.active {
-            background: rgba(255, 195, 173, 0.5);
-            border-color: #FF635D;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .settings-tab {
-            padding: 8px 12px;
-            font-size: 12px;
+        @media (max-width: 768px) {
+            overflow-x: auto;
+            
+            .btn {
+                padding: 8px 12px;
+                font-size: 12px;
+                min-width: 120px;
+            }
         }
     }
 }
