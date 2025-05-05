@@ -400,7 +400,7 @@ const DomainIdentity = () => {
                 )}
                 
                 <div className="info-text">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.</p>
+                    <p>BLABLABLA INFO.</p>
                 </div>
                 
                 {!domainSettings.domainStatus && (
