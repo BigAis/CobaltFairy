@@ -1,0 +1,475 @@
+.settings-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    
+    // Default ButtonGroup styling without custom modifications
+    .btn-group {
+        width: 100%;
+        
+        .btn {
+            // Using default ButtonGroup styling
+            font-size: 14px;
+            white-space: nowrap;
+        }
+    }
+}
+
+.settings-content-card {
+    padding: 30px;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.5);
+    
+    @media (max-width: 768px) {
+        padding: 15px;
+    }
+}
+
+.profile-content {
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.settings-tab-content {
+    .section-title {
+        font-family: 'Bitter', serif;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        margin-top: 30px;
+        text-align: left;
+        
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+    
+    .profile-title {
+        font-family: 'Bitter', serif;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        text-align: left;
+    }
+    
+    .input-section {
+        margin-bottom: 20px;
+        width: 100%;
+        
+        .input-text-wrapper {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        
+        .input-text {
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(218, 209, 197, 1);
+        }
+    }
+    
+    .verification-badge-container {
+        display: flex;
+        align-items: center;
+        margin: 15px 0;
+        
+        &.standalone {
+            display: inline-flex;
+            margin-right: 15px;
+        }
+        
+        .verified-badge {
+            display: inline-flex;
+            padding: 5px 10px;
+            
+            .badge-verified {
+                background: #99EA0F;
+            }
+            
+            .badge-unverified {
+                background: #FFA600;
+            }
+        }
+    }
+    
+    .action-button {
+        margin: 15px 0;
+        
+        .btn {
+            font-weight: 500;
+            
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.7);
+                box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+            }
+        }
+    }
+    
+    .info-text {
+        color: #666;
+        margin: 15px 0 25px 0;
+        text-align: left;
+        
+        p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+    }
+    
+    .settings-action-buttons {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        
+        .btn {
+            min-width: 150px;
+            background-color: rgba(255, 195, 173, 0.5);
+            border: 2px solid #FF635D;
+            
+            &:hover {
+                background-color: rgba(255, 195, 173, 0.75);
+                box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+            }
+            
+            &.loading {
+                cursor: not-allowed;
+            }
+        }
+    }
+    
+    // Domain & Identity specific styles
+    .record-group {
+        margin-bottom: 20px;
+        
+        .record-heading {
+            text-align: left;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .record-item {
+            display: flex;
+            margin-bottom: 10px;
+            
+            .record-label {
+                min-width: 80px;
+                text-align: left;
+                font-weight: 500;
+            }
+            
+            .record-value {
+                flex: 1;
+                text-align: left;
+                background-color: rgba(255, 255, 255, 0.5);
+                padding: 8px 15px;
+                border-radius: 5px;
+                border: 1px dashed #DAD1C5;
+                word-break: break-all;
+                font-family: monospace;
+                font-size: 14px;
+            }
+        }
+    }
+    
+    .record-instructions {
+        text-align: left;
+        margin-bottom: 15px;
+        line-height: 1.5;
+    }
+    
+    .dkim-records-container {
+        margin-bottom: 25px;
+    }
+    
+    .verification-buttons {
+        display: flex;
+        margin: 15px 0;
+        
+        .btn {
+            &.loading {
+                cursor: not-allowed;
+            }
+        }
+        
+        .ml-10 {
+            margin-left: 10px;
+        }
+    }
+    
+    .status-pending {
+        color: #FF4D4D;
+        font-weight: 500;
+    }
+    
+    .status-verified {
+        color: #99EA0F;
+        font-weight: 500;
+    }
+    
+    .mt-10 {
+        margin-top: 10px;
+    }
+    
+    .mt-20 {
+        margin-top: 20px;
+    }
+    
+    .color-picker-section {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        
+        .color-field {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            
+            .color-display {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                margin-right: 10px;
+                border: 2px solid rgba(218, 209, 197, 1);
+            }
+            
+            .color-input {
+                width: 100px;
+                height: 40px;
+                padding: 0 10px;
+                font-size: 14px;
+                border: 2px solid rgba(218, 209, 197, 1);
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.5);
+            }
+        }
+        
+        .opacity-field {
+            display: flex;
+            align-items: center;
+            
+            .opacity-input {
+                width: 60px;
+                height: 40px;
+                padding: 0 10px;
+                font-size: 14px;
+                border: 2px solid rgba(218, 209, 197, 1);
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.5);
+                margin-right: 5px;
+            }
+            
+            .percentage-sign {
+                font-size: 16px;
+                font-weight: 500;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            flex-wrap: wrap;
+            
+            .color-field, .opacity-field {
+                margin-bottom: 10px;
+                width: 100%;
+            }
+        }
+    }
+    
+    .container-settings {
+        margin-bottom: 20px;
+    }
+    
+    .dropdown-section {
+        position: relative;
+        margin-bottom: 20px;
+        
+        .dropdown-row {
+            display: flex;
+            gap: 20px;
+            
+            .dropdown-item {
+                flex: 1;
+                position: relative;
+                
+                .dropdown {
+                    width: 100%;
+                    
+                    &:hover {
+                        background-color: rgba(255, 255, 255, 0.7);
+                        box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+                    }
+                }
+            }
+            
+            @media (max-width: 768px) {
+                flex-direction: column;
+                gap: 10px;
+                
+                .dropdown-item {
+                    width: 100%;
+                }
+            }
+        }
+    }
+    // Notification styles - Two column layout
+    .notifications-row {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 30px;
+        
+        .notification-column {
+            flex: 1;
+            
+            .notification-setting {
+                margin-bottom: 15px;
+                
+                .toggle-switch {
+                    margin-bottom: 0;
+                    
+                    .slider {
+                        background-color: rgba(255, 255, 255, 1);
+                        border: 2px solid rgba(218, 209, 197, 1);
+                        
+                        &:before {
+                            background-color: rgba(217, 217, 217, 1);
+                        }
+                    }
+                    
+                    input:checked + .slider {
+                        background-color: rgba(255, 99, 93, 0.5);
+                        border: 2px solid rgba(255, 99, 93, 1);
+                        
+                        &:before {
+                            background-color: white;
+                        }
+                    }
+                }
+            }
+            
+            .notification-email {
+                .input-text-wrapper {
+                    width: 100%;
+                    margin-bottom: 0;
+                }
+            }
+        }
+        
+        // Responsive layout for mobile
+        @media (max-width: 768px) {
+            flex-direction: column;
+            
+            .notification-column {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    }
+    // Notification settings - Updated to display horizontally
+    .notification-setting {
+        margin: 20px 0;
+        
+        .toggle-switch {
+            margin-bottom: 0;
+            
+            .slider {
+                background-color: rgba(255, 255, 255, 1);
+                border: 2px solid rgba(218, 209, 197, 1);
+                
+                &:before {
+                    background-color: rgba(217, 217, 217, 1);
+                }
+            }
+            
+            input:checked + .slider {
+                background-color: rgba(255, 99, 93, 0.5);
+                border: 2px solid rgba(255, 99, 93, 1);
+                
+                &:before {
+                    background-color: white;
+                }
+            }
+        }
+    }
+    
+    // New horizontal layout for notification email and action
+    .notification-email-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 15px;
+        margin-bottom: 25px;
+        
+        .notification-email {
+            flex: 1;
+            
+            .input-text-wrapper {
+                width: 100%;
+                margin-bottom: 0;
+            }
+        }
+        
+        .notification-action {
+            min-width: 100px;
+            margin-bottom: 1px; // Align with input field
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            flex-wrap: wrap;
+            
+            .notification-email {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .notification-action {
+                width: 100%;
+            }
+        }
+    }
+    
+    .password-section {
+        position: relative;
+        margin-bottom: 30px;
+        
+        .password-field {
+            position: relative;
+            margin-bottom: 15px;
+            
+            .input-text-wrapper {
+                width: 100%;
+            }
+            
+            .password-icon {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                cursor: pointer;
+                
+                svg {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+        }
+        
+        .update-password-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            
+            .btn {
+                width: auto;
+            }
+        }
+    }
+    
+    &.profile-tab {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px 0;
+    }
+}

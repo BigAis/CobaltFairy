@@ -24,6 +24,7 @@ import BookFunnel from './pages/integrations/BookFunnel'
 import EditCustomField from './pages/subscribers/EditCustomField'
 import NewCustomField from './pages/subscribers/NewCustomField'
 import NotificationContainer from './components/NotificationContainer/NotificationContainer'
+import Settings from './pages/settings/settings'
 
 // A wrapper component to handle authentication check
 const ProtectedRoute = ({ children }) => {
@@ -125,6 +126,9 @@ function App() {
         <Route path="/automations/editor/:autId" element={<ProtectedRoute><FlowEditor /></ProtectedRoute>} />
         <Route path="/choose-account" element={<ProtectedRoute><AccountPicker /></ProtectedRoute>} />
         <Route path="/stats" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/settings/:section" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Routes>
     </div>
   );

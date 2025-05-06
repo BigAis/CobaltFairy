@@ -118,7 +118,22 @@ const FlowEditor = () => {
 
 	const loadData = async (autId) => {
 		let resp = await ApiService.get(`fairymailer/getAutomations?filters[uuid]=${autId}&populate=*`, user.jwt)
-		const loadedNodes = resp.data.data[0].design
+		const loadedNodes = resp.data.data[0].design.map(node=>{
+			if(node.type === "condition" && ["cmp_link_clicked"].includes(node.data?.trigger) && node.data?.link){
+				if(!node.data.link.value) node.data.link = {value:node.data.link}
+			}
+			if(node.type === "delay"){
+				// if(node.meta?.label=="Days"){
+				// 	node.data.delayValue = ['days']
+				// }else if (node.meta?.label=="Hours"){
+				// 	node.data.delayValue = ['hours']
+				// }
+				// if(!node.data?.delayValue || !node.data.delayValue[0]){
+				// 	node.data.delayValue = ['days'] //fallback to days
+				// }
+			}
+			return node
+		})
 		console.log('loadedNodes', loadedNodes, resp.data)
 		if (loadedNodes && loadedNodes.length > 0) {
 			setNodes(transformNodes(loadedNodes))
@@ -865,15 +880,16 @@ const FlowEditor = () => {
 	return (
 		<div className="flow-editor-container">
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
-			<div className="header">
+			<div className="header" style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexDirection:'row'}}>
 				<Stepper
 					steps={steps}
 					current={3}
 					setStep={() => {
 						navigate(`/automations/${autId}`)
 					}}
+					style={{width:'70%'}}
 				/>
-				<div className="buttons">
+				<div className="buttons" style={{width:'40%'}}>
 					<Button type="secondary" icon="Save" onClick={exportData}>
 						Save
 					</Button>

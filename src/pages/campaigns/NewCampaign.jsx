@@ -363,6 +363,30 @@ const NewCampaign = () => {
 		setAbSplit(!abSplit)
 	}
 
+	// In NewCampaign.jsx
+
+	// Add a function to load and apply presets
+	const loadPreset = async (presetId) => {
+		try {
+		// Fetch preset data
+		const response = await ApiService.get(`fairymailer/getCampaignPreset?id=${presetId}`, user.jwt);
+		
+		if (response.data && response.data.data) {
+			const preset = response.data.data;
+			
+			// Apply preset settings to campaign
+			setCurrentCampaign({
+			...currentCampaign,
+			// Apply relevant preset properties
+			});
+			
+			// Apply container settings and other configurations
+		}
+		} catch (error) {
+		console.error("Error loading preset:", error);
+		}
+	};
+
 	const sendTestEmail = async () => {
 		const campaignUdid = uuid
 		const response = await ApiService.post(`fairymail/sendDraft`, { campaign_id: campaignUdid }, user.jwt)

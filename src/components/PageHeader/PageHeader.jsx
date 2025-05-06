@@ -22,11 +22,7 @@ const PageHeader = () => {
 			label:'Profile',
 			callback: () => {
 				setUserMenuOpen(false);
-				createNotification({
-					message: 'Profile feature coming soon!',
-					type: 'default',
-					autoClose: 3000
-				});
+				navigate('/settings/profile');
 			}
 		},
 		{

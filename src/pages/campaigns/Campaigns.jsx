@@ -413,7 +413,7 @@ const Campaigns = () => {
 						</Button>
 					</div>
 					<div className="filters-container">
-						<div className="row" style={{ marginBottom: '1rem' }}>
+						<div className="row" style={{ marginBottom: '1rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
 							<ButtonGroup
 								value={selectedCampaignType}
 								options={[
@@ -424,11 +424,9 @@ const Campaigns = () => {
 								]}
 								onChange={handleTabChange}
 							></ButtonGroup>
-						</div>
-						
 						{/* View mode toggle moved above the search bar and converted to ButtonGroup */}
 						{dropdownViewer === 'campaigns' && (
-							<div className="row" style={{ marginBottom: '1rem' }}>
+							// <div className="row" style={{ marginBottom: '1rem' }}>
 								<ButtonGroup
 									value={viewMode}
 									options={[
@@ -437,8 +435,10 @@ const Campaigns = () => {
 									]}
 									onChange={setViewMode}
 								/>
-							</div>
+							// </div>
 						)}
+						</div>
+						
 						
 						<div className="row d-flex content-space-between">
 							<InputText
