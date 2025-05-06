@@ -880,15 +880,16 @@ const FlowEditor = () => {
 	return (
 		<div className="flow-editor-container">
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
-			<div className="header">
+			<div className="header" style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexDirection:'row'}}>
 				<Stepper
 					steps={steps}
 					current={3}
 					setStep={() => {
 						navigate(`/automations/${autId}`)
 					}}
+					style={{width:'70%'}}
 				/>
-				<div className="buttons">
+				<div className="buttons" style={{width:'40%'}}>
 					<Button type="secondary" icon="Save" onClick={exportData}>
 						Save
 					</Button>

@@ -49,7 +49,7 @@
             cursor: grab;
             margin-top: 20px;
             border-top:2px solid #DAD1C5;
-            height: calc(-180px + 100vh);
+            height: calc(-130px + 100vh);
             max-width: calc(100vw);
             li.automation-node-item[data-nodeid='1'] {
                 margin-top: 20px;
@@ -98,6 +98,8 @@
             transition: right .5s ease-in-out;
             background: #fff8ef;
             border-left: 2px solid #dad1c5;
+            height: calc(-130px + 100vh);
+            overflow-y: scroll;
             
             h3.triggers-header{
                 font-family: 'Inter';

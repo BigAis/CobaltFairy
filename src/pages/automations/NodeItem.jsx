@@ -569,7 +569,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 																options={data.cmpLinks}
 																style={{ width: '350px', maxWidth: '350px' }}
 																onOptionSelect={(v) => {
-																	node = { ...node, data: { ...node.data, link: v } }
+																	node = { ...node, data: { ...node.data, link: v} }
 																	onUpdate(node)
 																}}
 															>
@@ -615,7 +615,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 																options={getTplIdLinks(node?.data?.email_node_id)}
 																style={{ width: '350px', maxWidth: '350px' }}
 																onOptionSelect={(v) => {
-																	node = { ...node, data: { ...node.data, link: v.value ?? v } }
+																	node = { ...node, data: { ...node.data, link: v } }
 																	onUpdate(node)
 																}}
 															>
