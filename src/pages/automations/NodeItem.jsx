@@ -466,7 +466,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									}}
 								>
 									{' '}
-									{node?.data?.meta?.label ?? 'Select delay type'}
+									{node?.meta?.label ?? 'Select delay type'}
 								</Dropdown>
 							</div>
 						</Card>
@@ -615,7 +615,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 																options={getTplIdLinks(node?.data?.email_node_id)}
 																style={{ width: '350px', maxWidth: '350px' }}
 																onOptionSelect={(v) => {
-																	node = { ...node, data: { ...node.data, link: v } }
+																	node = { ...node, data: { ...node.data, link: v.value ?? v } }
 																	onUpdate(node)
 																}}
 															>
