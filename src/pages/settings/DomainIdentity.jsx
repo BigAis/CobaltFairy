@@ -354,22 +354,21 @@ const DomainIdentity = () => {
             
             if (response.data && (response.data.success || response.data.code === 200)) {
                 const domainData = response.data.data || {};
-                const domainName = response.data.domain || 
-                                  (domainData && domainData.domain) || 
-                                  domainSettings.sendingDomain;
+                let domainName = domainData && domainData.VerificationAttributes ? Object.keys(domainData.VerificationAttributes)[0] : '';
+
+                const isVerified = domainData && 
+                                        domainData.VerificationAttributes && 
+                                        domainData.VerificationAttributes[domainName] &&
+                                        domainData.VerificationAttributes[domainName].VerificationStatus == "Verified"
                                   
-                const isVerified = response.data.verified || 
-                                  (domainData && domainData.verified) || 
-                                  false;
-                                  
-                const txtRecord = domainData.txtRecord || response.data.txtRecord || {};
+                const txtRecord = domainData?.VerificationAttributes[domainName]?.VerificationToken ?? 'err'; 
                 
                 setDomainSettings(prev => ({
                     ...prev,
                     sendingDomain: domainName,
                     domainStatus: isVerified ? 'VERIFIED' : 'PENDING',
-                    domainTxtName: txtRecord.name || `_amazon.${domainName}`,
-                    domainTxtValue: txtRecord.value || ''
+                    domainTxtName: `_amazon.${domainName}`,
+                    domainTxtValue: txtRecord || ''
                 }))
                 
                 return true;
@@ -393,23 +392,17 @@ const DomainIdentity = () => {
             
             if (response.data && (response.data.success || response.data.code === 200)) {
                 // Handle the response data directly from the API without creating placeholders
-                const dkimData = response.data.data || response.data;
+                const dkimData = response.data.data;
                 
                 // Extract the DKIM records from the response
                 let records = [];
                 
-                if (Array.isArray(dkimData.dkimRecords)) {
+                if (Array.isArray(dkimData.DkimTokens)) {
                     // If API returns records in the expected format
-                    records = dkimData.dkimRecords;
-                } else if (dkimData.dkimTokens || dkimData.tokens) {
-                    // If API returns tokens, use those to extract records
-                    const tokens = dkimData.dkimTokens || dkimData.tokens || [];
-                    if (Array.isArray(tokens)) {
-                        records = tokens.map(token => ({
-                            name: token.name || `${token}._domainkey.${domainSettings.sendingDomain}`,
-                            value: token.value || `${token}.dkim.amazonses.com`
-                        }));
-                    }
+                    records = dkimData.DkimTokens.map(token => ({
+                        name: token.name || `${token}._domainkey.${domainSettings.sendingDomain}`,
+                        value: token.value || `${token}.dkim.amazonses.com`
+                    }));;
                 }
                 
                 const isVerified = dkimData.verified || false;
