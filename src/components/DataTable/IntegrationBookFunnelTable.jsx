@@ -197,8 +197,8 @@ const BookFunnelIntegrationsTable = () => {
 					)}
 					headerStyle={{ width: '80px' }}
 				/>
-				<Column field="bf_page.book" header="BF Page" body={(rowData) => (loading ? <Skeleton /> : rowData.bf_page.name)} />
-				<Column field="group.name" header="Account Group" body={(rowData) => (loading ? <Skeleton /> : rowData.group.name)} />
+				<Column field="bf_page.book" header="BF Page" body={(rowData) => (loading ? <Skeleton /> : rowData?.bf_page?.book)} />
+				<Column field="group.name" header="Account Group" body={(rowData) => (loading ? <Skeleton /> : rowData?.group?.name)} />
 				<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
 			</DataTable>
 			<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
