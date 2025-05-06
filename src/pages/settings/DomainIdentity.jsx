@@ -27,25 +27,6 @@ const DomainIdentity = () => {
         isDetachingDomain: false
     })
 
-    // Reset domain state manually
-    const resetDomainState = () => {
-        setDomainSettings(prev => ({
-            ...prev,
-            sendingDomain: '',
-            domainStatus: null, // This is key - must be null to enable the input
-            dkimStatus: null,
-            domainTxtName: '',
-            domainTxtValue: '',
-            dkimRecords: []
-        }));
-        
-        createNotification({
-            message: 'Domain settings reset successfully',
-            type: 'default',
-            autoClose: 3000
-        });
-    };
-
     // Function to add a domain
     const handleAddDomain = async () => {
         if (!domainSettings.sendingDomain) {
@@ -128,6 +109,17 @@ const DomainIdentity = () => {
             return
         }
         
+        // Check if email domain matches sending domain
+        const emailParts = domainSettings.sendingEmail.split('@');
+        if (emailParts.length !== 2 || emailParts[1].toLowerCase() !== domainSettings.sendingDomain.toLowerCase()) {
+            createNotification({
+                message: `Email must use the verified domain: @${domainSettings.sendingDomain}`,
+                type: 'warning',
+                autoClose: 3000
+            })
+            return
+        }
+        
         // Prevent duplicate requests
         if (domainSettings.isAddingEmail) {
             return;
@@ -174,65 +166,6 @@ const DomainIdentity = () => {
             })
         }
     }
-    
-    // Function to detach a domain
-    const handleDetachDomain = async () => {
-        if (!domainSettings.sendingDomain) {
-            createNotification({
-                message: 'No domain to detach',
-                type: 'warning',
-                autoClose: 3000
-            });
-            return;
-        }
-        
-        // Prevent duplicate requests
-        if (domainSettings.isDetachingDomain) {
-            return;
-        }
-        
-        // Confirm with the user before detaching
-        if (!confirm(`Are you sure you want to detach the domain "${domainSettings.sendingDomain}"? This will invalidate all domain keys.`)) {
-            return;
-        }
-        
-        setDomainSettings(prevState => ({...prevState, isDetachingDomain: true}));
-        
-        try {
-            console.log('Detaching domain:', domainSettings.sendingDomain);
-            
-            const response = await ApiService.post(
-                'aws/remove-domain',
-                { domain_name: domainSettings.sendingDomain },
-                user.jwt
-            );
-            
-            console.log('Domain detach response:', response.data);
-            
-            // Always reset the domain state regardless of response
-            // This ensures the UI resets even if the API fails
-            resetDomainState();
-            setDomainSettings(prev => ({...prev, isDetachingDomain: false}));
-            
-            createNotification({
-                message: 'Domain detached successfully',
-                type: 'default',
-                autoClose: 3000
-            });
-        } catch (error) {
-            console.error('Error detaching domain:', error);
-            
-            // Reset domain state anyway to allow users to try again
-            resetDomainState();
-            setDomainSettings(prev => ({...prev, isDetachingDomain: false}));
-            
-            createNotification({
-                message: 'Error detaching domain. Domain settings have been reset.',
-                type: 'warning',
-                autoClose: 3000
-            });
-        }
-    };
     
     // Function to verify domain DKIM
     const handleVerifyDomainDkim = async () => {
@@ -486,18 +419,20 @@ const DomainIdentity = () => {
     return (
         <div className="domain-identity-container">
             <Card className="domain-section">
-                <div className="section-header">
-                    <h3 className="section-title">Sending domain & identity</h3>
-                    {domainSettings.domainStatus && (
-                        <Button 
-                            type="secondary" 
-                            onClick={resetDomainState}
-                            className="reset-button"
-                        >
-                            Reset
-                        </Button>
-                    )}
-                </div>
+                <h3 className="section-title">Sending domain & identity</h3>
+                
+                {/* Moved verification badge above input */}
+                {domainSettings.domainStatus === 'VERIFIED' && (
+                    <div className="verification-badge-container">
+                        <VerificationBadge isVerified={true} />
+                    </div>
+                )}
+                
+                {domainSettings.domainStatus === 'PENDING' && (
+                    <div className="verification-badge-container">
+                        <VerificationBadge isVerified={false} />
+                    </div>
+                )}
                 
                 <div className="input-section">
                     <InputText
@@ -508,41 +443,20 @@ const DomainIdentity = () => {
                     />
                 </div>
                 
-                {domainSettings.domainStatus === 'VERIFIED' && (
-                    <div className="verification-badge-container">
-                        <VerificationBadge isVerified={true} />
-                    </div>
-                )}
-                
                 {domainSettings.domainStatus === 'PENDING' && (
-                    <div className="verification-badge-container">
-                        <VerificationBadge isVerified={false} />
-                        <div className="info-text mt-10">
-                            <p>Please make sure you have added the following (TXT) DNS record in order to verify your identity</p>
-                            
-                            <div className="record-group">
-                                <div className="record-item">
-                                    <div className="record-label">NAME:</div>
-                                    <div className="record-value">{domainSettings.domainTxtName}</div>
-                                </div>
-                                <div className="record-item">
-                                    <div className="record-label">VALUE:</div>
-                                    <div className="record-value">{domainSettings.domainTxtValue}</div>
-                                </div>
+                    <div className="info-text mt-10">
+                        <p>Please make sure you have added the following (TXT) DNS record in order to verify your identity</p>
+                        
+                        <div className="record-group">
+                            <div className="record-item">
+                                <div className="record-label">NAME:</div>
+                                <div className="record-value">{domainSettings.domainTxtName}</div>
+                            </div>
+                            <div className="record-item">
+                                <div className="record-label">VALUE:</div>
+                                <div className="record-value">{domainSettings.domainTxtValue}</div>
                             </div>
                         </div>
-                    </div>
-                )}
-                
-                {domainSettings.domainStatus && (
-                    <div className="action-button">
-                        <Button 
-                            type="secondary" 
-                            onClick={handleDetachDomain}
-                            loading={domainSettings.isDetachingDomain}
-                        >
-                            Detach
-                        </Button>
                     </div>
                 )}
                 
@@ -612,7 +526,7 @@ const DomainIdentity = () => {
                         
                         <div className="input-section">
                             <InputText
-                                placeholder="Enter email"
+                                placeholder={`Enter email (must use @${domainSettings.sendingDomain})`}
                                 value={domainSettings.sendingEmail}
                                 onChange={(e) => setDomainSettings({...domainSettings, sendingEmail: e.target.value})}
                             />
