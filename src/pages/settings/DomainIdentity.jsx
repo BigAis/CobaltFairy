@@ -410,7 +410,7 @@ const DomainIdentity = () => {
                 setDomainSettings(prev => ({
                     ...prev,
                     dkimRecords: records,
-                    dkimStatus: isVerified ? 'VERIFIED' : 'PENDING'
+                    // dkimStatus: isVerified ? 'VERIFIED' : 'PENDING'
                 }));
             }
         } catch (error) {
