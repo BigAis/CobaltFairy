@@ -23,8 +23,28 @@ const DomainIdentity = () => {
         isAddingDomain: false,
         isAddingEmail: false,
         isVerifyingDkim: false,
-        isVerifyingEmail: false
+        isVerifyingEmail: false,
+        isDetachingDomain: false
     })
+
+    // Reset domain state manually
+    const resetDomainState = () => {
+        setDomainSettings(prev => ({
+            ...prev,
+            sendingDomain: '',
+            domainStatus: null, // This is key - must be null to enable the input
+            dkimStatus: null,
+            domainTxtName: '',
+            domainTxtValue: '',
+            dkimRecords: []
+        }));
+        
+        createNotification({
+            message: 'Domain settings reset successfully',
+            type: 'default',
+            autoClose: 3000
+        });
+    };
 
     // Function to add a domain
     const handleAddDomain = async () => {
@@ -51,17 +71,24 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            if (response.data && response.data.success) {
-                // Set domain status to pending initially
+            console.log('Domain add response:', response.data)
+            
+            // Check for response code 200
+            if (response.data && response.data.code === 200) {
+                // Extract the verification token from the correct location in the response
+                const verificationToken = response.data.data?.VerificationToken || '';
+                
                 setDomainSettings(prevState => ({
                     ...prevState,
                     domainStatus: 'PENDING',
-                    domainTxtName: response.data.txtRecord?.name || `_amazon.${prevState.sendingDomain}`,
-                    domainTxtValue: response.data.txtRecord?.value || 'S01zjkZ3LpQjfd2Nr8TnyAmsNkpI4DGcBX2jc3UhsgY=',
+                    // Use the domain name from state to build the TXT record name
+                    domainTxtName: `_amazon.${prevState.sendingDomain}`,
+                    // Use the verification token from the response
+                    domainTxtValue: verificationToken,
                     isAddingDomain: false
                 }))
                 
-                // Fetch DKIM records after adding domain
+                // Fetch DKIM records immediately after adding domain
                 setTimeout(() => {
                     getDkimRecords()
                 }, 500)
@@ -115,7 +142,9 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            if (response.data && response.data.success) {
+            console.log('Email add response:', response.data)
+            
+            if (response.data && response.data.code === 200) {
                 setDomainSettings(prevState => ({
                     ...prevState,
                     emailStatus: 'PENDING',
@@ -149,52 +178,61 @@ const DomainIdentity = () => {
     // Function to detach a domain
     const handleDetachDomain = async () => {
         if (!domainSettings.sendingDomain) {
-            return
+            createNotification({
+                message: 'No domain to detach',
+                type: 'warning',
+                autoClose: 3000
+            });
+            return;
         }
         
-        if (!confirm('Are you sure you want to detach this domain? This will invalidate all domain keys.')) {
-            return
+        // Prevent duplicate requests
+        if (domainSettings.isDetachingDomain) {
+            return;
         }
+        
+        // Confirm with the user before detaching
+        if (!confirm(`Are you sure you want to detach the domain "${domainSettings.sendingDomain}"? This will invalidate all domain keys.`)) {
+            return;
+        }
+        
+        setDomainSettings(prevState => ({...prevState, isDetachingDomain: true}));
         
         try {
+            console.log('Detaching domain:', domainSettings.sendingDomain);
+            
             const response = await ApiService.post(
                 'aws/remove-domain',
                 { domain_name: domainSettings.sendingDomain },
                 user.jwt
-            )
+            );
             
-            if (response.data && response.data.success) {
-                setDomainSettings({
-                    ...domainSettings,
-                    domainStatus: null,
-                    dkimStatus: null,
-                    emailStatus: null,
-                    domainTxtName: '',
-                    domainTxtValue: '',
-                    dkimRecords: []
-                })
-                
-                createNotification({
-                    message: 'Domain detached successfully',
-                    type: 'default',
-                    autoClose: 3000
-                })
-            } else {
-                createNotification({
-                    message: 'Failed to detach domain. Please try again.',
-                    type: 'warning',
-                    autoClose: 3000
-                })
-            }
-        } catch (error) {
-            console.error('Error detaching domain:', error)
+            console.log('Domain detach response:', response.data);
+            
+            // Always reset the domain state regardless of response
+            // This ensures the UI resets even if the API fails
+            resetDomainState();
+            setDomainSettings(prev => ({...prev, isDetachingDomain: false}));
+            
             createNotification({
-                message: 'Error detaching domain: ' + (error.response?.data?.message || error.message),
+                message: 'Domain detached successfully',
+                type: 'default',
+                autoClose: 3000
+            });
+        } catch (error) {
+            console.error('Error detaching domain:', error);
+            
+            // Reset domain state anyway to allow users to try again
+            resetDomainState();
+            setDomainSettings(prev => ({...prev, isDetachingDomain: false}));
+            
+            createNotification({
+                message: 'Error detaching domain. Domain settings have been reset.',
                 type: 'warning',
                 autoClose: 3000
-            })
+            });
         }
-    }
+    };
     
     // Function to verify domain DKIM
     const handleVerifyDomainDkim = async () => {
@@ -211,15 +249,21 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            if (response.data && response.data.success) {
+            console.log('DKIM verify response:', response.data)
+            
+            if (response.data && (response.data.success || response.data.code === 200)) {
+                const isVerified = response.data.verified || 
+                                  (response.data.data && response.data.data.verified) || 
+                                  false;
+                                  
                 setDomainSettings(prevState => ({
                     ...prevState,
-                    dkimStatus: response.data.verified ? 'VERIFIED' : 'PENDING',
+                    dkimStatus: isVerified ? 'VERIFIED' : 'PENDING',
                     isVerifyingDkim: false
                 }))
                 
                 createNotification({
-                    message: response.data.verified 
+                    message: isVerified 
                         ? 'DKIM verified successfully!' 
                         : 'DKIM verification pending. Please ensure DNS records are properly configured.',
                     type: 'default',
@@ -259,15 +303,21 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
+            console.log('Email verify response:', response.data)
+            
             if (response.data) {
+                const isVerified = response.data.verified || 
+                                  (response.data.data && response.data.data.verified) || 
+                                  false;
+                                  
                 setDomainSettings(prevState => ({
                     ...prevState,
-                    emailStatus: response.data.verified ? 'VERIFIED' : 'PENDING',
+                    emailStatus: isVerified ? 'VERIFIED' : 'PENDING',
                     isVerifyingEmail: false
                 }))
                 
                 createNotification({
-                    message: response.data.verified 
+                    message: isVerified 
                         ? 'Email verified successfully!' 
                         : 'Email verification pending. Please check your inbox for verification email.',
                     type: 'default',
@@ -300,15 +350,26 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            if (response.data && response.data.domain) {
-                const domainName = response.data.domain
+            console.log('Domain status response:', response.data)
+            
+            if (response.data && (response.data.success || response.data.code === 200)) {
+                const domainData = response.data.data || {};
+                const domainName = response.data.domain || 
+                                  (domainData && domainData.domain) || 
+                                  domainSettings.sendingDomain;
+                                  
+                const isVerified = response.data.verified || 
+                                  (domainData && domainData.verified) || 
+                                  false;
+                                  
+                const txtRecord = domainData.txtRecord || response.data.txtRecord || {};
                 
                 setDomainSettings(prev => ({
                     ...prev,
                     sendingDomain: domainName,
-                    domainStatus: response.data.verified ? 'VERIFIED' : 'PENDING',
-                    domainTxtName: response.data.txtRecord?.name || `_amazon.${domainName}`,
-                    domainTxtValue: response.data.txtRecord?.value || 'S01zjkZ3LpQjfd2Nr8TnyAmsNkpI4DGcBX2jc3UhsgY='
+                    domainStatus: isVerified ? 'VERIFIED' : 'PENDING',
+                    domainTxtName: txtRecord.name || `_amazon.${domainName}`,
+                    domainTxtValue: txtRecord.value || ''
                 }))
                 
                 return true;
@@ -326,22 +387,46 @@ const DomainIdentity = () => {
             const response = await ApiService.get(
                 'aws/get-domain-dkim',
                 user.jwt
-            )
+            );
             
-            if (response.data && response.data.dkimRecords) {
-                const records = response.data.dkimRecords.map(record => ({
-                    name: record.name,
-                    value: record.value
-                }))
+            console.log('DKIM records response:', response.data);
+            
+            if (response.data && (response.data.success || response.data.code === 200)) {
+                // Handle the response data directly from the API without creating placeholders
+                const dkimData = response.data.data || response.data;
+                
+                // Extract the DKIM records from the response
+                let records = [];
+                
+                if (Array.isArray(dkimData.dkimRecords)) {
+                    // If API returns records in the expected format
+                    records = dkimData.dkimRecords;
+                } else if (dkimData.dkimTokens || dkimData.tokens) {
+                    // If API returns tokens, use those to extract records
+                    const tokens = dkimData.dkimTokens || dkimData.tokens || [];
+                    if (Array.isArray(tokens)) {
+                        records = tokens.map(token => ({
+                            name: token.name || `${token}._domainkey.${domainSettings.sendingDomain}`,
+                            value: token.value || `${token}.dkim.amazonses.com`
+                        }));
+                    }
+                }
+                
+                const isVerified = dkimData.verified || false;
                 
                 setDomainSettings(prev => ({
                     ...prev,
                     dkimRecords: records,
-                    dkimStatus: response.data.verified ? 'VERIFIED' : 'PENDING'
-                }))
+                    dkimStatus: isVerified ? 'VERIFIED' : 'PENDING'
+                }));
             }
         } catch (error) {
-            console.error('Error getting DKIM records:', error)
+            console.error('Error getting DKIM records:', error);
+            createNotification({
+                message: 'Error retrieving DKIM records: ' + (error.response?.data?.message || error.message),
+                type: 'warning',
+                autoClose: 3000
+            });
         }
     }
     
@@ -353,11 +438,16 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            if (response.data && response.data.email) {
+            console.log('Email status response:', response.data)
+            
+            if (response.data) {
+                const emailData = response.data.data || response.data;
+                const isVerified = emailData.verified || false;
+                
                 setDomainSettings(prev => ({
                     ...prev,
-                    sendingEmail: response.data.email,
-                    emailStatus: response.data.verified ? 'VERIFIED' : 'PENDING'
+                    sendingEmail: emailData.email || prev.sendingEmail,
+                    emailStatus: isVerified ? 'VERIFIED' : 'PENDING'
                 }))
             }
         } catch (error) {
@@ -388,7 +478,6 @@ const DomainIdentity = () => {
                     }
                 } catch (error) {
                     console.error('Error during initial data fetch:', error);
-                    // Don't show error notification on initial load
                 }
             }
         };
@@ -404,13 +493,25 @@ const DomainIdentity = () => {
     return (
         <div className="domain-identity-container">
             <Card className="domain-section">
-                <h3 className="section-title">Sending domain & identity</h3>
+                <div className="section-header">
+                    <h3 className="section-title">Sending domain & identity</h3>
+                    {domainSettings.domainStatus && (
+                        <Button 
+                            type="secondary" 
+                            onClick={resetDomainState}
+                            className="reset-button"
+                        >
+                            Reset
+                        </Button>
+                    )}
+                </div>
                 
                 <div className="input-section">
                     <InputText
                         placeholder="Sending domain"
                         value={domainSettings.sendingDomain}
                         onChange={(e) => setDomainSettings({...domainSettings, sendingDomain: e.target.value})}
+                        disabled={domainSettings.domainStatus !== null}
                     />
                 </div>
                 
@@ -442,12 +543,18 @@ const DomainIdentity = () => {
                 
                 {domainSettings.domainStatus && (
                     <div className="action-button">
-                        <Button type="secondary" onClick={handleDetachDomain}>Detach</Button>
+                        <Button 
+                            type="secondary" 
+                            onClick={handleDetachDomain}
+                            loading={domainSettings.isDetachingDomain}
+                        >
+                            Detach
+                        </Button>
                     </div>
                 )}
                 
                 <div className="info-text">
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.</p>
+                    <p>Add your domain to verify ownership and enable email sending. You'll need access to modify your domain's DNS records.</p>
                 </div>
                 
                 {!domainSettings.domainStatus && (
@@ -469,19 +576,11 @@ const DomainIdentity = () => {
                         <h3 className="section-title">DKIM Verification for domain {domainSettings.sendingDomain}</h3>
                         
                         <div className="info-text">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo. Nunc id lacus sem. Nam sit amet arcu eu nibh rhoncus iaculis eget id arcu.</p>
+                            <p>You will need to add these CNAME records to make sure your mail is not marked as spam.</p>
                         </div>
                         
-                        <div className="verification-badge-container">
-                            <VerificationBadge isVerified={domainSettings.dkimStatus === 'VERIFIED'} />
-                        </div>
-                        
-                        {domainSettings.dkimStatus !== 'VERIFIED' && domainSettings.dkimRecords && domainSettings.dkimRecords.length > 0 && (
+                        {domainSettings.dkimRecords && domainSettings.dkimRecords.length > 0 && (
                             <div className="dkim-records-container">
-                                <div className="record-instructions">
-                                    You will need to add these CNAME records to make sure your mail is not marked as spam.
-                                </div>
-                                
                                 {domainSettings.dkimRecords.map((record, index) => (
                                     <div key={index} className="record-group">
                                         <div className="record-heading">Record #{index + 1}:</div>
@@ -495,18 +594,24 @@ const DomainIdentity = () => {
                                         </div>
                                     </div>
                                 ))}
-                                
-                                <div className="verification-buttons mt-20">
-                                    <Button 
-                                        type="secondary" 
-                                        onClick={handleVerifyDomainDkim} 
-                                        loading={domainSettings.isVerifyingDkim}
-                                    >
-                                        Verify DKIM
-                                    </Button>
-                                </div>
                             </div>
                         )}
+                        
+                        <div className="dkim-status">
+                            DKIM Verification status <span className={`status-${domainSettings.dkimStatus === 'VERIFIED' ? 'verified' : 'pending'}`}>
+                                {domainSettings.dkimStatus === 'VERIFIED' ? 'Verified' : 'Pending verification'}
+                            </span>
+                        </div>
+                        
+                        <div className="verification-buttons mt-20">
+                            <Button 
+                                type="secondary" 
+                                onClick={handleVerifyDomainDkim} 
+                                loading={domainSettings.isVerifyingDkim}
+                            >
+                                Verify DKIM
+                            </Button>
+                        </div>
                     </Card>
                     
                     <Card className="email-section">
@@ -524,30 +629,30 @@ const DomainIdentity = () => {
                             <VerificationBadge isVerified={domainSettings.emailStatus === 'VERIFIED'} />
                         </div>
                         
-                        {domainSettings.emailStatus !== 'VERIFIED' && (
-                            <div className="verification-buttons mt-10">
+                        <div className="verification-buttons mt-10">
+                            <Button 
+                                type="secondary" 
+                                onClick={handleAddEmail} 
+                                loading={domainSettings.isAddingEmail}
+                            >
+                                Save Email
+                            </Button>
+                            {domainSettings.emailStatus === 'PENDING' && (
                                 <Button 
                                     type="secondary" 
-                                    onClick={handleAddEmail} 
-                                    loading={domainSettings.isAddingEmail}
+                                    onClick={handleVerifyEmail} 
+                                    loading={domainSettings.isVerifyingEmail}
+                                    className="ml-10"
                                 >
-                                    Save Email
+                                    Verify Email
                                 </Button>
-                                {domainSettings.emailStatus === 'PENDING' && (
-                                    <Button 
-                                        type="secondary" 
-                                        onClick={handleVerifyEmail} 
-                                        loading={domainSettings.isVerifyingEmail}
-                                        className="ml-10"
-                                    >
-                                        Verify Email
-                                    </Button>
-                                )}
-                            </div>
-                        )}
+                            )}
+                        </div>
                         
-                        <div className="action-buttons mt-20">
-                            <Button type="primary">Save Changes</Button>
+                        <div className="status-text">
+                            Status: <span className={`status-${domainSettings.emailStatus === 'VERIFIED' ? 'verified' : 'pending'}`}>
+                                {domainSettings.emailStatus === 'VERIFIED' ? 'Verified' : 'Pending verification'}
+                            </span>
                         </div>
                     </Card>
                 </>

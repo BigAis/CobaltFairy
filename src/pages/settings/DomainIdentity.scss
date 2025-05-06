@@ -1,6 +1,18 @@
 .domain-identity-container {
     width: 100%;
     
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .reset-button {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+    
     .domain-section,
     .dkim-section,
     .email-section {
@@ -88,7 +100,7 @@
                     text-align: left;
                     background-color: rgba(255, 255, 255, 0.5);
                     padding: 8px 15px;
-                    border-radius: 5px; // Fixed potential SCSS syntax error
+                    border-radius: 5px;
                     border: 1px dashed #DAD1C5;
                     word-break: break-all;
                     font-family: monospace;
@@ -107,6 +119,30 @@
             margin-bottom: 25px;
         }
         
+        .dkim-status {
+            text-align: left;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            
+            .status-pending {
+                color: #FF4D4D;
+                font-weight: 500;
+                margin: 0 15px;
+            }
+            
+            .status-verified {
+                color: #99EA0F;
+                font-weight: 500;
+                margin: 0 15px;
+            }
+            
+            .verify-button {
+                margin-left: auto;
+            }
+        }
+        
         .action-button {
             margin: 15px 0;
             
@@ -116,6 +152,10 @@
                 &:hover {
                     background-color: rgba(255, 255, 255, 0.7);
                     box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+                }
+                
+                &.loading {
+                    cursor: not-allowed;
                 }
             }
         }
@@ -180,6 +220,17 @@
     
     .mt-20 {
         margin-top: 20px;
+    }
+    
+    .debug-info {
+        margin-top: 5px;
+        font-size: 12px;
+        text-align: left;
+        color: #888;
+    }
+    
+    .status-text {
+        font-style: italic;
     }
 }
 
