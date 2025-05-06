@@ -3,30 +3,14 @@
     margin-bottom: 20px;
     overflow-x: auto;
     
+    // Default ButtonGroup styling without custom modifications
     .btn-group {
         width: 100%;
         
         .btn {
-            margin-right: 10px;
-            flex: 1;
-            min-width: auto;
+            // Using default ButtonGroup styling
             font-size: 14px;
             white-space: nowrap;
-            
-            &.active {
-                background: rgba(255, 195, 173, 0.5);
-                border-color: #FF635D;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            overflow-x: auto;
-            
-            .btn {
-                padding: 8px 12px;
-                font-size: 12px;
-                min-width: 120px;
-            }
         }
     }
 }
@@ -327,7 +311,60 @@
             }
         }
     }
-    
+    // Notification styles - Two column layout
+    .notifications-row {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 30px;
+        
+        .notification-column {
+            flex: 1;
+            
+            .notification-setting {
+                margin-bottom: 15px;
+                
+                .toggle-switch {
+                    margin-bottom: 0;
+                    
+                    .slider {
+                        background-color: rgba(255, 255, 255, 1);
+                        border: 2px solid rgba(218, 209, 197, 1);
+                        
+                        &:before {
+                            background-color: rgba(217, 217, 217, 1);
+                        }
+                    }
+                    
+                    input:checked + .slider {
+                        background-color: rgba(255, 99, 93, 0.5);
+                        border: 2px solid rgba(255, 99, 93, 1);
+                        
+                        &:before {
+                            background-color: white;
+                        }
+                    }
+                }
+            }
+            
+            .notification-email {
+                .input-text-wrapper {
+                    width: 100%;
+                    margin-bottom: 0;
+                }
+            }
+        }
+        
+        // Responsive layout for mobile
+        @media (max-width: 768px) {
+            flex-direction: column;
+            
+            .notification-column {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    }
+    // Notification settings - Updated to display horizontally
     .notification-setting {
         margin: 20px 0;
         
@@ -354,36 +391,42 @@
         }
     }
     
-    .notification-email {
-        margin: 15px 0 30px 0;
-        
-        .input-text-wrapper {
-            width: 100%;
-        }
-    }
-    
-    .profile-photo-section {
+    // New horizontal layout for notification email and action
+    .notification-email-row {
         display: flex;
-        align-items: center;
-        margin-bottom: 30px;
+        align-items: flex-end;
+        gap: 15px;
+        margin-bottom: 25px;
         
-        .profile-initials {
-            width: 56px;
-            height: 56px;
-            background: #FFF;
-            border: 2px solid rgba(218, 209, 197, 1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Bitter', serif;
-            font-size: 24px;
-            font-weight: 600;
-            margin-right: 20px;
+        .notification-email {
+            flex: 1;
+            
+            .input-text-wrapper {
+                width: 100%;
+                margin-bottom: 0;
+            }
         }
         
-        .btn {
-            height: 40px;
+        .notification-action {
+            min-width: 100px;
+            margin-bottom: 1px; // Align with input field
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            flex-wrap: wrap;
+            
+            .notification-email {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .notification-action {
+                width: 100%;
+            }
         }
     }
     

@@ -16,6 +16,7 @@ import Icon from '../../components/Icon/Icon'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import DomainIdentity from './DomainIdentity'
+import CampaignPresets from './CampaignPresets'
 
 const Settings = () => {
     const { user, account, createNotification } = useAccount()
@@ -293,49 +294,50 @@ const Settings = () => {
             case 'domain':
                 return <DomainIdentity />
             case 'presets':
-                return (
-                    <div className="settings-tab-content">
-                        <h3 className="section-title">Campaign Presets</h3>
-                        <p>Campaign presets content will go here</p>
-                        
-                        <div className="settings-action-buttons">
-                            <Button type="primary" onClick={handleSaveChanges} loading={isLoading}>Save Changes</Button>
-                        </div>
-                    </div>
-                )
+                return <CampaignPresets />
             case 'notifications':
                 return (
                     <div className="settings-tab-content">
-                        <div className="notification-setting">
-                            <Switch 
-                                checked={notificationSettings.monthlyActivity} 
-                                label="Monthly account activity" 
-                                onChange={(checked) => setNotificationSettings({...notificationSettings, monthlyActivity: checked})}
-                            />
+                        <div className="notifications-row">
+                            <div className="notification-column">
+                                <div className="notification-setting">
+                                    <Switch 
+                                        checked={notificationSettings.monthlyActivity} 
+                                        label="Monthly account activity" 
+                                        onChange={(checked) => setNotificationSettings({...notificationSettings, monthlyActivity: checked})}
+                                    />
+                                </div>
+                                
+                                <div className="notification-email">
+                                    <InputText
+                                        label="Email"
+                                        value={notificationSettings.monthlyActivityEmail}
+                                        onChange={(e) => setNotificationSettings({...notificationSettings, monthlyActivityEmail: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="notification-column">
+                                <div className="notification-setting">
+                                    <Switch 
+                                        checked={notificationSettings.campaignNotifications} 
+                                        label="Campaign Notifications" 
+                                        onChange={(checked) => setNotificationSettings({...notificationSettings, campaignNotifications: checked})}
+                                    />
+                                </div>
+                                
+                                <div className="notification-email">
+                                    <InputText
+                                        label="Email"
+                                        value={notificationSettings.campaignNotificationsEmail}
+                                        onChange={(e) => setNotificationSettings({...notificationSettings, campaignNotificationsEmail: e.target.value})}
+                                    />
+                                </div>
+                            </div>
                         </div>
                         
-                        <div className="notification-email">
-                            <InputText
-                                label="Email"
-                                value={notificationSettings.monthlyActivityEmail}
-                                onChange={(e) => setNotificationSettings({...notificationSettings, monthlyActivityEmail: e.target.value})}
-                            />
-                        </div>
-                        
-                        <div className="notification-setting">
-                            <Switch 
-                                checked={notificationSettings.campaignNotifications} 
-                                label="Campaign Notifications" 
-                                onChange={(checked) => setNotificationSettings({...notificationSettings, campaignNotifications: checked})}
-                            />
-                        </div>
-                        
-                        <div className="notification-email">
-                            <InputText
-                                label="Email"
-                                value={notificationSettings.campaignNotificationsEmail}
-                                onChange={(e) => setNotificationSettings({...notificationSettings, campaignNotificationsEmail: e.target.value})}
-                            />
+                        <div className="settings-action-buttons">
+                            <Button type="primary" onClick={handleSaveChanges} loading={isLoading}>Save Changes</Button>
                         </div>
                     </div>
                 )
