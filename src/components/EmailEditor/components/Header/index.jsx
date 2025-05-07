@@ -57,7 +57,8 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 			console.log('currentCampaign from saveTemplate is : ', currentCampaign)
 			const html = editorRef.current.exportHtml(['Inter:400,700'])
 			const data = editorRef.current.exportData(['Inter:400,700'])
-			let updResp = await ApiService.put(`templates/${currentCampaign.id}`, { data: { design: JSON.stringify(data), html } }, user.jwt)
+			// let updResp = await ApiService.put(`templates/${currentCampaign.id}`, { data: { design: JSON.stringify(data), html } }, user.jwt)
+			let updResp = await ApiService.post(`fairymailer/updateTemplate`, { data: { design: JSON.stringify(data), html, uuid:currentCampaign.uuid } }, user.jwt)
 			console.log('updresp', updResp)
 			createNotification({ 
 				message: 'Email data saved successfully.', 
