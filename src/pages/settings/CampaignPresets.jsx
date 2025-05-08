@@ -154,8 +154,8 @@ const CampaignPresets = () => {
         setIsLoading(true);
         
         try {
-            // Format the presets data 
-            const presetData = {
+            // Create a minimal data structure with just the presets
+            const presets = {
                 styles: {
                     color: containerSettings.textColor || '#000000',
                     backgroundColor: containerSettings.backgroundColor || '#FFF8EF',
@@ -165,7 +165,6 @@ const CampaignPresets = () => {
                 },
                 contentWidth: `${containerSettings.width || 600}px`,
                 preHeader: '',
-                // Button defaults
                 buttonDefaults: {
                     backgroundColor: buttonSettings.backgroundColor || '#FF635D',
                     textColor: buttonSettings.textColor || '#FFFFFF',
@@ -175,30 +174,24 @@ const CampaignPresets = () => {
                     text: buttonSettings.buttonText || 'Read More',
                     width: buttonSettings.isAutoWidth ? 'auto' : `${buttonSettings.width}px`
                 },
-                // Footer settings
                 footerSettings: {
                     unsubscribeText: footerSettings.unsubscribeText || 'Click here to unsubscribe',
                     companyAddress: footerSettings.companyAddress || '',
                     legalText: footerSettings.legalText || ''
                 },
-                // Social links
                 socialLinks: socialLinks.map(link => ({
                     platform: link.platform,
                     url: link.url
                 }))
             };
             
-            // This is the key change - following the pattern from successful API calls in DomainIdentity.jsx
-            const requestData = {
-                accountPresets: presetData
-            };
+            // Log the data structure for debugging
+            console.log("Sending presets data:", presets);
             
-            console.log("Sending presets data:", requestData);
-            
-            // Make the API request with the correct format
+            // Send the data to match the updateAccountPresets endpoint's expectation
             const response = await ApiService.post(
                 'fairymailer/updateAccountPresets', 
-                requestData,
+                { presets }, // Just use a simple { presets } object
                 user.jwt
             );
             
@@ -216,6 +209,10 @@ const CampaignPresets = () => {
             if (error.response) {
                 console.error("Server error details:", error.response.data);
                 console.error("Status code:", error.response.status);
+                
+                // Extract the exact validation message if available
+                const errorMessage = error.response.data?.error?.message || 'Failed to save campaign presets';
+                console.error("Error message:", errorMessage);
             }
             
             createNotification({
