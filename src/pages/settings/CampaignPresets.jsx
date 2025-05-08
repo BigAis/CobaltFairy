@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../../components/Button';
 import InputText from '../../components/InputText/InputText';
 import ColorPicker from '../../components/ColorPicker';
@@ -9,9 +9,10 @@ import { useAccount } from '../../context/AccountContext';
 import Checkbox from '../../components/Checkbox';
 import Slider from '../../components/Slider_ck/Slider';
 import './CampaignPresets.scss';
+import { ApiService } from '../../service/api-service';
 
 const CampaignPresets = () => {
-    const { createNotification } = useAccount();
+    const { user, account, createNotification } = useAccount();
     const [isLoading, setIsLoading] = useState(false);
     
     // Container settings
@@ -25,7 +26,10 @@ const CampaignPresets = () => {
         paddingLeft: '20',
         fontSize: '16',
         lineHeight: '1.5',
-        font: 'Inter'
+        font: 'Inter',
+        textColor: '#000000',
+        linksColor: '#FF635D',
+        backgroundImage: ''
     });
     
     // Button settings
@@ -39,7 +43,8 @@ const CampaignPresets = () => {
         borderRadius: '8',
         fontSize: '16',
         buttonText: 'Read More',
-        isAutoWidth: true
+        isAutoWidth: true,
+        width: '150'
     });
     
     // Social links 
@@ -77,18 +82,150 @@ const CampaignPresets = () => {
         { value: 'TikTok', label: 'TikTok' },
     ];
     
-    const handleSaveSettings = () => {
+    // Load presets from account when component mounts
+    useEffect(() => {
+        const loadPresets = async () => {
+            try {
+                if (account && account.custom_component && account.custom_component.presets) {
+                    const presets = account.custom_component.presets;
+                    
+                    // Update containerSettings
+                    if (presets.styles) {
+                        setContainerSettings({
+                            ...containerSettings,
+                            backgroundColor: presets.styles.backgroundColor || '#FFA600',
+                            textColor: presets.styles.color || '#000000',
+                            linksColor: presets.styles.linkColor || '#FF635D',
+                            font: presets.styles.fontFamily || 'Inter',
+                            backgroundImage: presets.styles.backgroundImage || '',
+                            width: presets.contentWidth ? parseInt(presets.contentWidth) : 600,
+                            // Keep other properties
+                        });
+                    }
+                    
+                    // Update button settings
+                    if (presets.buttonDefaults) {
+                        const buttonDefaults = presets.buttonDefaults;
+                        // Parse padding values from string like "10px 20px 10px 20px"
+                        const padding = buttonDefaults.padding ? buttonDefaults.padding.split(' ').map(p => parseInt(p)) : [10, 20, 10, 20];
+                        
+                        setButtonSettings({
+                            ...buttonSettings,
+                            backgroundColor: buttonDefaults.backgroundColor || '#FF635D',
+                            textColor: buttonDefaults.textColor || '#FFFFFF',
+                            paddingTop: padding[0] ? parseInt(padding[0]) : 10,
+                            paddingRight: padding[1] ? parseInt(padding[1]) : 20,
+                            paddingBottom: padding[2] ? parseInt(padding[2]) : 10,
+                            paddingLeft: padding[3] ? parseInt(padding[3]) : 20,
+                            borderRadius: buttonDefaults.borderRadius ? parseInt(buttonDefaults.borderRadius) : 8,
+                            fontSize: buttonDefaults.fontSize ? parseInt(buttonDefaults.fontSize) : 16,
+                            buttonText: buttonDefaults.text || 'Read More',
+                        });
+                    }
+                    
+                    // Update footer settings
+                    if (presets.footerSettings) {
+                        setFooterSettings({
+                            ...footerSettings,
+                            unsubscribeText: presets.footerSettings.unsubscribeText || 'Click here to unsubscribe',
+                            companyAddress: presets.footerSettings.companyAddress || '',
+                            legalText: presets.footerSettings.legalText || ''
+                        });
+                    }
+                    
+                    // Update social links
+                    if (presets.socialLinks && presets.socialLinks.length > 0) {
+                        setSocialLinks(presets.socialLinks.map((link, index) => ({
+                            id: index + 1,
+                            platform: link.platform,
+                            url: link.url
+                        })));
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading presets:", error);
+            }
+        };
+        
+        loadPresets();
+    }, [account]);
+    
+    const handleSaveSettings = async () => {
         setIsLoading(true);
         
-        // Mock API call - would save to backend in production
-        setTimeout(() => {
+        try {
+            // Format the presets data 
+            const presetData = {
+                styles: {
+                    color: containerSettings.textColor || '#000000',
+                    backgroundColor: containerSettings.backgroundColor || '#FFF8EF',
+                    linkColor: containerSettings.linksColor || '#FF635D',
+                    fontFamily: containerSettings.font || 'Inter',
+                    backgroundImage: containerSettings.backgroundImage ? `url('${containerSettings.backgroundImage}')` : '',
+                },
+                contentWidth: `${containerSettings.width || 600}px`,
+                preHeader: '',
+                // Button defaults
+                buttonDefaults: {
+                    backgroundColor: buttonSettings.backgroundColor || '#FF635D',
+                    textColor: buttonSettings.textColor || '#FFFFFF',
+                    padding: `${buttonSettings.paddingTop}px ${buttonSettings.paddingRight}px ${buttonSettings.paddingBottom}px ${buttonSettings.paddingLeft}px`,
+                    borderRadius: `${buttonSettings.borderRadius}px`,
+                    fontSize: `${buttonSettings.fontSize}px`,
+                    text: buttonSettings.buttonText || 'Read More',
+                    width: buttonSettings.isAutoWidth ? 'auto' : `${buttonSettings.width}px`
+                },
+                // Footer settings
+                footerSettings: {
+                    unsubscribeText: footerSettings.unsubscribeText || 'Click here to unsubscribe',
+                    companyAddress: footerSettings.companyAddress || '',
+                    legalText: footerSettings.legalText || ''
+                },
+                // Social links
+                socialLinks: socialLinks.map(link => ({
+                    platform: link.platform,
+                    url: link.url
+                }))
+            };
+            
+            // This is the key change - following the pattern from successful API calls in DomainIdentity.jsx
+            const requestData = {
+                accountPresets: presetData
+            };
+            
+            console.log("Sending presets data:", requestData);
+            
+            // Make the API request with the correct format
+            const response = await ApiService.post(
+                'fairymailer/updateAccountPresets', 
+                requestData,
+                user.jwt
+            );
+            
+            console.log("Response from server:", response);
+            
             createNotification({
-                message: 'Campaign settings saved successfully',
+                message: 'Campaign presets saved successfully',
                 type: 'default',
                 autoClose: 3000
             });
+        } catch (error) {
+            console.error("Error saving presets:", error);
+            
+            // Detailed error logging
+            if (error.response) {
+                console.error("Server error details:", error.response.data);
+                console.error("Status code:", error.response.status);
+            }
+            
+            createNotification({
+                message: 'Failed to save campaign presets. Please try again.',
+                type: 'warning',
+                autoClose: 5000
+            });
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
     
     // Handle adding a new social link

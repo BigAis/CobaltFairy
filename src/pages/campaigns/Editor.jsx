@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import EmailEditor from '../../components/EmailEditor/index'
 import PopupText from '../../components/PopupText/PopupText'
+import { useAccount } from '../../context/AccountContext'
+import { ApiService } from '../../service/api-service'
 
 function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 	const navigate = useNavigate()
@@ -9,6 +11,7 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 	const [language, setLanguage] = useState('en')
 	const [design, setDesign] = useState(null)
 	const [key, setKey] = useState(0)
+	const { account } = useAccount()
 
 	const parseDesign = async (des) => {
 		if (des) {
@@ -32,15 +35,51 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 			}
 		}
 	}
+
+	// Load or initialize design based on the current campaign
 	useEffect(() => {
 		//Should also implement design B here.
 		if (currentCampaign && currentCampaign.design) {
 			let des = JSON.parse(currentCampaign.design)
 			parseDesign(des)
 		} else {
-			setDesign({ blockList: [], bodySettings: [], fontList: [] })
+			// For new templates/campaigns, initialize with presets if available
+			const initialDesign = { blockList: [], fontList: [] };
+			
+			// Add bodySettings from presets if available
+			if (account && account.custom_component && account.custom_component.presets) {
+				const presets = account.custom_component.presets;
+				
+				// Use presets for bodySettings
+				initialDesign.bodySettings = {
+					styles: presets.styles || {
+						color: '#000000',
+						backgroundColor: '#FFF8EF',
+						linkColor: '#FF635D',
+						fontFamily: 'Inter',
+					},
+					contentWidth: presets.contentWidth || '600px',
+					preHeader: '',
+				};
+				
+				console.log('Using presets for new design:', initialDesign);
+			} else {
+				// Default settings if no presets available
+				initialDesign.bodySettings = {
+					styles: {
+						color: '#000000',
+						backgroundColor: '#FFF8EF',
+						linkColor: '#FF635D',
+						fontFamily: 'Inter'
+					},
+					contentWidth: '600px',
+					preHeader: ''
+				};
+			}
+			
+			setDesign(initialDesign);
 		}
-	}, [currentCampaign])
+	}, [currentCampaign, account])
 
 	useEffect(() => {
 		setKey((prevState) => prevState + 1)
