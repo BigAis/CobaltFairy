@@ -52,14 +52,25 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 				
 				// Use presets for bodySettings
 				initialDesign.bodySettings = {
-					styles: presets.styles || {
-						color: '#000000',
-						backgroundColor: '#FFF8EF',
-						linkColor: '#FF635D',
-						fontFamily: 'Inter',
+					styles: {
+						color: presets.styles?.color || '#000000',
+						backgroundColor: presets.styles?.backgroundColor || '#FFF8EF',
+						linkColor: presets.styles?.linkColor || '#FF635D',
+						fontFamily: presets.styles?.fontFamily || 'Inter',
+						backgroundImage: presets.styles?.backgroundImage || '',
 					},
 					contentWidth: presets.contentWidth || '600px',
-					preHeader: '',
+					preHeader: presets.preHeader || '',
+					// Apply button defaults if available
+					buttonDefaults: presets.buttonDefaults ? {
+						...presets.buttonDefaults
+					} : undefined,
+					// Apply footer settings if available
+					footerSettings: presets.footerSettings ? {
+						...presets.footerSettings
+					} : undefined,
+					// Apply social links if available
+					socialLinks: presets.socialLinks ? [...presets.socialLinks] : undefined
 				};
 				
 				console.log('Using presets for new design:', initialDesign);

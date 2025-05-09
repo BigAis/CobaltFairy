@@ -154,17 +154,22 @@ const CampaignPresets = () => {
         setIsLoading(true);
         
         try {
-            // Create a minimal data structure with just the presets
+            // Create a comprehensive data structure with all preset elements
             const presets = {
+                // Style settings
                 styles: {
                     color: containerSettings.textColor || '#000000',
                     backgroundColor: containerSettings.backgroundColor || '#FFF8EF',
                     linkColor: containerSettings.linksColor || '#FF635D',
                     fontFamily: containerSettings.font || 'Inter',
-                    backgroundImage: containerSettings.backgroundImage ? `url('${containerSettings.backgroundImage}')` : '',
+                    backgroundImage: containerSettings.backgroundImage ? 
+                        containerSettings.backgroundImage : '', // Don't wrap in url() for storage
                 },
+                // Container width
                 contentWidth: `${containerSettings.width || 600}px`,
+                // Pre-header text
                 preHeader: '',
+                // Button defaults
                 buttonDefaults: {
                     backgroundColor: buttonSettings.backgroundColor || '#FF635D',
                     textColor: buttonSettings.textColor || '#FFFFFF',
@@ -174,11 +179,14 @@ const CampaignPresets = () => {
                     text: buttonSettings.buttonText || 'Read More',
                     width: buttonSettings.isAutoWidth ? 'auto' : `${buttonSettings.width}px`
                 },
+                // Footer settings
                 footerSettings: {
+                    includeUnsubscribe: footerSettings.includeUnsubscribe !== false, // Default to true
                     unsubscribeText: footerSettings.unsubscribeText || 'Click here to unsubscribe',
                     companyAddress: footerSettings.companyAddress || '',
                     legalText: footerSettings.legalText || ''
                 },
+                // Social links
                 socialLinks: socialLinks.map(link => ({
                     platform: link.platform,
                     url: link.url
@@ -191,7 +199,7 @@ const CampaignPresets = () => {
             // Send the data to match the updateAccountPresets endpoint's expectation
             const response = await ApiService.post(
                 'fairymailer/updateAccountPresets', 
-                { presets }, // Just use a simple { presets } object
+                { presets }, // Send the presets object
                 user.jwt
             );
             
