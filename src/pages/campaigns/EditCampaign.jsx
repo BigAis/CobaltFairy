@@ -17,6 +17,7 @@ import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
 import Checkbox from '../../components/Checkbox'
 import EmailPreview from '../../components/EmailPreview/EmailPreview'
+import LocationData from '../../components/LocationData/LocationData'
 
 import './campaigns.scss'
 import '../dashboard/dashboard.scss'
@@ -25,12 +26,12 @@ import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 
 const campaignButtonGroupOptions = [
-	{ value: 'overview_tab', label: `Overview ` },
-	{ value: 'absplit_tab', label: `A/B Split` },
-	{ value: 'view_email_tab', label: `View Email` },
-	{ value: 'sub_act_tab', label: `Subscriber Activity` },
-	{ value: 'link_act_tab', label: `Link Activity` },
-	{ value: 'loc_data_tab', label: `Location Data` },
+  { value: 'overview_tab', label: `Overview` },
+  { value: 'absplit_tab', label: `A/B Split` },
+  { value: 'view_email_tab', label: `View Email` },
+  { value: 'sub_act_tab', label: `Subscriber Activity` },
+  { value: 'link_act_tab', label: `Link Activity` },
+  { value: 'loc_data_tab', label: `Location Data` },
 ]
 
 // const emailClientsOptions = { Gmail: '41%', Outlook: '20%', AppleMail: '15%', Yahoo: '10%' }
@@ -367,7 +368,16 @@ const EditCampaign = () => {
 								</>
 							)}
 
-							{selectedTab === 'loc_data_tab' && <>Under Construction</>}
+							{selectedTab === 'loc_data_tab' && (
+							<>
+								<div className="stats-container d-flex flex-column gap-20 mt20">
+								<Card>
+									<p className="stat-heading">Location Data</p>
+									<LocationData campaign={campaign} />
+								</Card>
+								</div>
+							</>
+							)}
 						</>
 					)}
 				</div>
