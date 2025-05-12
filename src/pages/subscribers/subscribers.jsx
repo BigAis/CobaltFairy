@@ -23,6 +23,8 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import CustomFieldsTable from '../../components/DataTable/CustomFieldsTable'
 import ImportCSV from './ImportCSV'
+import SubscribersCleanup from './SubscribersCleanup';
+import './SubscribersCleanup.scss';
 import AddSubscriber from './AddSubscriber'
 import PopupText from '../../components/PopupText/PopupText'
 
@@ -388,20 +390,20 @@ const Subscribers = () => {
 						<div className="filters-container">
 							<div className="button-group-wrapper">
 								<ButtonGroup
-									options={[
-										{ value: 'subs', label: `All Subscribers (${totalSubs})` },
-										{ value: null, label: `Segments (0)` },
-										{ value: 'groups', label: `Groups (${totalGroups})` },
-										{ value: 'fields', label: `Fields` },
-										{ value: null, label: `History` },
-										{ value: null, label: `Stats` },
-										{ value: null, label: `Clean up` },
-									]}
-									onChange={(value) => {
-										if (value) setView(value)
-										setShowFilters(false)
-									}}
-									value={view}
+								options={[
+									{ value: 'subs', label: `All Subscribers (${totalSubs})` },
+									{ value: null, label: `Segments (0)` },
+									{ value: 'groups', label: `Groups (${totalGroups})` },
+									{ value: 'fields', label: `Fields` },
+									{ value: null, label: `History` },
+									{ value: null, label: `Stats` },
+									{ value: 'cleanup', label: `Clean up` }, // Changed from null to 'cleanup'
+								]}
+								onChange={(value) => {
+									if (value) setView(value)
+									setShowFilters(false)
+								}}
+								value={view}
 								></ButtonGroup>
 							</div>
 
@@ -516,6 +518,17 @@ const Subscribers = () => {
 						<div className="groups">
 							<CustomFieldsTable setView={setView} />
 						</div>
+					)}
+
+					{view === 'cleanup' && (
+					<div className="subscribers-cleanup-container">
+						<SubscribersCleanup 
+						user={user} 
+						account={account} 
+						groups={groups}
+						onUpdate={onUpdate}
+						/>
+					</div>
 					)}
 					
 					{/* Import options section with proper rendering */}
