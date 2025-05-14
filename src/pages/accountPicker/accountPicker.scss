@@ -65,4 +65,103 @@
             columns:1;   
         }
     }
+
+    /* Modal styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .add-account-modal {
+        width: 450px;
+        max-width: 90%;
+        background: #FEF1DF;
+        border-radius: 8px;
+        padding: 20px;
+        border: 2px solid rgba(218, 209, 197, 1);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+
+        h2 {
+            font-family: 'Bitter', serif;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+            color: #1A1A1A;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #1A1A1A;
+            padding: 0;
+            line-height: 1;
+        }
+    }
+
+    .modal-body {
+        margin-bottom: 20px;
+
+        .input-field {
+            margin-bottom: 15px;
+            
+            &:last-child {
+                margin-bottom: 0;
+            }
+            
+            .input-text {
+                background: rgba(255, 255, 255, 0.5);
+                border: 2px solid rgba(218, 209, 197, 1);
+                padding: 12px 15px;
+                border-radius: 8px;
+                width: 100%;
+                font-size: 16px;
+            }
+        }
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        
+        .btn {
+            flex: 1;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .cancel-button {
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(218, 209, 197, 1);
+        }
+        
+        .create-button {
+            background-color: rgba(255, 195, 173, 0.5);
+            border: 2px solid #FF635D;
+            
+            &:hover {
+                background-color: rgba(255, 195, 173, 0.75);
+            }
+        }
+    }
 }
