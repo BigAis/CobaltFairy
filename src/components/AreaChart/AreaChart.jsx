@@ -1,10 +1,33 @@
 import React from 'react'
 import { Line } from 'react-chartjs-2'
-import { Chart as ChartJS, LineElement, PointElement, Tooltip, Legend, CategoryScale, LinearScale } from 'chart.js'
+import { 
+  Chart as ChartJS, 
+  LineElement, 
+  PointElement, 
+  Tooltip, 
+  Legend, 
+  CategoryScale, 
+  LinearScale,
+  Filler  // Import the Filler plugin
+} from 'chart.js'
 
-ChartJS.register(LineElement, PointElement, Tooltip, Legend, CategoryScale, LinearScale)
+// Register all required components including Filler plugin
+ChartJS.register(LineElement, PointElement, Tooltip, Legend, CategoryScale, LinearScale, Filler)
 
 const AreaChart = () => {
+	// Function to create a gradient - will be called when chart renders
+	const createGradient = (ctx, area) => {
+		const gradientGreen = ctx.createLinearGradient(0, 0, 0, area.height);
+		gradientGreen.addColorStop(0, 'rgba(47, 191, 47, 0.5)');
+		gradientGreen.addColorStop(1, 'rgba(47, 191, 47, 0)');
+		
+		const gradientOrange = ctx.createLinearGradient(0, 0, 0, area.height);
+		gradientOrange.addColorStop(0, 'rgba(244, 166, 34, 0.3)');
+		gradientOrange.addColorStop(1, 'rgba(244, 166, 34, 0)');
+		
+		return [gradientGreen, gradientOrange];
+	};
+
 	const data = {
 		labels: ['13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'],
 		datasets: [
@@ -12,23 +35,41 @@ const AreaChart = () => {
 				label: 'High',
 				data: [1, 1, 1, 1, 1, 1, 1],
 				borderColor: '#2FBF2F',
-				backgroundColor: 'rgba(47, 191, 47, 0.2)',
+				backgroundColor: function(context) {
+					const chart = context.chart;
+					const {ctx, chartArea} = chart;
+					
+					if (!chartArea) {
+						// This can happen when the chart is not yet rendered
+						return 'rgba(47, 191, 47, 0.2)';
+					}
+					return createGradient(ctx, chartArea)[0];
+				},
 				borderWidth: 2,
 				fill: true,
 				tension: 0.4,
-				pointRadius: 0, // Removes points
-				pointHoverRadius: 0, // Prevents points from appearing on hover
+				pointRadius: 0,
+				pointHoverRadius: 0,
 			},
 			{
 				label: 'Low',
 				data: [0, 0, 0, 0, 0, 0, 0],
 				borderColor: '#F4A622',
-				backgroundColor: 'rgba(244, 166, 34, 0.1)',
+				backgroundColor: function(context) {
+					const chart = context.chart;
+					const {ctx, chartArea} = chart;
+					
+					if (!chartArea) {
+						// This can happen when the chart is not yet rendered
+						return 'rgba(244, 166, 34, 0.1)';
+					}
+					return createGradient(ctx, chartArea)[1];
+				},
 				borderWidth: 2,
 				fill: true,
 				tension: 0.4,
-				pointRadius: 0, // Removes points
-				pointHoverRadius: 0, // Prevents points from appearing on hover
+				pointRadius: 0,
+				pointHoverRadius: 0,
 			},
 		],
 	}
@@ -38,7 +79,7 @@ const AreaChart = () => {
 		maintainAspectRatio: false,
 		plugins: {
 			legend: {
-				display: false, // Hide legend for cleaner UI
+				display: false,
 			},
 			tooltip: {
 				enabled: true,
@@ -48,13 +89,13 @@ const AreaChart = () => {
 		scales: {
 			x: {
 				grid: {
-					display: false, // Removes vertical grid lines
+					display: false,
 				},
 			},
 			y: {
-				display: false, // Hide Y-axis labels
+				display: false,
 				grid: {
-					display: false, // Hide horizontal grid lines
+					display: false,
 				},
 			},
 		},

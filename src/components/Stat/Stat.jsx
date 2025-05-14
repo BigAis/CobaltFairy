@@ -1,27 +1,58 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import './Stat.scss'
 import classNames from 'classnames'
 import Icon from '../Icon/Icon'
 
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
+import { 
+  Chart as ChartJS, 
+  CategoryScale, 
+  LinearScale, 
+  PointElement, 
+  LineElement, 
+  Title, 
+  Tooltip, 
+  Legend,
+  Filler  // Import the Filler plugin
+} from 'chart.js'
 import { Line } from 'react-chartjs-2'
 
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 
+// Register all required components including Filler plugin
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
-
-const Stat = ({ stats, hasChart, defaultLabel, className }) => {
+const Stat = ({ 
+	stats, 
+	hasChart = false, 
+	defaultLabel = '', 
+	className = '' 
+}) => {
 	if(!stats) return <></>
-	// const defaultOption = stats.find((stat) => stat.defaultValue) || stats[0]
+	
 	const defaultOption = stats.find((stat) => stat.label === defaultLabel) || stats[0]
 	const [selectedOption, setSelectedOption] = useState(defaultOption)
 	const [isOpen, setIsOpen] = useState(false)
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
 	const isPositive = selectedOption && selectedOption.percentage > 0
+	
+	// Function to create gradients for chart
+	const createGradient = (ctx, area) => {
+		// Create gradient for chart backgrounds
+		const gradient = ctx.createLinearGradient(0, 0, 0, area.height);
+		
+		if (isPositive) {
+			gradient.addColorStop(0, 'rgba(96, 199, 0, 0.5)');
+			gradient.addColorStop(1, 'rgba(96, 199, 0, 0)');
+		} else {
+			gradient.addColorStop(0, 'rgba(255, 166, 0, 0.5)');
+			gradient.addColorStop(1, 'rgba(255, 166, 0, 0)');
+		}
+		
+		return gradient;
+	};
 
 	const handleOptionSelect = (selected) => {
 		setSelectedOption(selected)
@@ -34,12 +65,22 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 
 	const computedClassName = classNames('stat-wrapper', className)
 
-	const chartData = selectedOption && parseFloat(selectedOption.value)>=0 ? {
+	const chartData = selectedOption && (parseFloat(selectedOption.value) >= 0 || typeof selectedOption.value === 'number') ? {
 		labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
 		datasets: [
 			{
 				data: [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4],
 				borderColor: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
+				backgroundColor: function(context) {
+					const chart = context.chart;
+					const {ctx, chartArea} = chart;
+					
+					if (!chartArea) {
+						// This can happen when the chart is not yet rendered
+						return isPositive ? 'rgba(96, 199, 0, 0.2)' : 'rgba(255, 166, 0, 0.1)';
+					}
+					return createGradient(ctx, chartArea);
+				},
 				borderWidth: 3,
 				tension: 0.4,
 				pointRadius: 0,
@@ -52,22 +93,29 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 			{
 				data: [0,0,0],
 				borderColor: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
+				backgroundColor: isPositive ? 'rgba(96, 199, 0, 0.2)' : 'rgba(255, 166, 0, 0.1)',
 				borderWidth: 3,
 				tension: 0.4,
 				pointRadius: 0,
 				fill: true,
 			},
 		],
-	} 
+	}
+	
 	const formatNumber = (num) => {
-		if (num >= 1000000) {
-		  return (num / 1000000).toFixed(1) + 'm';
-		} else if (num >= 1000) {
-		  return (num / 1000).toFixed(1) + 'k';
+		// Handle both string and number types
+		const numValue = typeof num === 'string' ? parseFloat(num) : num;
+		
+		if (isNaN(numValue)) return '0';
+		
+		if (numValue >= 1000000) {
+		  return (numValue / 1000000).toFixed(1) + 'm';
+		} else if (numValue >= 1000) {
+		  return (numValue / 1000).toFixed(1) + 'k';
 		} else {
-		  return parseInt(num)
+		  return Math.round(numValue).toString();
 		}
-	  }
+	}
 
 	const chartOptions = {
 		responsive: true,
@@ -112,7 +160,7 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 				setSelectedOption(ss)
 			}
 		}
-	},[stats])
+	},[stats, defaultLabel])
 	
 	return (
 		<div className={computedClassName}>
@@ -134,7 +182,7 @@ const Stat = ({ stats, hasChart, defaultLabel, className }) => {
 			)}
 
 			<div>
-				{selectedOption && parseFloat(selectedOption.value)>=0 ? 
+				{selectedOption && (selectedOption.value || selectedOption.value === 0) ? 
 					(<p className="stat-value">{formatNumber(selectedOption.value)}</p>) : 
 					(<Skeleton style={{minHeight: isMobile ? '30px' : '40px'}}/>)
 				}
@@ -159,7 +207,10 @@ Stat.propTypes = {
 	stats: PropTypes.arrayOf(
 		PropTypes.shape({
 			label: PropTypes.string.isRequired,
-			value: PropTypes.string.isRequired,
+			value: PropTypes.oneOfType([
+				PropTypes.string,
+				PropTypes.number
+			]).isRequired,
 			percentage: PropTypes.number.isRequired,
 			defaultValue: PropTypes.bool,
 		})
@@ -167,12 +218,6 @@ Stat.propTypes = {
 	hasChart: PropTypes.bool,
 	defaultLabel: PropTypes.string,
 	className: PropTypes.string,
-}
-
-Stat.defaultProps = {
-	hasChart: false,
-	defaultLabel: '',
-	className: '',
 }
 
 export default Stat

@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import PopupText from '../../components/PopupText/PopupText'
+import DashboardChart from '../../components/DashboardChart/DashboardChart'
 
 const Dashboard = () => {
 	const navigate = useNavigate()
@@ -312,7 +313,7 @@ const Dashboard = () => {
 							</div>
 							<br></br>
 							<div style={{ height: isMobile ? '200px' : '350px' }}>
-								<Line data={subsChartData} options={subsChartOptions} />
+								<DashboardChart isPositive={true} />
 							</div>
 							<br></br>
 							<Button
