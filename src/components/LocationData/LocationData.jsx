@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { scaleLinear } from 'd3-scale';
 import ButtonGroup from '../../components/ButtonGroup';
 import Card from '../../components/Card';
-import { WorldMap } from 'world-svg';
+import WorldMapComponent from '../WorldMapComponent/WorldMapComponent';
 
 const LocationData = ({ campaign }) => {
   const [viewMode, setViewMode] = useState('map');
@@ -59,11 +59,6 @@ const LocationData = ({ campaign }) => {
   // Find maximum click value for scaling
   const maxClicks = Math.max(...Object.values(countryData), 100);
   
-  // Create a color scale for shading countries
-  const colorScale = scaleLinear()
-    .domain([0, maxClicks * 0.33, maxClicks * 0.66, maxClicks])
-    .range(['#FFE8DC', '#FFC3AD', '#FF9A8A', '#FF635D']);
-
   // Get color for a specific country based on click count
   const getCountryColor = (code) => {
     const clicks = countryData[code];
@@ -97,37 +92,8 @@ const LocationData = ({ campaign }) => {
     }
   };
 
-  // Custom rendering function for country colors
-  const renderMap = () => {
-    // Create an object with country codes as keys and their colors as values
-    const countryColors = {};
-    
-    // For all countries in our data, assign them a color based on click count
-    Object.keys(countryData).forEach(code => {
-      countryColors[code] = colorScale(countryData[code]);
-    });
-    
-    return (
-      <WorldMap 
-        landColor="#FFF8EF"  // Default color for countries with no data
-        hoverColor="#FFC3AD" // Color when hovering over a country
-        landBorder="#DAD1C5" // Border color between countries
-        tooltipBgColor="#FFFFFF"
-        tooltipTextColor="#000000"
-        onCountryClick={handleCountryClick}
-        tooltip="on"
-        // Override styles for countries with data
-        styles={{
-          ...Object.keys(countryData).reduce((styles, code) => {
-            styles[`.${code.toLowerCase()}`] = {
-              fill: colorScale(countryData[code])
-            };
-            return styles;
-          }, {})
-        }}
-      />
-    );
-  };
+  // Define color ranges for the map
+  const colorRanges = ['#FFE8DC', '#FFC3AD', '#FF9A8A', '#FF635D'];
 
   return (
     <div>
@@ -150,9 +116,14 @@ const LocationData = ({ campaign }) => {
         ) : (
           viewMode === 'map' ? (
             <div className="position-relative">
-              {/* World SVG Map */}
+              {/* World Map Component */}
               <div style={{ width: '100%', height: 'auto', minHeight: '400px' }}>
-                {renderMap()}
+                <WorldMapComponent 
+                  countryData={countryData}
+                  colorRanges={colorRanges}
+                  onCountryClick={handleCountryClick}
+                  countryNames={countryNames}
+                />
               </div>
               
               {/* Legend */}
@@ -200,7 +171,11 @@ const LocationData = ({ campaign }) => {
                                 style={{
                                   width: `${percentage}%`,
                                   height: '100%',
-                                  backgroundColor: colorScale(clicks),
+                                  backgroundColor: colorRanges[
+                                    percentage <= 33 ? 0 : 
+                                    percentage <= 66 ? 1 : 
+                                    percentage <= 99 ? 2 : 3
+                                  ],
                                   borderRadius: '3px',
                                 }}
                               ></div>
