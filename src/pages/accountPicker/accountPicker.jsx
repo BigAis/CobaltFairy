@@ -27,7 +27,7 @@ const AccountPicker = () => {
 
     const chooseAccount = async (aid) => {
         const jwt = User.get().jwt;
-        let accountchosen = await ApiService.post('fairymailer/chooseUserAccount',{account_id:aid},jwt)
+        let accountchosen = await ApiService.post('fairymail/chooseUserAccount',{account_id:aid},jwt)
         console.log('respaccount',accountchosen.data)
         window.location='/' // no navigate
     }
@@ -51,7 +51,7 @@ const AccountPicker = () => {
             try {
                 setIsRemovingAccount(true);
                 const jwt = User.get().jwt;
-                await ApiService.post('fairymailer/removeAccount', { account_id: account.id }, jwt);
+                await ApiService.post('fairymail/removeAccount', { account_id: account.id }, jwt);
                 
                 // Refresh accounts list
                 const updatedAccounts = accounts.filter(acc => acc.id !== account.id);
@@ -93,7 +93,18 @@ const AccountPicker = () => {
         try {
             setIsAddingAccount(true);
             const jwt = User.get().jwt;
-            const response = await ApiService.post('fairymailer/createAccount', newAccount, jwt);
+            
+            // Create payload exactly matching the expected format
+            const payload = {
+                account_name: newAccount.account_name,
+                account_website: newAccount.account_website || "https://example.com", // Default if empty
+                account_email: newAccount.account_email || "account@example.com"      // Default if empty
+            };
+            
+            console.log("Creating account with payload:", payload);
+            
+            // Try using the complete endpoint URL to debug
+            const response = await ApiService.post('fairymail/createAccount', payload, jwt);
             
             if (response.data && response.data.success) {
                 // Reset form
@@ -121,10 +132,16 @@ const AccountPicker = () => {
             }
         } catch (error) {
             console.error('Error creating account:', error);
+            // Show more detailed error information for debugging
+            let errorMessage = 'Failed to create account';
+            if (error.response && error.response.data && error.response.data.message) {
+                errorMessage += `: ${error.response.data.message}`;
+            }
+            
             PopupText.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to create account',
+                text: errorMessage,
                 showConfirmButton: true
             });
         } finally {
@@ -136,7 +153,7 @@ const AccountPicker = () => {
         try {
             // First change to the account that we want to edit
             const jwt = User.get().jwt;
-            await ApiService.post('fairymailer/chooseUserAccount', {
+            await ApiService.post('fairymail/chooseUserAccount', {
                 account_id: account.id
             }, jwt);
             
