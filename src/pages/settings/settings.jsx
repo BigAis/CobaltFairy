@@ -196,26 +196,59 @@ const Settings = () => {
         }
     }
 
+    // Updated handleSaveChanges function for settings.jsx
     const handleSaveChanges = async () => {
-        setIsLoading(true)
+        setIsLoading(true);
         try {
-            // In a real implementation, we would save these settings via an API
-            // For now, we'll just show a success notification
-            setTimeout(() => {
-                createNotification({
-                    message: 'Settings saved successfully',
-                    type: 'default',
-                    autoClose: 3000
-                })
-                setIsLoading(false)
-            }, 1000)
+            // Check if we're in the details section and have an account to update
+            if (activeSection === 'details' && account && account.id) {
+                // Make the API call to edit the account
+                const response = await ApiService.post(
+                    'fairymail/editAccount',
+                    {
+                        account_id: account.id,
+                        account_name: personalSettings.accountName
+                    },
+                    user.jwt
+                );
+                
+                if (response.data && (response.data.success || response.data.code === 200)) {
+                    // Update the accounts list in User service for the account picker
+                    const accounts = User.getAccounts();
+                    if (accounts && Array.isArray(accounts)) {
+                        const updatedAccounts = accounts.map(acc => 
+                            acc.id === account.id ? { ...acc, name: personalSettings.accountName } : acc
+                        );
+                        User.setAccounts(updatedAccounts);
+                    }
+                    
+                    createNotification({
+                        message: 'Account updated successfully',
+                        type: 'default',
+                        autoClose: 3000
+                    });
+                } else {
+                    throw new Error('Failed to update account');
+                }
+            } else {
+                // For other sections, we might implement different API calls
+                // For now, just show a success message
+                setTimeout(() => {
+                    createNotification({
+                        message: 'Settings saved successfully',
+                        type: 'default',
+                        autoClose: 3000
+                    });
+                }, 500);
+            }
         } catch (error) {
-            console.error("Error saving settings:", error)
+            console.error("Error saving settings:", error);
             createNotification({
-                message: 'Failed to save settings. Please try again.',
+                message: 'Failed to save settings: ' + (error.response?.data?.message || error.message),
                 type: 'warning'
-            })
-            setIsLoading(false)
+            });
+        } finally {
+            setIsLoading(false);
         }
     }
 
