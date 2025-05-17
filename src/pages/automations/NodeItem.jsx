@@ -443,7 +443,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									type="number"
 									style={{ marginTop: '10px', width: '140px', marginRight: '10px' }}
 									label="Delay"
-									value={node?.data?.delay[0] ?? ''}
+									value={node?.data?.delay?.[0] ?? ''}
 									onChange={(e) => {
 										onUpdate({ ...node, data: { ...node.data, delay: [e.target.value] } })
 									}}
@@ -569,7 +569,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 																options={data.cmpLinks}
 																style={{ width: '350px', maxWidth: '350px' }}
 																onOptionSelect={(v) => {
-																	node = { ...node, data: { ...node.data, link: v} }
+																	node = { ...node, data: { ...node.data, link: v } }
 																	onUpdate(node)
 																}}
 															>
