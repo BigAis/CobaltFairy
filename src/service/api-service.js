@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { jwtDecode } from 'jwt-decode'
-const APP_VERSION = '0.3.9'
+const APP_VERSION = '0.4.0'
 const BASE_URL = 'https://fairymail.cobaltfairy.com/api'
 // const BASE_URL = 'http://localhost:1337/api'
 

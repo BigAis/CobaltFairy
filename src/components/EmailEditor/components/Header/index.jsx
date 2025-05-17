@@ -52,6 +52,19 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 		return true
 	}
 
+	const testTemplateEmail = async (subject) => {
+		if (editorRef && editorRef.current) {
+			let updResp = await ApiService.post(`fairymail/testTemplateEmail`, { data: { uuid:currentCampaign.uuid, subject } }, user.jwt)
+			console.log('updresp', updResp)
+			createNotification({ 
+				message: 'Email was sent successfully.', 
+				type: 'default',
+				autoClose: 3000 
+			})
+		}
+		return true
+	}
+
 	const saveTemplate = async (showConfirmationMsg = true) => {
 		if (editorRef && editorRef.current) {
 			console.log('currentCampaign from saveTemplate is : ', currentCampaign)
@@ -238,7 +251,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 						Export
 					</Button>
 					<Button
-						style={{ margin: '0 10px' }}
+						style={{ margin: '0 10px', padding:'13px 20px' }}
 						icon="Import"
 						blackIcon={true}
 						type="secondary"
@@ -304,6 +317,36 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 					>
 						Import
 					</Button>
+
+					{editorType == 'template' && 
+						<>
+							<Button
+							style={{ margin: '0 10px', padding:'13px 20px'  }}
+						blackIcon={false}
+						type="secondary"
+							onClick={()=>{
+								PopupText.fire({
+												text: 'Enter a test subject line',
+												inputField: true,
+												inputLabel: 'Testing template '+currentCampaign.name,
+												confirmButtonText: 'Send test email',
+												showCancelButton:true,
+											}).then(async (result) => {
+												console.log('result',result)
+												if (result.isConfirmed) {
+													 await saveTemplate()
+													await testTemplateEmail(result.inputValue)
+												} else if (result.isCancelled) {
+
+												}
+											})
+
+							}
+							}>
+								Test it
+							</Button>
+						</>
+					}
 				</div>
 				<div className="header-box text-right">
 					<Icon

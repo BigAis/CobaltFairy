@@ -93,7 +93,7 @@ const AccountPicker = () => {
         try {
             setIsAddingAccount(true);
             const jwt = User.get().jwt;
-            const response = await ApiService.post('fairymailer/createAccount', newAccount, jwt);
+            const response = await ApiService.post('fairymail/createAccount', newAccount, jwt);
             
             if (response.data && response.data.success) {
                 // Reset form

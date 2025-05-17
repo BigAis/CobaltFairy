@@ -4,7 +4,7 @@ import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import '../../fullpage.scss'
 import './settings.scss'
-
+import User from '../../service/User'
 import Card from '../../components/Card'
 import Button from '../../components/Button'
 import ButtonGroup from '../../components/ButtonGroup'
@@ -223,10 +223,15 @@ const Settings = () => {
                     }
                     
                     createNotification({
-                        message: 'Account updated successfully',
+                        message: 'Account updated successfully! Refreshing page...',
                         type: 'default',
-                        autoClose: 3000
+                        autoClose: 1500
                     });
+                    
+                    // Give a small delay so the notification can be seen briefly
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 } else {
                     throw new Error('Failed to update account');
                 }
