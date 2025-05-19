@@ -4,13 +4,18 @@ import '../../fullpage.scss'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
 import Button from '../../components/Button'
+import InputText from '../../components/InputText/InputText'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import { useAccount } from '../../context/AccountContext'
 import ButtonGroup from '../../components/ButtonGroup'
+import Dropdown from '../../components/Dropdown'
+import Switch from '../../components/Switch'
+import PopupText from '../../components/PopupText/PopupText'
 
 const Billing = () => {
     const { user, account } = useAccount()
     const [activeTab, setActiveTab] = useState('overview')
+    const [showAddPaymentModal, setShowAddPaymentModal] = useState(false)
 
     // Mock data for billing page
     const mockBillingData = {
@@ -39,6 +44,72 @@ const Billing = () => {
 
     const subscriberPercentage = calculatePercentage(mockBillingData.currentPlan.usageSubscribers, mockBillingData.currentPlan.subscribers);
     const emailPercentage = calculatePercentage(mockBillingData.currentPlan.usageEmails, mockBillingData.currentPlan.emails);
+
+    const handleAddPaymentMethod = () => {
+        setShowAddPaymentModal(true);
+    }
+
+    const handleCloseModal = () => {
+        setShowAddPaymentModal(false);
+    }
+
+    const handleSavePaymentMethod = () => {
+        // Logic to save payment method would go here
+        setShowAddPaymentModal(false);
+    }
+
+    // Payment Method Modal
+    const PaymentMethodModal = () => {
+        return (
+            <div className="modal-overlay" onClick={handleCloseModal}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-header">
+                        <h3>Add Payment Method</h3>
+                        <span className="close-icon" onClick={handleCloseModal}>×</span>
+                    </div>
+                    <div className="modal-body">
+                        <InputText 
+                            label="Card Number" 
+                            placeholder="Enter card number" 
+                            value="" 
+                            onChange={() => {}}
+                        />
+                        <div className="input-row">
+                            <InputText 
+                                label="Date" 
+                                placeholder="MM/YY" 
+                                value="" 
+                                onChange={() => {}}
+                            />
+                            <InputText 
+                                label="CVV" 
+                                placeholder="CVV" 
+                                value="" 
+                                onChange={() => {}}
+                            />
+                        </div>
+                        <InputText 
+                            label="Name on card" 
+                            placeholder="Enter name on card" 
+                            value="" 
+                            onChange={() => {}}
+                        />
+                        <div className="checkbox-row">
+                            <Switch 
+                                checked={false} 
+                                onChange={() => {}}
+                                label="Use Default"
+                            />
+                        </div>
+                    </div>
+                    <div className="modal-footer">
+                        <Button type="secondary" onClick={handleCloseModal}>Cancel</Button>
+                        <Button onClick={handleSavePaymentMethod}>Add</Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="billing-wrapper">
@@ -138,7 +209,7 @@ const Billing = () => {
                                     <h2>${mockBillingData.currentPlan.price}</h2>
                                     <p>{mockBillingData.currentPlan.dueDate}</p>
                                 </div>
-                                <Button onClick={() => console.log('Payment Methods clicked')}>Payment Methods</Button>
+                                <Button onClick={() => setActiveTab('paymentMethods')}>Payment Methods</Button>
                             </Card>
                         </div>
                         
@@ -189,26 +260,126 @@ const Billing = () => {
                                     <p>**** {mockBillingData.paymentMethod.lastFour}</p>
                                 </div>
                             </div>
-                            <Button type="secondary" onClick={() => console.log('Add Method clicked')}>Add Method</Button>
+                            <Button type="secondary" onClick={handleAddPaymentMethod}>Add Method</Button>
                         </Card>
                     </div>
                 )}
                 
                 {/* Invoice Details Tab */}
                 {activeTab === 'invoiceDetails' && (
-                    <Card>
+                    <Card className="invoice-details-card">
                         <h3>Invoice Details</h3>
-                        <p>This section is under construction.</p>
+                        <div className="invoice-form">
+                            <div className="form-row">
+                                <InputText 
+                                    label="First Name" 
+                                    placeholder="First Name" 
+                                    value="" 
+                                    onChange={() => {}}
+                                />
+                                <InputText 
+                                    label="First Name" 
+                                    placeholder="First Name" 
+                                    value="" 
+                                    onChange={() => {}}
+                                />
+                            </div>
+                            
+                            <div className="form-row">
+                                <InputText 
+                                    label="Address 1" 
+                                    placeholder="Address 1" 
+                                    value="" 
+                                    onChange={() => {}}
+                                />
+                                <InputText 
+                                    label="Address 2" 
+                                    placeholder="Address 2" 
+                                    value="" 
+                                    onChange={() => {}}
+                                />
+                            </div>
+                            
+                            <div className="form-row">
+                                <InputText 
+                                    label="City" 
+                                    placeholder="City" 
+                                    value="" 
+                                    onChange={() => {}}
+                                />
+                                <Dropdown 
+                                    options={[
+                                        { value: 'us', label: 'United States' },
+                                        { value: 'ca', label: 'Canada' },
+                                        { value: 'uk', label: 'United Kingdom' }
+                                    ]}
+                                    placeholder="Country"
+                                />
+                            </div>
+                            
+                            <div className="form-row">
+                                <InputText 
+                                    label="VAT ID" 
+                                    placeholder="VAT ID" 
+                                    value="" 
+                                    onChange={() => {}}
+                                />
+                                <InputText 
+                                    label="Company Name" 
+                                    placeholder="Company Name" 
+                                    value="" 
+                                    onChange={() => {}}
+                                />
+                            </div>
+                            
+                            <InputText 
+                                label="Invoice Email Receiptents" 
+                                placeholder="Add email addresses..." 
+                                value="" 
+                                onChange={() => {}}
+                            />
+                            
+                            <div className="form-actions">
+                                <Button onClick={() => console.log('Save Changes clicked')}>Save Changes</Button>
+                            </div>
+                        </div>
                     </Card>
                 )}
                 
                 {/* Payment Methods Tab */}
                 {activeTab === 'paymentMethods' && (
-                    <Card>
+                    <Card className="payment-methods-card">
                         <h3>Payment Methods</h3>
-                        <p>This section is under construction.</p>
+                        <div className="payment-method-item">
+                            <div className="card-info">
+                                <div className="card-logo">
+                                    <div className="visa-logo">VISA</div>
+                                </div>
+                                <div className="card-details">
+                                    <p>Card</p>
+                                    <p>**** {mockBillingData.paymentMethod.lastFour}</p>
+                                </div>
+                            </div>
+                            <div className="card-actions">
+                                <Button type="secondary" onClick={() => console.log('Make Default clicked')}>Make Default</Button>
+                                <Button type="secondary" onClick={() => console.log('Delete clicked')}>Delete</Button>
+                            </div>
+                        </div>
+                        
+                        <div className="add-method-container">
+                            <Button 
+                                type="secondary" 
+                                className="add-method-btn"
+                                onClick={handleAddPaymentMethod}
+                            >
+                                Add new method
+                            </Button>
+                        </div>
                     </Card>
                 )}
+                
+                {/* Add Payment Method Modal */}
+                {showAddPaymentModal && <PaymentMethodModal />}
             </div>
         </div>
     )
