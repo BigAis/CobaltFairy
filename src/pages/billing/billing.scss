@@ -204,7 +204,7 @@
             }
         }
         
-        .payment-method-card {
+        .payment-method-card, .payment-methods-card {
             h3 {
                 font-family: 'Bitter', serif;
                 font-size: 18px;
@@ -218,15 +218,20 @@
                 align-items: center;
                 margin-bottom: 20px;
                 
-                .card-icon {
+                .card-icon, .card-logo {
                     margin-right: 15px;
-                    background: white;
-                    padding: 10px;
-                    border-radius: 6px;
                     
                     img {
                         width: 50px;
                         height: auto;
+                    }
+                    
+                    .visa-logo {
+                        background-color: #1A1F71;
+                        color: white;
+                        font-weight: bold;
+                        padding: 5px 10px;
+                        border-radius: 4px;
                     }
                 }
                 
@@ -275,14 +280,6 @@
         
         /* Payment Methods Tab Styles */
         .payment-methods-card {
-            h3 {
-                font-family: 'Bitter', serif;
-                font-size: 18px;
-                font-weight: 600;
-                margin-bottom: 20px;
-                color: #100F1C;
-            }
-            
             .payment-method-item {
                 display: flex;
                 justify-content: space-between;
@@ -301,29 +298,6 @@
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
-                    }
-                }
-                
-                .card-info {
-                    display: flex;
-                    align-items: center;
-                    
-                    .card-logo {
-                        margin-right: 15px;
-                        
-                        .visa-logo {
-                            background-color: #1A1F71;
-                            color: white;
-                            font-weight: bold;
-                            padding: 5px 10px;
-                            border-radius: 4px;
-                        }
-                    }
-                    
-                    .card-details {
-                        p {
-                            margin: 2px 0;
-                        }
                     }
                 }
                 

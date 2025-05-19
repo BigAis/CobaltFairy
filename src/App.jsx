@@ -27,6 +27,7 @@ import NotificationContainer from './components/NotificationContainer/Notificati
 import Settings from './pages/settings/settings'
 import Billing from './pages/billing/billing'
 
+
 // A wrapper component to handle authentication check
 const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
@@ -130,6 +131,11 @@ function App() {
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/settings/:section" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
+        <Route path="/billing/:tab" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
+        <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
+        <Route path="/billing/overview" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
+        <Route path="/billing/invoice-details" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
+        <Route path="/billing/payment-methods" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Routes>
     </div>
