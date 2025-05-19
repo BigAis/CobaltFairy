@@ -25,6 +25,7 @@ import EditCustomField from './pages/subscribers/EditCustomField'
 import NewCustomField from './pages/subscribers/NewCustomField'
 import NotificationContainer from './components/NotificationContainer/NotificationContainer'
 import Settings from './pages/settings/settings'
+import Billing from './pages/billing/billing'
 
 // A wrapper component to handle authentication check
 const ProtectedRoute = ({ children }) => {
@@ -128,6 +129,7 @@ function App() {
         <Route path="/stats" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/settings/:section" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Routes>
     </div>
