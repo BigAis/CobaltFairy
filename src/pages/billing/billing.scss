@@ -259,6 +259,46 @@
                 flex: 1; /* Make the payment method card take up less space */
             }
         }
+        /* Add this to your billing.scss file */
+
+        .invoice-form {
+        .dropdown-field-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            
+            label {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #100F1C;
+            }
+            
+            .country-dropdown {
+            height: 44px; /* Match the height of your InputText component */
+            }
+            
+            /* Style adjustments for dropdown to match other inputs */
+            .dropdown-wrapper {
+            .dropdown {
+                background-color: #FFFFFF;
+                
+                /* Make the text color and placeholder match */
+                color: #000;
+                
+                &.inactive:not(.disabled) {
+                background-color: #FFFFFF;
+                }
+            }
+            
+            /* Position the dropdown arrow correctly */
+            .dropdown-arrow {
+                right: 15px;
+            }
+            }
+        }
+        }
         /* Invoice Details Tab Styles */
         .invoice-details-card {
             h3 {

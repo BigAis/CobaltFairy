@@ -31,6 +31,16 @@ const InvoiceDetails = () => {
         // Here you would typically send this data to your API
     };
 
+    // Country options
+    const countryOptions = [
+        { value: 'us', label: 'United States' },
+        { value: 'ca', label: 'Canada' },
+        { value: 'uk', label: 'United Kingdom' },
+        { value: 'au', label: 'Australia' },
+        { value: 'de', label: 'Germany' },
+        { value: 'fr', label: 'France' }
+    ];
+
     return (
         <Card className="invoice-details-card">
             <h3>Contact Settings</h3>
@@ -72,20 +82,17 @@ const InvoiceDetails = () => {
                         value={formData.city} 
                         onChange={(e) => handleInputChange('city', e.target.value)}
                     />
-                    <Dropdown 
-                        options={[
-                            { value: 'us', label: 'United States' },
-                            { value: 'ca', label: 'Canada' },
-                            { value: 'uk', label: 'United Kingdom' },
-                            { value: 'au', label: 'Australia' },
-                            { value: 'de', label: 'Germany' },
-                            { value: 'fr', label: 'France' }
-                        ]}
-                        placeholder="Country"
-                        label="Country"
-                        selectedValue={formData.country ? { value: formData.country, label: formData.country } : null}
-                        onOptionSelect={(option) => handleInputChange('country', option.value)}
-                    />
+                    <div className="dropdown-field-wrapper">
+                        <label>Country</label>
+                        <Dropdown 
+                            options={countryOptions}
+                            selectedValue={formData.country ? { value: formData.country, label: countryOptions.find(c => c.value === formData.country)?.label || '' } : null}
+                            onOptionSelect={(option) => handleInputChange('country', option.value)}
+                            className="country-dropdown"
+                        >
+                            Country
+                        </Dropdown>
+                    </div>
                 </div>
                 
                 <div className="form-row">
