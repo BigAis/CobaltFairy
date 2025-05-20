@@ -243,7 +243,22 @@
                 }
             }
         }
-        
+        .invoices-payment-row {
+            display: flex;
+            gap: 20px;
+            
+            @media (max-width: 768px) {
+                flex-direction: column;
+            }
+            
+            .invoices-card {
+                flex: 2; /* Make the invoices card take up more space */
+            }
+            
+            .payment-method-card {
+                flex: 1; /* Make the payment method card take up less space */
+            }
+        }
         /* Invoice Details Tab Styles */
         .invoice-details-card {
             h3 {
