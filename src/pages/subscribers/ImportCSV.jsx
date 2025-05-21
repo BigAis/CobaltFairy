@@ -49,7 +49,7 @@ const ImportCSV = ({ groups = [], onImportComplete = () => {} }) => {
     // Parse CSV to get headers and preview data
     Papa.parse(file, {
       header: true,
-      preview: 5,
+      preview: 5, // Show only first 5 rows in preview
       skipEmptyLines: true,
       dynamicTyping: true,
       complete: (results) => {
@@ -72,8 +72,12 @@ const ImportCSV = ({ groups = [], onImportComplete = () => {} }) => {
             name: nameColumn
           });
           
-          // Set preview data
-          setPreviewData(results.data.slice(0, 5));
+          // Set preview data - only include rows with valid data
+          const validRows = results.data.filter(row => {
+            // Check if row has at least some data and isn't just empty fields
+            return Object.values(row).some(val => val !== null && val !== '');
+          });
+          setPreviewData(validRows.slice(0, 5));
         }
       },
       error: (error) => {
@@ -239,14 +243,17 @@ const ImportCSV = ({ groups = [], onImportComplete = () => {} }) => {
     label: group.name
   }));
   
-  // Format to help debug the preview data
+  // Improved renderPreview function
   const renderPreview = () => {
     if (!file || previewData.length === 0) return null;
     
+    // Determine if we need scrolling based on the number of rows
+    const needsScrolling = previewData.length > 10;
+    
     return (
-      <div className="preview-container">
-        <h4>Preview (first 5 rows)</h4>
-        <div className="preview-table-wrapper">
+      <div className="preview-section">
+        <h4>Preview {previewData.length > 0 ? `(${previewData.length} rows)` : ''}</h4>
+        <div className={`preview-table-wrapper ${needsScrolling ? 'preview-table-scrollable' : ''}`}>
           <table className="preview-table">
             <thead>
               <tr>
