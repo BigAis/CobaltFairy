@@ -1,12 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Card from '../../components/Card'
 import Button from '../../components/Button'
+import Pagination from '../../components/Pagination'
 import { useAccount } from '../../context/AccountContext'
 import { useNavigate } from 'react-router-dom'
 
 const BillingOverview = () => {
     const { user, account } = useAccount()
     const navigate = useNavigate();
+    // Add state for pagination
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Mock data for billing page
     const mockBillingData = {
@@ -35,6 +38,13 @@ const BillingOverview = () => {
 
     const subscriberPercentage = calculatePercentage(mockBillingData.currentPlan.usageSubscribers, mockBillingData.currentPlan.subscribers);
     const emailPercentage = calculatePercentage(mockBillingData.currentPlan.usageEmails, mockBillingData.currentPlan.emails);
+
+    // Handle pagination change
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        console.log(`Changed to page ${page}`);
+        // Here you would typically fetch the data for the new page
+    };
 
     return (
         <div className="billing-overview">
@@ -143,15 +153,15 @@ const BillingOverview = () => {
                             ))}
                         </tbody>
                     </table>
-                    <div className="pagination">
-                        <button className="prev-page">‹</button>
-                        <span className="page-active">1</span>
-                        <span>2</span>
-                        <span>...</span>
-                        <span>9</span>
-                        <span>10</span>
-                        <button className="next-page">›</button>
-                    </div>
+                    
+                    {/* Replace the custom pagination with the Pagination component */}
+                    <Pagination 
+                        currentPage={currentPage}
+                        totalResults={100} // Replace with actual total number of invoices
+                        resultsPerPage={10} // Replace with your actual results per page
+                        onChange={handlePageChange}
+                        siblingCount={1}
+                    />
                 </Card>
                 
                 {/* Payment Method Section */}

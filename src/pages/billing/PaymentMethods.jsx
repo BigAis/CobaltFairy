@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Card from '../../components/Card'
 import Button from '../../components/Button'
-import InputText from '../../components/InputText/InputText'
+import CreditCardPicker from '../../components/CreditCardPicker'
 import Switch from '../../components/Switch'
 import { useAccount } from '../../context/AccountContext'
 import PopupText from '../../components/PopupText/PopupText'
@@ -9,26 +9,14 @@ import PopupText from '../../components/PopupText/PopupText'
 const PaymentMethods = () => {
     const { user, account } = useAccount()
     const [showAddPaymentModal, setShowAddPaymentModal] = useState(false)
-    const [cardData, setCardData] = useState({
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-        nameOnCard: '',
-        isDefault: false
-    });
+    const [isDefaultCard, setIsDefaultCard] = useState(false)
 
     // Mock data for payment methods
     const mockPaymentMethod = {
         type: 'Card',
-        lastFour: '5414'
+        lastFour: '5414',
+        cardType: 'mastercard' // Added for CreditCardPicker
     }
-
-    const handleInputChange = (field, value) => {
-        setCardData({
-            ...cardData,
-            [field]: value
-        });
-    };
 
     const handleAddPaymentMethod = () => {
         setShowAddPaymentModal(true);
@@ -40,7 +28,7 @@ const PaymentMethods = () => {
 
     const handleSavePaymentMethod = () => {
         // Validation would go here
-        console.log('Saving payment method:', cardData);
+        console.log('Saving payment method');
         setShowAddPaymentModal(false);
         
         // Show success message
@@ -75,7 +63,7 @@ const PaymentMethods = () => {
         });
     }
 
-    // Payment Method Modal
+    // Payment Method Modal using CreditCardPicker
     const PaymentMethodModal = () => {
         return (
             <div className="modal-overlay" onClick={handleCloseModal}>
@@ -85,36 +73,11 @@ const PaymentMethods = () => {
                         <span className="close-icon" onClick={handleCloseModal}>×</span>
                     </div>
                     <div className="modal-body">
-                        <InputText 
-                            label="Card Number" 
-                            placeholder="Enter card number" 
-                            value={cardData.cardNumber} 
-                            onChange={(e) => handleInputChange('cardNumber', e.target.value)}
-                        />
-                        <div className="input-row">
-                            <InputText 
-                                label="Date" 
-                                placeholder="MM/YY" 
-                                value={cardData.expiryDate} 
-                                onChange={(e) => handleInputChange('expiryDate', e.target.value)}
-                            />
-                            <InputText 
-                                label="CVV" 
-                                placeholder="CVV" 
-                                value={cardData.cvv}
-                                onChange={(e) => handleInputChange('cvv', e.target.value)}
-                            />
-                        </div>
-                        <InputText 
-                            label="Name on card" 
-                            placeholder="Enter name on card" 
-                            value={cardData.nameOnCard}
-                            onChange={(e) => handleInputChange('nameOnCard', e.target.value)}
-                        />
+                        <CreditCardPicker />
                         <div className="checkbox-row">
                             <Switch 
-                                checked={cardData.isDefault} 
-                                onChange={(checked) => handleInputChange('isDefault', checked)}
+                                checked={isDefaultCard} 
+                                onChange={(checked) => setIsDefaultCard(checked)}
                                 label="Use Default"
                             />
                         </div>
@@ -132,16 +95,20 @@ const PaymentMethods = () => {
         <>
             <Card className="payment-methods-card">
                 <h3>Payment Methods</h3>
+                
+                {/* Display existing payment methods */}
                 <div className="payment-method-item">
-                    <div className="card-info">
-                        <div className="card-logo">
-                            <div className="visa-logo">VISA</div>
+                    {/* Use CreditCardPicker component in view mode */}
+                    <div className="card-verified">
+                        <div className={`rccs__card rccs__card--${mockPaymentMethod.cardType}`}>
+                            <div className="rccs__issuer"></div>
                         </div>
-                        <div className="card-details">
-                            <p>{mockPaymentMethod.type}</p>
-                            <p>**** {mockPaymentMethod.lastFour}</p>
+                        <div className="card-text">
+                            <span>Card</span>
+                            <span>**** {mockPaymentMethod.lastFour}</span>
                         </div>
                     </div>
+                    
                     <div className="card-actions">
                         <Button type="secondary" onClick={() => console.log('Make Default clicked')}>Make Default</Button>
                         <Button type="secondary" onClick={handleDeleteCard}>Delete</Button>

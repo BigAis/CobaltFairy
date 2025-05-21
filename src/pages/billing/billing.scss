@@ -167,38 +167,26 @@
                 }
             }
             
+            /* Updated styles for Pagination component */
             .pagination {
                 display: flex;
                 justify-content: center;
-                align-items: center;
-                gap: 10px;
+                margin-top: 20px;
                 
-                span {
-                    display: inline-block;
-                    width: 30px;
-                    height: 30px;
-                    line-height: 30px;
-                    text-align: center;
-                    border-radius: 4px;
-                    cursor: pointer;
+                .btn {
+                    margin: 0 5px;
+                    padding: 7px 12px;
+                    font-size: 14px;
+                    min-height: 35px;
                     
-                    &.page-active {
+                    &.selected {
                         background-color: rgba(255, 255, 255, 0.5);
                         border: 2px solid rgba(218, 209, 197, 1);
                         font-weight: 500;
                     }
-                }
-                
-                .next-page {
-                    background: none;
-                    border: 2px solid rgba(218, 209, 197, 1);
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 4px;
-                    cursor: pointer;
                     
-                    &:hover {
-                        background-color: rgba(255, 255, 255, 0.7);
+                    &.active {
+                        cursor: pointer;
                     }
                 }
             }
@@ -359,6 +347,44 @@
                 .card-actions {
                     display: flex;
                     gap: 10px;
+                }
+                
+                /* Styles for CreditCardPicker when used in verified mode */
+                .card-verified {
+                    display: flex;
+                    align-items: center;
+                    font-size: 18px;
+                    font-family: Arial, sans-serif;
+                    
+                    .rccs__card {
+                        height: 45px;
+                        width: 72px;
+                        display: flex;
+                        align-items: center;
+                        background-color: #fff9ef !important;
+                        border: 2px solid #dad1c5;
+                        border-radius: 8px;
+                        
+                        .rccs__issuer {
+                            background-size: 65%;
+                            height: 100%;
+                            width: 100%;
+                            position: relative;
+                            background-position: center center;
+                            top: auto;
+                            right: auto;
+                        }
+                    }
+                    
+                    .card-text {
+                        margin-left: 10px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: start;
+                        font-family: Inter;
+                        font-size: 14px;
+                        line-height: 17px;
+                    }
                 }
             }
             
