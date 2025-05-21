@@ -12,6 +12,8 @@ import { ApiService } from '../../service/api-service'
 import { useNavigate } from 'react-router-dom'
 import PopupText from '../../components/PopupText/PopupText'
 import InputText from '../../components/InputText/InputText'
+import { useAccount } from '../../context/AccountContext'
+import NotificationBar from '../../components/NotificationBar/NotificationBar'
 
 const AccountPicker = () => {
     const navigate = useNavigate();
@@ -24,6 +26,16 @@ const AccountPicker = () => {
     });
     const [isAddingAccount, setIsAddingAccount] = useState(false);
     const [isRemovingAccount, setIsRemovingAccount] = useState(false);
+    const [localNotification, setLocalNotification] = useState(null);
+    
+    // Use the context, but provide a fallback if it's not available
+    const accountContext = useAccount();
+    const createNotification = accountContext?.createNotification || 
+        ((msg) => {
+            console.log("Fallback notification:", msg);
+            setLocalNotification(msg);
+            setTimeout(() => setLocalNotification(null), msg.autoClose || 3000);
+        });
 
     const chooseAccount = async (aid) => {
         const jwt = User.get().jwt;
@@ -58,20 +70,17 @@ const AccountPicker = () => {
                 setAccounts(updatedAccounts);
                 User.setAccounts(updatedAccounts);
                 
-                PopupText.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Account has been removed',
-                    showConfirmButton: false,
-                    timer: 1500
+                createNotification({
+                    message: 'Account has been removed',
+                    type: 'default',
+                    autoClose: 3000
                 });
             } catch (error) {
                 console.error('Error removing account:', error);
-                PopupText.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to remove account',
-                    showConfirmButton: true
+                createNotification({
+                    message: 'Failed to remove account',
+                    type: 'warning',
+                    autoClose: 3000
                 });
             } finally {
                 setIsRemovingAccount(false);
@@ -82,6 +91,12 @@ const AccountPicker = () => {
     const handleAddAccount = async () => {
         // Validate form
         if (!newAccount.account_name.trim()) {
+            // Use both notification methods to ensure one works
+            createNotification({
+                message: 'Please enter an account name',
+                type: 'warning',
+                autoClose: 3000
+            });
             PopupText.fire({
                 icon: 'warning',
                 text: 'Please enter an account name',
@@ -95,7 +110,10 @@ const AccountPicker = () => {
             const jwt = User.get().jwt;
             const response = await ApiService.post('fairymail/createAccount', newAccount, jwt);
             
-            if (response.data && response.data.success) {
+            console.log('Account creation response:', response);
+            
+            // Check different possible response structures
+            if (response && response.status === 200) {
                 // Reset form
                 setNewAccount({
                     account_name: '',
@@ -106,25 +124,50 @@ const AccountPicker = () => {
                 // Close modal
                 setShowAddModal(false);
                 
-                // Refresh accounts list
-                const updatedAccounts = [...accounts, response.data.account];
-                setAccounts(updatedAccounts);
-                User.setAccounts(updatedAccounts);
+                // Try to get account from response (handle different possible structures)
+                const newAccount = response.data.account || 
+                                  (response.data.data && response.data.data.account) || 
+                                  response.data;
+                
+                // Refresh accounts list if we have account data
+                if (newAccount && newAccount.id) {
+                    const updatedAccounts = [...accounts, newAccount];
+                    setAccounts(updatedAccounts);
+                    User.setAccounts(updatedAccounts);
+                } else {
+                    // Fallback: reload accounts from server or local storage
+                    setAccounts(User.getAccounts() || []);
+                }
+                
+                // Try both notification methods
+                createNotification({
+                    message: 'Account has been created successfully',
+                    type: 'default',
+                    autoClose: 3000
+                });
                 
                 PopupText.fire({
                     icon: 'success',
-                    title: 'Success',
-                    text: 'Account has been created',
+                    text: 'Account has been created successfully',
                     showConfirmButton: false,
-                    timer: 1500
+                    timer: 2000
                 });
+            } else {
+                throw new Error('Unexpected response format');
             }
         } catch (error) {
             console.error('Error creating account:', error);
+            
+            // Use both notification methods
+            createNotification({
+                message: 'Failed to create account: ' + (error.response?.data?.message || error.message),
+                type: 'warning',
+                autoClose: 5000
+            });
+            
             PopupText.fire({
                 icon: 'error',
-                title: 'Error',
-                text: 'Failed to create account',
+                text: 'Failed to create account: ' + (error.response?.data?.message || error.message),
                 showConfirmButton: true
             });
         } finally {
@@ -144,11 +187,10 @@ const AccountPicker = () => {
             window.location.href = '/settings/details';
         } catch (error) {
             console.error('Error switching to account for editing:', error);
-            PopupText.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to switch to account for editing',
-                showConfirmButton: true
+            createNotification({
+                message: 'Failed to switch to account for editing',
+                type: 'warning',
+                autoClose: 3000
             });
         }
     }
@@ -156,6 +198,18 @@ const AccountPicker = () => {
     return (
         <div className="accountPicker-container">
             <Logo style={{}}/>
+            
+            {/* Local fallback notification in case context notifications aren't working */}
+            {localNotification && (
+                <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
+                    <NotificationBar 
+                        message={localNotification.message}
+                        type={localNotification.type || 'default'}
+                        onClose={() => setLocalNotification(null)}
+                        autoClose={localNotification.autoClose || 3000}
+                    />
+                </div>
+            )}
 
             <h3 className='accountPicker-header'>Pick an account:</h3>
             <div className='accounts-container'>
