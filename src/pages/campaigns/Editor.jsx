@@ -4,6 +4,7 @@ import EmailEditor from '../../components/EmailEditor/index'
 import PopupText from '../../components/PopupText/PopupText'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
+import { defaultState } from '../../components/EmailEditor/reducers/index'
 
 function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 	const navigate = useNavigate()
@@ -53,14 +54,14 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 				// Use presets for bodySettings
 				initialDesign.bodySettings = {
 					styles: {
-						color: presets.styles?.color || '#000000',
-						backgroundColor: presets.styles?.backgroundColor || '#FFF8EF',
-						linkColor: presets.styles?.linkColor || '#FF635D',
-						fontFamily: presets.styles?.fontFamily || 'Inter',
-						backgroundImage: presets.styles?.backgroundImage || '',
+						color: presets.styles?.color ?? defaultState.bodySettings.styles.color,
+						backgroundColor: presets.styles?.backgroundColor ?? defaultState.bodySettings.styles.backgroundColor,
+						linkColor: presets.styles?.linkColor ?? '#FF635D',
+						fontFamily: presets.styles?.fontFamily ?? defaultState.bodySettings.styles.fontFamily,
+						backgroundImage: presets.styles?.backgroundImage ?? '',
 					},
-					contentWidth: presets.contentWidth || '600px',
-					preHeader: presets.preHeader || '',
+					contentWidth: presets.contentWidth ?? defaultState.bodySettings.contentWidth,
+					preHeader: presets.preHeader ?? '',
 					// Apply button defaults if available
 					buttonDefaults: presets.buttonDefaults ? {
 						...presets.buttonDefaults
@@ -78,12 +79,11 @@ function Editor({ editorType = 'campaign', currentCampaign, setStep }) {
 				// Default settings if no presets available
 				initialDesign.bodySettings = {
 					styles: {
-						color: '#000000',
-						backgroundColor: '#FFF8EF',
+						...defaultState.bodySettings.styles,
 						linkColor: '#FF635D',
-						fontFamily: 'Inter'
+						backgroundImage: '',
 					},
-					contentWidth: '600px',
+					contentWidth: defaultState.bodySettings.contentWidth,
 					preHeader: ''
 				};
 			}
