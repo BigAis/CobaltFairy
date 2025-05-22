@@ -1,12 +1,10 @@
 // src/components/LocationData/LocationData.jsx
 import React, { useState, useEffect } from 'react';
 import { scaleLinear } from 'd3-scale';
-import ButtonGroup from '../../components/ButtonGroup';
 import Card from '../../components/Card';
 import WorldMapComponent from '../WorldMapComponent/WorldMapComponent';
 
 const LocationData = ({ campaign }) => {
-  const [viewMode, setViewMode] = useState('map');
   const [countryData, setCountryData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
@@ -97,24 +95,14 @@ const LocationData = ({ campaign }) => {
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <ButtonGroup
-          value={viewMode}
-          options={[
-            { value: 'map', label: 'Map View' },
-            { value: 'table', label: 'Table View' }
-          ]}
-          onChange={setViewMode}
-        />
-      </div>
-
-      <Card>
-        {isLoading ? (
-          <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
-            <div className="spinner"></div>
-          </div>
-        ) : (
-          viewMode === 'map' ? (
+      {isLoading ? (
+        <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
+          <div className="spinner"></div>
+        </div>
+      ) : (
+        <div className="d-flex gap-20">
+          {/* Left Panel - Map View */}
+          <Card className="flex-1">
             <div className="position-relative">
               {/* World Map Component */}
               <div style={{ width: '100%', height: 'auto', minHeight: '400px' }}>
@@ -146,7 +134,10 @@ const LocationData = ({ campaign }) => {
                 </div>
               </div>
             </div>
-          ) : (
+          </Card>
+
+          {/* Right Panel - Table View */}
+          <Card className="flex-1">
             <table className="w-100" style={{ borderCollapse: 'separate', borderSpacing: '0 6px' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #DAD1C5' }}>
@@ -188,9 +179,9 @@ const LocationData = ({ campaign }) => {
                   })}
               </tbody>
             </table>
-          )
-        )}
-      </Card>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
