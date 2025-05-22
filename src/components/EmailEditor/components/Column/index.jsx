@@ -26,6 +26,20 @@ const Column = (props) => {
     setCurrentItem(null);
   };
 
+  // New copy block function
+  const copyBlock = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const newBlockList = deepClone(blockList);
+    const blockToCopy = deepClone(block);
+    
+    // Insert the copied block right after the current block
+    newBlockList.splice(blockIndex + 1, 0, blockToCopy);
+    
+    setBlockList(newBlockList, "copy");
+    setCurrentItem({ data: blockToCopy, type: "edit", index: blockIndex + 1 });
+  };
+
   const deleteBlockItem = (index) => (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -55,6 +69,27 @@ const Column = (props) => {
     }
     setBlockList(newBlockList, "delete");
     setCurrentItem(null);
+  };
+
+  // New copy block item function
+  const copyBlockItem = (index) => (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const newBlockList = deepClone(blockList);
+    const indexArr = index.split("-");
+    const blockIndex = indexArr[0];
+    const contentIndex = indexArr[1];
+    const itemIndex = parseInt(indexArr[2]);
+    
+    const item = newBlockList[blockIndex].children[contentIndex].children[itemIndex];
+    const copiedItem = deepClone(item);
+    
+    // Insert the copied item right after the current item
+    newBlockList[blockIndex].children[contentIndex].children.splice(itemIndex + 1, 0, copiedItem);
+    
+    setBlockList(newBlockList, "copy");
+    const newIndex = `${blockIndex}-${contentIndex}-${itemIndex + 1}`;
+    setCurrentItem({ data: copiedItem, type: "edit", index: newIndex });
   };
 
   const dragStart = () => {
@@ -135,8 +170,10 @@ const Column = (props) => {
                     </>
                   )}
                   <span className="absolute block-item-delete" onClick={deleteBlockItem(index)}>
-                    {/* <FontAwesomeIcon icon={faTrash} /> */}
                     <Icon name="Trash"/>
+                  </span>
+                  <span className="absolute block-item-copy" onClick={copyBlockItem(index)}>
+                    <Icon name="Copy"/>
                   </span>
                   <span
                     className="absolute block-item-move current-move-block-arrows"
@@ -146,7 +183,6 @@ const Column = (props) => {
                     onDragStart={dragStart}
                   >
                     <Icon name="Pointer" />
-                    {/* <FontAwesomeIcon icon={faArrowsAlt} /> */}
                   </span>
                 </div>
                 <BlockItems blockItem={item} index={index}/>
@@ -190,6 +226,9 @@ const Column = (props) => {
             <span className="absolute block-delete" onClick={deleteBlock}>
               <Icon name="Trash"/>
             </span>
+            <span className="absolute block-copy" onClick={copyBlock}>
+              <Icon name="Copy"/>
+            </span>
             <span
               className="absolute block-move current-move-block-arrows"
               draggable="true"
@@ -197,7 +236,6 @@ const Column = (props) => {
               data-index={blockIndex}
               onDragStart={dragStart}
             >
-              {/* <FontAwesomeIcon icon={faArrowsAlt} /> */}
               <Icon name="Pointer" />
             </span>
           </div>

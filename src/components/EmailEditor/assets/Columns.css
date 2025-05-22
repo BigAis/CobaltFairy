@@ -12,7 +12,7 @@
     outline-offset: -2px
 }
 
-.block-delete .icon path, .block-move .icon path, .block-item-delete .icon path, .block-item-move .icon path{
+.block-delete .icon path, .block-move .icon path, .block-copy .icon path, .block-item-delete .icon path, .block-item-move .icon path, .block-item-copy .icon path{
     fill:black!important;
 }
 
@@ -35,6 +35,10 @@
     margin-right: -50px;
 }
 
+.mobile-block-focus .block-copy {
+    margin-right: -50px;
+}
+
 .mobile-block-focus .block-delete {
     margin-right: -50px;
 }
@@ -51,6 +55,9 @@
     visibility: visible;
 }
 
+.block-focus .block-copy {
+    visibility: visible;
+}
 
 .block-focus .block-delete {
     visibility: visible;
@@ -72,14 +79,28 @@
     cursor: pointer;
 }
 
+.block-copy {
+    width: 30px;
+    height: 30px;
+    visibility: hidden;
+    right: 30px;
+    bottom: -36px;
+    background-color: rgb(255 222 207);
+    border: 2px solid #ff4c49;
+    border-radius: 0;
+    color: black;
+    text-align: center;
+    line-height: 24px;
+    z-index: 120;
+    cursor: pointer;
+}
+
 .block-move {
     width: 35px;
     height: 35px;
     visibility: hidden;
     right: -14px;
     bottom: 50%;
-    /* background-color: var(--block-active-border);
-    color: var(--tools-font-color); */
     background-color: rgb(255 222 207);
     border: 2px solid #ff4c49;
     text-align: center;
@@ -118,7 +139,6 @@
     bottom: 0;
     left:0;
 }
-
 
 .block-move-top {
     width: 100%;
@@ -239,7 +259,23 @@
     bottom: -36px;
     background-color: rgb(255 222 207);
     border: 2px solid #ff4c49;
-    border-radius: 5px;
+    border-radius: 5px 0 0 5px;
+    color: black;
+    text-align: center;
+    line-height: 24px;
+    z-index: 120;
+    cursor: pointer;
+}
+
+.block-item-copy {
+    width: 30px;
+    height: 30px;
+    visibility: hidden;
+    right: 30px;
+    bottom: -36px;
+    background-color: rgb(255 222 207);
+    border: 2px solid #ff4c49;
+    border-radius: 0;
     color: black;
     text-align: center;
     line-height: 24px;
@@ -253,8 +289,6 @@
     visibility: hidden;
     right: -14px;
     bottom: 50%;
-    /* background-color: var(--block-active-border);
-    color: var(--tools-font-color); */
     background-color: rgb(255 222 207);
     border: 2px solid #ff4c49;
     text-align: center;
@@ -265,10 +299,14 @@
     transform: translateY(50%);
     cursor: pointer;
 }
+
 .block-item-focus .block-item-move {
     visibility: visible;
 }
 
+.block-item-focus .block-item-copy {
+    visibility: visible;
+}
 
 .block-item-focus .block-item-delete {
     visibility: visible;
