@@ -739,7 +739,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											let children1 = [0, 1].map((index) => {
 												if (child && child.id) return getChildrenOfCondition(nodes, child.id, index)
 											})
-											// if (closestCondition(child.id) == node.id)
+											if (closestCondition(child.id) == node.id)
 											return (
 												<NodeItem
 													key={child ? child.id : 0}
