@@ -371,10 +371,7 @@ const EditCampaign = () => {
 							{selectedTab === 'loc_data_tab' && (
 							<>
 								<div className="stats-container d-flex flex-column gap-20 mt20">
-								<Card>
-									<p className="stat-heading">Location Data</p>
-									<LocationData campaign={campaign} />
-								</Card>
+								<LocationData campaign={campaign} />
 								</div>
 							</>
 							)}

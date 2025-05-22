@@ -1,7 +1,6 @@
 // src/components/LocationData/LocationData.jsx
 import React, { useState, useEffect } from 'react';
 import { scaleLinear } from 'd3-scale';
-import Card from '../../components/Card';
 import WorldMapComponent from '../WorldMapComponent/WorldMapComponent';
 
 const LocationData = ({ campaign }) => {
@@ -102,7 +101,13 @@ const LocationData = ({ campaign }) => {
       ) : (
         <div className="d-flex gap-20">
           {/* Left Panel - Map View */}
-          <Card className="flex-1">
+          <div className="flex-1" style={{ 
+            backgroundColor: '#FFF8EF', 
+            border: '2px solid #DAD1C5', 
+            borderRadius: '8px', 
+            padding: '20px' 
+          }}>
+            <p className="stat-heading" style={{ marginBottom: '20px', fontWeight: '600' }}>Opens and clicks</p>
             <div className="position-relative">
               {/* World Map Component */}
               <div style={{ width: '100%', height: 'auto', minHeight: '400px' }}>
@@ -134,10 +139,16 @@ const LocationData = ({ campaign }) => {
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
 
           {/* Right Panel - Table View */}
-          <Card className="flex-1">
+          <div className="flex-1" style={{ 
+            backgroundColor: '#FFF8EF', 
+            border: '2px solid #DAD1C5', 
+            borderRadius: '8px', 
+            padding: '20px' 
+          }}>
+            <p className="stat-heading" style={{ marginBottom: '20px', fontWeight: '600' }}>Location Activity</p>
             <table className="w-100" style={{ borderCollapse: 'separate', borderSpacing: '0 6px' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #DAD1C5' }}>
@@ -179,7 +190,7 @@ const LocationData = ({ campaign }) => {
                   })}
               </tbody>
             </table>
-          </Card>
+          </div>
         </div>
       )}
     </div>
