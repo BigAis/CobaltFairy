@@ -17,7 +17,7 @@ import NotificationBar from '../../components/NotificationBar/NotificationBar'
 
 const AccountPicker = () => {
     const navigate = useNavigate();
-    const [accounts, setAccounts] = useState([{name:'test'}]);
+    const [accounts, setAccounts] = useState([]);
     const [showAddModal, setShowAddModal] = useState(false);
     const [newAccount, setNewAccount] = useState({
         account_name: '',
@@ -26,6 +26,7 @@ const AccountPicker = () => {
     });
     const [isAddingAccount, setIsAddingAccount] = useState(false);
     const [isRemovingAccount, setIsRemovingAccount] = useState(false);
+    const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
     const [localNotification, setLocalNotification] = useState(null);
     
     // Use the context, but provide a fallback if it's not available
@@ -37,6 +38,36 @@ const AccountPicker = () => {
             setTimeout(() => setLocalNotification(null), msg.autoClose || 3000);
         });
 
+    // Function to fetch accounts from server
+    const fetchAccountsFromServer = async () => {
+        try {
+            setIsLoadingAccounts(true);
+            const jwt = User.get().jwt;
+            const response = await ApiService.get('fairymailer/getAccount', jwt);
+            
+            if (response.data && response.data.user && response.data.user.accounts) {
+                const serverAccounts = response.data.user.accounts;
+                setAccounts(serverAccounts);
+                User.setAccounts(serverAccounts);
+                console.log('Accounts refreshed from server:', serverAccounts);
+                return serverAccounts;
+            } else {
+                console.warn('Unexpected response structure from server');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching accounts from server:', error);
+            createNotification({
+                message: 'Failed to refresh accounts list',
+                type: 'warning',
+                autoClose: 3000
+            });
+            return null;
+        } finally {
+            setIsLoadingAccounts(false);
+        }
+    };
+
     const chooseAccount = async (aid) => {
         const jwt = User.get().jwt;
         let accountchosen = await ApiService.post('fairymailer/chooseUserAccount',{account_id:aid},jwt)
@@ -44,9 +75,16 @@ const AccountPicker = () => {
         window.location='/' // no navigate
     }
 
-    useEffect(()=>{
-        setAccounts(User.getAccounts())
-    },[])
+    useEffect(() => {
+        // Try to load from local storage first for immediate display
+        const localAccounts = User.getAccounts();
+        if (localAccounts && localAccounts.length > 0) {
+            setAccounts(localAccounts);
+        }
+        
+        // Then fetch fresh data from server
+        fetchAccountsFromServer();
+    }, [])
     
     const handleDeleteAccount = async (account) => {
         const result = await PopupText.fire({
@@ -65,10 +103,8 @@ const AccountPicker = () => {
                 const jwt = User.get().jwt;
                 await ApiService.post('fairymailer/removeAccount', { account_id: account.id }, jwt);
                 
-                // Refresh accounts list
-                const updatedAccounts = accounts.filter(acc => acc.id !== account.id);
-                setAccounts(updatedAccounts);
-                User.setAccounts(updatedAccounts);
+                // Refresh accounts from server after deletion
+                await fetchAccountsFromServer();
                 
                 createNotification({
                     message: 'Account has been removed',
@@ -91,7 +127,6 @@ const AccountPicker = () => {
     const handleAddAccount = async () => {
         // Validate form
         if (!newAccount.account_name.trim()) {
-            // Use both notification methods to ensure one works
             createNotification({
                 message: 'Please enter an account name',
                 type: 'warning',
@@ -112,7 +147,7 @@ const AccountPicker = () => {
             
             console.log('Account creation response:', response);
             
-            // Check different possible response structures
+            // Check if account was created successfully
             if (response && response.status === 200) {
                 // Reset form
                 setNewAccount({
@@ -124,41 +159,46 @@ const AccountPicker = () => {
                 // Close modal
                 setShowAddModal(false);
                 
-                // Try to get account from response (handle different possible structures)
-                const newAccount = response.data.account || 
-                                  (response.data.data && response.data.data.account) || 
-                                  response.data;
+                // Fetch fresh accounts from server to ensure we have the latest data
+                console.log('Account created successfully, fetching updated accounts...');
+                const updatedAccounts = await fetchAccountsFromServer();
                 
-                // Refresh accounts list if we have account data
-                if (newAccount && newAccount.id) {
-                    const updatedAccounts = [...accounts, newAccount];
-                    setAccounts(updatedAccounts);
-                    User.setAccounts(updatedAccounts);
+                if (updatedAccounts) {
+                    createNotification({
+                        message: 'Account has been created successfully',
+                        type: 'success',
+                        autoClose: 4000
+                    });
                 } else {
-                    // Fallback: reload accounts from server or local storage
-                    setAccounts(User.getAccounts() || []);
+                    // If server fetch failed, try to parse the response
+                    const createdAccount = response.data.account || 
+                                          (response.data.data && response.data.data.account) || 
+                                          response.data;
+                    
+                    if (createdAccount && createdAccount.id) {
+                        const updatedAccounts = [...accounts, createdAccount];
+                        setAccounts(updatedAccounts);
+                        User.setAccounts(updatedAccounts);
+                        
+                        createNotification({
+                            message: 'Account has been created successfully',
+                            type: 'success',
+                            autoClose: 4000
+                        });
+                    } else {
+                        createNotification({
+                            message: 'Account created, but failed to refresh list. Please refresh the page.',
+                            type: 'warning',
+                            autoClose: 5000
+                        });
+                    }
                 }
-                
-                // Try both notification methods
-                createNotification({
-                    message: 'Account has been created successfully',
-                    type: 'default',
-                    autoClose: 3000
-                });
-                
-                PopupText.fire({
-                    icon: 'success',
-                    text: 'Account has been created successfully',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
             } else {
                 throw new Error('Unexpected response format');
             }
         } catch (error) {
             console.error('Error creating account:', error);
             
-            // Use both notification methods
             createNotification({
                 message: 'Failed to create account: ' + (error.response?.data?.message || error.message),
                 type: 'warning',
@@ -212,6 +252,14 @@ const AccountPicker = () => {
             )}
 
             <h3 className='accountPicker-header'>Pick an account:</h3>
+            
+            {/* Loading indicator */}
+            {isLoadingAccounts && (
+                <div style={{ textAlign: 'center', margin: '20px 0' }}>
+                    <p>Loading accounts...</p>
+                </div>
+            )}
+            
             <div className='accounts-container'>
                 {accounts.map((account, index) => {
                     return (
