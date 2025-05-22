@@ -231,6 +231,7 @@
                 }
             }
         }
+        
         .invoices-payment-row {
             display: flex;
             gap: 20px;
@@ -247,46 +248,7 @@
                 flex: 1; /* Make the payment method card take up less space */
             }
         }
-        /* Add this to your billing.scss file */
-
-        .invoice-form {
-        .dropdown-field-wrapper {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            
-            label {
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #100F1C;
-            }
-            
-            .country-dropdown {
-            height: 44px; /* Match the height of your InputText component */
-            }
-            
-            /* Style adjustments for dropdown to match other inputs */
-            .dropdown-wrapper {
-            .dropdown {
-                background-color: #FFFFFF;
-                
-                /* Make the text color and placeholder match */
-                color: #000;
-                
-                &.inactive:not(.disabled) {
-                background-color: #FFFFFF;
-                }
-            }
-            
-            /* Position the dropdown arrow correctly */
-            .dropdown-arrow {
-                right: 15px;
-            }
-            }
-        }
-        }
+        
         /* Invoice Details Tab Styles */
         .invoice-details-card {
             h3 {
@@ -317,6 +279,43 @@
                     display: flex;
                     justify-content: center;
                     margin-top: 30px;
+                }
+                
+                .dropdown-field-wrapper {
+                    display: flex;
+                    flex-direction: column;
+                    width: 100%;
+                    
+                    label {
+                        font-family: 'Inter', sans-serif;
+                        font-size: 14px;
+                        font-weight: 500;
+                        margin-bottom: 8px;
+                        color: #100F1C;
+                    }
+                    
+                    .country-dropdown {
+                        height: 44px; /* Match the height of your InputText component */
+                    }
+                    
+                    /* Style adjustments for dropdown to match other inputs */
+                    .dropdown-wrapper {
+                        .dropdown {
+                            background-color: #FFFFFF;
+                            
+                            /* Make the text color and placeholder match */
+                            color: #000;
+                            
+                            &.inactive:not(.disabled) {
+                                background-color: #FFFFFF;
+                            }
+                        }
+                        
+                        /* Position the dropdown arrow correctly */
+                        .dropdown-arrow {
+                            right: 15px;
+                        }
+                    }
                 }
             }
         }
@@ -401,7 +400,7 @@
     }
 }
 
-/* Modal Styles */
+/* Enhanced Modal Styles with better card component support */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -413,21 +412,32 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    padding: 20px;
 }
 
 .modal-content {
     background-color: #FFF1DF;
     border: 2px solid rgba(218, 209, 197, 1);
     border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-    padding: 20px;
+    width: 100%;
+    max-width: 650px; /* Increased from 500px to accommodate card layout */
+    min-width: 600px; /* Ensure minimum width for proper card display */
+    padding: 25px;
+    max-height: 90vh;
+    overflow-y: auto;
+    
+    @media (max-width: 768px) {
+        min-width: auto;
+        max-width: 95vw;
+        padding: 20px;
+        margin: 10px;
+    }
     
     .modal-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
         
         h3 {
             font-family: 'Bitter', serif;
@@ -440,28 +450,199 @@
         .close-icon {
             font-size: 24px;
             cursor: pointer;
+            color: #666;
+            transition: color 0.2s ease;
+            
+            &:hover {
+                color: #333;
+            }
         }
     }
     
     .modal-body {
+        margin-bottom: 25px;
+        
+        /* Enhanced styles for CreditCardPicker in modal */
+        #PaymentForm {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 25px;
+            
+            @media (max-width: 768px) {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            /* Credit card preview */
+            .rccs__card {
+                flex-shrink: 0;
+                margin-bottom: 0;
+            }
+            
+            /* Form section */
+            form {
+                flex: 1;
+                margin-left: 0;
+                min-width: auto;
+                width: 100%;
+                
+                .input-text-wrapper {
+                    margin-bottom: 15px;
+                    
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+                
+                .expiry-cvc {
+                    display: flex;
+                    gap: 15px;
+                    
+                    .input-text-wrapper {
+                        flex: 1;
+                        
+                        &:nth-of-type(2) .input-container {
+                            align-items: flex-start;
+                        }
+                    }
+                    
+                    [name="expiry"],
+                    [name="cvc"] {
+                        width: 100%;
+                    }
+                }
+                
+                /* Style the verify button */
+                .btn {
+                    width: 100%;
+                    margin-top: 15px;
+                    justify-content: center;
+                }
+            }
+        }
+        
+        /* Checkbox/Switch row styling */
+        .checkbox-row {
+            margin: 20px 0;
+            padding: 15px 0;
+            border-top: 1px solid rgba(218, 209, 197, 0.5);
+            
+            .switch-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+        
+        /* Additional form rows */
         .input-row {
             display: flex;
             gap: 15px;
             margin-bottom: 15px;
             
+            @media (max-width: 768px) {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
             > div {
                 flex: 1;
             }
-        }
-        
-        .checkbox-row {
-            margin: 15px 0;
         }
     }
     
     .modal-footer {
         display: flex;
-        justify-content: space-between;
-        margin-top: 20px;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(218, 209, 197, 0.5);
+        
+        @media (max-width: 768px) {
+            flex-direction: column-reverse;
+            gap: 10px;
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        .btn {
+            min-width: 100px;
+            
+            &:first-child {
+                margin-right: auto;
+                
+                @media (max-width: 768px) {
+                    margin-right: 0;
+                }
+            }
+        }
+    }
+}
+
+/* Enhanced card verified display in modal */
+.modal-content .card-verified {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #FFF8EF;
+    border: 2px solid rgba(218, 209, 197, 1);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    
+    .rccs__card {
+        height: 50px;
+        width: 80px;
+        margin-right: 15px;
+    }
+    
+    .card-text {
+        display: flex;
+        flex-direction: column;
+        
+        span {
+            font-family: 'Inter', sans-serif;
+            
+            &:first-child {
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 4px;
+            }
+            
+            &:last-child {
+                font-size: 16px;
+                font-weight: 500;
+                color: #333;
+            }
+        }
+    }
+}
+
+/* Ensure proper spacing for form elements in modal */
+.modal-content .input-text-wrapper {
+    .input-text {
+        background-color: #FFFFFF;
+        border: 2px solid rgba(218, 209, 197, 1);
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+        
+        &:focus {
+            outline: none;
+            border-color: #FF635D;
+        }
+    }
+    
+    label {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #100F1C;
+        display: block;
     }
 }

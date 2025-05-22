@@ -24,12 +24,14 @@ const PaymentMethods = () => {
 
     const handleCloseModal = () => {
         setShowAddPaymentModal(false);
+        setIsDefaultCard(false); // Reset the default card state
     }
 
     const handleSavePaymentMethod = () => {
         // Validation would go here
         console.log('Saving payment method');
         setShowAddPaymentModal(false);
+        setIsDefaultCard(false); // Reset the default card state
         
         // Show success message
         PopupText.fire({
@@ -37,6 +39,7 @@ const PaymentMethods = () => {
             text: 'Payment method added successfully',
             showConfirmButton: true,
             confirmButtonText: 'OK',
+            showCancelButton: false
         });
     }
 
@@ -58,12 +61,23 @@ const PaymentMethods = () => {
                     text: 'Payment method deleted successfully',
                     showConfirmButton: true,
                     confirmButtonText: 'OK',
+                    showCancelButton: false
                 });
             }
         });
     }
 
-    // Payment Method Modal using CreditCardPicker
+    const handleMakeDefault = () => {
+        PopupText.fire({
+            icon: 'success',
+            text: 'Payment method set as default',
+            showConfirmButton: true,
+            confirmButtonText: 'OK',
+            showCancelButton: false
+        });
+    }
+
+    // Enhanced Payment Method Modal using CreditCardPicker
     const PaymentMethodModal = () => {
         return (
             <div className="modal-overlay" onClick={handleCloseModal}>
@@ -83,8 +97,12 @@ const PaymentMethods = () => {
                         </div>
                     </div>
                     <div className="modal-footer">
-                        <Button type="secondary" onClick={handleCloseModal}>Cancel</Button>
-                        <Button onClick={handleSavePaymentMethod}>Add</Button>
+                        <Button type="secondary" onClick={handleCloseModal}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSavePaymentMethod}>
+                            Add
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -110,8 +128,12 @@ const PaymentMethods = () => {
                     </div>
                     
                     <div className="card-actions">
-                        <Button type="secondary" onClick={() => console.log('Make Default clicked')}>Make Default</Button>
-                        <Button type="secondary" onClick={handleDeleteCard}>Delete</Button>
+                        <Button type="secondary" onClick={handleMakeDefault}>
+                            Make Default
+                        </Button>
+                        <Button type="secondary" onClick={handleDeleteCard}>
+                            Delete
+                        </Button>
                     </div>
                 </div>
                 
