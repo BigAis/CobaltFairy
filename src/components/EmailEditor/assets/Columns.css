@@ -36,7 +36,7 @@
 }
 
 .mobile-block-focus .block-copy {
-    margin-right: -52.5px;
+    margin-right: -50px;
 }
 
 .mobile-block-focus .block-delete {
@@ -80,37 +80,35 @@
 }
 
 .block-copy {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     visibility: hidden;
-    right: -52.5px;
-    bottom: 50%;
+    right: -15px;
+    top: calc(50% + 20px);
+    transform: translateY(-50%);
     background-color: rgb(255 222 207);
     border: 2px solid #ff4c49;
-    border-radius: 25px;
+    border-radius: 50%;
     color: black;
     text-align: center;
-    line-height: 30px;
+    line-height: 24px;
     z-index: 120;
     cursor: pointer;
-    font-size: 16px;
-    transform: translateY(-50%);
 }
 
 .block-move {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     visibility: hidden;
-    right: -17.5px;
-    bottom: 50%;
+    right: -15px;
+    top: calc(50% - 20px);
+    transform: translateY(-50%);
     background-color: rgb(255 222 207);
     border: 2px solid #ff4c49;
     text-align: center;
-    line-height: 30px;
+    line-height: 24px;
     z-index: 120;
-    border-radius: 25px;
-    font-size: 16px;
-    transform: translateY(-50%);
+    border-radius: 50%;
     cursor: pointer;
 }
 
@@ -270,37 +268,35 @@
 }
 
 .block-item-copy {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     visibility: hidden;
-    right: -52.5px;
-    bottom: 50%;
+    right: -15px;
+    top: calc(50% + 20px);
+    transform: translateY(-50%);
     background-color: rgb(255 222 207);
     border: 2px solid #ff4c49;
-    border-radius: 25px;
+    border-radius: 50%;
     color: black;
     text-align: center;
-    line-height: 30px;
+    line-height: 24px;
     z-index: 120;
     cursor: pointer;
-    font-size: 16px;
-    transform: translateY(-50%);
 }
 
 .block-item-move {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     visibility: hidden;
-    right: -17.5px;
-    bottom: 50%;
+    right: -15px;
+    top: calc(50% - 20px);
+    transform: translateY(-50%);
     background-color: rgb(255 222 207);
     border: 2px solid #ff4c49;
     text-align: center;
-    line-height: 30px;
+    line-height: 24px;
     z-index: 120;
-    border-radius: 25px;
-    font-size: 16px;
-    transform: translateY(-50%);
+    border-radius: 50%;
     cursor: pointer;
 }
 
