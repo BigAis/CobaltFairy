@@ -77,6 +77,7 @@ const en = {
   left: "Left",
   bottom: "Bottom",
   line_height: "Line Height",
+  border_radius: "Border Radius",
   link: "Link",
   link_url: "Link URL",
   padding_settings: "Padding Settings",

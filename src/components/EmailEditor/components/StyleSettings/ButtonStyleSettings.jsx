@@ -70,6 +70,7 @@ const ButtonStyleSettings = () => {
     const fontSize = findStyleItem(currentItem.data.styles, "fontSize");
     const lineHeight = findStyleItem(currentItem.data.styles, "lineHeight");
     const backgroundColor = findStyleItem(currentItem.data.styles, "backgroundColor");
+    const borderRadius = findStyleItem(currentItem.data.styles, "borderRadius");
     const fontFamilyList = ["sans-serif", "Arial", "Inter", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
     const { fontsList } = useDataSource();
 
@@ -113,6 +114,10 @@ const ButtonStyleSettings = () => {
             value={Number(lineHeight.replace("%", ""))}
             onChange={(value) => inputChange("lineHeight")(value + "%")}
           />
+        )}
+        {cardItemElement(
+          t("border_radius"),
+          <InputNumber min={0} className="input-width" addonAfter="px" value={borderRadius} onChange={inputChange("borderRadius")} />
         )}
         <div className="card-item-title">{t("button_padding")}</div>
         <PaddingSettings
