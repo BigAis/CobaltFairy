@@ -12,17 +12,14 @@
   
   .search-button {
     min-height: 51px;
+    min-width: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
-    
-    .icon {
-      margin-right: 8px;
-    }
   }
 }
 
-// Responsive styles
+// Responsive styles for smaller screens
 @media (max-width: 768px) {
   .search-bar-container {
     flex-direction: column;

@@ -9,7 +9,8 @@ import Button from '../../components/Button'
 import BookFunnelIntegrationsTable from '../../components/DataTable/IntegrationBookFunnelTable'
 import InputText from '../../components/InputText/InputText'
 import Dropdown from '../../components/Dropdown'
-import SearchBar from '../../components/SearchBar/SearchBar';
+import SearchBar from '../../components/SearchBar/SearchBar'
+import Card from '../../components/Card'
 
 const BookFunnel = () => {
 	const { user, account, createNotification } = useAccount()
@@ -18,13 +19,15 @@ const BookFunnel = () => {
 	const [currentPage, setCurrentPage] = useState(1)
 	const [itemsPerPage, setItemsPerPage] = useState(20)
 	const [integrations, setIntegrations] = useState([])
-	const [searchTerm, setSearchTerm] = useState('');
 	const [meta, setMeta] = useState(null)
+    const [loading, setLoading] = useState(false)
+	const [searchTerm, setSearchTerm] = useState('')
 
 	const [bookFunnelBooks, setBookFunnelBooks] = useState([])
 	const [groups, setGroups] = useState([])
 	const [selectedBookFunnelBook, setSelectedBookFunnelBook] = useState(null)
 	const [selectedGroup, setSelectedGroup] = useState(null)
+	
 	const bookFunnelBooksOptions = bookFunnelBooks.map((book) => ({
 		value: book,
 		label: book.name,
@@ -35,11 +38,58 @@ const BookFunnel = () => {
 		label: group.name,
 	}))
 
-	const dropdownOptions = [
-		{ value: 'option1', label: 'Option 1' },
-		{ value: 'option2', label: 'Option 2' },
-		{ value: 'option3', label: 'Option 3' },
-	]
+	// Get BookFunnel integrations
+    const getIntegrations = async () => {
+        try {
+            setLoading(true)
+            const response = await ApiService.get(
+                `fairymailer/bookfunnel-integrations?pagination[page]=${currentPage}&pagination[pageSize]=${itemsPerPage}`,
+                user.jwt
+            )
+            if (response.data && response.data.data) {
+                setIntegrations(response.data.data)
+                if (response.data.meta) {
+                    setMeta(response.data.meta)
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching BookFunnel integrations:', error)
+            createNotification({
+                message: 'Error fetching integrations. Please try again.',
+                type: 'warning'
+            })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+	// Search function for BookFunnel integrations
+	const searchIntegrations = async (term) => {
+		try {
+			setSearchTerm(term)
+			setLoading(true)
+			
+			const response = await ApiService.get(
+				`fairymailer/bookfunnel-integrations?filters[name][$contains]=${term}&pagination[page]=${currentPage}&pagination[pageSize]=${itemsPerPage}`,
+				user.jwt
+			)
+			
+			if (response.data && response.data.data) {
+				setIntegrations(response.data.data)
+				if (response.data.meta) {
+					setMeta(response.data.meta)
+				}
+			}
+		} catch (error) {
+			console.error('Error searching BookFunnel integrations:', error)
+			createNotification({
+				message: 'Error searching integrations. Please try again.',
+				type: 'warning'
+			})
+		} finally {
+            setLoading(false)
+        }
+	}
 
 	const getBookFunnelBooks = async () => {
 		try {
@@ -68,30 +118,6 @@ const BookFunnel = () => {
 			})
 		}
 	}
-	// Add a search function for BookFunnel integrations
-	const searchIntegrations = async (term) => {
-	try {
-		setSearchTerm(term);
-		
-		const response = await ApiService.get(
-		`fairymailer/bookfunnel-integrations?filters[name][$contains]=${term}&pagination[page]=${currentPage}&pagination[pageSize]=${itemsPerPage}`,
-		user.jwt
-		);
-		
-		if (response.data && response.data.data) {
-		setIntegrations(response.data.data);
-		if (response.data.meta) {
-			setMeta(response.data.meta);
-		}
-		}
-	} catch (error) {
-		console.error('Error searching BookFunnel integrations:', error);
-		createNotification({
-		message: 'Error searching integrations. Please try again.',
-		type: 'warning'
-		});
-	}
-	};
 
 	const saveBookFunnelIntegration = async () => {
 		try {
@@ -132,6 +158,12 @@ const BookFunnel = () => {
 	}
 
 	useEffect(() => {
+		if (user && mode !== 'new') {
+            getIntegrations()
+        }
+	}, [user, mode, currentPage, itemsPerPage])
+
+	useEffect(() => {
 		if (user && mode === 'new') {
 			getBookFunnelBooks()
 			getGroups()
@@ -143,7 +175,6 @@ const BookFunnel = () => {
 			<div className="fm-page-wrapper">
 				<Sidemenu />
 				<div className="fm-page-container">
-					{/* Removed local notifications container */}
 					<PageHeader user={user} account={account} />
 
 					{mode !== 'new' ? (
@@ -155,19 +186,39 @@ const BookFunnel = () => {
 								</Button>
 							</div>
 							<div className="filters-container">
-							<div className="row" style={{ marginBottom: '1rem' }}></div>
-							<div className="row d-flex content-space-between">
-								<SearchBar
-								placeholder="Search Integrations"
-								label="Search Integrations"
-								initialValue={searchTerm}
-								onSearch={searchIntegrations}
-								style={{ width: '100%' }}
-								/>
-							</div>
+								<div className="row" style={{ marginBottom: '1rem' }}></div>
+								<div className="row d-flex content-space-between">
+									<SearchBar
+										placeholder="Search Integrations"
+										label="Search Integrations" 
+										initialValue={searchTerm}
+										onSearch={searchIntegrations}
+										style={{ width: '100%' }}
+									/>
+								</div>
 							</div>
 							<div>
-								<BookFunnelIntegrationsTable />
+                                {loading ? (
+                                    <Card>
+                                        <div className="text-center p-4">Loading integrations...</div>
+                                    </Card>
+                                ) : integrations && integrations.length > 0 ? (
+                                    <BookFunnelIntegrationsTable integrations={integrations} meta={meta} />
+                                ) : (
+                                    <Card>
+                                        <div className="text-center p-4">
+                                            <p>No integrations found.</p>
+                                            {searchTerm && (
+                                                <Button type="secondary" onClick={() => {
+                                                    setSearchTerm('')
+                                                    getIntegrations()
+                                                }}>
+                                                    Clear Search
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </Card>
+                                )}
 							</div>
 						</>
 					) : (

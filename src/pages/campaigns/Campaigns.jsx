@@ -19,8 +19,7 @@ import TemplateCard from '../../components/TemplateCard/TemplateCard'
 import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
 import CampaignCalendar from './CampaignCalendar'
 import { v4 as uuidv4 } from 'uuid'
-import SearchBar from '../../components/SearchBar/SearchBar';
-
+import SearchBar from '../../components/SearchBar/SearchBar'
 const Campaigns = () => {
 	const navigate = useNavigate()
 
@@ -45,7 +44,6 @@ const Campaigns = () => {
 	const totalCampaignsSent = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.sent : 2
 	const totalCampaignsDraft = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.draft : 1
 	const totalCampaignsOutBox = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.outbox : 0
-
 	// Handle window resize for mobile detection
 	useEffect(() => {
 		const handleResize = () => {
@@ -54,7 +52,7 @@ const Campaigns = () => {
 		
 		window.addEventListener('resize', handleResize);
 		return () => window.removeEventListener('resize', handleResize);
-	  }, []);
+	}, []);
 
 	// Handle clicks outside of dropdown menus
 	useEffect(() => {
@@ -71,8 +69,11 @@ const Campaigns = () => {
 	}, [actionMenuCampaign]);
 
 	useEffect(() => {
-		getCampaigns()
-		getTemplates()
+		// Only load data initially, not on every account change
+		if (!searchTerm) {
+			getCampaigns()
+			getTemplates()
+		}
 	}, [account])
 
 	// Filter campaigns whenever selectedCampaignType or campaigns change
@@ -90,39 +91,67 @@ const Campaigns = () => {
 			setFilteredCampaigns([]);
 		}
 	}, [campaigns, selectedCampaignType]);
-
+	// Updated search function with loading state
 	const updateSearchTerm = async (search) => {
-	setSearchTerm(search);
+		try {
+			// Set state for UI updates
+			setSearchTerm(search);
+			setLoading(true);
+			
+			// Skip search if empty
+			if (!search.trim()) {
+				getCampaigns();
+				return;
+			}
 
-	let outboxfilter = selectedCampaignType == 'outbox' ? '&filters[date][$notNull]=true' : 
-						selectedCampaignType == 'draft' ? '&filters[date][$null]=true' : '';
+			let endpoint = '';
+			
+			// Use appropriate endpoint based on viewer
+			if (dropdownViewer === 'campaigns') {
+				let outboxfilter = selectedCampaignType === 'outbox' 
+					? '&filters[date][$notNull]=true' 
+					: selectedCampaignType === 'draft' 
+						? '&filters[date][$null]=true' 
+						: '';
+						
+				endpoint = `fairymailer/getCampaigns?filters[name][$contains]=${search}&filters[status]=${
+					selectedCampaignType === 'outbox' ? 'draft' : selectedCampaignType === 'draft' ? 'draft' : selectedCampaignType
+				}${outboxfilter}&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=100&pagination[page]=1`;
+			} else {
+				// For templates
+				endpoint = `fairymailer/getTemplates?filters[name][$contains]=${search}&pagination[pageSize]=100&pagination[page]=1`;
+			}
 
-	// Show loading state
-	setLoading(true);
+			console.log("Search endpoint:", endpoint);
+			
+			let resp = await ApiService.get(endpoint, user.jwt);
 
-	try {
-		let resp = await ApiService.get(
-		`fairymailer/getCampaigns?filters[name][$contains]=${search}&filters[status]=${
-			selectedCampaignType == 'outbox' ? 'draft' : selectedCampaignType == 'draft' ? 'draft' : selectedCampaignType
-		}${outboxfilter}&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=100&pagination[page]=1`,
-		user.jwt
-		);
-
-		if (resp && resp.data && resp.data.data) {
-		setCampaigns(resp.data.data.map((item) => ({
-			...item,
-			image: '/images/cmp.png',
-		})))
+			if (resp && resp.data) {
+				if (dropdownViewer === 'campaigns') {
+					const searchResults = resp.data.data.map((item) => ({
+						...item,
+						image: '/images/cmp.png',
+					}));
+					
+					console.log("Search found:", searchResults.length, "results");
+					
+					// Update campaigns and filtered campaigns
+					setCampaigns(searchResults);
+					// This will trigger the useEffect that updates filteredCampaigns
+				} else {
+					// For templates
+					setTemplates(resp.data.data);
+				}
+			}
+		} catch (error) {
+			console.error('Error searching:', error);
+			createNotification({
+				message: `Error searching ${dropdownViewer}. Please try again.`,
+				type: 'warning'
+			});
+		} finally {
+			setLoading(false);
 		}
-	} catch (error) {
-		console.error('Error searching campaigns:', error);
-		createNotification({
-		message: 'Error searching campaigns. Please try again.',
-		type: 'warning'
-		});
-	} finally {
-		setLoading(false);
-	}
 	};
 
 	const getCampaigns = async (page = 1) => {
@@ -198,7 +227,6 @@ const Campaigns = () => {
 			})
 		}
 	}
-
 	// Toggle expand/collapse of a campaign card
 	const toggleCampaignExpand = (campaignId) => {
 		setExpandedCampaign(expandedCampaign === campaignId ? null : campaignId)
@@ -284,102 +312,121 @@ const Campaigns = () => {
 		  default:
 			break;
 		}
-	  }
+	}
 
 	// Render a mobile campaign card with collapsible content
 	const renderMobileCampaignCard = (campaign) => {
-		const isExpanded = expandedCampaign === campaign.uuid
-		const showActionMenu = actionMenuCampaign === campaign.uuid
+	const isExpanded = expandedCampaign === campaign.uuid;
+	const showActionMenu = actionMenuCampaign === campaign.uuid;
 
-		return (
-			<div className="campaign-item" key={campaign.uuid || `campaign-${Math.random()}`}>
-				<div className="campaign-item-header" onClick={() => toggleCampaignExpand(campaign.uuid)}>
-					<div>
-						<div className="campaign-item-title">{campaign.name || "Campaign Name"}</div>
-						<div className="campaign-item-subject">{campaign.subject || "Subject goes here"}</div>
-					</div>
-					<div className={`campaign-item-chevron ${isExpanded ? 'expanded' : ''}`}>
-						<img src="/src/components/arrow.svg" alt="Arrow" />
-					</div>
-				</div>
-				
-				{isExpanded && (
-					<div className="campaign-item-content">
-						<div className="campaign-item-img">
-							<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
-						</div>
-						
-						<div className="campaign-item-details">
-							<span className="campaign-detail-label">Type</span>
-							<span>{campaign.type || "Normal"}</span>
-						</div>
-						
-						<div className="campaign-item-details">
-							<span className="campaign-detail-label">Created</span>
-							<span>{campaign.sent_at ? new Date(campaign.sent_at).toISOString().split('T')[0] : "2024-04-17"}</span>
-						</div>
-						
-						<div className="overview-button" onClick={(e) => toggleActionMenu(e, campaign.uuid)}>
-							Overview
-							<img 
-								src="/src/components/arrow.svg" 
-								alt="Arrow" 
-								style={{ 
-									position: 'absolute', 
-									right: '10px', 
-									top: '50%', 
-									transform: 'translateY(-50%)' 
-								}} 
-							/>
-						</div>
-						
-						{showActionMenu && (
-							<div className="campaign-dropdown-menu">
-								<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('delete', campaign)}>
-									Delete
-								</div>
-								<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('duplicate', campaign)}>
-									Duplicate
-								</div>
-								<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('rename', campaign)}>
-									Rename
-								</div>
-								<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('overview', campaign)}>
-									Overview
-								</div>
-							</div>
-						)}
-					</div>
-				)}
+	return (
+		<div className="campaign-item" key={campaign.uuid || `campaign-${Math.random()}`}>
+		<div className="campaign-item-header" onClick={() => toggleCampaignExpand(campaign.uuid)}>
+			<div>
+			<div className="campaign-item-title">{campaign.name || "Campaign Name"}</div>
+			<div className="campaign-item-subject">{campaign.subject || "Subject goes here"}</div>
 			</div>
-		);
+			<div className={`campaign-item-chevron ${isExpanded ? 'expanded' : ''}`}>
+			{/* Replace image with text arrow */}
+			<span style={{ 
+				transform: isExpanded ? 'rotate(180deg)' : 'none',
+				display: 'inline-block',
+				fontSize: '16px',
+				fontWeight: 'bold'
+			}}>
+				▼
+			</span>
+			</div>
+		</div>
+		
+		{isExpanded && (
+			<div className="campaign-item-content">
+			<div className="campaign-item-img">
+				<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
+			</div>
+			
+			<div className="campaign-item-details">
+				<span className="campaign-detail-label">Type</span>
+				<span>{campaign.type || "Normal"}</span>
+			</div>
+			
+			<div className="campaign-item-details">
+				<span className="campaign-detail-label">Created</span>
+				<span>{campaign.sent_at ? new Date(campaign.sent_at).toISOString().split('T')[0] : "2024-04-17"}</span>
+			</div>
+			
+			<div className="overview-button" onClick={(e) => toggleActionMenu(e, campaign.uuid)}>
+				Overview
+				{/* Replace image with text arrow */}
+				<span style={{ 
+				position: 'absolute', 
+				right: '10px', 
+				top: '50%', 
+				transform: 'translateY(-50%)'
+				}}>
+				›
+				</span>
+			</div>
+			
+			{showActionMenu && (
+				<div className="campaign-dropdown-menu">
+				<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('delete', campaign)}>
+					Delete
+				</div>
+				<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('duplicate', campaign)}>
+					Duplicate
+				</div>
+				<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('rename', campaign)}>
+					Rename
+				</div>
+				<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('overview', campaign)}>
+					Overview
+				</div>
+				</div>
+			)}
+			</div>
+		)}
+		</div>
+	);
 	};
-
 	// Handle tab change
 	const handleTabChange = (value) => {
 		// Reset expanded and action menu states when changing tabs
-		setExpandedCampaign(null)
-		setActionMenuCampaign(null)
+		setExpandedCampaign(null);
+		setActionMenuCampaign(null);
 		
+		// Clear search term when changing tabs
+		setSearchTerm('');
+		
+		// Update tab state based on selection
 		switch (value) {
 			case 'sent':
-				setDropdownViewer('campaigns')
-				setSelectedCampaignType('sent')
-				break
+				setDropdownViewer('campaigns');
+				setSelectedCampaignType('sent');
+				break;
 			case 'draft':
-				setDropdownViewer('campaigns')
-				setSelectedCampaignType('draft')
-				break
+				setDropdownViewer('campaigns');
+				setSelectedCampaignType('draft');
+				break;
 			case 'outbox':
-				setDropdownViewer('campaigns')
-				setSelectedCampaignType('outbox')
-				break
+				setDropdownViewer('campaigns');
+				setSelectedCampaignType('outbox');
+				break;
 			case 'templates':
-				setDropdownViewer('templates')
-				setSelectedCampaignType('templates')
-				break
+				setDropdownViewer('templates');
+				setSelectedCampaignType('templates');
+				break;
 		}
-	}
+		
+		// Refresh data after tab change (with a slight delay to ensure state is updated)
+		setTimeout(() => {
+			if (value === 'templates') {
+				getTemplates();
+			} else {
+				getCampaigns();
+			}
+		}, 50);
+	};
 	
 	// Handle "New Campaign" button click with mobile restriction check
 	const handleNewCampaignClick = () => {
@@ -414,7 +461,6 @@ const Campaigns = () => {
 		}
 	  }
 	};
-
 	return (
 		<>
 			<div className="fm-page-wrapper">
@@ -441,45 +487,40 @@ const Campaigns = () => {
 							></ButtonGroup>
 						{/* View mode toggle moved above the search bar and converted to ButtonGroup */}
 						{dropdownViewer === 'campaigns' && (
-							// <div className="row" style={{ marginBottom: '1rem' }}>
-								<ButtonGroup
-									value={viewMode}
-									options={[
-										{ value: 'list', label: 'List View' },
-										{ value: 'calendar', label: 'Calendar' },
-									]}
-									onChange={setViewMode}
+							<ButtonGroup
+								value={viewMode}
+								options={[
+									{ value: 'list', label: 'List View' },
+									{ value: 'calendar', label: 'Calendar' },
+								]}
+								onChange={setViewMode}
+							/>
+						)}
+						</div>
+						
+						
+						<div className="row d-flex content-space-between">
+							{dropdownViewer === 'campaigns' ? (
+								<SearchBar
+									placeholder="Search Campaigns"
+									label="Search Campaigns"
+									initialValue={searchTerm}
+									onSearch={(value) => {
+										updateSearchTerm(value);
+									}}
 								/>
-							// </div>
-						)}
+							) : (
+								<SearchBar
+									placeholder="Search Templates"
+									label="Search Templates"
+									initialValue={searchTerm}
+									onSearch={(value) => {
+										updateSearchTerm(value);
+									}}
+								/>
+							)}
 						</div>
-						
-						
-						{dropdownViewer === 'campaigns' ? (
-						<div className="row d-flex content-space-between">
-							<SearchBar
-							placeholder="Search Campaigns"
-							label="Search Campaigns"
-							initialValue={searchTerm}
-							onSearch={(value) => {
-								updateSearchTerm(value);
-							}}
-							/>
-						</div>
-						) : (
-						<div className="row d-flex content-space-between">
-							<SearchBar
-							placeholder="Search Templates"
-							label="Search Templates"
-							initialValue={searchTerm}
-							onSearch={(value) => {
-								updateSearchTerm(value);
-							}}
-							/>
-						</div>
-						)}
 					</div>
-
 					{loading ? (
 						<div className="loading-indicator">Loading...</div>
 					) : (
@@ -496,19 +537,32 @@ const Campaigns = () => {
 											) : (
 												<div className="no-campaigns">
 													No {selectedCampaignType} campaigns found
+													{searchTerm && (
+														<div style={{ marginTop: '15px' }}>
+															<Button 
+																type="secondary" 
+																onClick={() => {
+																	setSearchTerm('')
+																	getCampaigns()
+																}}
+															>
+																Clear Search
+															</Button>
+														</div>
+													)}
 												</div>
 											)}
 											
 											{filteredCampaigns.length > 0 && (
-												<div className="pagination-container">
-													<button><Icon name="ChevronLeft" size={16} /></button>
-													<span className="current-page">1</span>
-													<span>2</span>
-													<span className="pagination-dots">...</span>
-													<span>9</span>
-													<span>10</span>
-													<button><Icon name="ChevronRight" size={16} /></button>
-												</div>
+											<div className="pagination-container">
+												<button>{'<'}</button>
+												<span className="current-page">1</span>
+												<span>2</span>
+												<span className="pagination-dots">...</span>
+												<span>9</span>
+												<span>10</span>
+												<button>{'>'}</button>
+											</div>
 											)}
 										</div>
 									) : (

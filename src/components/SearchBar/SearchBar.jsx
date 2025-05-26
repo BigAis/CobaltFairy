@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import InputText from '../InputText/InputText';
 import Button from '../Button';
+import './SearchBar.scss';
 
 const SearchBar = ({ 
   placeholder = "Search", 
@@ -12,7 +13,7 @@ const SearchBar = ({
 }) => {
   const [searchValue, setSearchValue] = useState(initialValue);
   
-  // Update local state when initialValue changes
+  // Update local state when initialValue changes (e.g. when cleared externally)
   useEffect(() => {
     setSearchValue(initialValue);
   }, [initialValue]);
@@ -32,30 +33,25 @@ const SearchBar = ({
   };
   
   return (
-    <div style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      width: '100%',
-      ...style 
-    }}>
-      <InputText
-        style={{ 
-          width: '100%', 
-          margin: 0, 
-          marginRight: '10px' 
-        }}
-        placeholder={placeholder}
-        label={label}
-        hasError={false}
-        value={searchValue}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyPress}
-      />
+    <div className="search-bar-container" style={style}>
+      <div className="input-wrapper">
+        <InputText
+          style={{ 
+            width: '100%', 
+            margin: 0
+          }}
+          placeholder={placeholder}
+          label={label}
+          hasError={false}
+          value={searchValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyPress}
+        />
+      </div>
       <Button
         type="secondary"
-        icon="Search"
         onClick={handleSearch}
-        style={{ minHeight: '51px' }}
+        className="search-button"
       >
         Search
       </Button>
