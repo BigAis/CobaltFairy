@@ -27,6 +27,7 @@ import SubscribersCleanup from './SubscribersCleanup';
 import './SubscribersCleanup.scss';
 import AddSubscriber from './AddSubscriber'
 import PopupText from '../../components/PopupText/PopupText'
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -219,6 +220,59 @@ const Subscribers = () => {
 		setImportMode('manual')
 		setView('import')
 	}
+	const searchSubscribers = async (searchTerm) => {
+	try {
+		const resp = await ApiService.get(
+		`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[active]=true&filters[email][$contains]=${searchTerm}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
+		user.jwt
+		);
+		
+		if (resp.data && resp.data.data) {
+		setSubscribers(resp.data.data);
+		if (resp.data.meta) setTotalSubs(resp.data.meta.pagination.total);
+		}
+	} catch (error) {
+		console.error('Error searching subscribers:', error);
+		PopupText.fire({
+		text: 'Error searching subscribers. Please try again.',
+		icon: 'error'
+		});
+	}
+	};
+
+	const searchGroups = async (searchTerm) => {
+	try {
+		const query = {
+		pagination: {
+			pageSize: 1000,
+			page: 1,
+		},
+		filters: {
+			name: {
+			$contains: searchTerm
+			}
+		}
+		};
+		
+		const queryString = qs.stringify(query, { encode: false });
+		
+		const resp = await ApiService.get(
+		`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true`,
+		user.jwt
+		);
+		
+		if (resp.data && resp.data.data) {
+		setGroups(resp.data.data);
+		setTotalGroups(resp.data.meta.pagination.total);
+		}
+	} catch (error) {
+		console.error('Error searching groups:', error);
+		PopupText.fire({
+		text: 'Error searching groups. Please try again.',
+		icon: 'error'
+		});
+	}
+	};
 
 	const renderAddButton = () => {
 		switch (view) {
@@ -408,47 +462,44 @@ const Subscribers = () => {
 							</div>
 
 							{view === 'subs' && (
-								<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-									<InputText
-										style={{ width: '100%', margin: 0, marginRight: '20px' }}
-										placeholder="Search Subscribers"
-										label="Search Subscribers"
-										hasError={false}
-										errorMessage="Name must be at least 3 characters long."
-										value={subscriberSearchValue}
-										onChange={(e) => {
-											setSubscriberSearchValue(e.target.value)
-										}}
-									/>
-									<Button
-										type="secondary"
-										icon={'Filters'}
-										className="button-filters"
-										onClick={() => {
-											setShowFilters((prev) => {
-												return !prev
-											})
-										}}
-									>
-										Filters
-									</Button>
-								</div>
+							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+								<SearchBar
+								placeholder="Search Subscribers"
+								label="Search Subscribers"
+								initialValue={subscriberSearchValue}
+								onSearch={(value) => {
+									setSubscriberSearchValue(value);
+									searchSubscribers(value);
+								}}
+								style={{ width: '100%', marginRight: '20px' }}
+								/>
+								<Button
+								type="secondary"
+								icon={'Filters'}
+								className="button-filters"
+								onClick={() => {
+									setShowFilters((prev) => !prev);
+								}}
+								>
+								Filters
+								</Button>
+							</div>
 							)}
 
+
 							{view === 'groups' && (
-								<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-									<InputText
-										style={{ width: '100%', margin: 0, marginRight: '20px' }}
-										placeholder="Search Groups"
-										label="Search Groups"
-										hasError={false}
-										errorMessage="Name must be at least 3 characters long."
-										value={groupSearchValue}
-										onChange={(e) => {
-											setGroupSearchValue(e.target.value)
-										}}
-									/>
-								</div>
+							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+								<SearchBar
+								placeholder="Search Groups"
+								label="Search Groups"
+								initialValue={groupSearchValue}
+								onSearch={(value) => {
+									setGroupSearchValue(value);
+									searchGroups(value);
+								}}
+								style={{ width: '100%' }}
+								/>
+							</div>
 							)}
 						</div>
 					)}

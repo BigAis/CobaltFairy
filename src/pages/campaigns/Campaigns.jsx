@@ -19,6 +19,7 @@ import TemplateCard from '../../components/TemplateCard/TemplateCard'
 import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
 import CampaignCalendar from './CampaignCalendar'
 import { v4 as uuidv4 } from 'uuid'
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 const Campaigns = () => {
 	const navigate = useNavigate()
@@ -91,24 +92,38 @@ const Campaigns = () => {
 	}, [campaigns, selectedCampaignType]);
 
 	const updateSearchTerm = async (search) => {
-		setSearchTerm(search)
+	setSearchTerm(search);
 
-		let outboxfilter = selectedCampaignType == 'outbox' ? '&filters[date][$notNull]=true' : selectedCampaignType == 'draft' ? '&filters[date][$null]=true' : ''
+	let outboxfilter = selectedCampaignType == 'outbox' ? '&filters[date][$notNull]=true' : 
+						selectedCampaignType == 'draft' ? '&filters[date][$null]=true' : '';
 
+	// Show loading state
+	setLoading(true);
+
+	try {
 		let resp = await ApiService.get(
-			`fairymailer/getCampaigns?filters[name][$contains]=${search}&filters[status]=${
-				selectedCampaignType == 'outbox' ? 'draft' : selectedCampaignType == 'draft' ? 'draft' : selectedCampaignType
-			}${outboxfilter}&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=100&pagination[page]=1`,
-			user.jwt
-		)
+		`fairymailer/getCampaigns?filters[name][$contains]=${search}&filters[status]=${
+			selectedCampaignType == 'outbox' ? 'draft' : selectedCampaignType == 'draft' ? 'draft' : selectedCampaignType
+		}${outboxfilter}&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=100&pagination[page]=1`,
+		user.jwt
+		);
 
 		if (resp && resp.data && resp.data.data) {
-			setCampaigns(resp.data.data.map((item) => ({
-				...item,
-				image: '/images/cmp.png',
-			})))
+		setCampaigns(resp.data.data.map((item) => ({
+			...item,
+			image: '/images/cmp.png',
+		})))
 		}
+	} catch (error) {
+		console.error('Error searching campaigns:', error);
+		createNotification({
+		message: 'Error searching campaigns. Please try again.',
+		type: 'warning'
+		});
+	} finally {
+		setLoading(false);
 	}
+	};
 
 	const getCampaigns = async (page = 1) => {
 		try {
@@ -440,15 +455,29 @@ const Campaigns = () => {
 						</div>
 						
 						
+						{dropdownViewer === 'campaigns' ? (
 						<div className="row d-flex content-space-between">
-							<InputText
-								onChange={(e) => updateSearchTerm(e.target.value)}
-								style={{ width: '100%' }}
-								placeholder="Campaign Name"
-								hasError={false}
-								errorMessage="Name must be at least 3 characters long."
+							<SearchBar
+							placeholder="Search Campaigns"
+							label="Search Campaigns"
+							initialValue={searchTerm}
+							onSearch={(value) => {
+								updateSearchTerm(value);
+							}}
 							/>
 						</div>
+						) : (
+						<div className="row d-flex content-space-between">
+							<SearchBar
+							placeholder="Search Templates"
+							label="Search Templates"
+							initialValue={searchTerm}
+							onSearch={(value) => {
+								updateSearchTerm(value);
+							}}
+							/>
+						</div>
+						)}
 					</div>
 
 					{loading ? (

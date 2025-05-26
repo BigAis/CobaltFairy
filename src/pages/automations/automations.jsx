@@ -14,11 +14,14 @@ import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import AutomationsTable from '../../components/DataTable/AutomationsTable'
 import { useNavigate } from 'react-router-dom'
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 const Automations = ()=>{
     const {user, account} = useAccount(); 
     const [automations,setAutomations] = useState([]);
+	const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
+
 
     const loadData = async () =>{
         let resp = await ApiService.get('fairymailer/getAutomations?sort[0]=createdAt:desc&pagination[pageSize]=1000&pagination[page]=1&',user.jwt)
@@ -28,6 +31,27 @@ const Automations = ()=>{
         }))
         // if(resp.data && resp.data.meta) setTotalSubs(resp.data.meta.pagination.total)
     }
+
+	// Add a search function
+	const searchAutomations = async (term) => {
+	try {
+		setSearchTerm(term);
+		
+		let resp = await ApiService.get(
+		`fairymailer/getAutomations?sort[0]=createdAt:desc&filters[name][$contains]=${term}&pagination[pageSize]=1000&pagination[page]=1&`,
+		user.jwt
+		);
+		
+		if (resp.data && resp.data.data) {
+		setAutomations(resp.data.data.map(data => {
+			data.createdAt = data.createdAt.split('T')[0];
+			return data;
+		}));
+		}
+	} catch (error) {
+		console.error('Error searching automations:', error);
+	}
+	};
     useEffect(()=>{
         loadData()
     },[user])
@@ -44,12 +68,17 @@ const Automations = ()=>{
 						</Button>
 					</div>
 					<div className="filters-container">
-						<div className="input-text-container" style={{marginTop:'10px', display:'flex', alignItems:'center', justifyContent:'space-between'}}>
-							<InputText style={{ width: '100%', margin:0, marginRight:'20px' }} placeholder="Search Automations" label="Search Automations" hasError={false} errorMessage="Name must be at least 3 characters long." />
-							<Button type="secondary" icon={'Filters'} className="button-filters"> Filters </Button>
-						</div>
+					<div className="input-text-container" style={{marginTop:'10px', display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+						<SearchBar
+						placeholder="Search Automations" 
+						label="Search Automations"
+						initialValue={searchTerm}
+						onSearch={searchAutomations}
+						style={{ width: '100%', marginRight: '20px' }}
+						/>
+						<Button type="secondary" icon={'Filters'} className="button-filters"> Filters </Button>
 					</div>
-
+					</div>
 					<div className="groups">
 							{automations && automations.length>0 && <AutomationsTable incomingAutomations={automations} />}
                     </div>

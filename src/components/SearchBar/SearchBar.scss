@@ -1,0 +1,40 @@
+// src/components/SearchBar/SearchBar.scss
+
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  
+  .input-wrapper {
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  
+  .search-button {
+    min-height: 51px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .search-bar-container {
+    flex-direction: column;
+    
+    .input-wrapper {
+      width: 100%;
+      margin-right: 0;
+      margin-bottom: 10px;
+    }
+    
+    .search-button {
+      width: 100%;
+    }
+  }
+}

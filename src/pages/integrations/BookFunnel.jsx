@@ -9,6 +9,7 @@ import Button from '../../components/Button'
 import BookFunnelIntegrationsTable from '../../components/DataTable/IntegrationBookFunnelTable'
 import InputText from '../../components/InputText/InputText'
 import Dropdown from '../../components/Dropdown'
+import SearchBar from '../../components/SearchBar/SearchBar';
 
 const BookFunnel = () => {
 	const { user, account, createNotification } = useAccount()
@@ -17,6 +18,7 @@ const BookFunnel = () => {
 	const [currentPage, setCurrentPage] = useState(1)
 	const [itemsPerPage, setItemsPerPage] = useState(20)
 	const [integrations, setIntegrations] = useState([])
+	const [searchTerm, setSearchTerm] = useState('');
 	const [meta, setMeta] = useState(null)
 
 	const [bookFunnelBooks, setBookFunnelBooks] = useState([])
@@ -66,6 +68,30 @@ const BookFunnel = () => {
 			})
 		}
 	}
+	// Add a search function for BookFunnel integrations
+	const searchIntegrations = async (term) => {
+	try {
+		setSearchTerm(term);
+		
+		const response = await ApiService.get(
+		`fairymailer/bookfunnel-integrations?filters[name][$contains]=${term}&pagination[page]=${currentPage}&pagination[pageSize]=${itemsPerPage}`,
+		user.jwt
+		);
+		
+		if (response.data && response.data.data) {
+		setIntegrations(response.data.data);
+		if (response.data.meta) {
+			setMeta(response.data.meta);
+		}
+		}
+	} catch (error) {
+		console.error('Error searching BookFunnel integrations:', error);
+		createNotification({
+		message: 'Error searching integrations. Please try again.',
+		type: 'warning'
+		});
+	}
+	};
 
 	const saveBookFunnelIntegration = async () => {
 		try {
@@ -129,20 +155,16 @@ const BookFunnel = () => {
 								</Button>
 							</div>
 							<div className="filters-container">
-								<div className="row" style={{ marginBottom: '1rem' }}></div>
-								<div className="row d-flex content-space-between">
-									{/* <InputText
-								onChange={(e) => updateSearchTerm(e.target.value)}
+							<div className="row" style={{ marginBottom: '1rem' }}></div>
+							<div className="row d-flex content-space-between">
+								<SearchBar
+								placeholder="Search Integrations"
+								label="Search Integrations"
+								initialValue={searchTerm}
+								onSearch={searchIntegrations}
 								style={{ width: '100%' }}
-								placeholder="Search Campaign"
-								label="Search Campaign"
-								hasError={false}
-								errorMessage="Name must be at least 3 characters long."
-							/> */}
-									{/* <Button type="secondary" icon={'Filters'}>
-								Filters
-							</Button> */}
-								</div>
+								/>
+							</div>
 							</div>
 							<div>
 								<BookFunnelIntegrationsTable />
