@@ -23,7 +23,15 @@ dayjs.extend(timezone)
 
 import qs from 'qs'
 
-const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, resultsPerPage = 20, refreshData=()=>{} }) => {
+const CampaignsTable = ({ 
+  selectedCampaignType, 
+  dashboardPreviewOnly = false, 
+  resultsPerPage = 20, 
+  refreshData = () => {}, 
+  searchTerm = '',
+  campaigns: propCampaigns = null,
+  loading: propLoading = false
+}) => {
 	const navigate = useNavigate()
 	const { user, account, createNotification } = useAccount()
 
@@ -303,9 +311,16 @@ const CampaignsTable = ({ selectedCampaignType, dashboardPreviewOnly = false, re
 
 	useEffect(() => {
 		if (user) {
+		// Only fetch if no campaigns were provided via props
+		if (propCampaigns === null) {
 			getCampaigns(currentPage)
+		} else {
+			// Use the campaigns provided via props
+			setCampaigns(propCampaigns)
+			setLoading(propLoading)
 		}
-	}, [user, currentPage, selectedCampaignType])
+		}
+	}, [user, currentPage, selectedCampaignType, propCampaigns, propLoading])
 
 	const actionsBodyTemplate = (rowData) => {
 		return (

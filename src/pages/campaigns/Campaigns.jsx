@@ -575,12 +575,15 @@ const Campaigns = () => {
 								) : (
 									// Desktop view for campaigns (list or calendar)
 									viewMode === 'list' ? (
-										<CampaignsTable
-											resultsPerPage={10}
-											refreshData={refreshData}
-											selectedCampaignType={selectedCampaignType}
-											dashboardPreviewOnly={false}
-										/>
+									<CampaignsTable
+										resultsPerPage={10}
+										refreshData={refreshData}
+										selectedCampaignType={selectedCampaignType}
+										dashboardPreviewOnly={false}
+										searchTerm={searchTerm}
+										campaigns={filteredCampaigns}  // Pass the filtered campaigns directly
+										loading={loading}
+									/>
 									) : (
 										<CampaignCalendar 
 											campaigns={filteredCampaigns}
