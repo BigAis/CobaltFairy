@@ -45,7 +45,14 @@ const AutomationsTable = ({ incomingAutomations }) => {
     const actionsBodyTemplate = (item) => {
         return (
             <div>
-                <Dropdown withDivider={true} icon={'Plus'} options={dropdownOptions} onLeftClick={()=>{handleLeftClick(item)}} onOptionSelect={ async (value)=>{
+                <Dropdown withDivider={true} icon={'Plus'} options={dropdownOptions} onLeftClick={()=>{
+                    // If automation is active, navigate to view-only mode
+                    if (item.active) {
+                        navigate(`/automations/${item.uuid}?viewOnly=true`);
+                    } else {
+                        handleLeftClick(item);
+                    }
+                }} onOptionSelect={ async (value)=>{
                     switch(value){
                         case "delete": 
                         if(item.active) {
@@ -79,7 +86,7 @@ const AutomationsTable = ({ incomingAutomations }) => {
                         break;
                     }
                 }}>
-                    Edit
+                    {item.active ? 'View' : 'Edit'}
                 </Dropdown>
             </div>
         )

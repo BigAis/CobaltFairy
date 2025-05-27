@@ -13,7 +13,7 @@ import Icon from '../../components/Icon/Icon'
 import InputText from '../../components/InputText/InputText'
 import PopupText from '../../components/PopupText/PopupText'
 
-const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, getChildrenOfCondition, data, onUpdate, handleAdditionalChange, setSideBarShown }) => {
+const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, getChildrenOfCondition, data, onUpdate, handleAdditionalChange, setSideBarShown, isReadOnly = false }) => {
 	const [nodeAction, setNodeAction] = useState(null)
 	const [showAddPopover, setShowAddPopover] = useState(-1)
 
@@ -163,6 +163,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 							<Dropdown
 								icon={'Plus'}
 								options={data.groups}
+								disabled={isReadOnly}
 								onOptionSelect={(value) => {
 									handleAdditionalChange(data.groups.filter((g) => g.value == value.value))
 								}}
@@ -174,7 +175,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					{!node.output || !node.output[0] || !node.output[0].id ? (
+					{!isReadOnly && !node.output || !node.output[0] || !node.output[0].id ? (
 						<Card
 							style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
 							onDragOver={(e) => {
@@ -209,13 +210,14 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
-						<Icon name="Close" className="close" onClick={handleRemove} />
+						{!isReadOnly && <Icon name="Close" className="close" onClick={handleRemove} />}
 						<Card className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
 							<h4 className="node-type">Send an email</h4>
 							<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between' }}>
 								<Dropdown
 									className={'delay-dropdown'}
 									style={{ width: '350px' }}
+									disabled={isReadOnly}
 									options={data.templates.map((t) => {
 										return { label: t.attributes.name, value: t.id, uuid: t.attributes.uuid }
 									})}
@@ -235,6 +237,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								<InputText
 									type="text"
 									style={{ marginTop: '10px', minWidth: '350px' }}
+									disabled={isReadOnly}
 									label="Subject"
 									value={node?.data?.emailSubject ?? ''}
 									onChange={(e) => {
@@ -327,7 +330,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					{!node.output || !node.output[0] || !node.output[0].id ? (
+					{!isReadOnly && !node.output || !node.output[0] || !node.output[0].id ? (
 						<Card
 							style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
 							onDragOver={(e) => {
@@ -367,12 +370,13 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
-						<Icon name="Close" className="close" onClick={handleRemove} />
+						{!isReadOnly && <Icon name="Close" className="close" onClick={handleRemove} />}
 						<Card className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
 							<h4 className="node-type">{node?.name ? actionOptions.find((option) => option.value === node.name).label : ''}</h4>
 							{('copy-to-group' == node?.name || 'move-to-group' == node?.name) && (
 								<Dropdown
 									style={{ minWidth: '270px' }}
+									disabled={isReadOnly}
 									onOptionSelect={(v, l) => {
 										node = { ...node, data: { group: [v] }, meta: { label: v.label } }
 										onUpdate(node)
@@ -385,6 +389,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 							{'remove-from-group' == node?.name && (
 								<Dropdown
 									style={{ minWidth: '270px' }}
+									disabled={isReadOnly}
 									onOptionSelect={(v, l) => {
 										node = { ...node, data: { group: [v] }, meta: { label: v.label } }
 										onUpdate(node)
@@ -399,7 +404,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					{!node.output || !node.output[0] || !node.output[0].id ? (
+					{!isReadOnly && !node.output || !node.output[0] || !node.output[0].id ? (
 						<Card
 							style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
 							onDragOver={(e) => {
@@ -432,7 +437,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
-						<Icon name="Close" className="close" onClick={handleRemove} />
+						{!isReadOnly && <Icon name="Close" className="close" onClick={handleRemove} />}
 						<Card className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
 							<div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', width: '180px' }}>
 								<Icon name="Clock" style={{ marginRight: '20px' }} />
@@ -442,6 +447,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								<InputText
 									type="number"
 									style={{ marginTop: '10px', width: '140px', marginRight: '10px' }}
+									disabled={isReadOnly}
 									label="Delay"
 									value={node?.data?.delay?.[0] ?? ''}
 									onChange={(e) => {
@@ -450,6 +456,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								/>
 								<Dropdown
 									className={'delay-dropdown'}
+									disabled={isReadOnly}
 									options={[
 										{
 											label: 'Days',
@@ -474,7 +481,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					{!node.output || !node.output[0] || !node.output[0].id ? (
+					{!isReadOnly && !node.output || !node.output[0] || !node.output[0].id ? (
 						<Card
 							style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
 							onDragOver={(e) => {
@@ -521,13 +528,14 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
 						<Card>
-							<Icon name="Close" className="close" onClick={handleRemove} />
+							{!isReadOnly && <Icon name="Close" className="close" onClick={handleRemove} />}
 							<div className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
 								<h4 className="node-type">Condition: {node?.name ? conditionOptions.find((option) => option.value === node.name)?.label : 'Select a condition'}</h4>
 								<div style={{ display: 'flex', flexDirection: 'column' }}>
 									<Dropdown
 										options={conditionOptions}
 										style={{ width: '350px' }}
+										disabled={isReadOnly}
 										onOptionSelect={(v, l) => {
 											node = { ...node, name: v.value, data: { ...(node.data || {}) }, meta: { label: v.label } }
 											onUpdate(node)
@@ -541,6 +549,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											<Dropdown
 												options={data.avlCampaigns}
 												style={{ width: '350px' }}
+												disabled={isReadOnly}
 												onOptionSelect={(v, l) => {
 													node = { ...node, data: { ...node.data, cmp: v }, meta: {} }
 													onUpdate(node)
@@ -555,6 +564,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 													<Dropdown
 														options={workflowConditionOptions}
 														style={{ width: '350px' }}
+														disabled={isReadOnly}
 														onOptionSelect={(v) => {
 															node = { ...node, data: { ...node.data, trigger: v } }
 															onUpdate(node)
@@ -568,6 +578,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 															<Dropdown
 																options={data.cmpLinks}
 																style={{ width: '350px', maxWidth: '350px' }}
+																disabled={isReadOnly}
 																onOptionSelect={(v) => {
 																	node = { ...node, data: { ...node.data, link: v } }
 																	onUpdate(node)
@@ -587,6 +598,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											<Dropdown
 												options={data.workflowCampaigns}
 												style={{ width: '350px' }}
+												disabled={isReadOnly}
 												onOptionSelect={(v) => {
 													node = { ...node, data: { ...node.data, cmp: v.value, email_node_id: v.value }, meta: { ...node.meta, cmpname: v.label } }
 													onUpdate(node)
@@ -601,6 +613,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 													<Dropdown
 														options={workflowConditionOptions}
 														style={{ width: '350px' }}
+														disabled={isReadOnly}
 														onOptionSelect={(v) => {
 															node = { ...node, data: { ...node.data, trigger: v.value }, meta: { ...node.meta, triggerName: v.label } }
 															onUpdate(node)
@@ -614,6 +627,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 															<Dropdown
 																options={getTplIdLinks(node?.data?.email_node_id)}
 																style={{ width: '350px', maxWidth: '350px' }}
+																disabled={isReadOnly}
 																onOptionSelect={(v) => {
 																	node = { ...node, data: { ...node.data, link: v } }
 																	onUpdate(node)
@@ -633,6 +647,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											<Dropdown
 												options={data.avlCampaigns}
 												style={{ width: '350px' }}
+												disabled={isReadOnly}
 												onOptionSelect={(v) => {
 													node = { ...node, data: { ...node.data, cmp: v } }
 													onUpdate(node)
@@ -648,6 +663,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											<Dropdown
 												options={data.cmpLinks}
 												style={{ width: '350px' }}
+												disabled={isReadOnly}
 												onOptionSelect={(v) => {
 													node = { ...node, data: { ...node.data, link: v.value } }
 													onUpdate(node)

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react'
 
-import { useNavigate, useParams } from 'react-router-dom'
 import NodeItem from './NodeItem'
 import { ApiService } from '../../service/api-service'
 import User from '../../service/User'
@@ -12,9 +11,11 @@ import Dropdown from '../../components/Dropdown'
 import Card from '../../components/Card'
 import Icon from '../../components/Icon/Icon'
 import PopupText from '../../components/PopupText/PopupText'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 
 const FlowEditor = () => {
 	const { autId } = useParams()
+	const location = useLocation();
 	const automationContainerRef = useRef(null)
 	const navigate = useNavigate()
 	const [tab, setTab] = useState('actions')
@@ -29,7 +30,9 @@ const FlowEditor = () => {
 	const [excludeNodes, setExcludeNodes] = useState([])
 	const [nodes, setNodes] = useState([])
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
+  	const queryParams = new URLSearchParams(location.search);
+  	const isViewOnlyParam = queryParams.get('viewOnly') === 'true';
+  	const [isReadOnly, setIsReadOnly] = useState(isViewOnlyParam);
 	const isDragging = useRef(false)
 	const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
 
@@ -85,6 +88,15 @@ const FlowEditor = () => {
 		window.addEventListener('resize', handleResize);
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
+
+	// Update isReadOnly when data changes (to check active status)
+	useEffect(() => {
+		if (data?.active) {
+		setIsReadOnly(true);
+		} else if (!isViewOnlyParam) {
+		setIsReadOnly(false);
+		}
+	}, [data, isViewOnlyParam]);
 
 	// Add this useEffect to redirect mobile users away from the editor
 	useEffect(() => {
@@ -882,80 +894,110 @@ const FlowEditor = () => {
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
 			<div className="header" style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexDirection:'row'}}>
 				<Stepper
-					steps={steps}
-					current={3}
-					setStep={() => {
-						navigate(`/automations/${autId}`)
-					}}
-					style={{width:'70%'}}
+				steps={steps}
+				current={3}
+				setStep={() => {
+					navigate(`/automations/${autId}`)
+				}}
+				style={{width:'70%'}}
 				/>
 				<div className="buttons" style={{width:'40%'}}>
+				{!isReadOnly ? (
+					<>
 					<Button type="secondary" icon="Save" onClick={exportData}>
 						Save
 					</Button>
 					<Switch
 						style={{ margin: '0 10px' }}
 						label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
-						checked={data?.active}
+						checked={data?.active || false}
 						onChange={(value) => {
-							setData({
-								...data,
-								active: value,
-							})
+						setData({
+							...data,
+							active: value,
+						});
 						}}
 					/>
 					<Button
 						onClick={async () => {
-							await exportData(false)
-							navigate('/automations')
+						await exportData(false)
+						navigate('/automations')
 						}}
 					>
 						Done Editing
 					</Button>
+					</>
+				) : (
+					<>
+					<div style={{ color: '#ff635d', fontWeight: 'bold', marginRight: '20px' }}>
+						{data?.active ? 'This automation is currently active and cannot be edited' : 'View-only mode'}
+					</div>
+					<Button
+						onClick={() => {
+						if (data?.active) {
+							// If active, show a popup explaining how to deactivate
+							PopupText.fire({
+							icon: 'info',
+							text: 'To edit this automation, you need to deactivate it first from the automations list.',
+							showConfirmButton: true,
+							confirmButtonText: 'Got it',
+							});
+						} else {
+							// If not active but in view-only mode, navigate to edit mode
+							navigate(`/automations/editor/${autId}`);
+						}
+						}}
+					>
+						{data?.active ? 'Back to List' : 'Edit Flow'}
+					</Button>
+					</>
+				)}
 				</div>
 			</div>
 			<div className="body">
 				<div id="automation-builder" ref={automationContainerRef}>
 					<ul style={{ listStyleType: 'none', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '4500px', paddingBottom: '200px' }}>
-						{nodes.map((node, idx) => {
-							let children
-							if (node.type == 'condition') {
-								children = [getChildrenOfCondition(nodes, node.id, 0), getChildrenOfCondition(nodes, node.id, 1)]
-							} else {
-								children = []
-							}
-							if (excludeNodes.map(Number).includes(node.id)) return ''
-							console.log('node.id', node.id, excludeNodes, excludeNodes.includes(node.id))
-							return (
-								<>
-									{console.log('Renders', node.id)}
-									<NodeItem
-										onSelect={(_node) => selectNode(_node)}
-										key={node.id}
-										node={node}
-										type={node.type}
-										onAdd={addNode}
-										removeNode={removeNode}
-										nodes={nodes}
-										children={children}
-										getChildrenOfCondition={getChildrenOfCondition}
-										handleAdditionalChange={handleAdditionalChange}
-										data={{ groups, avlCampaigns, workflowCampaigns, templates, cmpLinks }}
-										setSideBarShown={setSideBarShown}
-										onUpdate={(data) => {
-											setNodes(
-												nodes.map((n) => {
-													if (n.id == data.id) return data
-													return n
-												})
-											)
-										}}
-									/>
-								</>
+					{nodes.map((node, idx) => {
+					let children
+					if (node.type == 'condition') {
+						children = [getChildrenOfCondition(nodes, node.id, 0), getChildrenOfCondition(nodes, node.id, 1)]
+					} else {
+						children = []
+					}
+					if (excludeNodes.map(Number).includes(node.id)) return ''
+					console.log('node.id', node.id, excludeNodes, excludeNodes.includes(node.id))
+					return (
+						<>
+						{console.log('Renders', node.id)}
+						<NodeItem
+							onSelect={(_node) => selectNode(_node)}
+							key={node.id}
+							node={node}
+							type={node.type}
+							onAdd={addNode}
+							removeNode={removeNode}
+							nodes={nodes}
+							children={children}
+							getChildrenOfCondition={getChildrenOfCondition}
+							handleAdditionalChange={handleAdditionalChange}
+							data={{ groups, avlCampaigns, workflowCampaigns, templates, cmpLinks }}
+							setSideBarShown={setSideBarShown}
+							isReadOnly={isReadOnly}  // Pass the isReadOnly prop here
+							onUpdate={(data) => {
+							setNodes(
+								nodes.map((n) => {
+								if (n.id == data.id) return data
+								return n
+								})
 							)
-						})}
+							}}
+						/>
+						</>
+					)
+					})}
 					</ul>
 				</div>
+				{!isReadOnly && (
 				<div className={'flow-sidebar ' + (sidebarShown && 'visible')}>
 					{!hasTrigger ? (
 						<>
@@ -1464,9 +1506,10 @@ const FlowEditor = () => {
 						</>
 					)}
 				</div>
+				)}
 			</div>
 		</div>
-	)
+	);
 }
 
 export default FlowEditor
