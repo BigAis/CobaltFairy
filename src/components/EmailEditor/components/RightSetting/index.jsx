@@ -51,12 +51,34 @@ const RightSetting = () => {
 	}
 
 	const colorChange = (key) => (color) => {
-		setBodySettings({ ...bodySettings, styles: { ...bodySettings.styles, [key]: color.hex } }, 'set_body_settings')
-		if (key === 'linkColor') {
-			recursivelyUpdateBlocks(blockList, color.hex, bodySettings.styles?.fontFamily ?? 'Inter')
-		}
-		console.log(blockList)
+	// Handle rgba when opacity is less than 1
+	let colorValue;
+	if (color.rgb && color.rgb.a < 1) {
+		const { r, g, b, a } = color.rgb;
+		colorValue = `rgba(${r}, ${g}, ${b}, ${a})`;
+	} else {
+		colorValue = color.hex;
 	}
+	
+	setBodySettings(
+		{ 
+		...bodySettings, 
+		styles: { 
+			...bodySettings.styles, 
+			[key]: colorValue 
+		} 
+		}, 
+		'set_body_settings'
+	);
+	
+	if (key === 'linkColor') {
+		recursivelyUpdateBlocks(
+		blockList, 
+		colorValue, 
+		bodySettings.styles?.fontFamily ?? 'Inter'
+		);
+	}
+	};
 
 	const updateFontFamily = (value) => {
 		console.log('updateFontFamily', value)

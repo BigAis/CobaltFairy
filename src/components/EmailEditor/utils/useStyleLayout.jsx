@@ -23,13 +23,21 @@ const useLayout = () => {
     );
   };
 
-  const colorChange =
-    (key) =>
-    ({ hex }) => {
-      const newCurrentItem = deepClone(currentItem);
-      newCurrentItem.data.styles[previewMode][key] = hex;
-      updateItemStyles(newCurrentItem.data);
-    };
+  const colorChange = (key) => (color) => {
+    const newCurrentItem = deepClone(currentItem);
+    
+    // Handle rgba when opacity is less than 1
+    let colorValue;
+    if (color.rgb && color.rgb.a < 1) {
+      const { r, g, b, a } = color.rgb;
+      colorValue = `rgba(${r}, ${g}, ${b}, ${a})`;
+    } else {
+      colorValue = color.hex;
+    }
+    
+    newCurrentItem.data.styles[previewMode][key] = colorValue;
+    updateItemStyles(newCurrentItem.data);
+  };
 
   const paddingChange = (padding) => {
     const newData = deepClone(currentItem.data);
