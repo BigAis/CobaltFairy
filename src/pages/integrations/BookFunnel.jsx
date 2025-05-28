@@ -43,7 +43,8 @@ const BookFunnel = () => {
         try {
             setLoading(true)
             const response = await ApiService.get(
-                `fairymailer/bookfunnel-integrations?pagination[page]=${currentPage}&pagination[pageSize]=${itemsPerPage}`,
+                // `fairymailer/bookfunnel-integrations?pagination[page]=${currentPage}&pagination[pageSize]=${itemsPerPage}`,
+                `fairymailer/bookfunnel-maps?populate[group]=true&pagination[page]=${currentPage}&pagination[pageSize]=${itemsPerPage}`,
                 user.jwt
             )
             if (response.data && response.data.data) {
