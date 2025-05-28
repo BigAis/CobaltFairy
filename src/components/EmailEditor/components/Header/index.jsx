@@ -31,7 +31,9 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 	const { histories, index } = blockListHistory
 
 	const [templates, setTemplates] = useState([])
-	const popupTemplateOptions = templates && templates.map((tpl) => ({ label: `${tpl.name}`, value: `${tpl.uuid}` }))
+	const popupTemplateOptions = templates && templates
+	.filter(tpl => tpl.uuid !== currentCampaign.uuid) // Filter out current template
+	.map((tpl) => ({ label: `${tpl.name}`, value: `${tpl.uuid}` }))
 
 	const [selectedTemplateOption, setSelectedTemplateOption] = useState(null)
 	let selectedTemplate = null
