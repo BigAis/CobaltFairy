@@ -639,7 +639,7 @@ const NewCampaign = () => {
 												</div>
 											</>
 										)}
-										<Checkbox label={'A/B Split Campaign'} onChange={handleCheckAbSplit} />
+										<Checkbox label={'A/B Split Campaign'} checked={abSplit} onChange={handleCheckAbSplit} />
 									</div>
 									<div className="new-campaign-right flex-1">
 										<div className="campaign-preview-wrapper d-flex flex-column align-items-center">
