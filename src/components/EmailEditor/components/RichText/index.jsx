@@ -1,11 +1,11 @@
-import { useEffect, useRef, useContext } from "react";
+import { useEffect, useRef, useContext, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown, faExpandAlt, faCompressAlt } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import { faAngleDown, faExpandAlt, faCompressAlt, faSmile } from "@fortawesome/free-solid-svg-icons";
 import { GlobalContext } from "../../reducers";
 import { deepClone } from "../../utils/helpers";
 import { motion } from "framer-motion";
 import useDataSource from "../../configs/useDataSource"
+import EmojiPicker from 'emoji-picker-react';
 
 import Bold from "./Bold";
 import Italic from "./Italic";
@@ -16,11 +16,13 @@ import InsertUnorderedList from "./InsertUnorderedList";
 import Link from "./Link";
 import TextAlign from "./TextAlign";
 import FontColor from "./FontColor";
+import Icon from "../../../Icon/Icon";
 
 const RichText = ({ index, textBlock, styles }) => {
   const { blockList, setBlockList, currentItem, setCurrentItem } = useContext(GlobalContext);
   const richTextRef = useRef(null);
   const [isHidden, setIsHidden] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   useEffect(() => {
     if (richTextRef.current) {
@@ -46,6 +48,12 @@ const RichText = ({ index, textBlock, styles }) => {
 
   const modifyText = (command, defaultUi, value) => {
     document.execCommand(command, defaultUi, value);
+  };
+
+  const handleEmojiClick = (emojiData) => {
+    modifyText("insertText", false, emojiData.emoji);
+    setTextContent();
+    setShowEmojiPicker(false);
   };
 
   const fontSizeList = [
@@ -160,6 +168,7 @@ const RichText = ({ index, textBlock, styles }) => {
   const editFontName = (item) => {
     modifyText("fontName", false, item);
   };
+  
   return (
     <div
       className={`rich-text ${'0-0-0'===index ? 'first-node' : ''}`}
@@ -189,6 +198,30 @@ const RichText = ({ index, textBlock, styles }) => {
               <InsertUnorderedList modifyText={modifyText} setTextContent={setTextContent} />
               <Link modifyText={modifyText} setTextContent={setTextContent} />
               <TextAlign modifyText={modifyText} setTextContent={setTextContent} />
+              
+              {/* Emoji Picker Button */}
+              <button
+                className="rich-text-tools-button"
+                title="Insert Emoji"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              >
+                <FontAwesomeIcon icon={faSmile} className="rich-text-tools-button-icon" />
+              </button>
+              
+              {/* Emoji Picker Dropdown */}
+              {showEmojiPicker && (
+                <div style={{ 
+                  position: 'absolute', 
+                  zIndex: 1080, 
+                  top: '100%', 
+                  left: 0,
+                  background: '#fff',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                  borderRadius: '8px'
+                }}>
+                  <EmojiPicker onEmojiClick={handleEmojiClick} />
+                </div>
+              )}
             </>
           )}
           <button className="rich-text-tools-button" onClick={() => setIsHidden(!isHidden)}>
