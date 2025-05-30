@@ -17,16 +17,42 @@ const EditGroup = () => {
 	const { uuid } = useParams()
 	const navigate = useNavigate()
 	const { user, account } = useAccount()
-	const [group, setGroup] = useState({ name: '' })
+	const [group, setGroup] = useState({ name: '', udid: '' })
 	const [isEdit, setIsEdit] = useState(!!uuid)
+	const [loading, setLoading] = useState(false)
 
 	const fetchSubscriber = async () => {
+		if (!uuid || !user?.jwt) return
+		
+		setLoading(true)
 		try {
 			const response = await ApiService.get(`fairymailer/getGroups/?filters[udid]=${uuid}&populate=*`, user.jwt)
 			console.log('group is : ', response)
-			if (response && response.data && response.data.data) setGroup(response.data.data[0])
+			
+			// Check if we have data and it's an array
+			if (response?.data?.data && Array.isArray(response.data.data)) {
+				// Find the group with matching UUID
+				const foundGroup = response.data.data.find(g => g.udid === uuid)
+				
+				if (foundGroup) {
+					console.log('Found matching group:', foundGroup)
+					setGroup(foundGroup)
+				} else {
+					console.error('No group found with UUID:', uuid)
+					// Set default empty group with the current UUID
+					setGroup({ name: '', udid: uuid })
+				}
+			} else {
+				console.error('Invalid response format:', response?.data)
+				// Set default empty group with the current UUID
+				setGroup({ name: '', udid: uuid })
+			}
 		} catch (error) {
-			console.error('Error fetching subscriber:', error)
+			console.error('Error fetching group:', error)
+			// Set default empty group with the current UUID
+			setGroup({ name: '', udid: uuid })
+		} finally {
+			setLoading(false)
 		}
 	}
 
@@ -37,11 +63,14 @@ const EditGroup = () => {
 				navigate('/subscribers/')
 			}
 		} else {
-			group.udid = uuidv4()
-			group.account = account.id
-			group.click_rate = 0
-			group.open_rate = 0
-			const response = await ApiService.post(`groups`, { data: group }, user.jwt)
+			const newGroup = {
+				...group,
+				udid: uuidv4(),
+				account: account.id,
+				click_rate: 0,
+				open_rate: 0
+			}
+			const response = await ApiService.post(`groups`, { data: newGroup }, user.jwt)
 			if (response && response.data) {
 				navigate('/subscribers/')
 			}
@@ -73,21 +102,32 @@ const EditGroup = () => {
 				const deleteResponse = await ApiService.post(`fairymailer/deleteGroupByGuid/${group.udid}`, { data: {} }, user.jwt)
 				if (deleteResponse) {
 					console.log('on update running')
-					// navigate('/subscribers/')
+					navigate('/subscribers/')
 				}
 			}
 		})
 	}
 
+	// Fetch data when component mounts or when dependencies change
 	useEffect(() => {
-		if (user && account && isEdit) {
+		if (user && account && uuid) {
+			console.log('Fetching group with UUID:', uuid)
 			fetchSubscriber()
 		}
-	}, [uuid, user, account, isEdit])
+	}, [user, account, uuid]) // uuid in the dependencies triggers a refetch when it changes
 
-	// if (!subscriber) {
-	// 	return <div>Loading...</div>
-	// }
+	// This ensures the form is reset when changing between different groups
+	useEffect(() => {
+		if (!loading && uuid) {
+			// Make sure the UUID in the form always matches the URL
+			setGroup(prevGroup => {
+				if (prevGroup.udid !== uuid) {
+					return { ...prevGroup, udid: uuid }
+				}
+				return prevGroup
+			})
+		}
+	}, [uuid, loading])
 
 	return (
 		<>
@@ -99,11 +139,16 @@ const EditGroup = () => {
 					<div className="page-name-container">
 						<div className="page-name">{isEdit ? 'Edit Group' : 'New Group'}</div>
 					</div>
-					{group && (
+					{/* Display loading state if needed */}
+					{loading ? (
+						<Card>
+							<div>Loading group data...</div>
+						</Card>
+					) : (
 						<Card>
 							<InputText
 								label={'Name'}
-								value={group.name}
+								value={group.name || ''}
 								onChange={(e) => {
 									setGroup((prevState) => ({
 										...prevState,
@@ -111,7 +156,7 @@ const EditGroup = () => {
 									}))
 								}}
 							/>
-							{isEdit && <InputText label={'Group UUID'} value={group.udid} disabled={true} />}
+							{isEdit && <InputText label={'Group UUID'} value={group.udid || uuid || ''} disabled={true} />}
 
 							<div className="d-flex gap-20">
 								{isEdit && (
@@ -122,6 +167,11 @@ const EditGroup = () => {
 									</Button>
 								)}
 								<Button onClick={saveGroup}>Save</Button>
+								{isEdit && group.name && (
+									<Button type="secondary" onClick={deleteGroup}>
+										Delete
+									</Button>
+								)}
 							</div>
 						</Card>
 					)}
