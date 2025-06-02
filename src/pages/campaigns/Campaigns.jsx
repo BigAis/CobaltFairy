@@ -241,83 +241,247 @@ const Campaigns = () => {
 	}
 
 	// Handle campaign actions
+
 	const handleCampaignAction = (action, campaign) => {
-		// Check if on mobile and trying to access editor for any campaign
-		if (isMobile && action === 'edit') {
-		  PopupText.fire({
-			icon: 'warning',
-			text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
-			showCancelButton: false,
-			confirmButtonText: 'OK',
-		  });
-		  return; // Stop further execution
-		}
-		
-		// Allow viewing overview even on mobile
-		// Proceed with normal action handling
-		switch (action) {
-		  case 'delete':
-			// Implement delete logic
-			PopupText.fire({
-				icon: 'question',
-				text: 'Are you sure you want to delete this campaign?',
-				showCancelButton: true,
-				confirmButtonText: 'Yes, delete it',
-			}).then((result) => {
-				if (result.isConfirmed) {
-					// Delete logic here
-					createNotification({
-						message: 'Campaign deleted successfully',
-						type: 'default',
-						autoClose: 3000
-					})
-				}
-			});
-			break;
-		  case 'duplicate':
-			// Duplicate logic
-			createNotification({
-				message: 'Campaign duplicated successfully',
-				type: 'default',
-				autoClose: 3000
-			})
-			break;
-		  case 'rename':
-			// Rename logic
-			PopupText.fire({
-				text: 'Enter new campaign name',
-				inputField: true,
-				inputLabel: 'Campaign Name',
-				inputValue: campaign.name,
-				confirmButtonText: 'Rename',
-			}).then((result) => {
-				if (result.isConfirmed) {
-					// Rename logic here
-					createNotification({
-						message: 'Campaign renamed successfully',
-						type: 'default',
-						autoClose: 3000
-					})
-				}
-			});
-			break;
-		  case 'edit':
-			// Navigate to campaign edit page (design editor) - this won't execute on mobile due to check above
-			navigate(`/campaigns/edit/${campaign.uuid}`);
-			break;
-		  case 'overview':
-			// Navigate to campaign overview - this WILL execute on mobile
-			navigate(`/campaigns/overview/${campaign.uuid}`);
-			break;
-		  default:
-			break;
-		}
+	// Check if on mobile and trying to access editor for any campaign
+	if (isMobile && action === 'edit') {
+		PopupText.fire({
+		icon: 'warning',
+		text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
+		showCancelButton: false,
+		confirmButtonText: 'OK',
+		});
+		return; // Stop further execution
 	}
+	
+	// Allow viewing overview even on mobile
+	// Proceed with normal action handling
+	switch (action) {
+		case 'delete':
+		// Implement delete logic
+		PopupText.fire({
+			icon: 'question',
+			text: 'Are you sure you want to delete this campaign?',
+			showCancelButton: true,
+			confirmButtonText: 'Yes, delete it',
+		}).then((result) => {
+			if (result.isConfirmed) {
+			// Delete logic here
+			ApiService.post(`fairymailer/removeCampaign`, { data: { udid: campaign.uuid } }, user.jwt)
+				.then(() => {
+				refreshData();
+				createNotification({
+					message: 'Campaign deleted successfully',
+					type: 'default',
+					autoClose: 3000
+				});
+				})
+				.catch(error => {
+				console.error('Error deleting campaign:', error);
+				createNotification({
+					message: 'Failed to delete campaign. Please try again.',
+					type: 'warning',
+					autoClose: 5000
+				});
+				});
+			}
+		});
+		break;
+		case 'duplicate':
+		// Duplicate logic
+		PopupText.fire({
+			icon: 'question',
+			text: 'Please type a title for the new campaign',
+			inputField: true,
+			focusCancel: false,
+			showConfirmButton: true,
+			showDenyButton: false,
+			showCancelButton: true,
+			confirmButtonText: 'Continue',
+			cancelButtonText: 'Cancel',
+		}).then((result) => {
+			if (result.isConfirmed) {
+			const newUuid = uuidv4();
+			const newCampaign = {
+				...campaign,
+				uuid: newUuid,
+				name: `${result.inputValue}`,
+				date: null,
+				sent_at: null,
+				stats: null,
+				account: account?.id,
+				recipients: 0,
+				uuid_b: uuidv4(),
+				status: 'draft',
+				recp_groups: campaign.recp_groups && campaign.recp_groups.map ? 
+				campaign.recp_groups.map((g) => {
+					return typeof g === 'object' ? g.id : g;
+				}) : []
+			};
+			delete(newCampaign.id);
+			
+			ApiService.post(
+				'campaigns/',
+				{ data: newCampaign },
+				user.jwt
+			).then(response => {
+				if(response.data && response.data.data && response.data.data.id){
+				refreshData();
+				createNotification({
+					message: 'Campaign duplicated successfully',
+					type: 'default',
+					autoClose: 3000
+				});
+				}
+			}).catch(error => {
+				console.error('Error duplicating campaign:', error);
+				createNotification({
+				message: 'Failed to duplicate campaign. Please try again.',
+				type: 'warning',
+				autoClose: 5000
+				});
+			});
+			}
+		});
+		break;
+		case 'rename':
+		// Rename logic
+		PopupText.fire({
+			text: 'Enter new campaign name',
+			inputField: true,
+			inputLabel: 'Campaign Name',
+			inputValue: campaign.name,
+			confirmButtonText: 'Rename',
+		}).then((result) => {
+			if (result.isConfirmed) {
+			// Rename logic here
+			const updCampaign = {
+				uuid: campaign.uuid,
+				name: `${result.inputValue}`,
+			};
+			
+			ApiService.post(
+				'fairymailer/updateCampaign',
+				{ data: updCampaign },
+				user.jwt
+			).then(response => {
+				if(response.data && response.data.code && response.data.code==200){
+				refreshData();
+				createNotification({
+					message: 'Campaign renamed successfully',
+					type: 'default',
+					autoClose: 3000
+				});
+				}
+			}).catch(error => {
+				console.error('Error renaming campaign:', error);
+				createNotification({
+				message: 'Failed to rename campaign. Please try again.',
+				type: 'warning',
+				autoClose: 5000
+				});
+			});
+			}
+		});
+		break;
+		case 'reschedule':
+		// New reschedule action for outbox campaigns
+		if (campaign.date) {
+			const currentDate = new Date(campaign.date);
+			
+			PopupText.fire({
+			title: 'Reschedule Campaign',
+			html: `
+				<div style="text-align: left; margin-bottom: 15px;">
+				<label for="campaign-date">Date:</label>
+				<input type="date" id="campaign-date" class="swal2-input" value="${currentDate.toISOString().split('T')[0]}" style="width: 100%">
+				</div>
+				<div style="text-align: left; margin-bottom: 15px;">
+				<label for="campaign-time">Time:</label>
+				<input type="time" id="campaign-time" class="swal2-input" value="${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}" style="width: 100%">
+				</div>
+			`,
+			showCancelButton: true,
+			confirmButtonText: 'Update Schedule',
+			preConfirm: () => {
+				const dateInput = document.getElementById('campaign-date').value;
+				const timeInput = document.getElementById('campaign-time').value;
+				
+				if (!dateInput || !timeInput) {
+				PopupText.showValidationMessage('Please enter both date and time');
+				return false;
+				}
+				
+				return { date: dateInput, time: timeInput };
+			}
+			}).then((result) => {
+			if (result.isConfirmed) {
+				const { date, time } = result.value;
+				const [hours, minutes] = time.split(':');
+				
+				const newDate = new Date(date);
+				newDate.setHours(parseInt(hours, 10));
+				newDate.setMinutes(parseInt(minutes, 10));
+				
+				// Update campaign date
+				const updatedCampaign = {
+				uuid: campaign.uuid,
+				date: newDate.toISOString()
+				};
+				
+				ApiService.post(
+				'fairymailer/updateCampaign',
+				{ data: updatedCampaign },
+				user.jwt
+				).then(response => {
+				if(response.data && response.data.code && response.data.code === 200){
+					refreshData();
+					createNotification({
+					message: 'Campaign rescheduled successfully',
+					type: 'default',
+					autoClose: 3000
+					});
+				}
+				}).catch(error => {
+				console.error('Error rescheduling campaign:', error);
+				createNotification({
+					message: 'Failed to reschedule campaign. Please try again.',
+					type: 'warning',
+					autoClose: 5000
+				});
+				});
+			}
+			});
+		} else {
+			createNotification({
+			message: 'This campaign is not scheduled',
+			type: 'warning',
+			autoClose: 3000
+			});
+		}
+		break;
+		case 'edit':
+		// Navigate to campaign edit page (design editor) - this won't execute on mobile due to check above
+		navigate(`/campaigns/edit/${campaign.uuid}`);
+		break;
+		case 'overview':
+		// Navigate to campaign overview - this WILL execute on mobile
+		navigate(`/campaigns/overview/${campaign.uuid}`);
+		break;
+		default:
+		break;
+	}
+	};
 
 	// Render a mobile campaign card with collapsible content
+
 	const renderMobileCampaignCard = (campaign) => {
 	const isExpanded = expandedCampaign === campaign.uuid;
 	const showActionMenu = actionMenuCampaign === campaign.uuid;
+	const isSent = campaign.status === 'sent';
+	
+	// Determine button text based on campaign status
+	const primaryButtonText = isSent ? 'Overview' : 'Edit';
 
 	return (
 		<div className="campaign-item" key={campaign.uuid || `campaign-${Math.random()}`}>
@@ -327,7 +491,6 @@ const Campaigns = () => {
 			<div className="campaign-item-subject">{campaign.subject || "Subject goes here"}</div>
 			</div>
 			<div className={`campaign-item-chevron ${isExpanded ? 'expanded' : ''}`}>
-			{/* Replace image with text arrow */}
 			<span style={{ 
 				transform: isExpanded ? 'rotate(180deg)' : 'none',
 				display: 'inline-block',
@@ -347,17 +510,26 @@ const Campaigns = () => {
 			
 			<div className="campaign-item-details">
 				<span className="campaign-detail-label">Type</span>
-				<span>{campaign.type || "Normal"}</span>
+				<span>{campaign.type === 'absplit' ? 'A/B Split' : 'Normal'}</span>
 			</div>
 			
 			<div className="campaign-item-details">
-				<span className="campaign-detail-label">Created</span>
-				<span>{campaign.sent_at ? new Date(campaign.sent_at).toISOString().split('T')[0] : "2024-04-17"}</span>
+				<span className="campaign-detail-label">
+				{isSent ? 'Sent' : campaign.date ? 'Scheduled' : 'Created'}
+				</span>
+				<span>
+				{isSent && campaign.sent_at 
+					? new Date(campaign.sent_at).toISOString().split('T')[0] 
+					: campaign.date 
+					? new Date(campaign.date).toISOString().split('T')[0]
+					: campaign.createdAt 
+						? new Date(campaign.createdAt).toISOString().split('T')[0] 
+						: "N/A"}
+				</span>
 			</div>
 			
 			<div className="overview-button" onClick={(e) => toggleActionMenu(e, campaign.uuid)}>
-				Overview
-				{/* Replace image with text arrow */}
+				{primaryButtonText}
 				<span style={{ 
 				position: 'absolute', 
 				right: '10px', 
@@ -379,9 +551,20 @@ const Campaigns = () => {
 				<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('rename', campaign)}>
 					Rename
 				</div>
-				<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('overview', campaign)}>
+				{isSent ? (
+					<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('overview', campaign)}>
 					Overview
-				</div>
+					</div>
+				) : (
+					<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('edit', campaign)}>
+					Edit
+					</div>
+				)}
+				{!isSent && campaign.date && (
+					<div className="campaign-dropdown-menu-item" onClick={() => handleCampaignAction('reschedule', campaign)}>
+					Reschedule
+					</div>
+				)}
 				</div>
 			)}
 			</div>
@@ -445,21 +628,66 @@ const Campaigns = () => {
 	};
 	
 	// Handle campaign click in calendar view
+
 	const handleCalendarCampaignClick = (campaign) => {
-	  if (campaign.status === 'sent') {
+	if (campaign.status === 'sent') {
+		// For sent campaigns, navigate to overview
 		navigate(`/campaigns/overview/${campaign.uuid}`);
-	  } else {
+	} else if (campaign.status === 'draft' && campaign.date) {
+		// For scheduled/outbox campaigns, show reschedule dialog on mobile
 		if (isMobile) {
-		  PopupText.fire({
+		// Show reschedule dialog since edit is not available on mobile
+		const currentDate = new Date(campaign.date);
+		
+		PopupText.fire({
+			title: 'Campaign Options',
+			html: `
+			<div style="text-align: left; margin-bottom: 15px;">
+				<p>What would you like to do with this scheduled campaign?</p>
+			</div>
+			`,
+			showDenyButton: true,
+			showCancelButton: true,
+			confirmButtonText: 'Reschedule',
+			denyButtonText: 'View Details',
+			cancelButtonText: 'Cancel'
+		}).then((result) => {
+			if (result.isConfirmed) {
+			// Handle reschedule
+			handleCampaignAction('reschedule', campaign);
+			} else if (result.isDenied) {
+			// Show basic details since edit is not available
+			PopupText.fire({
+				title: campaign.name,
+				html: `
+				<div style="text-align: left;">
+					<p><strong>Subject:</strong> ${campaign.subject || 'N/A'}</p>
+					<p><strong>Scheduled for:</strong> ${new Date(campaign.date).toLocaleString()}</p>
+					<p><strong>Recipients:</strong> ${campaign.recipients || 0}</p>
+					<p><strong>Type:</strong> ${campaign.type === 'absplit' ? 'A/B Split' : 'Normal'}</p>
+				</div>
+				`,
+				confirmButtonText: 'Close'
+			});
+			}
+		});
+		} else {
+		// On desktop, navigate to edit
+		navigate(`/campaigns/edit/${campaign.uuid}`);
+		}
+	} else {
+		// For draft campaigns without date
+		if (isMobile) {
+		PopupText.fire({
 			icon: 'warning',
 			text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
 			showCancelButton: false,
 			confirmButtonText: 'OK',
-		  });
+		});
 		} else {
-		  navigate(`/campaigns/edit/${campaign.uuid}`);
+		navigate(`/campaigns/edit/${campaign.uuid}`);
 		}
-	  }
+	}
 	};
 	return (
 		<>
