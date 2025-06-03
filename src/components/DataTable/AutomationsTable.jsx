@@ -23,6 +23,11 @@ const AutomationsTable = ({ incomingAutomations }) => {
     const [currentPage, setCurrentPage] = useState(1)
     const rowsPerPage = 20
 
+    // Update automations state when incomingAutomations changes
+    useEffect(() => {
+        setAutomations(incomingAutomations);
+    }, [incomingAutomations]);
+
     const handlePageChange = (page) => {
         setCurrentPage(page)
     }
@@ -52,8 +57,8 @@ const AutomationsTable = ({ incomingAutomations }) => {
                     } else {
                         handleLeftClick(item);
                     }
-                }} onOptionSelect={ async (value)=>{
-                    switch(value){
+                }} onOptionSelect={ async (selectedOption)=>{
+                    switch(selectedOption.value){
                         case "delete": 
                         if(item.active) {
                             await PopupText.fire({
@@ -77,11 +82,43 @@ const AutomationsTable = ({ incomingAutomations }) => {
                                     })
                             
                                     if (result.isConfirmed) {    
-                                        let sendResp = await ApiService.delete(`automations/${item.id}`,user.jwt)
-                                        setTimeout(() => {
-                                            PopupText.fire({ icon: 'success', text: 'Deleted successfully!', showConfirmButton: false, cancelButtonText:'Ok' })
-                                            setAutomations(automations.filter(a=>a.id!=item.id))
-                                        }, 1000)
+                                        try {
+                                            // Use the correct endpoint
+                                            let sendResp = await ApiService.post(
+                                                `fairymail/delete-automation`, 
+                                                { data: { uuid: item.uuid } },
+                                                user.jwt
+                                            );
+                                            
+                                            // Update automations list immediately on success
+                                            setAutomations(currentAutomations => 
+                                                currentAutomations.filter(a => a.uuid !== item.uuid)
+                                            );
+                                            
+                                            PopupText.fire({ 
+                                                icon: 'success', 
+                                                text: 'Deleted successfully!', 
+                                                showConfirmButton: false, 
+                                                cancelButtonText:'Ok' 
+                                            });
+                                        } catch (error) {
+                                            // Handle error response
+                                            if (error.response && error.response.status === 500) {
+                                                PopupText.fire({ 
+                                                    icon: 'error', 
+                                                    text: 'Cannot delete an active automation. Please deactivate it first.', 
+                                                    showConfirmButton: false, 
+                                                    cancelButtonText:'Ok' 
+                                                });
+                                            } else {
+                                                PopupText.fire({ 
+                                                    icon: 'error', 
+                                                    text: 'An error occurred while deleting the automation.', 
+                                                    showConfirmButton: false, 
+                                                    cancelButtonText:'Ok' 
+                                                });
+                                            }
+                                        }
                                     }
                         break;
                     }
@@ -95,41 +132,79 @@ const AutomationsTable = ({ incomingAutomations }) => {
         return (
             <div>
                 <Switch checked={item.active} onChange={async (e)=>{
-                    item.active=!item.active;
-                    let resp = await ApiService.put(`automations/${item.id}`, { data: { active: item.active} }, user.jwt)
-                    console.log(resp.data);
-                    setNotifications([...notifications,{id:item.id, type:'warning', message:'Automation status was updated.', onClose:()=>{setNotifications(notifications.filter(n=>n.id!=item.id))}}]);
-                    setTimeout(()=>{
-                        setNotifications(notifications.filter(n=>n.id!=item.id))
-                    },5000)
+                    const newActiveStatus = !item.active;
+                    
+                    try {
+                        let resp = await ApiService.put(`automations/${item.id}`, { data: { active: newActiveStatus } }, user.jwt);
+                        
+                        // Update the item in the automations state
+                        setAutomations(currentAutomations => 
+                            currentAutomations.map(automation => 
+                                automation.id === item.id 
+                                    ? {...automation, active: newActiveStatus} 
+                                    : automation
+                            )
+                        );
+                        
+                        const notificationId = Date.now();
+                        setNotifications(current => [
+                            ...current,
+                            {
+                                id: notificationId, 
+                                type: 'warning', 
+                                message: 'Automation status was updated.', 
+                                onClose: () => {
+                                    setNotifications(n => n.filter(notification => notification.id !== notificationId))
+                                }
+                            }
+                        ]);
+                        
+                        setTimeout(() => {
+                            setNotifications(current => current.filter(n => n.id !== notificationId));
+                        }, 5000);
+                    } catch (error) {
+                        console.error("Error updating automation status:", error);
+                        PopupText.fire({ 
+                            icon: 'error', 
+                            text: 'Failed to update automation status.', 
+                            showConfirmButton: false, 
+                            cancelButtonText:'Ok' 
+                        });
+                    }
                 }}></Switch>
             </div>
         )
     }
 
     return (
-        // <div>
         <>
             {notifications && notifications.length>0 &&  (
                 <div style={{margin:'5px 0'}}>
-                    {notifications.map(n=>{
-                        return <NotificationBar type={n.type || 'default'} message={n.message} onClose={n.onClose}/>
+                    {notifications.map((n, index) => {
+                        return <NotificationBar key={n.id} type={n.type || 'default'} message={n.message} onClose={n.onClose}/>
                     })}
                 </div>
             )}
-            <DataTable value={paginatedData} paginator={false} selection={selectedAutomations} onSelectionChange={(e) => setSelectedAutomations(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
+            <DataTable 
+                value={paginatedData} 
+                paginator={false} 
+                selection={selectedAutomations} 
+                onSelectionChange={(e) => setSelectedAutomations(e.value)} 
+                dataKey="uuid" 
+                rowClassName={() => 'p-table-row'}
+            >
                 <Column
                     body={(rowData) => (
                         <div style={{ position: 'relative' }}>
                             {/* Checkbox in the Top-Left Corner */}
                             <div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
                                 <Checkbox
-                                    checked={selectedAutomations.some((subscribers) => subscribers.name === rowData.name)}
+                                    checked={selectedAutomations.some((automation) => automation.uuid === rowData.uuid)}
                                     onChange={(e) => {
                                         if (e) {
                                             setSelectedAutomations((prev) => [...prev, rowData])
                                         } else {
-                                            setSelectedAutomations((prev) => prev.filter((subscribers) => subscribers.name !== rowData.name))
+                                            setSelectedAutomations((prev) => prev.filter((automation) => automation.uuid !== rowData.uuid))
                                         }
                                     }}
                                 />
@@ -159,7 +234,6 @@ const AutomationsTable = ({ incomingAutomations }) => {
                 <Column header="Actions" body={actionsBodyTemplate} />
             </DataTable>
             <Pagination currentPage={1} totalResults={automations ? automations.length : 0} resultsPerPage={20} onChange={handlePageChange} />
-            {/* </div> */}
         </>
     )
 }
