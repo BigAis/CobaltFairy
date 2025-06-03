@@ -23,6 +23,14 @@ const RichText = ({ index, textBlock, styles }) => {
   const richTextRef = useRef(null);
   const [isHidden, setIsHidden] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  
+  // Store cursor position data
+  const cursorPositionRef = useRef({
+    startOffset: 0,
+    endOffset: 0,
+    startContainer: null,
+    endContainer: null
+  });
 
   useEffect(() => {
     if (richTextRef.current) {
@@ -50,10 +58,104 @@ const RichText = ({ index, textBlock, styles }) => {
     document.execCommand(command, defaultUi, value);
   };
 
+  // Save the current cursor position when the emoji picker button is clicked
+  const saveCursorPosition = () => {
+    if (textBlock && textBlock.current) {
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        
+        // Store all necessary information to recreate the range later
+        cursorPositionRef.current = {
+          startContainer: range.startContainer,
+          endContainer: range.endContainer,
+          startOffset: range.startOffset,
+          endOffset: range.endOffset,
+          commonAncestorContainer: range.commonAncestorContainer
+        };
+        
+        // Ensure the text block is still focused
+        textBlock.current.focus();
+      }
+    }
+  };
+
+  // Toggle emoji picker and save cursor position
+  const toggleEmojiPicker = () => {
+    if (!showEmojiPicker) {
+      saveCursorPosition();
+    }
+    setShowEmojiPicker(!showEmojiPicker);
+  };
+
+  // Handle emoji selection
   const handleEmojiClick = (emojiData) => {
-    modifyText("insertText", false, emojiData.emoji);
-    setTextContent();
+    if (textBlock && textBlock.current) {
+      // Focus the editable area first
+      textBlock.current.focus();
+      
+      try {
+        // Create a new selection and range
+        const selection = window.getSelection();
+        const range = document.createRange();
+        
+        // Use the stored cursor position to recreate the selection
+        const position = cursorPositionRef.current;
+        
+        if (position.startContainer && position.endContainer) {
+          // Set the range boundaries using the stored information
+          range.setStart(position.startContainer, position.startOffset);
+          range.setEnd(position.endContainer, position.endOffset);
+          
+          // Apply the range to the selection
+          selection.removeAllRanges();
+          selection.addRange(range);
+          
+          // Insert emoji at cursor position
+          document.execCommand('insertText', false, emojiData.emoji);
+          
+          // Update the content
+          setTextContent();
+        } else {
+          // Fallback - insert at the end if position data is missing
+          console.warn("No valid cursor position found, appending to end");
+          range.selectNodeContents(textBlock.current);
+          range.collapse(false);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          document.execCommand('insertText', false, emojiData.emoji);
+          setTextContent();
+        }
+      } catch (error) {
+        console.error("Error inserting emoji:", error);
+        // Last resort fallback - try direct insertion
+        document.execCommand('insertText', false, emojiData.emoji);
+        setTextContent();
+      }
+    }
+    
+    // Close the emoji picker
     setShowEmojiPicker(false);
+  };
+
+  const setTextContent = () => {
+    const indexArray = index.split("-");
+    let newBlockList = deepClone(blockList);
+    let newCurrentItem = deepClone(currentItem);
+    
+    if (textBlock && textBlock.current) {
+      newCurrentItem.data.text = textBlock.current.innerHTML;
+      newBlockList[indexArray[0]].children[indexArray[1]].children[indexArray[2]].text = textBlock.current.innerHTML;
+      setCurrentItem({ ...newCurrentItem });
+      setBlockList(newBlockList);
+      
+      // After updating content, try to restore focus and cursor position
+      setTimeout(() => {
+        if (textBlock.current) {
+          textBlock.current.focus();
+        }
+      }, 0);
+    }
   };
 
   const fontSizeList = [
@@ -81,16 +183,6 @@ const RichText = ({ index, textBlock, styles }) => {
 
   const fontname_configs = ["sans-serif", "Inter", "Arial", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
   const { fontsList } = useDataSource();
-
-  const setTextContent = () => {
-    const indexArray = index.split("-");
-    let newBlockList = deepClone(blockList);
-    let newCurrentItem = deepClone(currentItem);
-    newCurrentItem.data.text = textBlock.current.innerHTML;
-    newBlockList[indexArray[0]].children[indexArray[1]].children[indexArray[2]].text = textBlock.current.innerHTML;
-    setCurrentItem({ ...newCurrentItem });
-    setBlockList(newBlockList);
-  };
 
   const selectElement = (selectList, defaultValue, type, onChange) => {
     const hideOptions = () => {
@@ -203,7 +295,7 @@ const RichText = ({ index, textBlock, styles }) => {
               <button
                 className="rich-text-tools-button"
                 title="Insert Emoji"
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                onClick={toggleEmojiPicker}
               >
                 <FontAwesomeIcon icon={faSmile} className="rich-text-tools-button-icon" />
               </button>
