@@ -110,6 +110,10 @@ function App() {
         <Route path="/design" element={<ProtectedRoute><Desing /></ProtectedRoute>} />
         <Route path="/payment-plan" element={<ProtectedRoute><PaymentPlan /></ProtectedRoute>} />
         <Route path="/campaigns" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
+        <Route path="/campaigns/sent" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
+        <Route path="/campaigns/draft" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
+        <Route path="/campaigns/outbox" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
+        <Route path="/campaigns/templates" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
         <Route path="/campaigns/new" element={<ProtectedRoute><NewCampaign /></ProtectedRoute>} />
         <Route path="/campaigns/edit/:uuid" element={<ProtectedRoute><NewCampaign /></ProtectedRoute>} />
         <Route path="/templates/edit/:uuid" element={<ProtectedRoute><EditTemplate /></ProtectedRoute>} />

@@ -3,7 +3,7 @@ import '../dashboard/dashboard.scss'
 import '../../fullpage.scss'
 
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAccount } from '../../context/AccountContext'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid'
 import SearchBar from '../../components/SearchBar/SearchBar'
 const Campaigns = () => {
 	const navigate = useNavigate()
+	const location = useLocation()
 
 	const [dropdownViewer, setDropdownViewer] = useState('campaigns')
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
@@ -75,6 +76,60 @@ const Campaigns = () => {
 			getTemplates()
 		}
 	}, [account])
+
+	// handle URL-based tab initialization
+	useEffect(() => {
+	// Only process if account is loaded to avoid unnecessary resets
+	if (!account) return;
+	
+	// Set initial tab based on URL path
+	const path = location.pathname;
+	let shouldRefreshData = false;
+	
+	if (path === '/campaigns') {
+		// Get the last active tab from localStorage, default to 'sent' if none
+		const lastActiveTab = localStorage.getItem('fairymail_last_active_tab') || 'sent';
+		
+		// Navigate to the appropriate tab URL
+		if (lastActiveTab) {
+		navigate(`/campaigns/${lastActiveTab}`, { replace: true });
+		return; // Exit early as we're redirecting
+		}
+	} else if (path.includes('/campaigns/sent')) {
+		if (selectedCampaignType !== 'sent' || dropdownViewer !== 'campaigns') {
+		setDropdownViewer('campaigns');
+		setSelectedCampaignType('sent');
+		shouldRefreshData = true;
+		}
+	} else if (path.includes('/campaigns/draft')) {
+		if (selectedCampaignType !== 'draft' || dropdownViewer !== 'campaigns') {
+		setDropdownViewer('campaigns');
+		setSelectedCampaignType('draft');
+		shouldRefreshData = true;
+		}
+	} else if (path.includes('/campaigns/outbox')) {
+		if (selectedCampaignType !== 'outbox' || dropdownViewer !== 'campaigns') {
+		setDropdownViewer('campaigns');
+		setSelectedCampaignType('outbox');
+		shouldRefreshData = true;
+		}
+	} else if (path.includes('/campaigns/templates')) {
+		if (selectedCampaignType !== 'templates' || dropdownViewer !== 'templates') {
+		setDropdownViewer('templates');
+		setSelectedCampaignType('templates');
+		shouldRefreshData = true;
+		}
+	}
+	
+	// Refresh data if the tab changed from URL
+	if (shouldRefreshData && !searchTerm) {
+		if (path.includes('/campaigns/templates') || selectedCampaignType === 'templates') {
+		getTemplates();
+		} else {
+		getCampaigns();
+		}
+	}
+	}, [location.pathname, account, navigate]);
 
 	// Filter campaigns whenever selectedCampaignType or campaigns change
 	useEffect(() => {
@@ -574,41 +629,48 @@ const Campaigns = () => {
 	};
 	// Handle tab change
 	const handleTabChange = (value) => {
-		// Reset expanded and action menu states when changing tabs
-		setExpandedCampaign(null);
-		setActionMenuCampaign(null);
-		
-		// Clear search term when changing tabs
-		setSearchTerm('');
-		
-		// Update tab state based on selection
-		switch (value) {
-			case 'sent':
-				setDropdownViewer('campaigns');
-				setSelectedCampaignType('sent');
-				break;
-			case 'draft':
-				setDropdownViewer('campaigns');
-				setSelectedCampaignType('draft');
-				break;
-			case 'outbox':
-				setDropdownViewer('campaigns');
-				setSelectedCampaignType('outbox');
-				break;
-			case 'templates':
-				setDropdownViewer('templates');
-				setSelectedCampaignType('templates');
-				break;
+	// Reset expanded and action menu states when changing tabs
+	setExpandedCampaign(null);
+	setActionMenuCampaign(null);
+	
+	// Clear search term when changing tabs
+	setSearchTerm('');
+	
+	// Store the selected tab in localStorage for returning later
+	localStorage.setItem('fairymail_last_active_tab', value);
+	
+	// Update tab state and navigate to appropriate URL
+	switch (value) {
+		case 'sent':
+		setDropdownViewer('campaigns');
+		setSelectedCampaignType('sent');
+		navigate('/campaigns/sent', { replace: true });
+		break;
+		case 'draft':
+		setDropdownViewer('campaigns');
+		setSelectedCampaignType('draft');
+		navigate('/campaigns/draft', { replace: true });
+		break;
+		case 'outbox':
+		setDropdownViewer('campaigns');
+		setSelectedCampaignType('outbox');
+		navigate('/campaigns/outbox', { replace: true });
+		break;
+		case 'templates':
+		setDropdownViewer('templates');
+		setSelectedCampaignType('templates');
+		navigate('/campaigns/templates', { replace: true });
+		break;
+	}
+	
+	// Refresh data after tab change (with a slight delay to ensure state is updated)
+	setTimeout(() => {
+		if (value === 'templates') {
+		getTemplates();
+		} else {
+		getCampaigns();
 		}
-		
-		// Refresh data after tab change (with a slight delay to ensure state is updated)
-		setTimeout(() => {
-			if (value === 'templates') {
-				getTemplates();
-			} else {
-				getCampaigns();
-			}
-		}, 50);
+	}, 50);
 	};
 	
 	// Handle "New Campaign" button click with mobile restriction check
@@ -697,9 +759,11 @@ const Campaigns = () => {
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
-						<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
+						{selectedCampaignType !== 'templates' && (
+							<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
 							{isMobile ? '' : 'New Campaign'}
-						</Button>
+							</Button>
+						)}
 					</div>
 					<div className="filters-container">
 						<div className="row" style={{ marginBottom: '1rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import Button from '../../components/Button'
@@ -38,10 +38,13 @@ const campaignButtonGroupOptions = [
 
 const EditCampaign = () => {
 	const { uuid } = useParams()
+	const navigate = useNavigate()
+	const location = useLocation()
 	const { user, account, loading, error } = useAccount()
 	const [campaign, setCampaign] = useState(null)
 	const [selectedTab, setSelectedTab] = useState('overview_tab')
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])
+	const returnTab = location.state?.returnTab || localStorage.getItem('lastCampaignTab') || 'sent'
 
 	const emailClientsOptions = campaign?.stats?.metadata?.emailClient
 	const halfRecps = Math.round(campaign?.recipients / 2)
