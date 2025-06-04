@@ -151,8 +151,9 @@ const createSocialLinkString = (socialLinkBlock) => {
   style="${socialLinkBlock.contentStyleConfig.desktop}">
     ${socialLinkBlock.list
       .map((socialLinkItem) => {
-        const { image, title, linkURL } = socialLinkItem;
-        return `<a target="_black" href="https://${linkURL}" style="${socialLinkBlock.styleConfig.desktop};display:inline-block;">
+        const { image, title, link } = socialLinkItem;
+        console.log('socialLinkItem',socialLinkItem)
+        return `<a target="_black" href="${link}" style="${socialLinkBlock.styleConfig.desktop};display:inline-block;">
         <img src="${image}" alt="${title}" style="width:${socialLinkBlock.imageWidth}px;" 
         ${socialLinkBlock.styleConfig.mobile ? `class="${socialLinkBlock.styleConfig.className}"` : ""}/> 
       </a>`;
