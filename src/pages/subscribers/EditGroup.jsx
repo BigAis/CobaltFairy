@@ -10,6 +10,7 @@ import Card from '../../components/Card'
 import InputText from '../../components/InputText/InputText'
 import Button from '../../components/Button'
 import PopupText from '../../components/PopupText/PopupText'
+import GoBackButton from '../../components/GoBackButton'
 
 import { v4 as uuidv4 } from 'uuid'
 
@@ -60,7 +61,7 @@ const EditGroup = () => {
 		if (isEdit) {
 			const response = await ApiService.post(`fairymailer/updateSubscriber`, { data: group }, user.jwt)
 			if (response.data && response.data.code == 200) {
-				navigate('/subscribers/')
+				navigate('/subscribers/groups')
 			}
 		} else {
 			const newGroup = {
@@ -72,7 +73,7 @@ const EditGroup = () => {
 			}
 			const response = await ApiService.post(`groups`, { data: newGroup }, user.jwt)
 			if (response && response.data) {
-				navigate('/subscribers/')
+				navigate('/subscribers/groups')
 			}
 		}
 	}
@@ -86,7 +87,7 @@ const EditGroup = () => {
 				console.log('Confirmed with input:', result)
 				const response = await ApiService.post(`fairymailer/removeSubscriber`, { data: group }, user.jwt)
 				if (response.data && response.data.code == 200) {
-					navigate('/subscribers/')
+					navigate('/subscribers/groups')
 				}
 			}
 		})
@@ -102,7 +103,7 @@ const EditGroup = () => {
 				const deleteResponse = await ApiService.post(`fairymailer/deleteGroupByGuid/${group.udid}`, { data: {} }, user.jwt)
 				if (deleteResponse) {
 					console.log('on update running')
-					navigate('/subscribers/')
+					navigate('/subscribers/groups')
 				}
 			}
 		})
@@ -136,9 +137,12 @@ const EditGroup = () => {
 				<div className="fm-page-container">
 					{user && account && <PageHeader user={user.user} account={{ plan: 'Free Plan', ...(account || {}) }} />}
 
+					<GoBackButton destination="/subscribers/groups" />
+					
 					<div className="page-name-container">
 						<div className="page-name">{isEdit ? 'Edit Group' : 'New Group'}</div>
 					</div>
+					
 					{/* Display loading state if needed */}
 					{loading ? (
 						<Card>
@@ -159,13 +163,6 @@ const EditGroup = () => {
 							{isEdit && <InputText label={'Group UUID'} value={group.udid || uuid || ''} disabled={true} />}
 
 							<div className="d-flex gap-20">
-								{isEdit && (
-									<Button type="secondary" onClick={()=>{
-										navigate('/subscribers')
-									}}>
-										Go Back
-									</Button>
-								)}
 								<Button onClick={saveGroup}>Save</Button>
 								{isEdit && group.name && (
 									<Button type="secondary" onClick={deleteGroup}>

@@ -10,6 +10,7 @@ import InputText from '../../components/InputText/InputText'
 import Button from '../../components/Button'
 import Dropdown from '../../components/Dropdown'
 import PopupText from '../../components/PopupText/PopupText'
+import GoBackButton from '../../components/GoBackButton'
 
 const NewCustomField = () => {
 	const navigate = useNavigate()
@@ -54,7 +55,7 @@ const NewCustomField = () => {
 					confirmButtonText: 'OK',
 					icon: 'success',
 				}).then(() => {
-					navigate('/subscribers/')
+					navigate('/subscribers/fields')
 				})
 			}
 		} catch (error) {
@@ -74,9 +75,12 @@ const NewCustomField = () => {
 				<div className="fm-page-container">
 					{user && account && <PageHeader user={user.user} account={{ plan: 'Free Plan', ...(account || {}) }} />}
 
+					<GoBackButton destination="/subscribers/fields" />
+					
 					<div className="page-name-container">
 						<div className="page-name">New Field</div>
 					</div>
+					
 					<Card className={'d-flex flex-column gap-10'}>
 						<InputText label={'Name'} value={field.name} onChange={(e) => setField({ ...field, name: e.target.value })} />
 
@@ -115,9 +119,6 @@ const NewCustomField = () => {
 						)}
 
 						<div className="d-flex gap-20">
-							<Button type="secondary" onClick={() => navigate('/subscribers/')}>
-								Cancel
-							</Button>
 							<Button onClick={createCustomField}>Create</Button>
 						</div>
 					</Card>

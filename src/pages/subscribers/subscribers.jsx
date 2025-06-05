@@ -28,13 +28,14 @@ import './SubscribersCleanup.scss';
 import AddSubscriber from './AddSubscriber'
 import PopupText from '../../components/PopupText/PopupText'
 import SearchBar from '../../components/SearchBar/SearchBar';
+import GoBackButton from '../../components/GoBackButton'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
 import qs from 'qs'
 
-const Subscribers = () => {
+const Subscribers = ({ initialView }) => {
 	const navigate = useNavigate()
 	const location = useLocation()
 
@@ -52,7 +53,7 @@ const Subscribers = () => {
 	// State to track selected subscribers
 	const [selectedSubscribers, setSelectedSubscribers] = useState([])
 
-	const [view, setView] = useState('subs')
+	const [view, setView] = useState(initialView || 'subs')
 	const [importMode, setImportMode] = useState('manual') // 'manual' or 'bulk'
 	const [subscriberSearchValue, setSubscriberSearchValue] = useState('')
 	const [groupSearchValue, setGroupSearchValue] = useState('')
@@ -215,63 +216,76 @@ const Subscribers = () => {
 		}
 	}, [user])
 
+	// Update the URL when view changes for better navigation
+	useEffect(() => {
+		if (view && view !== 'subs') {
+			// Don't update URL if we're already there
+			if (!location.pathname.includes(`/subscribers/${view}`)) {
+				navigate(`/subscribers/${view}`, { replace: true });
+			}
+		} else if (view === 'subs' && location.pathname !== '/subscribers') {
+			navigate('/subscribers', { replace: true });
+		}
+	}, [view, navigate, location]);
+
 	const handleAddSubscribersClick = () => {
 		// Reset to manual mode when opening the add subscribers view
 		setImportMode('manual')
 		setView('import')
 	}
+	
 	const searchSubscribers = async (searchTerm) => {
-	try {
-		const resp = await ApiService.get(
-		`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[active]=true&filters[email][$contains]=${searchTerm}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
-		user.jwt
-		);
-		
-		if (resp.data && resp.data.data) {
-		setSubscribers(resp.data.data);
-		if (resp.data.meta) setTotalSubs(resp.data.meta.pagination.total);
+		try {
+			const resp = await ApiService.get(
+			`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[active]=true&filters[email][$contains]=${searchTerm}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
+			user.jwt
+			);
+			
+			if (resp.data && resp.data.data) {
+			setSubscribers(resp.data.data);
+			if (resp.data.meta) setTotalSubs(resp.data.meta.pagination.total);
+			}
+		} catch (error) {
+			console.error('Error searching subscribers:', error);
+			PopupText.fire({
+			text: 'Error searching subscribers. Please try again.',
+			icon: 'error'
+			});
 		}
-	} catch (error) {
-		console.error('Error searching subscribers:', error);
-		PopupText.fire({
-		text: 'Error searching subscribers. Please try again.',
-		icon: 'error'
-		});
-	}
 	};
 
 	const searchGroups = async (searchTerm) => {
-	try {
-		const query = {
-		pagination: {
-			pageSize: 1000,
-			page: 1,
-		},
-		filters: {
-			name: {
-			$contains: searchTerm
+		try {
+			const query = {
+			pagination: {
+				pageSize: 1000,
+				page: 1,
+			},
+			filters: {
+				name: {
+				$contains: searchTerm
+				}
 			}
+			};
+			
+			const queryString = qs.stringify(query, { encode: false });
+			
+			const resp = await ApiService.get(
+			`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true`,
+			user.jwt
+			);
+			
+			if (resp.data && resp.data.data) {
+			setGroups(resp.data.data);
+			setTotalGroups(resp.data.meta.pagination.total);
+			}
+		} catch (error) {
+			console.error('Error searching groups:', error);
+			PopupText.fire({
+			text: 'Error searching groups. Please try again.',
+			icon: 'error'
+			});
 		}
-		};
-		
-		const queryString = qs.stringify(query, { encode: false });
-		
-		const resp = await ApiService.get(
-		`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true`,
-		user.jwt
-		);
-		
-		if (resp.data && resp.data.data) {
-		setGroups(resp.data.data);
-		setTotalGroups(resp.data.meta.pagination.total);
-		}
-	} catch (error) {
-		console.error('Error searching groups:', error);
-		PopupText.fire({
-		text: 'Error searching groups. Please try again.',
-		icon: 'error'
-		});
-	}
 	};
 
 	const renderAddButton = () => {
@@ -306,11 +320,7 @@ const Subscribers = () => {
 					</Button>
 				)
 			case 'import':
-				return (
-					<Button onClick={() => setView('subs')} icon={'ArrowLeft'} type="action">
-						Back to Subscribers
-					</Button>
-				)
+				return null; // No button in import view - we'll use the GoBackButton instead
 			default:
 				return <></>
 		}
@@ -327,7 +337,6 @@ const Subscribers = () => {
 			autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
 		}
 	}, [user, subscribersFilters, autoAppliedFilters])
-	// }, [user, subscriberSearchValue, groupSearchValue, subscribersFilters, autoAppliedFilters])
 
 	useEffect(() => {
 		if (filterString && groups && groups.length > 0) {
@@ -428,6 +437,11 @@ const Subscribers = () => {
 				<Sidemenu />
 				<div className="fm-page-container">
 					<PageHeader user={user} account={account} />
+					
+					{view === 'import' && (
+						<GoBackButton onClick={() => setView('subs')} destination="/subscribers" />
+					)}
+					
 					<div className="page-name-container">
 						{view === 'subs' && <div className="page-name">Subscribers</div>}
 						{view === 'groups' && <div className="page-name">Groups</div>}
@@ -437,6 +451,7 @@ const Subscribers = () => {
 								{importMode === 'manual' ? 'Add Subscriber' : 'Import Subscribers'}
 							</div>
 						)}
+						{view === 'cleanup' && <div className="page-name">Cleanup Subscribers</div>}
 						{renderAddButton()}
 					</div>
 					

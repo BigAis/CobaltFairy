@@ -10,6 +10,7 @@ import InputText from '../../components/InputText/InputText'
 import Button from '../../components/Button'
 import PopupText from '../../components/PopupText/PopupText'
 import Dropdown from '../../components/Dropdown'
+import GoBackButton from '../../components/GoBackButton'
 
 const EditCustomField = () => {
 	const navigate = useNavigate()
@@ -61,7 +62,7 @@ const EditCustomField = () => {
 					confirmButtonText: 'OK',
 					icon: 'success',
 				}).then(() => {
-					navigate('/subscribers/')
+					navigate('/subscribers/fields')
 				})
 			}
 		} catch (error) {
@@ -83,7 +84,7 @@ const EditCustomField = () => {
 				try {
 					const response = await ApiService.post(`fairymailer/removeCustomField`, { data: field }, user.jwt)
 					if (response.data && response.data.code == 200) {
-						navigate('/subscribers/')
+						navigate('/subscribers/fields')
 					}
 				} catch (error) {
 					console.error('Error deleting custom field:', error)
@@ -103,9 +104,12 @@ const EditCustomField = () => {
 				<div className="fm-page-container">
 					{user && account && <PageHeader user={user.user} account={{ plan: 'Free Plan', ...(account || {}) }} />}
 
+					<GoBackButton destination="/subscribers/fields" />
+					
 					<div className="page-name-container">
 						<div className="page-name">Custom Fields</div>
 					</div>
+					
 					{field && (
 						<Card className={'d-flex flex-column gap-10'}>
 							<InputText

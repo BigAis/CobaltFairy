@@ -109,6 +109,8 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/design" element={<ProtectedRoute><Desing /></ProtectedRoute>} />
         <Route path="/payment-plan" element={<ProtectedRoute><PaymentPlan /></ProtectedRoute>} />
+        
+        {/* Campaign routes */}
         <Route path="/campaigns" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
         <Route path="/campaigns/sent" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
         <Route path="/campaigns/draft" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
@@ -118,7 +120,17 @@ function App() {
         <Route path="/campaigns/edit/:uuid" element={<ProtectedRoute><NewCampaign /></ProtectedRoute>} />
         <Route path="/templates/edit/:uuid" element={<ProtectedRoute><EditTemplate /></ProtectedRoute>} />
         <Route path="/campaigns/overview/:uuid" element={<ProtectedRoute><EditCampaign /></ProtectedRoute>} />
+        
+        {/* Subscribers routes */}
+// Replace the existing subscribers routes in App.jsx with these routes:
+
+        {/* Subscribers routes */}
         <Route path="/subscribers" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
+        <Route path="/subscribers/list" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
+        <Route path="/subscribers/groups" element={<ProtectedRoute><Subscribers initialView="groups" /></ProtectedRoute>} />
+        <Route path="/subscribers/fields" element={<ProtectedRoute><Subscribers initialView="fields" /></ProtectedRoute>} />
+        <Route path="/subscribers/cleanup" element={<ProtectedRoute><Subscribers initialView="cleanup" /></ProtectedRoute>} />
+        <Route path="/subscribers/import" element={<ProtectedRoute><Subscribers initialView="import" /></ProtectedRoute>} />
         <Route path="/subscribers/:uuid" element={<ProtectedRoute><EditSubscriber /></ProtectedRoute>} />
         <Route path="/subscribers/field/edit" element={<ProtectedRoute><EditCustomField /></ProtectedRoute>} />
         <Route path="/subscribers/field/new" element={<ProtectedRoute><NewCustomField /></ProtectedRoute>} />
@@ -136,7 +148,6 @@ function App() {
         <Route path="/settings/:section" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
         <Route path="/billing/:tab" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
-        <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
         <Route path="/billing/overview" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
         <Route path="/billing/invoice-details" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
         <Route path="/billing/payment-methods" element={<ProtectedRoute><Billing /></ProtectedRoute>} />

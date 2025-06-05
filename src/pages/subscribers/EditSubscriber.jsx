@@ -12,6 +12,7 @@ import Button from '../../components/Button'
 import PopupText from '../../components/PopupText/PopupText'
 import DatePicker from '../../components/DatePicker'
 import dayjs from 'dayjs'
+import GoBackButton from '../../components/GoBackButton'
 
 const EditSubscriber = () => {
 	const { uuid } = useParams()
@@ -27,7 +28,8 @@ const EditSubscriber = () => {
 				if (response && response.data && response.data.data) {
 					const subscriberData = response.data.data[0]
 
-					if (!subscriberData.fields && account && account.fields) {
+					// Initialize fields as an empty array if it doesn't exist
+					if (!subscriberData.fields || !Array.isArray(subscriberData.fields)) {
 						subscriberData.fields = []
 					}
 
@@ -46,7 +48,7 @@ const EditSubscriber = () => {
 	const saveSubscriber = async () => {
 		const response = await ApiService.post(`fairymailer/updateSubscriber`, { data: subscriber }, user.jwt)
 		if (response.data && response.data.code == 200) {
-			navigate('/subscribers/')
+			navigate('/subscribers')
 		}
 	}
 
@@ -57,7 +59,7 @@ const EditSubscriber = () => {
 		}
 		const response = await ApiService.post(`fairymailer/updateSubscriber`, { data: subscriberData }, user.jwt)
 		if (response.data && response.data.code == 200) {
-			navigate('/subscribers/')
+			navigate('/subscribers')
 		}
 	}
 
@@ -70,7 +72,7 @@ const EditSubscriber = () => {
 				console.log('Confirmed with input:', result)
 				const response = await ApiService.post(`fairymailer/removeSubscriber`, { data: subscriber }, user.jwt)
 				if (response.data && response.data.code == 200) {
-					navigate('/subscribers/')
+					navigate('/subscribers')
 				}
 			}
 		})
@@ -131,10 +133,6 @@ const EditSubscriber = () => {
 		return formatted
 	}
 
-	// if (!subscriber) {
-	// 	return <div>Loading...</div>
-	// }
-
 	const getDateFormat = (format) => {
 		if (format === 'YYYY/MM/DD') {
 			return 'Y/m/d'
@@ -155,10 +153,14 @@ const EditSubscriber = () => {
 
 		console.log('Subscriber is : ', subscriber)
 		console.log('AccountFields is : ', account.fields)
+		
+		// Ensure subscriber.fields is always an array
+		const subscriberFields = Array.isArray(subscriber.fields) ? subscriber.fields : [];
+		
 		return (
 			<>
 				{account.fields.map((field) => {
-					const fieldData = subscriber.fields?.find((f) => f.uuid === field.uuid) || { value: '' }
+					const fieldData = subscriberFields.find((f) => f.uuid === field.uuid) || { value: '' }
 					const fieldValue = fieldData.value
 
 					if (field.type.toLowerCase() === 'date') {
@@ -201,9 +203,12 @@ const EditSubscriber = () => {
 				<div className="fm-page-container">
 					{user && account && <PageHeader user={user.user} account={{ plan: 'Free Plan', ...(account || {}) }} />}
 
+					<GoBackButton destination="/subscribers" />
+					
 					<div className="page-name-container">
-						<div className="page-name">Subscribers</div>
+						<div className="page-name">Edit Subscriber</div>
 					</div>
+					
 					{subscriber && (
 						<Card>
 							<InputText label={'Email'} value={subscriber.email} disabled={true} />
