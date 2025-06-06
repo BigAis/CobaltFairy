@@ -929,23 +929,18 @@ const FlowEditor = () => {
 					</>
 				) : (
 					<>
-					<div style={{ color: '#ff635d', fontWeight: 'bold', marginRight: '20px' }}>
+					<div style={{ 
+						color: '#ff635d', 
+						fontWeight: 'bold', 
+						marginRight: '20px',
+						fontFamily: 'Inter, sans-serif' // Fix: Add consistent font family
+					}}>
 						{data?.active ? 'This automation is currently active and cannot be edited' : 'View-only mode'}
 					</div>
 					<Button
 						onClick={() => {
-						if (data?.active) {
-							// If active, show a popup explaining how to deactivate
-							PopupText.fire({
-							icon: 'info',
-							text: 'To edit this automation, you need to deactivate it first from the automations list.',
-							showConfirmButton: true,
-							confirmButtonText: 'Got it',
-							});
-						} else {
-							// If not active but in view-only mode, navigate to edit mode
-							navigate(`/automations/editor/${autId}`);
-						}
+						// Fix: Navigate directly to automations list instead of showing popup
+						navigate('/automations');
 						}}
 					>
 						{data?.active ? 'Back to List' : 'Edit Flow'}
