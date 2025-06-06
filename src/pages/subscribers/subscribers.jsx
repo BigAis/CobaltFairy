@@ -49,6 +49,8 @@ const Subscribers = ({ initialView }) => {
 	const [subscribers, setSubscribers] = useState([])
 	const [totalSubs, setTotalSubs] = useState(0)
 	const [groups, setGroups] = useState([])
+	const [allGroups, setAllGroups] = useState([]) // Store all groups for client-side filtering
+	const [groupsLoading, setGroupsLoading] = useState(false)
 
 	// State to track selected subscribers
 	const [selectedSubscribers, setSelectedSubscribers] = useState([])
@@ -184,37 +186,76 @@ const Subscribers = ({ initialView }) => {
 		}
 	}
 
-	const getGroups = async (page = 1) => {
-		const query = {
-			pagination: {
-				pageSize: 1000,
-				page,
-			},
-			// fields: ['id', 'udid'],
-		}
-		const queryString = qs.stringify(query, { encode: false })
-
+	const getGroups = async (page = 1, searchTerm = '') => {
+		// Prevent duplicate calls
+		if (groupsLoading) return;
+		
+		setGroupsLoading(true);
+		
 		try {
-			const resp = await ApiService.get(`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true&`, user.jwt)
+			// Always fetch all groups
+			const query = {
+				pagination: {
+					pageSize: 1000,
+					page,
+				}
+			};
+			
+			const queryString = qs.stringify(query, { encode: false });
+			const resp = await ApiService.get(`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true`, user.jwt);
 
 			if (resp.data && resp.data.data) {
-				setGroups(resp.data.data)
-				setTotalGroups(resp.data.meta.pagination.total)
+				const allGroupsData = resp.data.data;
+				setAllGroups(allGroupsData); // Store all groups
+				
+				// Client-side filtering
+				if (searchTerm && searchTerm.trim() !== '') {
+					const filtered = allGroupsData.filter(group => 
+						group.name.toLowerCase().includes(searchTerm.toLowerCase())
+					);
+					setGroups(filtered);
+					setTotalGroups(filtered.length);
+				} else {
+					setGroups(allGroupsData);
+					setTotalGroups(resp.data.meta.pagination.total);
+				}
 			}
 		} catch (error) {
-			console.error('Error fetching groups:', error)
+			console.error('Error fetching groups:', error);
 			PopupText.fire({
 				text: 'Error fetching groups. Please try again later.',
 				icon: 'error'
-			})
+			});
+		} finally {
+			setGroupsLoading(false);
 		}
 	}
 
+	// Initial load of groups when user is available
 	useEffect(() => {
-		if (user) {
-			getGroups()
+		if (user && allGroups.length === 0 && !groupsLoading) {
+			getGroups(1, '');
 		}
 	}, [user])
+
+	// Handle search term changes for groups
+	useEffect(() => {
+		if (!user || view !== 'groups') return;
+		
+		// If we already have all groups, filter client-side
+		if (allGroups.length > 0 && !groupsLoading) {
+			if (groupSearchValue && groupSearchValue.trim() !== '') {
+				const filtered = allGroups.filter(group => 
+					group.name.toLowerCase().includes(groupSearchValue.toLowerCase())
+				);
+				setGroups(filtered);
+				setTotalGroups(filtered.length);
+			} else {
+				setGroups(allGroups);
+				setTotalGroups(allGroups.length);
+			}
+		}
+	}, [groupSearchValue, view, user, allGroups])
 
 	// Update the URL when view changes for better navigation
 	useEffect(() => {
@@ -254,38 +295,10 @@ const Subscribers = ({ initialView }) => {
 		}
 	};
 
-	const searchGroups = async (searchTerm) => {
-		try {
-			const query = {
-			pagination: {
-				pageSize: 1000,
-				page: 1,
-			},
-			filters: {
-				name: {
-				$contains: searchTerm
-				}
-			}
-			};
-			
-			const queryString = qs.stringify(query, { encode: false });
-			
-			const resp = await ApiService.get(
-			`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true`,
-			user.jwt
-			);
-			
-			if (resp.data && resp.data.data) {
-			setGroups(resp.data.data);
-			setTotalGroups(resp.data.meta.pagination.total);
-			}
-		} catch (error) {
-			console.error('Error searching groups:', error);
-			PopupText.fire({
-			text: 'Error searching groups. Please try again.',
-			icon: 'error'
-			});
-		}
+	const searchGroups = (searchTerm) => {
+		// Just update the search term state
+		// The useEffect will handle the API call
+		setGroupSearchValue(searchTerm);
 	};
 
 	const renderAddButton = () => {
@@ -327,13 +340,14 @@ const Subscribers = ({ initialView }) => {
 	}
 
 	const onUpdate = async () => {
-		getGroups()
-		autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
+		// Reload all groups and apply current filter
+		await getGroups(1, groupSearchValue);
+		autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers();
 	}
 
 	useEffect(() => {
 		if (user) {
-			if (groups.length === 0) getGroups()
+			// Don't load groups here, it's handled by other useEffects
 			autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
 		}
 	}, [user, subscribersFilters, autoAppliedFilters])
@@ -508,10 +522,7 @@ const Subscribers = ({ initialView }) => {
 								placeholder="Search Groups"
 								label="Search Groups"
 								initialValue={groupSearchValue}
-								onSearch={(value) => {
-									setGroupSearchValue(value);
-									searchGroups(value);
-								}}
+								onSearch={searchGroups}
 								style={{ width: '100%' }}
 								/>
 							</div>
@@ -576,7 +587,14 @@ const Subscribers = ({ initialView }) => {
 
 					{view === 'groups' && (
 						<div className="groups">
-							<GroupsTable groupSearchValue={groupSearchValue} onUpdate={onUpdate} setView={setView} />
+							<GroupsTable 
+								groupSearchValue={groupSearchValue} 
+								onUpdate={onUpdate} 
+								setView={setView}
+								groups={groups}
+								totalResults={totalGroups}
+								loading={groupsLoading}
+							/>
 						</div>
 					)}
 

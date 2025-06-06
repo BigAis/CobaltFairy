@@ -15,12 +15,11 @@ import { ApiService } from '../../service/api-service'
 
 import qs from 'qs'
 
-// const GroupsTable = ({ groups, resultsPerPage, onUpdate, setView, currentPage, totalResults, onPageChange }) => {
-const GroupsTable = ({ groupSearchValue, onUpdate, setView }) => {
+const GroupsTable = ({ groupSearchValue, onUpdate, setView, groups: propGroups = null, totalResults: propTotalResults = 0, loading: propLoading = false }) => {
 	const navigate = useNavigate()
 	const { user } = useAccount()
 
-	const [loading, setLoading] = useState(false)
+	const [loading, setLoading] = useState(propLoading)
 	const [groups, setGroups] = useState([])
 	const [totalResults, setTotalResults] = useState(0)
 	const [currentPage, setCurrentPage] = useState(1)
@@ -40,9 +39,15 @@ const GroupsTable = ({ groupSearchValue, onUpdate, setView }) => {
 	const paginatedData = groups.slice(startIndex, endIndex)
 
 	useEffect(() => {}, [selectedGroups])
+	
 	useEffect(() => {
-		getGroups(currentPage)
-	}, [currentPage, groupSearchValue])
+		// Always use provided groups when available
+		if (propGroups !== null) {
+			setGroups(propGroups)
+			setTotalResults(propTotalResults)
+			setLoading(propLoading)
+		}
+	}, [propGroups, propTotalResults, propLoading])
 
 	const handlePageChange = (newPage) => {
 		setCurrentPage(newPage)
@@ -97,44 +102,12 @@ const GroupsTable = ({ groupSearchValue, onUpdate, setView }) => {
 				const deleteResponse = await ApiService.post(`fairymailer/deleteGroupByGuid/${rowData.udid}`, { data: {} }, user.jwt)
 				if (deleteResponse) {
 					onUpdate()
-					getGroups()
 				}
 			}
 		})
 	}
 
-	const getGroups = async (page = 1) => {
-		setLoading(true)
-		const query = {
-			filters: {
-				name: {
-					$contains: groupSearchValue,
-				},
-			},
-			pagination: {
-				pageSize: resultsPerPage,
-				page,
-			},
-		}
-		const queryString = qs.stringify(query, { encode: false })
-
-		try {
-			const resp = await ApiService.get(`fairymailer/getGroups?${queryString}&populate[subscribers][count]=true`, user.jwt)
-
-			if (resp.data && resp.data.data) {
-				setGroups(resp.data.data)
-				setTotalResults(resp.data.meta.pagination.total)
-			}
-			setCurrentPage(page)
-		} catch (error) {
-			console.error('Error fetching groups:', error)
-		} finally {
-			setLoading(false)
-		}
-	}
-
 	return (
-		// <div>
 		<>
 			<DataTable value={groups} paginator={false} selection={selectedGroups} onSelectionChange={(e) => setSelectedGroups(e.value)} dataKey="name" rowClassName={() => 'p-table-row'}>
 				<Column
@@ -176,7 +149,6 @@ const GroupsTable = ({ groupSearchValue, onUpdate, setView }) => {
 				<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
 			</DataTable>
 			<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
-			{/* </div> */}
 		</>
 	)
 }
