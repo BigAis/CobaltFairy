@@ -172,17 +172,11 @@ div.automation-node-horizontal-line {
 
 div.automation-node-content-wrapper {
 	cursor: pointer;
+    /* border: 1px solid #e5e7eb; */ /* Remove this line */
+	/* border-radius: 5px; */ /* Remove this line */
+    transition-duration: 150ms;
 }
 
-div.automation-node-content-wrapper {
-	border: 1px solid #e5e7eb;
-	border-radius: 5px;
-	transition-duration: 150ms;
-}
-
-div.automation-node-content-wrapper:hover {
-	border-color: #acaeb2;
-}
 
 div.automation-node-content-wrapper i {
 	position: absolute;
@@ -197,3 +191,4 @@ div.automation-node-content-wrapper:hover i {
 div.automation-node-content-wrapper i:hover {
 	color: #1e1e1e;
 }
+
