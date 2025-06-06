@@ -83,18 +83,27 @@ const Automations = () => {
                             Add Automation
                         </Button>
                     </div>
-                    <div className="filters-container">
-                        <div className="input-text-container" style={{marginTop:'10px', display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+                    
+                    {/* Search Bar - Added margin-bottom for spacing */}
+                    <div className="filters-container" style={{ marginBottom: '20px' }}>
+                        <div className="input-text-container" style={{
+                            marginTop: '10px', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between'
+                        }}>
                             <SearchBar
                                 placeholder="Search Automations" 
                                 label="Search Automations"
                                 initialValue={searchTerm}
                                 onSearch={searchAutomations}
-                                style={{ width: '100%', marginRight: '20px' }}
+                                style={{ width: '100%' }}
                             />
+                            {/* Filters button temporarily hidden
                             <Button type="secondary" icon={'Filters'} className="button-filters">
                                 Filters
                             </Button>
+                            */}
                         </div>
                     </div>
 
