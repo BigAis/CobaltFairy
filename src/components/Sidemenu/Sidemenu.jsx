@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import './Sidemenu.scss'
 import Logo from '../Logo/Logo'
 import SubsCounter from '../SubsCounter'
@@ -31,6 +31,7 @@ const Sidemenu = () => {
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 	const [menuOpen, setMenuOpen] = useState(false)
 	const [userMenuOpen, setUserMenuOpen] = useState(false)
+	const userMenuRef = useRef(null)
 
 	// Determine active menu item
 	const getActiveItem = () => {
@@ -49,12 +50,14 @@ const Sidemenu = () => {
 			label: 'Profile',
 			callback: () => {
 				setUserMenuOpen(false);
+				navigate('/settings/profile');
 			}
 		},
 		{
 			label: 'Change Password',
 			callback: () => {
 				setUserMenuOpen(false);
+				navigate('/settings/profile');
 			}
 		},
 		{
@@ -91,13 +94,16 @@ const Sidemenu = () => {
 		return () => window.removeEventListener('resize', handleResize)
 	}, [])
 
-	// Close menu when clicking outside on mobile
+	// Updated click handler to close dropdowns when clicking outside
 	useEffect(() => {
 		const handleClickOutside = (e) => {
+			// Close menu when clicking outside on mobile
 			if (isMobile && menuOpen && !e.target.closest('.sidemenu')) {
 				setMenuOpen(false)
 			}
-			if (isMobile && userMenuOpen && !e.target.closest('.user-menu-wrapper')) {
+			
+			// Close user menu when clicking outside
+			if (isMobile && userMenuOpen && userMenuRef.current && !userMenuRef.current.contains(e.target)) {
 				setUserMenuOpen(false)
 			}
 		}
@@ -134,7 +140,7 @@ const Sidemenu = () => {
 								<Logo />
 							</div>
 							
-							<div className="user-menu-wrapper">
+							<div className="user-menu-wrapper" ref={userMenuRef}>
 								<div className="user-avatar" onClick={(e) => {
 									e.stopPropagation();
 									setUserMenuOpen(!userMenuOpen);
