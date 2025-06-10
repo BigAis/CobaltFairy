@@ -1,42 +1,52 @@
-.sidemenu{
+.sidemenu {
     width: 265px;
     min-height: 100vh;
     background: rgba(255, 255, 255, 0.5);
     border-right: 2px solid rgba(218, 209, 197, 1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1em 0;
-    justify-content: space-between;
-    padding-bottom:3em;
-    position: relative;
+    position: fixed; /* Make sidemenu fixed in desktop mode */
+    top: 0;
+    left: 0;
     z-index: 100;
+    overflow-y: auto; /* Allow scrolling within sidemenu if needed */
 
-    .sidemenu-inner{
+    .sidemenu-inner {
         width: 265px;
         height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
         padding: 1em 0;
-        justify-content: space-between;
-        padding-bottom:3em;
         position: relative;
         
-        .menu_upper, .menu_lower{
-            padding:0 2em;
-            min-width:220px;
+        /* Adjust spacing between elements */
+        .fairymail-logo-container {
+            margin-bottom: 2em;
+        }
+        
+        .menu_upper {
+            margin-top: 1em;
+            padding: 0 2em;
+            min-width: 220px;
             text-align: left;
+        }
 
-            ul{
+        .menu_lower {
+            margin-top: 1em;
+            padding: 0 2em;
+            min-width: 220px;
+            text-align: left;
+        }
+
+        .menu_upper, .menu_lower {
+            ul {
                 list-style: none;
-                padding:0;
-                li{
+                padding: 0;
+                li {
                     font-family: 'Bitter';
-                    color:#343037;
+                    color: #343037;
                     display: flex;
                     align-items: center;
-                    margin-bottom:20px;
+                    margin-bottom: 20px;
                     font-weight: 600;
                     font-size: 18px;
                     border-radius: 8px;
@@ -46,16 +56,16 @@
                 }
                 
                 svg {
-                    margin-right:10px;
+                    margin-right: 10px;
                     path {
                         fill: #343037;
                         transition: fill 0.2s ease;
                     }
                 }
 
-                li:hover{
+                li:hover {
                     color: rgba(255, 76, 73, 1);
-                    cursor:pointer;
+                    cursor: pointer;
                     /* Removed background-color change */
                     text-decoration: none !important;
                     
@@ -68,7 +78,7 @@
                     }
                 }
                 
-                li.active{
+                li.active {
                     color: rgba(255, 76, 73, 1);
                     /* Removed background-color change */
                     text-decoration: none !important;
@@ -95,8 +105,10 @@
         }
         
         .menu_bottom {
+            margin-top: auto; /* Push to bottom while maintaining spacing */
             padding: 0 1em;
             width: 90%;
+            margin-bottom: 3em;
         }
     }
 
@@ -276,6 +288,17 @@
                 }
             }
         }
+    }
+}
+
+/* Add this to adjust main content area in desktop mode */
+.dashboard-container, .fm-page-container {
+    margin-left: 265px;
+    width: calc(100% - 265px);
+    
+    @media (max-width: 768px) {
+        margin-left: 0;
+        width: 100%;
     }
 }
 

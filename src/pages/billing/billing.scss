@@ -8,9 +8,12 @@
     
     .billing-container {
         padding: 3em;
-        width: 100%;
+        width: calc(100% - 265px);
+        margin-left: 265px;
         
         @media (max-width: 768px) {
+            margin-left: 0;
+            width: 100%;
             padding: 1em;
             padding-top: 70px !important; /* Account for fixed header */
         }
