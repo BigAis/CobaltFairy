@@ -777,19 +777,33 @@ const Campaigns = () => {
 								]}
 								onChange={handleTabChange}
 							></ButtonGroup>
-						{/* View mode toggle moved above the search bar and converted to ButtonGroup */}
-						{dropdownViewer === 'campaigns' && (
-							<ButtonGroup
-								value={viewMode}
-								options={[
-									{ value: 'list', label: 'List View' },
-									{ value: 'calendar', label: 'Calendar' },
-								]}
-								onChange={setViewMode}
-							/>
-						)}
+							
+							{/* View mode toggle only shows here on desktop */}
+							{!isMobile && dropdownViewer === 'campaigns' && (
+								<ButtonGroup
+									value={viewMode}
+									options={[
+										{ value: 'list', label: 'List View' },
+										{ value: 'calendar', label: 'Calendar' },
+									]}
+									onChange={setViewMode}
+								/>
+							)}
 						</div>
 						
+						{/* Show view mode toggle in a separate row on mobile */}
+						{isMobile && dropdownViewer === 'campaigns' && (
+							<div className="row" style={{ marginBottom: '1rem' }}>
+								<ButtonGroup
+									value={viewMode}
+									options={[
+										{ value: 'list', label: 'List View' },
+										{ value: 'calendar', label: 'Calendar' },
+									]}
+									onChange={setViewMode}
+								/>
+							</div>
+						)}
 						
 						<div className="row d-flex content-space-between">
 							{dropdownViewer === 'campaigns' ? (
