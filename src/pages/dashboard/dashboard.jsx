@@ -261,7 +261,7 @@ const Dashboard = () => {
 					<span>Create Campaign</span>
 					</Button>
 						<Button type={'secondary'} onClick={()=>{
-							PopupText.fire({text:'Under Construction',showCancelButton:false,confirmButtonText:'OK'})
+							navigate('/subscribers/import')
 						}}>
 							<Icon name="Contacts" />
 							<span>Import Contacts</span>
