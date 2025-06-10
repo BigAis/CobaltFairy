@@ -97,7 +97,7 @@ const NewCampaign = () => {
 		const handleResize = () => {
 			setIsMobile(window.innerWidth <= 768)
 		}
-		
+
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
 	}, [])
@@ -105,52 +105,52 @@ const NewCampaign = () => {
 	// Handle mobile restrictions
 	useEffect(() => {
 		if (isMobile) {
-		// For campaign creation on mobile - prevent editor access
-		if (step === 3) {
-			PopupText.fire({
-			icon: 'warning',
-			text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
-			showCancelButton: false,
-			confirmButtonText: 'OK',
-			}).then(() => {
-			setStep(4); // Skip to next step
-			});
+			// For campaign creation on mobile - prevent editor access
+			if (step === 3) {
+				PopupText.fire({
+					icon: 'warning',
+					text: 'Campaign editor is not available on mobile devices. Please use a desktop to design your campaign.',
+					showCancelButton: false,
+					confirmButtonText: 'OK',
+				}).then(() => {
+					setStep(4) // Skip to next step
+				})
+			}
+
+			// For going back from step 4 to step 3 on mobile
+			if (step === 4 && typeof window !== 'undefined' && window.sessionStorage) {
+				// Store a flag to indicate we'd need to skip step 3
+				window.sessionStorage.setItem('skipEditorStep', 'true')
+			}
+
+			// For editing draft campaigns on mobile - redirect back to campaigns page
+			if (isEdit && currentCampaign && currentCampaign.status === 'draft') {
+				PopupText.fire({
+					icon: 'warning',
+					text: 'Draft campaigns cannot be edited on mobile devices. Please use a desktop to edit your campaign.',
+					showCancelButton: false,
+					confirmButtonText: 'OK',
+				}).then(() => {
+					navigate('/campaigns')
+				})
+			}
 		}
-		
-		// For going back from step 4 to step 3 on mobile
-		if (step === 4 && typeof window !== 'undefined' && window.sessionStorage) {
-			// Store a flag to indicate we'd need to skip step 3
-			window.sessionStorage.setItem('skipEditorStep', 'true');
-		}
-		
-		// For editing draft campaigns on mobile - redirect back to campaigns page
-		if (isEdit && currentCampaign && currentCampaign.status === 'draft') {
-			PopupText.fire({
-			icon: 'warning',
-			text: 'Draft campaigns cannot be edited on mobile devices. Please use a desktop to edit your campaign.',
-			showCancelButton: false,
-			confirmButtonText: 'OK',
-			}).then(() => {
-			navigate('/campaigns');
-			});
-		}
-		}
-	}, [isMobile, step, isEdit, currentCampaign, navigate]);
-	
+	}, [isMobile, step, isEdit, currentCampaign, navigate])
+
 	// Function to handle the next and back buttons with mobile compatibility
 	const handleStepChange = (direction) => {
 		if (direction === 'next') {
-		// Handle next button logic (your existing code)
-		// ...
+			// Handle next button logic (your existing code)
+			// ...
 		} else if (direction === 'back') {
-		// Going back
-		if (isMobile && step === 4) {
-			setStep(2); // Skip step 3 (editor) and go directly to step 2
-		} else {
-			setStep(step - 1); // Normal back behavior
+			// Going back
+			if (isMobile && step === 4) {
+				setStep(2) // Skip step 3 (editor) and go directly to step 2
+			} else {
+				setStep(step - 1) // Normal back behavior
+			}
 		}
-		}
-	};
+	}
 
 	//Validation for the first step
 	const validationSchema = Yup.object().shape({
@@ -293,7 +293,7 @@ const NewCampaign = () => {
 	const handleSendNow = async () => {
 		const campaignData = {
 			...currentCampaign,
-			date: dayjs().add(10, 'day').toISOString(),
+			date: dayjs().add(10, 'minute').toISOString(),
 			account: account.id,
 		}
 		try {
@@ -311,53 +311,52 @@ const NewCampaign = () => {
 
 	const handleNext = async () => {
 		try {
-		  await validationSchema.validate({ subject: currentCampaign.subject, subjectB: currentCampaign.subject_b }, { abortEarly: false });
-		  setErrors({});
-	  
-		  const campaignData = {
-			...currentCampaign,
-			account: account.id,
-		  };
-	  
-		  if (isEdit) {
-			campaignData.udid = uuid;
-			const response = await ApiService.post('fairymailer/updateCampaign', { assignses: true, data: campaignData }, user.jwt);
-			
-			if (response && response.data && response.data.code === 200) {
-			  if (isMobile && step === 2) {
-				// If on mobile and moving from step 2 to step 3, skip directly to step 4
-				setStep(4);
-			  } else {
-				navigate(`/campaigns/edit/${campaignData.udid}`);
-				setStep(step + 1);
-			  }
-			}
-		  } else {
-			campaignData.udid = uuidv4();
-			campaignData.uuid_b = uuidv4();
-	  
-			const response = await ApiService.post('fairymailer/createCampaign', { assignses: true, data: campaignData }, user.jwt);
-			
-			if (response && response.data && response.data.code === 200) {
-			  if (isMobile && step === 2) {
-				// If on mobile and moving from step 2 to step 3, skip directly to step 4
-				setStep(4);
-			  } else {
-				navigate(`/campaigns/edit/${campaignData.udid}`);
-				setStep(step + 1);
-			  }
-			}
-		  }
-		} catch (err) {
-		  console.log('error is : ', err);
-		  const newErrors = {};
-		  err.inner.forEach((error) => {
-			newErrors[error.path] = error.message;
-		  });
-		  setErrors(newErrors);
-		}
-	  };
+			await validationSchema.validate({ subject: currentCampaign.subject, subjectB: currentCampaign.subject_b }, { abortEarly: false })
+			setErrors({})
 
+			const campaignData = {
+				...currentCampaign,
+				account: account.id,
+			}
+
+			if (isEdit) {
+				campaignData.udid = uuid
+				const response = await ApiService.post('fairymailer/updateCampaign', { assignses: true, data: campaignData }, user.jwt)
+
+				if (response && response.data && response.data.code === 200) {
+					if (isMobile && step === 2) {
+						// If on mobile and moving from step 2 to step 3, skip directly to step 4
+						setStep(4)
+					} else {
+						navigate(`/campaigns/edit/${campaignData.udid}`)
+						setStep(step + 1)
+					}
+				}
+			} else {
+				campaignData.udid = uuidv4()
+				campaignData.uuid_b = uuidv4()
+
+				const response = await ApiService.post('fairymailer/createCampaign', { assignses: true, data: campaignData }, user.jwt)
+
+				if (response && response.data && response.data.code === 200) {
+					if (isMobile && step === 2) {
+						// If on mobile and moving from step 2 to step 3, skip directly to step 4
+						setStep(4)
+					} else {
+						navigate(`/campaigns/edit/${campaignData.udid}`)
+						setStep(step + 1)
+					}
+				}
+			}
+		} catch (err) {
+			console.log('error is : ', err)
+			const newErrors = {}
+			err.inner.forEach((error) => {
+				newErrors[error.path] = error.message
+			})
+			setErrors(newErrors)
+		}
+	}
 
 	const handleCheckAbSplit = () => {
 		setAbSplit(!abSplit)
@@ -368,45 +367,45 @@ const NewCampaign = () => {
 	// Add a function to load and apply presets
 	const loadPreset = async (presetId) => {
 		try {
-		// Fetch preset data
-		const response = await ApiService.get(`fairymailer/getCampaignPreset?id=${presetId}`, user.jwt);
-		
-		if (response.data && response.data.data) {
-			const preset = response.data.data;
-			
-			// Apply preset settings to campaign
-			setCurrentCampaign({
-			...currentCampaign,
-			// Apply relevant preset properties
-			});
-			
-			// Apply container settings and other configurations
-		}
+			// Fetch preset data
+			const response = await ApiService.get(`fairymailer/getCampaignPreset?id=${presetId}`, user.jwt)
+
+			if (response.data && response.data.data) {
+				const preset = response.data.data
+
+				// Apply preset settings to campaign
+				setCurrentCampaign({
+					...currentCampaign,
+					// Apply relevant preset properties
+				})
+
+				// Apply container settings and other configurations
+			}
 		} catch (error) {
-		console.error("Error loading preset:", error);
+			console.error('Error loading preset:', error)
 		}
-	};
+	}
 
 	const sendTestEmail = async () => {
 		const campaignUdid = uuid
 		const response = await ApiService.post(`fairymail/sendDraft`, { campaign_id: campaignUdid }, user.jwt)
-		
-		if(response?.data?.code && response?.data?.code==200){
-		  createNotification({ 
-			message: 'Test email was sent successfully.', 
-			type: 'default',
-			autoClose: 3000 
-		  })
+
+		if (response?.data?.code && response?.data?.code == 200) {
+			createNotification({
+				message: 'Test email was sent successfully.',
+				type: 'default',
+				autoClose: 3000,
+			})
 		} else {
-		  createNotification({ 
-			message: 'Could not send test email. If the problem persists please contact our support team.', 
-			type: 'warning',
-			autoClose: 90000 
-		  })
+			createNotification({
+				message: 'Could not send test email. If the problem persists please contact our support team.',
+				type: 'warning',
+				autoClose: 90000,
+			})
 		}
-	
+
 		console.log('response from sendTestEmail is : ', response)
-	  }
+	}
 
 	const updateRecpFilter = (id, filter, meta) => {
 		console.log('meta inside updateRecpFilter is : ', meta)
@@ -481,13 +480,13 @@ const NewCampaign = () => {
 			// Only set default date when enabling scheduling and no date exists
 			setCurrentCampaign((prevState) => ({
 				...prevState,
-				date: dayjs(new Date(new Date().setHours(new Date().getHours() + 2))).toISOString()
+				date: dayjs(new Date(new Date().setHours(new Date().getHours() + 2))).toISOString(),
 			}))
 		} else if (!scheduleCampaign) {
 			// Clear date when disabling scheduling
 			setCurrentCampaign((prevState) => ({
 				...prevState,
-				date: null
+				date: null,
 			}))
 		}
 		// Don't modify date if scheduleCampaign is true and date already exists
@@ -693,7 +692,7 @@ const NewCampaign = () => {
 
 					{step === 4 && (
 						<>
-							<div className="mt50 d-flex flex-column gap-20" style={{ maxWidth: '550px', paddingBottom:'40px' }}>
+							<div className="mt50 d-flex flex-column gap-20" style={{ maxWidth: '550px', paddingBottom: '40px' }}>
 								<h1 className="campaign-title">Review and Send</h1>
 								<div className="new-campaign-right flex-1">
 									<div className="campaign-preview-wrapper d-flex flex-column align-items-center">
