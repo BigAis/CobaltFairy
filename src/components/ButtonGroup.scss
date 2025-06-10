@@ -2,6 +2,7 @@
 	text-align: left;
 	display: flex;
 	flex-wrap: wrap;
+	position: relative;
 	
 	.btn {
 		margin-right: 3px;
@@ -11,31 +12,74 @@
 	
 	@media (max-width: 768px) {
 		width: 100%;
-		margin-bottom: 10px;
+		margin-bottom: 16px; /* Add more space for the scrollbar below */
 		overflow-x: auto;
 		display: flex;
 		flex-wrap: nowrap;
+		-webkit-overflow-scrolling: touch;
+		
+		/* Show a visual scrollbar below the buttons */
+		&::after {
+			content: '';
+			position: absolute;
+			bottom: -8px;
+			left: 0;
+			right: 0;
+			height: 4px;
+			background-color: rgba(218, 209, 197, 0.5);
+			border-radius: 2px;
+		}
+		
+		/* Create scrollbar indicator */
+		&::before {
+			content: '';
+			position: absolute;
+			bottom: -8px;
+			left: 0;
+			width: 30%; /* This represents the visible portion */
+			height: 4px;
+			background-color: rgba(255, 99, 93, 0.7);
+			border-radius: 2px;
+			z-index: 1;
+			transition: transform 0.3s ease;
+			transform: translateX(0);
+		}
 		
 		.btn {
 			font-size: 12px;
-			padding: 5px 8px;
-			min-width: 80px;
+			padding: 5px 10px;
+			min-width: auto; /* Let the content determine width */
+			width: auto;
 			white-space: nowrap;
 			flex-shrink: 0;
+			text-overflow: clip; /* Don't truncate text */
+			overflow: visible; /* Ensure text isn't cut off */
 		}
 		
 		&.btn-sm {
-			justify-content: space-between;
+			justify-content: flex-start;
 			
 			.btn {
-				flex: 1;
-				margin-right: 2px;
+				flex: 0 0 auto;
+				margin-right: 4px;
 				margin-left: 0;
 				text-align: center;
+				padding: 6px 14px; /* More padding for better touch targets */
+				border-radius: 6px;
+				
+				/* Ensure full text is shown */
+				text-overflow: clip;
+				overflow: visible;
 				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
 			}
 		}
+		
+		/* Hide default scrollbar */
+		&::-webkit-scrollbar {
+			display: none;
+		}
+		
+		/* Hide scrollbar for Firefox */
+		scrollbar-width: none;
 	}
 }
