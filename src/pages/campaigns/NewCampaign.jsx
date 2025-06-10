@@ -477,13 +477,20 @@ const NewCampaign = () => {
 	}, [uuid, user, step])
 
 	useEffect(() => {
-		console.log('currentCampaign from scheduleCampaign useEffect is : ', currentCampaign)
-		setCurrentCampaign((prevState) => ({
-			...prevState,
-			date: scheduleCampaign ? (currentCampaign.date ? dayjs(currentCampaign.date).toISOString() : dayjs(new Date(new Date().setHours(new Date().getHours() + 2))).toISOString()) : null,
-		}))
-		// if (!scheduleCampaign) {
-		// }
+		if (scheduleCampaign && !currentCampaign.date) {
+			// Only set default date when enabling scheduling and no date exists
+			setCurrentCampaign((prevState) => ({
+				...prevState,
+				date: dayjs(new Date(new Date().setHours(new Date().getHours() + 2))).toISOString()
+			}))
+		} else if (!scheduleCampaign) {
+			// Clear date when disabling scheduling
+			setCurrentCampaign((prevState) => ({
+				...prevState,
+				date: null
+			}))
+		}
+		// Don't modify date if scheduleCampaign is true and date already exists
 	}, [scheduleCampaign])
 
 	useEffect(() => {
