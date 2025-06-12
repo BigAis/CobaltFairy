@@ -1,4 +1,4 @@
-import { useContext,useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { GlobalContext } from "../../reducers";
 import classNames from "../../utils/classNames";
 import { InputNumber, Select } from "antd";
@@ -16,13 +16,22 @@ import ImageUploadPopup from "./ImageUploadPopup"
 import Button from "../../../Button"
 import useDataSource from "../../configs/useDataSource"
 
-
-
 const AboutTheBookStyleSettings = () => {
-    const { currentItem, previewMode } = useContext(GlobalContext);
-    const [ pickerVisible, setPickerVisible ] = useState(false)
+    const { currentItem, previewMode, setCurrentItem } = useContext(GlobalContext);
+    const [ pickerVisible, setPickerVisible ] = useState(false);
+    const [ imageWidth, setImageWidth ] = useState(50);
     const { t } = useTranslation();
     const { findStyleItem, cardItemElement, inputChange, updateItemStyles, colorChange, paddingChange, otherStylesChange, } = useLayout();
+
+  // When the component loads or currentItem changes, update the image width state
+  useEffect(() => {
+    if (currentItem?.data?.styles?.desktop?.width) {
+      const width = currentItem.data.styles.desktop.width;
+      if (width.includes('%')) {
+        setImageWidth(parseInt(width));
+      }
+    }
+  }, [currentItem]);
 
   const PaddingStylesElement = () => {
     return (
@@ -47,7 +56,6 @@ const AboutTheBookStyleSettings = () => {
     const fontFamily = findStyleItem(currentItem.data.styles, "fontFamily");
     const fontSize = findStyleItem(currentItem.data.styles, "fontSize");
     const lineHeight = findStyleItem(currentItem.data.styles, "lineHeight");
-    const fontFamilyList = ["sans-serif", "Inter", "Arial", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
     const { fontsList } = useDataSource();
 
     return (
@@ -69,7 +77,6 @@ const AboutTheBookStyleSettings = () => {
                   className={classNames(textAlign === value ? "align-style-item-active" : "align-style-item-un_active", "align-style-item")}
                   onClick={() => otherStylesChange("textAlign", value)}
                 >
-                  {/* <FontAwesomeIcon icon={icon} className="tag-style-size" /> */}
                   <img src={`/images/align-${value}.png`}/>
                 </div>
               );
@@ -90,21 +97,10 @@ const AboutTheBookStyleSettings = () => {
           t("font_size"),
           <InputNumber min={0} className="input-width" addonAfter="px" value={fontSize} onChange={inputChange("fontSize")} />
         )}
-        {/* {cardItemElement(
-          t("line_height"),
-          <InputNumber
-            className="input-width"
-            addonAfter="%"
-            min={0}
-            value={Number(lineHeight.replace("%", ""))}
-            onChange={(value) => inputChange("lineHeight")(value + "%")}
-          />
-        )} */}
       </>
     );
   };
    
-
   const actionSettings = () => {
     const { linkURL } = currentItem.data;
 
@@ -118,7 +114,6 @@ const AboutTheBookStyleSettings = () => {
     return (
       <>
         <div className="right-setting-block-item-title">Image Link</div>
-        {/* {cardItemElement(t("action_type"), <div className="link-tag">{t("link")}</div>)} */}
         <div className="card-item-title">{t("link_url")}</div>
         <div className="margin-top-6">
           <Input value={linkURL} onChange={linkChange} />
@@ -136,16 +131,27 @@ const AboutTheBookStyleSettings = () => {
       updateItemStyles(newCurrentItem.data);
     };
 
-    const pickImage = (src) =>{
+    const pickImage = (src) => {
       const newCurrentItem = deepClone(currentItem);
       newCurrentItem.data['src'] = src;
-      newCurrentItem.data['styles'].desktop.width = '50%';
-      newCurrentItem.data['styles'].desktop.float = 'left';
-      console.log(newCurrentItem)
-      newCurrentItem.data['imgHeight'] = document.querySelector('img[src="'+src+'"]').clientHeight
+      
+      // Set float based on image width
+      const width = imageWidth || 50;
+      newCurrentItem.data['styles'].desktop.float = width > 65 ? 'none' : 'right';
+      newCurrentItem.data['styles'].desktop.marginLeft = width > 65 ? '0' : '20px';
+      newCurrentItem.data['styles'].desktop.marginBottom = width > 65 ? '20px' : '0';
+      
+      // Get image height for reference
+      setTimeout(() => {
+        const img = document.querySelector('img[src="'+src+'"]');
+        if (img) {
+          newCurrentItem.data['imgHeight'] = img.clientHeight;
+          updateItemStyles(newCurrentItem.data);
+        }
+      }, 100);
+      
       updateItemStyles(newCurrentItem.data);
     }
-
 
     return (
       <>
@@ -191,8 +197,30 @@ const AboutTheBookStyleSettings = () => {
   };
 
   const imageStyleSettings = () => {
-    const width = findStyleItem(currentItem.data.image.styles, "width");
-    const textAlign = findStyleItem(currentItem.data.image.contentStyles, "textAlign");
+    const width = findStyleItem(currentItem.data.styles, "width");
+    const textAlign = findStyleItem(currentItem.data.contentStyles, "textAlign");
+    
+    const handleWidthChange = (value) => {
+      // Update the width
+      setImageWidth(value);
+      
+      const newData = deepClone(currentItem.data);
+      newData.styles[previewMode].width = value + "%";
+      
+      // Adjust float and margins based on width
+      if (value > 65) {
+        newData.styles[previewMode].float = "none";
+        newData.styles[previewMode].marginLeft = "0";
+        newData.styles[previewMode].marginBottom = "20px";
+      } else {
+        newData.styles[previewMode].float = "right";
+        newData.styles[previewMode].marginLeft = "20px";
+        newData.styles[previewMode].marginBottom = "0";
+      }
+      
+      updateItemStyles(newData);
+    };
+    
     return (
       <>
         <div className="right-setting-block-item-title">{t("image_styles")}</div>
@@ -207,7 +235,17 @@ const AboutTheBookStyleSettings = () => {
             }}
           />
         )}
-        {width !== "auto" && <Slider value={Number(width.replace("%", ""))} onChange={(value) => inputChange("width")(value + "%")} />}
+        {width !== "auto" && (
+          <div>
+            <div className="card-item-title">Image Width: {imageWidth}%</div>
+            <Slider 
+              value={imageWidth} 
+              min={10} 
+              max={100} 
+              onChange={handleWidthChange} 
+            />
+          </div>
+        )}
         {cardItemElement(
           t("align"),
           <div className="flex justify-center items-center">
@@ -223,7 +261,6 @@ const AboutTheBookStyleSettings = () => {
                   className={classNames(textAlign === value ? "align-style-item-active" : "align-style-item-un_active", "align-style-item")}
                   onClick={() => updateContentTextAlign(value)}
                 >
-                  {/* <FontAwesomeIcon icon={icon} className="tag-style-size" /> */}
                   <img src={`/images/align-${value}.png`}/>
                 </div>
               );
@@ -243,6 +280,7 @@ const AboutTheBookStyleSettings = () => {
       </>
     );
   };
+  
   return (
     <div className="margin-y-30">
       {actionSettings()}

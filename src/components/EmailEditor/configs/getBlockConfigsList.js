@@ -368,7 +368,6 @@ const getBlockConfigsList = (t) => {
         contentStyles: {
           desktop: {
             paddingTop: 12,
-            // paddingBottom: 12,
             paddingLeft: 12,
             paddingRight: 12,
             textAlign: "center",
@@ -380,9 +379,9 @@ const getBlockConfigsList = (t) => {
         styles: {
           desktop: {
             width: "50%",
-            minWidth: "50%",
-            float: "left",
-            marginRight:"20px"
+            // Removed minWidth: "50%"
+            float: "right", // Changed from "left" to "right"
+            marginLeft: "20px" // Changed from marginRight to marginLeft
           },
           mobile: {
             width: "100%",
@@ -399,7 +398,6 @@ const getBlockConfigsList = (t) => {
             fontFamily: "Inter",
             color: undefined,
             lineHeight: "140%",
-            // paddingTop: 12,
             paddingBottom: 12,
             paddingLeft: 12,
             paddingRight: 12,

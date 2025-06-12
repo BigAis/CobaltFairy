@@ -94,7 +94,60 @@ const parseItem = (item, index, styles, parentIndex) => {
   }
   if(newItem.parentKey && newItem.parentKey=="about_the_book"){
     newItem.contentStyleConfig.mobile = ` @media(max-width:620px){
-      .image-content-about_the_book {width:100%;}
+    .about-the-book-container {
+      position: relative;
+      width: 100%;
+      display: block;
+      clear: both;
+      overflow: hidden;
+    }
+
+    .image-content-about_the_book {
+      position: relative;
+      float: right;
+      z-index: 5;
+    }
+
+    .image-content-about_the_book img {
+      width: 100% !important;
+    }
+
+    /* Make text wrap around image for widths less than 65% */
+    .image-content-about_the_book[style*="width: 65%"] ~ div,
+    .image-content-about_the_book[style*="width: 6"] ~ div,
+    .image-content-about_the_book[style*="width: 7"] ~ div,
+    .image-content-about_the_book[style*="width: 8"] ~ div,
+    .image-content-about_the_book[style*="width: 9"] ~ div,
+    .image-content-about_the_book[style*="width: 100%"] ~ div {
+      clear: both;
+      width: 100% !important;
+      float: none;
+    }
+
+    /* Handle responsive behavior */
+    @media(max-width:620px) {
+      td {
+        display: inline-block;
+        width: 100% !important;
+      }
+      
+      .image-content-about_the_book {
+        width: 100% !important;
+        float: none;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        margin-bottom: 20px;
+      }
+      
+      .image-content-about_the_book img {
+        width: 100% !important;
+      }
+      
+      .about-the-book-container > div:last-child {
+        clear: both;
+        width: 100% !important;
+      }
+    }}
     }`;
     if(!newItem.contentStyleConfig.mobile) newItem.contentStyleConfig.mobile = {}
     newItem.contentStyleConfig.mobile += ";width:100%;"
@@ -110,8 +163,20 @@ const parseItem = (item, index, styles, parentIndex) => {
 
 const createImageString = (imageConfig) => {
   if(!imageConfig.linkURL.includes("://")) imageConfig.linkURL = `https://${imageConfig.linkURL}`
-  const imageString = `<img src="${imageConfig.src}" alt="${imageConfig.alt}" style="max-width:100%;${imageConfig.styleConfig.desktop}" 
+  
+  // Add the width check for float behavior
+  const imageWidth = imageConfig.styles.desktop.width && imageConfig.styles.desktop.width.includes('%') 
+    ? parseInt(imageConfig.styles.desktop.width) 
+    : 50;
+  
+  // Adjust styles based on width
+  const floatStyle = imageWidth > 65 ? 'float: none; margin-bottom: 20px;' : 'float: right; margin-left: 20px;';
+  
+  const imageStyle = `max-width:100%;${imageConfig.styleConfig.desktop};${floatStyle}`;
+  
+  const imageString = `<img src="${imageConfig.src}" alt="${imageConfig.alt}" style="${imageStyle}" 
       ${imageConfig.styleConfig.mobile ? `class="${imageConfig.styleConfig.className}"` : ""}/> `
+      
   return `<div ${imageConfig.contentStyleConfig.mobile ? `class="${imageConfig.contentStyleConfig.className}"` : ""} 
   style="${imageConfig.contentStyleConfig.desktop}">
       ${imageConfig.linkURL && imageConfig.linkURL.length>0 ? `<a href="${imageConfig.linkURL}" target="_blank">${imageString}</a>` : imageString}
@@ -206,8 +271,36 @@ const blockListToHtml = (blockList, bodySettings) => {
       if(item.image?.contentStyles?.desktop?.paddingTop==12) item.image.contentStyles.desktop.paddingTop=0;
       if(item.image?.contentStyles?.desktop?.paddingBottom==12) item.image.contentStyles.desktop.paddingBottom=0;
       if(item.text?.contentStyles?.desktop?.paddingTop==12) item.text.contentStyles.desktop.paddingTop=0;
+      
+      // Get image width to determine positioning
+      const imageWidth = item.image?.styles?.desktop?.width && 
+                        item.image.styles.desktop.width.includes('%') 
+        ? parseInt(item.image.styles.desktop.width) 
+        : 50;
+      
+      // Adjust styles based on width
+      if(item.image?.styles?.desktop) {
+        if (imageWidth > 65) {
+          item.image.styles.desktop.float = "none";
+          item.image.styles.desktop.marginLeft = "0";
+          item.image.styles.desktop.marginBottom = "20px";
+        } else {
+          item.image.styles.desktop.float = "right";
+          item.image.styles.desktop.marginLeft = "20px";
+          item.image.styles.desktop.marginBottom = "0";
+        }
+        
+        // Remove conflicting margins
+        if(item.image.styles.desktop.marginRight) {
+          delete item.image.styles.desktop.marginRight;
+        }
+      }
+      
+      // Create a container for the book content with clearfix
+      content += `<div class="about-the-book-container" style="position: relative; display: block; width: 100%; overflow: hidden;">`;
       content += createImageString(item.image);
       content += createTextString(item.text);
+      content += `</div>`;
     }
   });
 
