@@ -3,6 +3,7 @@ import { GlobalContext } from '../../reducers'
 import classNames from '../../utils/classNames'
 import { deepClone } from '../../utils/helpers'
 import RichText from '../RichText'
+import ContextMenu from '../ContextMenu/ContextMenu'
 
 const RichTextLayout = ({ index, blockItem }) => {
 	const { currentItem, previewMode, blockList, setBlockList, setCurrentItem, isDragStart } = useContext(GlobalContext)
@@ -36,16 +37,18 @@ const RichTextLayout = ({ index, blockItem }) => {
 	return (
 		<div className="relative">
 			{isEdit && blockItem && !isDragStart && <RichText textBlock={richTextRef} index={index} styles={styles} />}
-			<div
-				className={classNames(isEdit && 'text-block', 'text-content_editable')}
-				onClick={preventDefault}
-				onInput={setTextContent}
-				style={styles}
-				contentEditable={isEdit}
-				suppressContentEditableWarning
-				ref={richTextRef}
-				dangerouslySetInnerHTML={{ __html: blockItem.text }}
-			></div>
+			<ContextMenu>
+				<div
+					className={classNames(isEdit && 'text-block', 'text-content_editable')}
+					onClick={preventDefault}
+					onInput={setTextContent}
+					style={styles}
+					contentEditable={isEdit}
+					suppressContentEditableWarning
+					ref={richTextRef}
+					dangerouslySetInnerHTML={{ __html: blockItem.text }}
+				></div>
+			</ContextMenu>
 		</div>
 	)
 }

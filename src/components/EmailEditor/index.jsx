@@ -16,10 +16,10 @@ import {
 } from './reducers'
 import dataToHtml from './utils/dataToHTML'
 import Main from './components/Main/index'
+import ContextMenu from './components/ContextMenu/ContextMenu'
 import './assets/App.css'
 
 const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = 'en', customLanguageLibraries, setStep, currentCampaign, editorType, setDesign }, ref) => {
-	// console.log('bodySettings',bodySettings)
 	const [state, dispatch] = useReducer(reducer, {
 		...defaultState,
 		fontList: fontList ?? [],
@@ -86,7 +86,9 @@ const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = 
 				},
 			}}
 		>
-			<Main language={language} setStep={setStep} currentCampaign={currentCampaign} editorType={editorType} setDesign={setDesign} />
+			<ContextMenu>
+				<Main language={language} setStep={setStep} currentCampaign={currentCampaign} editorType={editorType} setDesign={setDesign} />
+			</ContextMenu>
 		</GlobalContext.Provider>
 	)
 })
