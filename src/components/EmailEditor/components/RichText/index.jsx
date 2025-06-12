@@ -19,7 +19,7 @@ import FontColor from "./FontColor";
 import Icon from "../../../Icon/Icon";
 
 const RichText = ({ index, textBlock, styles }) => {
-  const { blockList, setBlockList, currentItem, setCurrentItem } = useContext(GlobalContext);
+  const { blockList, setBlockList, currentItem, setCurrentItem, selectionRange } = useContext(GlobalContext);
   const richTextRef = useRef(null);
   const [isHidden, setIsHidden] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -31,6 +31,9 @@ const RichText = ({ index, textBlock, styles }) => {
     startContainer: null,
     endContainer: null
   });
+
+  // Store the current selection
+  const selectionRef = useRef(null);
 
   useEffect(() => {
     if (richTextRef.current) {
@@ -54,8 +57,44 @@ const RichText = ({ index, textBlock, styles }) => {
     }
   }, []);
 
+  // Save current selection whenever it changes
+  useEffect(() => {
+    if (selectionRange) {
+      selectionRef.current = selectionRange;
+    }
+  }, [selectionRange]);
+
   const modifyText = (command, defaultUi, value) => {
-    document.execCommand(command, defaultUi, value);
+    // Check if there's a selection first
+    const selection = window.getSelection();
+    const hasSelection = selection && !selection.isCollapsed;
+    
+    // If we're changing font or fontSize
+    if (command === "fontName" || command === "fontSize") {
+      if (hasSelection) {
+        // If text is selected, apply to selection only
+        document.execCommand(command, defaultUi, value);
+      } else if (textBlock && textBlock.current) {
+        // If no selection, apply to entire text block
+        const range = document.createRange();
+        range.selectNodeContents(textBlock.current);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.execCommand(command, defaultUi, value);
+        selection.removeAllRanges();
+        
+        // Restore cursor position
+        if (cursorPositionRef.current.startContainer) {
+          const newRange = document.createRange();
+          newRange.setStart(cursorPositionRef.current.startContainer, cursorPositionRef.current.startOffset);
+          newRange.setEnd(cursorPositionRef.current.endContainer, cursorPositionRef.current.endOffset);
+          selection.addRange(newRange);
+        }
+      }
+    } else {
+      // For other commands, use standard behavior
+      document.execCommand(command, defaultUi, value);
+    }
   };
 
   // Save the current cursor position when the emoji picker button is clicked
@@ -181,7 +220,6 @@ const RichText = ({ index, textBlock, styles }) => {
     "72px",
   ];
 
-  const fontname_configs = ["sans-serif", "Inter", "Arial", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
   const { fontsList } = useDataSource();
 
   const selectElement = (selectList, defaultValue, type, onChange) => {
@@ -202,6 +240,7 @@ const RichText = ({ index, textBlock, styles }) => {
       mask.style.display = "block";
       options.style.animation = "move 0.2s linear";
     };
+    
     return (
       <div className="richText-select">
         <div
@@ -227,11 +266,14 @@ const RichText = ({ index, textBlock, styles }) => {
             return (
               <div
                 className="richText-select-option_item"
-                key={item}
+                key={item.name || item}
                 onClick={() => {
+                  // Save selection before changing font
+                  saveCursorPosition();
+                  
                   const currentValueDom = document.querySelector(`#richText-select-value-${type}-${index}`);
                   let value = type=="fontName" ? item.attribute : item;
-                  currentValueDom.innerHTML = value;
+                  currentValueDom.innerHTML = type=="fontName" ? item.name : value;
                   hideOptions();
                   onChange && onChange(value);
                   setTextContent();
@@ -247,18 +289,91 @@ const RichText = ({ index, textBlock, styles }) => {
   };
 
   const editFontSize = (item) => {
-    document.execCommand("fontSize", 0, "7");
-    var fontElements = document.getElementsByTagName("font");
-    for (var idx = 0, len = fontElements.length; idx < len; ++idx) {
-      if (fontElements[idx].size === "7") {
-        fontElements[idx].removeAttribute("size");
-        fontElements[idx].style.fontSize = item;
+    // Save current selection state
+    saveCursorPosition();
+    
+    // Check if we have a text selection
+    const selection = window.getSelection();
+    const hasSelection = selection && !selection.isCollapsed;
+    
+    if (hasSelection) {
+      // Apply to selection only
+      document.execCommand("fontSize", 0, "7");
+      var fontElements = document.getElementsByTagName("font");
+      for (var idx = 0, len = fontElements.length; idx < len; ++idx) {
+        if (fontElements[idx].size === "7") {
+          fontElements[idx].removeAttribute("size");
+          fontElements[idx].style.fontSize = item;
+        }
+      }
+    } else if (textBlock && textBlock.current) {
+      // Apply to entire block
+      const range = document.createRange();
+      range.selectNodeContents(textBlock.current);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      document.execCommand("fontSize", 0, "7");
+      var fontElements = document.getElementsByTagName("font");
+      for (var idx = 0, len = fontElements.length; idx < len; ++idx) {
+        if (fontElements[idx].size === "7") {
+          fontElements[idx].removeAttribute("size");
+          fontElements[idx].style.fontSize = item;
+        }
+      }
+      
+      // Clear selection after applying
+      selection.removeAllRanges();
+      
+      // Restore cursor position if we had one
+      if (cursorPositionRef.current.startContainer) {
+        try {
+          const newRange = document.createRange();
+          newRange.setStart(cursorPositionRef.current.startContainer, cursorPositionRef.current.startOffset);
+          newRange.setEnd(cursorPositionRef.current.endContainer, cursorPositionRef.current.endOffset);
+          selection.addRange(newRange);
+        } catch (err) {
+          console.error("Error restoring cursor position:", err);
+        }
       }
     }
   };
 
   const editFontName = (item) => {
-    modifyText("fontName", false, item);
+    // Save current selection state
+    saveCursorPosition();
+    
+    // Check if we have a text selection
+    const selection = window.getSelection();
+    const hasSelection = selection && !selection.isCollapsed;
+    
+    if (hasSelection) {
+      // Apply to selection only
+      modifyText("fontName", false, item);
+    } else if (textBlock && textBlock.current) {
+      // Apply to entire block
+      const range = document.createRange();
+      range.selectNodeContents(textBlock.current);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      modifyText("fontName", false, item);
+      
+      // Clear selection after applying
+      selection.removeAllRanges();
+      
+      // Restore cursor position if we had one
+      if (cursorPositionRef.current.startContainer) {
+        try {
+          const newRange = document.createRange();
+          newRange.setStart(cursorPositionRef.current.startContainer, cursorPositionRef.current.startOffset);
+          newRange.setEnd(cursorPositionRef.current.endContainer, cursorPositionRef.current.endOffset);
+          selection.addRange(newRange);
+        } catch (err) {
+          console.error("Error restoring cursor position:", err);
+        }
+      }
+    }
   };
   
   return (

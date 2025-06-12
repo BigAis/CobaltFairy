@@ -94,60 +94,7 @@ const parseItem = (item, index, styles, parentIndex) => {
   }
   if(newItem.parentKey && newItem.parentKey=="about_the_book"){
     newItem.contentStyleConfig.mobile = ` @media(max-width:620px){
-    .about-the-book-container {
-      position: relative;
-      width: 100%;
-      display: block;
-      clear: both;
-      overflow: hidden;
-    }
-
-    .image-content-about_the_book {
-      position: relative;
-      float: right;
-      z-index: 5;
-    }
-
-    .image-content-about_the_book img {
-      width: 100% !important;
-    }
-
-    /* Make text wrap around image for widths less than 65% */
-    .image-content-about_the_book[style*="width: 65%"] ~ div,
-    .image-content-about_the_book[style*="width: 6"] ~ div,
-    .image-content-about_the_book[style*="width: 7"] ~ div,
-    .image-content-about_the_book[style*="width: 8"] ~ div,
-    .image-content-about_the_book[style*="width: 9"] ~ div,
-    .image-content-about_the_book[style*="width: 100%"] ~ div {
-      clear: both;
-      width: 100% !important;
-      float: none;
-    }
-
-    /* Handle responsive behavior */
-    @media(max-width:620px) {
-      td {
-        display: inline-block;
-        width: 100% !important;
-      }
-      
-      .image-content-about_the_book {
-        width: 100% !important;
-        float: none;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        margin-bottom: 20px;
-      }
-      
-      .image-content-about_the_book img {
-        width: 100% !important;
-      }
-      
-      .about-the-book-container > div:last-child {
-        clear: both;
-        width: 100% !important;
-      }
-    }}
+      .image-content-about_the_book {width:100%;}
     }`;
     if(!newItem.contentStyleConfig.mobile) newItem.contentStyleConfig.mobile = {}
     newItem.contentStyleConfig.mobile += ";width:100%;"
@@ -267,6 +214,7 @@ const blockListToHtml = (blockList, bodySettings) => {
     if (item.key === "social_link") {
       content += createSocialLinkString(item);
     }
+    
     if (item.key === "about_the_book") {
       if(item.image?.contentStyles?.desktop?.paddingTop==12) item.image.contentStyles.desktop.paddingTop=0;
       if(item.image?.contentStyles?.desktop?.paddingBottom==12) item.image.contentStyles.desktop.paddingBottom=0;
@@ -444,20 +392,40 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
         margin-inline-end: 0px;
         font-weight: bold;
       }
-      .image-content-about_the_book{
-        width:50%;
+      
+      .about-the-book-container {
+        position: relative;
+        width: 100%;
+        display: block;
+        clear: both;
+        overflow: hidden;
       }
-      .image-content-about_the_book img{
-        width:100%!important;
+      
+      .image-content-about_the_book {
+        position: relative;
+        z-index: 5;
       }
-      @media(max-width:620px){
+      
+      .image-content-about_the_book img {
+        width: 100% !important;
+      }
+      
+      @media(max-width:620px) {
         td {
-          display:inline-block;
-          width:100% !important;
+          display: inline-block;
+          width: 100% !important;
         }
-        .image-content-about_the_book, .image-content-about_the_book img{
-          width:100%!important;
-          margin-bottom:20px;
+        
+        .image-content-about_the_book {
+          width: 100% !important;
+          float: none !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          margin-bottom: 20px;
+        }
+        
+        .image-content-about_the_book img {
+          width: 100% !important;
         }
       }
 
