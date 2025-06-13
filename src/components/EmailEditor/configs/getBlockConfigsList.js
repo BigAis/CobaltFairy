@@ -359,10 +359,10 @@ const getBlockConfigsList = (t) => {
         desktop: {},
         mobile: {},
       },
-      image:{
+      image: {
         src: "",
         alt: "About the book",
-        parentKey:'about_the_book',
+        parentKey: 'about_the_book',
         type: "link",
         linkURL: "",
         contentStyles: {
@@ -373,15 +373,15 @@ const getBlockConfigsList = (t) => {
             textAlign: "center",
           },
           mobile: {
-            width:'100%'
+            width: '100%'
           },
         },
         styles: {
           desktop: {
             width: "50%",
-            // Removed minWidth: "50%"
-            float: "right", // Changed from "left" to "right"
-            marginLeft: "20px" // Changed from marginRight to marginLeft
+            maxWidth: "50%",
+            float: "left",
+            marginRight: "20px"
           },
           mobile: {
             width: "100%",
@@ -389,8 +389,8 @@ const getBlockConfigsList = (t) => {
           },
         },
       },
-      text:{
-        parentKey:'about_the_book',
+      text: {
+        parentKey: 'about_the_book',
         text: t("text_content"),
         styles: {
           desktop: {
@@ -404,7 +404,7 @@ const getBlockConfigsList = (t) => {
             textAlign: "left",
           },
           mobile: {
-            width:'100%'
+            width: '100%'
           },
         },
       }

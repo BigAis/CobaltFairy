@@ -408,6 +408,8 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
       
       .image-content-about_the_book img {
         width: 100% !important;
+        float: left;
+        margin-right: 20px;
       }
       
       @media(max-width:620px) {
@@ -415,6 +417,14 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
           display: inline-block;
           width: 100% !important;
         }
+
+        .about-the-book-container img {
+        max-width: 100% !important;
+        float: none !important;
+        margin-right: 0 !important;
+        margin-bottom: 20px;
+        width: 100% !important;
+      }
         
         .image-content-about_the_book {
           width: 100% !important;

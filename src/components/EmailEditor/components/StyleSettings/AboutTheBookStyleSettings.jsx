@@ -201,20 +201,21 @@ const AboutTheBookStyleSettings = () => {
     const textAlign = findStyleItem(currentItem.data.contentStyles, "textAlign");
     
     const handleWidthChange = (value) => {
-      // Update the width
-      setImageWidth(value);
+      // Ensure max width is 50%
+      const limitedValue = Math.min(value, 50);
+      setImageWidth(limitedValue);
       
       const newData = deepClone(currentItem.data);
-      newData.styles[previewMode].width = value + "%";
+      newData.styles[previewMode].width = limitedValue + "%";
       
       // Adjust float and margins based on width
-      if (value > 65) {
+      if (limitedValue > 40) {
         newData.styles[previewMode].float = "none";
-        newData.styles[previewMode].marginLeft = "0";
+        newData.styles[previewMode].marginRight = "0";
         newData.styles[previewMode].marginBottom = "20px";
       } else {
-        newData.styles[previewMode].float = "right";
-        newData.styles[previewMode].marginLeft = "20px";
+        newData.styles[previewMode].float = "left";
+        newData.styles[previewMode].marginRight = "20px";
         newData.styles[previewMode].marginBottom = "0";
       }
       
