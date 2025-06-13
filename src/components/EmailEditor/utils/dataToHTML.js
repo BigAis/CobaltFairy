@@ -396,9 +396,19 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
       .about-the-book-container {
         position: relative;
         width: 100%;
-        display: block;
+        display: flex;
         clear: both;
-        overflow: hidden;
+      }
+
+      .block-item.image.parent-about_the_book .block-item-tools,
+      .block-item.text.parent-about_the_book .block-item-tools {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
       }
       
       .image-content-about_the_book {
@@ -416,6 +426,16 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
         td {
           display: inline-block;
           width: 100% !important;
+        }
+
+          .about-the-book-container {
+          flex-direction: column !important;
+        }
+
+          .block-item.image.parent-about_the_book {
+          width: 100% !important;
+          margin-right: 0 !important;
+          margin-bottom: 20px !important;
         }
 
         .about-the-book-container img {

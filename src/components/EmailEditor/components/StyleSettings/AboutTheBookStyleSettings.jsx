@@ -200,27 +200,29 @@ const AboutTheBookStyleSettings = () => {
     const width = findStyleItem(currentItem.data.styles, "width");
     const textAlign = findStyleItem(currentItem.data.contentStyles, "textAlign");
     
-    const handleWidthChange = (value) => {
-      // Ensure max width is 50%
-      const limitedValue = Math.min(value, 50);
-      setImageWidth(limitedValue);
-      
-      const newData = deepClone(currentItem.data);
-      newData.styles[previewMode].width = limitedValue + "%";
-      
-      // Adjust float and margins based on width
-      if (limitedValue > 40) {
-        newData.styles[previewMode].float = "none";
-        newData.styles[previewMode].marginRight = "0";
-        newData.styles[previewMode].marginBottom = "20px";
-      } else {
-        newData.styles[previewMode].float = "left";
-        newData.styles[previewMode].marginRight = "20px";
-        newData.styles[previewMode].marginBottom = "0";
-      }
-      
-      updateItemStyles(newData);
-    };
+  const handleWidthChange = (value) => {
+    setImageWidth(value);
+    
+    const newData = deepClone(currentItem.data);
+    newData.styles[previewMode].width = value + "%";
+    
+    // Adjust layout based on width
+    const useVerticalLayout = value > 35;
+    
+    if (useVerticalLayout) {
+      // Vertical layout (text below image)
+      newData.styles[previewMode].float = "none";
+      newData.styles[previewMode].marginRight = "0";
+      newData.styles[previewMode].marginBottom = "20px";
+    } else {
+      // Side-by-side layout
+      newData.styles[previewMode].float = "left";
+      newData.styles[previewMode].marginRight = "20px";
+      newData.styles[previewMode].marginBottom = "0";
+    }
+    
+    updateItemStyles(newData);
+  };
     
     return (
       <>
