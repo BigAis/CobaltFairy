@@ -204,21 +204,32 @@ const AboutBookComponentV2StyleSettings = () => {
     setImageWidth(value);
     
     const newData = deepClone(currentItem.data);
-    newData.styles[previewMode].width = value + "%";
+    // Update the main imageWidth property
+    newData.imageWidth = value;
     
-    // Adjust layout based on width
+    // Also update the image styles for consistency
+    if (newData.image && newData.image.styles && newData.image.styles.desktop) {
+      newData.image.styles.desktop.width = value + "%";
+      newData.image.styles.desktop.maxWidth = value + "%";
+    }
+    
+    // Use consistent threshold (65%) for layout switching
     const useVerticalLayout = value > 65;
     
     if (useVerticalLayout) {
       // Vertical layout (image above text)
-      newData.styles[previewMode].float = "none";
-      newData.styles[previewMode].marginRight = "0";
-      newData.styles[previewMode].marginBottom = "20px";
+      if (newData.image && newData.image.styles && newData.image.styles.desktop) {
+        newData.image.styles.desktop.float = "none";
+        newData.image.styles.desktop.marginRight = "0";
+        newData.image.styles.desktop.marginBottom = "20px";
+      }
     } else {
       // Side-by-side layout (image left, text right)
-      newData.styles[previewMode].float = "left";
-      newData.styles[previewMode].marginRight = "20px";
-      newData.styles[previewMode].marginBottom = "0";
+      if (newData.image && newData.image.styles && newData.image.styles.desktop) {
+        newData.image.styles.desktop.float = "left";
+        newData.image.styles.desktop.marginRight = "20px";
+        newData.image.styles.desktop.marginBottom = "10px";
+      }
     }
     
     updateItemStyles(newData);
