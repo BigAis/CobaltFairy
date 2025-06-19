@@ -43,7 +43,21 @@ const AboutBookComponentV2 = (props) => {
     return 35;
   };
   
+  // Get image height if set
+  const getImageHeight = () => {
+    if (blockItem.image && blockItem.image.styles && blockItem.image.styles.desktop && blockItem.image.styles.desktop.height) {
+      const height = blockItem.image.styles.desktop.height;
+      if (typeof height === 'number') {
+        return height + 'px';
+      } else if (typeof height === 'string') {
+        return height;
+      }
+    }
+    return 'auto';
+  };
+  
   const imageWidth = getImageWidth();
+  const imageHeight = getImageHeight();
   const useVerticalLayout = imageWidth >= 100;
   
   const handleImageClick = (e) => {
@@ -90,7 +104,8 @@ const AboutBookComponentV2 = (props) => {
   // Image styles
   const imageStyle = {
     width: "100%",
-    display: "block"
+    display: "block",
+    height: imageHeight
   };
   
   return (
@@ -111,7 +126,7 @@ const AboutBookComponentV2 = (props) => {
           ) : (
             <div className="empty-image" style={{
               ...imageStyle,
-              height: "150px",
+              height: imageHeight !== 'auto' ? imageHeight : "150px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

@@ -204,9 +204,13 @@ const blockListToHtml = (blockList, bodySettings) => {
         "float:none; margin-right:0; margin-bottom:20px;" : 
         "float:left; margin-right:20px; margin-bottom:10px;";
       
+      // Get image height if defined
+      const imageHeight = item.image && item.image.styles && item.image.styles.desktop && item.image.styles.desktop.height ? 
+        `height:${item.image.styles.desktop.height};` : '';
+      
       // Add the image
       if (item.src) {
-        const imageStyle = `max-width:100%; width:${imageWidth}%; display:block; ${imageFloatStyle}`;
+        const imageStyle = `max-width:100%; width:${imageWidth}%; display:block; ${imageFloatStyle} ${imageHeight}`;
         const imageString = `<img src="${item.src}" alt="${item.alt || ''}" style="${imageStyle}" />`;
         
         content += `<div style="display:block; ${imageFloatStyle} width:${imageWidth}%;">
@@ -215,8 +219,9 @@ const blockListToHtml = (blockList, bodySettings) => {
               imageString}
         </div>`;
       } else {
-        // Placeholder for missing image
-        content += `<div style="${imageFloatStyle} width:${imageWidth}%; background-color:#f0f0f0; height:150px; display:flex; align-items:center; justify-content:center;">
+        // Placeholder for missing image - respect custom height if set
+        const placeholderHeight = imageHeight || 'height:150px;';
+        content += `<div style="${imageFloatStyle} width:${imageWidth}%; background-color:#f0f0f0; ${placeholderHeight} display:flex; align-items:center; justify-content:center;">
           <span style="color:#999; text-align:center; width:100%;">Image Placeholder</span>
         </div>`;
       }
@@ -549,6 +554,35 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
           width: 100% !important;
           margin-right: 0;
           margin-bottom: 20px;
+        }
+      }
+      /* Add these styles to src/components/EmailEditor/assets/App.css or the appropriate CSS file */
+
+      /* Updates for handling custom image heights in the About Book V2 component */
+      .about-book-v2-container img {
+        max-width: 100%;
+        display: block;
+        height: auto; /* Default to auto height */
+      }
+
+      /* Ensure the empty-image placeholder respects custom heights */
+      .about-book-v2-container .empty-image {
+        width: 100%;
+        min-height: 150px;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Media queries for responsive behavior */
+      @media(max-width: 620px) {
+        .about-book-v2-container img,
+        .about-book-v2-container .empty-image {
+          width: 100% !important;
+          float: none !important;
+          margin-right: 0 !important;
+          margin-bottom: 20px !important;
         }
       }
 
