@@ -9,6 +9,7 @@ import DividerStyleSettings from "./DividerStyleSettings";
 import ImageStyleSettings from "./ImageStyleSettings";
 import SocialLinkSettings from "./SocialLinkSettings";
 import AboutTheBookStyleSettings from "./AboutTheBookStyleSettings";
+import AboutBookComponentV2StyleSettings from "./AboutBookComponentV2StyleSettings";
 
 const StyleSettings = () => {
   const { currentItem } = useContext(GlobalContext);
@@ -23,6 +24,7 @@ const StyleSettings = () => {
       {currentItem?.data.key === "image" && <ImageStyleSettings />}
       {currentItem?.data.key === "social_link" && <SocialLinkSettings />}
       {currentItem?.data.key === "about_the_book" && <AboutTheBookStyleSettings />}
+      {currentItem?.data.key === "about_book_v2" && <AboutBookComponentV2StyleSettings />}
     </>
   );
 };

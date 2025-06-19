@@ -410,6 +410,57 @@ const getBlockConfigsList = (t) => {
       }
     },
     {
+      name: "About Book V2",
+      key: "about_book_v2",
+      src: "",
+      alt: "About the book",
+      linkURL: "",
+      imageWidth: 35,
+      text: `<strong>About the book</strong><br><br>Lorem ipsum dolor sit amet. The graphic and typographic operators know this well, in reality all the professions dealing with the universe of communication have a stable relationship with these words, but what is it? Lorem ipsum is a dummy text without any sense.`,
+      contentStyles: {
+        desktop: {
+          paddingTop: 12,
+          paddingBottom: 12,
+          paddingLeft: 12,
+          paddingRight: 12,
+        },
+        mobile: {},
+      },
+      styles: {
+        desktop: {
+          fontSize: 14,
+          fontFamily: "Inter",
+          color: undefined,
+          lineHeight: "140%",
+          paddingBottom: 12,
+          paddingLeft: 12,
+          paddingRight: 12,
+          textAlign: "left",
+        },
+        mobile: {},
+      },
+      image: {
+        src: "",
+        alt: "About the book",
+        parentKey: 'about_book_v2',
+        type: "link",
+        linkURL: "",
+        styles: {
+          desktop: {
+            width: "35%",
+            maxWidth: "35%",
+            float: "left",
+            marginRight: "20px",
+            marginBottom: "10px"
+          },
+          mobile: {
+            width: "100%",
+            float: "none",
+          },
+        },
+      }
+    },
+    {
       name: t("social_link"),
       key: "social_link",
       list: [

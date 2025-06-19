@@ -186,6 +186,56 @@ const blockListToHtml = (blockList, bodySettings) => {
        </table></div>`;
     }
 
+    if (item.key === "about_book_v2") {
+      // Create a container with text wrapping around image
+      const containerStyles = item.contentStyles && item.contentStyles.desktop ? 
+        Object.entries(item.contentStyles.desktop)
+          .map(([key, value]) => `${key}:${value}`)
+          .join(';') : '';
+      
+      content += `<div class="about-book-v2-container" style="overflow:auto; width:100%; ${containerStyles}">`;
+      
+      // Get image width safely
+      const imageWidth = item.imageWidth || 35;
+      const useVerticalLayout = imageWidth >= 100;
+      
+      // Generate image styles
+      const imageFloatStyle = useVerticalLayout ? 
+        "float:none; margin-right:0; margin-bottom:20px;" : 
+        "float:left; margin-right:20px; margin-bottom:10px;";
+      
+      // Add the image
+      if (item.src) {
+        const imageStyle = `max-width:100%; width:${imageWidth}%; display:block; ${imageFloatStyle}`;
+        const imageString = `<img src="${item.src}" alt="${item.alt || ''}" style="${imageStyle}" />`;
+        
+        content += `<div style="display:block; ${imageFloatStyle} width:${imageWidth}%;">
+            ${item.linkURL ? 
+              `<a href="${item.linkURL}" target="_blank">${imageString}</a>` : 
+              imageString}
+        </div>`;
+      } else {
+        // Placeholder for missing image
+        content += `<div style="${imageFloatStyle} width:${imageWidth}%; background-color:#f0f0f0; height:150px; display:flex; align-items:center; justify-content:center;">
+          <span style="color:#999; text-align:center; width:100%;">Image Placeholder</span>
+        </div>`;
+      }
+      
+      // Add text content
+      const textStyles = item.styles && item.styles.desktop ? 
+        Object.entries(item.styles.desktop)
+          .map(([key, value]) => `${key}:${value}`)
+          .join(';') : '';
+      
+      content += `<div style="${textStyles}">${item.text}</div>`;
+      
+      // Clear floats
+      content += `<div style="clear:both;"></div>`;
+      
+      // Close container
+      content += `</div>`;
+    }
+
     if (item.key === "content") {
       content += `<td ${item.styleConfig.mobile ? `class="${item.styleConfig.className}"` : ""} 
       style="width:${item.width}; ${item.styleConfig.desktop}">${blockListToHtml(item.children)}</td>`;
@@ -456,6 +506,49 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
         
         .image-content-about_the_book img {
           width: 100% !important;
+        }
+      }
+
+      .about-book-v2-container {
+        position: relative;
+        overflow: auto; /* Creates a block formatting context */
+        width: 100%;
+        clear: both;
+      }
+
+      .about-book-v2-container::after {
+        content: "";
+        display: table;
+        clear: both; /* Proper clearfix */
+      }
+
+      @media(max-width:620px) {
+        .about-book-v2-container img {
+          float: none !important;
+          width: 100% !important;
+          margin-right: 0 !important;
+          margin-bottom: 20px !important;
+        }
+      }
+
+      .parent-about_book_v2 img,
+      .parent-about_book_v2 .empty-image {
+        max-width: 100%;
+        display: block;
+      }
+
+      .parent-about_book_v2.image {
+        float: left;
+        margin-right: 20px;
+        margin-bottom: 10px;
+      }
+
+      @media(max-width:620px) {
+        .parent-about_book_v2.image {
+          float: none;
+          width: 100% !important;
+          margin-right: 0;
+          margin-bottom: 20px;
         }
       }
 

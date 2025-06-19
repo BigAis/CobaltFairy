@@ -5,6 +5,7 @@ import DividerBlock from "./DividerBlock";
 import ImageBlock from "./ImageBlock";
 import SocialLinkBlocks from "./SocialLinkBlocks";
 import AboutTheBookBlock from "./AboutTheBookBlock";
+import AboutBookComponentV2 from "./AboutBookComponentV2";
 
 const BlockItems = ({ blockItem, index }) => {
   return (
@@ -15,6 +16,7 @@ const BlockItems = ({ blockItem, index }) => {
       {blockItem && blockItem.key === "divider" && <DividerBlock blockItem={blockItem} index={index} />}
       {blockItem && blockItem.key === "image" && <ImageBlock blockItem={blockItem} index={index} />}
       {blockItem && blockItem.key === "about_the_book" && <AboutTheBookBlock blockItem={blockItem} index={index} />}
+      {blockItem && blockItem.key === "about_book_v2" && <AboutBookComponentV2 blockItem={blockItem} index={index} />}
       {blockItem && blockItem.key === "social_link" && <SocialLinkBlocks blockItem={blockItem} index={index} />}
     </>
   );
