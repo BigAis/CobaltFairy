@@ -59,18 +59,18 @@ const AutomationsTable = ({ incomingAutomations }) => {
                     }
                 }} onOptionSelect={ async (selectedOption)=>{
                     switch(selectedOption.value){
-                        case "delete": 
-                        if(item.active) {
-                            await PopupText.fire({
-                                icon: 'warning',
-                                text: 'You cannot delete active automations.',
-                                showConfirmButton: false,
-                                showCancelButton: true,
-                                cancelButtonText: 'Ok',
-                            })
-                            return;
-                        }
-                            const result = await PopupText.fire({
+                                    case "delete": 
+                                    if(item.active) {
+                                        await PopupText.fire({
+                                        icon: 'warning',
+                                        text: 'You cannot delete active automations.',
+                                        showConfirmButton: false,
+                                        showCancelButton: true,
+                                        cancelButtonText: 'Ok',
+                                        })
+                                        return;
+                                    }
+                                    const result = await PopupText.fire({
                                         icon: 'question',
                                         text: 'Are you sure you want to delete this automation? This action is irreversible.',
                                         focusCancel: false,
@@ -80,44 +80,47 @@ const AutomationsTable = ({ incomingAutomations }) => {
                                         confirmButtonText: 'Yes, DELETE it',
                                         cancelButtonText: 'No, abort',
                                     })
-                            
+
                                     if (result.isConfirmed) {    
                                         try {
-                                            // Use the correct endpoint
+                                            // Try without the nested 'data' property
                                             let sendResp = await ApiService.post(
                                                 `fairymail/delete-automation`, 
-                                                { data: { uuid: item.uuid } },
+                                                { uuid: item.uuid },  // Changed from { data: { uuid: item.uuid } }
                                                 user.jwt
                                             );
                                             
-                                            // Update automations list immediately on success
-                                            setAutomations(currentAutomations => 
-                                                currentAutomations.filter(a => a.uuid !== item.uuid)
-                                            );
-                                            
-                                            PopupText.fire({ 
-                                                icon: 'success', 
-                                                text: 'Deleted successfully!', 
-                                                showConfirmButton: false, 
-                                                cancelButtonText:'Ok' 
-                                            });
-                                        } catch (error) {
-                                            // Handle error response
-                                            if (error.response && error.response.status === 500) {
+                                            // Check the actual response content, not just the HTTP status
+                                            if (sendResp.data && sendResp.data.code === 200) {
+                                                // Only update the UI if the API confirms success
+                                                setAutomations(currentAutomations => 
+                                                    currentAutomations.filter(a => a.uuid !== item.uuid)
+                                                );
+                                                
                                                 PopupText.fire({ 
-                                                    icon: 'error', 
-                                                    text: 'Cannot delete an active automation. Please deactivate it first.', 
+                                                    icon: 'success', 
+                                                    text: 'Deleted successfully!', 
                                                     showConfirmButton: false, 
-                                                    cancelButtonText:'Ok' 
+                                                    cancelButtonText: 'Ok' 
                                                 });
                                             } else {
+                                                // Show the actual error from the API
                                                 PopupText.fire({ 
                                                     icon: 'error', 
-                                                    text: 'An error occurred while deleting the automation.', 
+                                                    text: sendResp.data.message || 'Failed to delete automation', 
                                                     showConfirmButton: false, 
-                                                    cancelButtonText:'Ok' 
+                                                    cancelButtonText: 'Ok' 
                                                 });
                                             }
+                                        } catch (error) {
+                                            // Handle error response
+                                            PopupText.fire({ 
+                                                icon: 'error', 
+                                                text: 'An error occurred while deleting the automation.', 
+                                                showConfirmButton: false, 
+                                                cancelButtonText: 'Ok' 
+                                            });
+                                        
                                         }
                                     }
                         break;

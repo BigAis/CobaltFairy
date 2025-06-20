@@ -113,7 +113,7 @@ const Automations = () => {
                                 <div className="text-center p-4">Loading automations...</div>
                             </Card>
                         ) : automations && automations.length > 0 ? (
-                            <AutomationsTable incomingAutomations={automations} />
+                            <AutomationsTable incomingAutomations={automations} refreshData={loadData} />
                         ) : (
                             <Card>
                                 <div className="text-center p-4">
