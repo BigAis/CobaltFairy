@@ -17,7 +17,7 @@ import Button from "../../../Button"
 import useDataSource from "../../configs/useDataSource"
 
 const AboutBookComponentV2StyleSettings = () => {
-    const { currentItem, previewMode, setCurrentItem } = useContext(GlobalContext);
+    const { currentItem, previewMode, blockList, setBlockList } = useContext(GlobalContext);
     const [ pickerVisible, setPickerVisible ] = useState(false);
     const [ imageWidth, setImageWidth ] = useState(35); // Default to 35% - left-aligned
     const [ imageHeight, setImageHeight ] = useState(null); // Default to null (auto height)
@@ -142,27 +142,80 @@ const AboutBookComponentV2StyleSettings = () => {
       updateItemStyles(newCurrentItem.data);
     };
 
+    // Fixed image picker function
     const pickImage = (src) => {
-      const newCurrentItem = deepClone(currentItem);
-      newCurrentItem.data['src'] = src;
-      
-      // Set float based on image width
-      const width = imageWidth || 35;
-      newCurrentItem.data['styles'].desktop.float = width > 65 ? 'none' : 'left';
-      newCurrentItem.data['styles'].desktop.marginRight = width > 65 ? '0' : '20px';
-      newCurrentItem.data['styles'].desktop.marginBottom = width > 65 ? '20px' : '0';
-      
-      // Get image height for reference
-      setTimeout(() => {
-        const img = document.querySelector('img[src="'+src+'"]');
-        if (img) {
-          newCurrentItem.data['imgHeight'] = img.clientHeight;
-          updateItemStyles(newCurrentItem.data);
+      // Check if we're working with a component section (image or text)
+      // by examining the index format
+      const isComponentSection = currentItem.index && 
+                               typeof currentItem.index === 'string' && 
+                               currentItem.index.includes('-image');
+
+      if (isComponentSection) {
+        // Get the base index without the -image suffix
+        const baseIndex = currentItem.index.split('-image')[0];
+        const indexParts = baseIndex.split('-');
+        
+        if (indexParts.length >= 3) {
+          // Create a deep clone of the current block list
+          const newBlockList = deepClone(blockList);
+          
+          // Find the parent component using the base index
+          const blockIndex = parseInt(indexParts[0]);
+          const contentIndex = parseInt(indexParts[1]);
+          const itemIndex = parseInt(indexParts[2]);
+          
+          const parentComponent = newBlockList[blockIndex].children[contentIndex].children[itemIndex];
+          
+          // Ensure this is our component
+          if (parentComponent && parentComponent.key === "about_book_v2") {
+            // Update both the main src and the image.src
+            parentComponent.src = src;
+            
+            // Update image object if it exists
+            if (parentComponent.image) {
+              parentComponent.image.src = src;
+              
+              // Set float based on image width
+              const width = imageWidth || 35;
+              parentComponent.image.styles.desktop.float = width > 65 ? 'none' : 'left';
+              parentComponent.image.styles.desktop.marginRight = width > 65 ? '0' : '20px';
+              parentComponent.image.styles.desktop.marginBottom = width > 65 ? '20px' : '10px';
+              parentComponent.image.styles.desktop.width = `${width}%`;
+              parentComponent.image.styles.desktop.maxWidth = `${width}%`;
+              
+              // Set height if specified
+              if (imageHeight) {
+                parentComponent.image.styles.desktop.height = `${imageHeight}px`;
+              } else if (parentComponent.image.styles.desktop.height) {
+                delete parentComponent.image.styles.desktop.height;
+              }
+            }
+            
+            // Update main component properties
+            parentComponent.imageWidth = imageWidth;
+            
+            // Update the block list
+            setBlockList(newBlockList, `edit_${new Date().getTime()}`);
+            
+            // Delay to allow DOM to update with new image
+            setTimeout(() => {
+              const img = document.querySelector(`img[src="${src}"]`);
+              if (img && parentComponent) {
+                parentComponent.imgHeight = img.clientHeight;
+                setBlockList(deepClone(newBlockList), `edit_${new Date().getTime()}`);
+              }
+            }, 100);
+            
+            return;
+          }
         }
-      }, 100);
+      }
       
+      // Fallback to standard update if we're not dealing with a component section
+      const newCurrentItem = deepClone(currentItem);
+      newCurrentItem.data.src = src;
       updateItemStyles(newCurrentItem.data);
-    }
+    };
 
     return (
       <>
@@ -218,28 +271,25 @@ const AboutBookComponentV2StyleSettings = () => {
       setImageWidth(value);
       
       const newData = deepClone(currentItem.data);
-      // Update the main imageWidth property
-      newData.imageWidth = value;
       
-      // Also update the image styles for consistency
-      if (newData.image && newData.image.styles && newData.image.styles.desktop) {
-        newData.image.styles.desktop.width = value + "%";
-        newData.image.styles.desktop.maxWidth = value + "%";
-      }
+      // Always update the imageWidth property
+      newData.imageWidth = value;
       
       // Use consistent threshold (65%) for layout switching
       const useVerticalLayout = value > 65;
       
-      if (useVerticalLayout) {
-        // Vertical layout (image above text)
-        if (newData.image && newData.image.styles && newData.image.styles.desktop) {
+      // Update the image object if it exists
+      if (newData.image && newData.image.styles && newData.image.styles.desktop) {
+        newData.image.styles.desktop.width = `${value}%`;
+        newData.image.styles.desktop.maxWidth = `${value}%`;
+        
+        if (useVerticalLayout) {
+          // Vertical layout (image above text)
           newData.image.styles.desktop.float = "none";
           newData.image.styles.desktop.marginRight = "0";
           newData.image.styles.desktop.marginBottom = "20px";
-        }
-      } else {
-        // Side-by-side layout (image left, text right)
-        if (newData.image && newData.image.styles && newData.image.styles.desktop) {
+        } else {
+          // Side-by-side layout (image left, text right)
           newData.image.styles.desktop.float = "left";
           newData.image.styles.desktop.marginRight = "20px";
           newData.image.styles.desktop.marginBottom = "10px";
@@ -256,8 +306,7 @@ const AboutBookComponentV2StyleSettings = () => {
       
       // Update the image height in styles
       if (newData.image && newData.image.styles && newData.image.styles.desktop) {
-        // Set the height in pixels
-        newData.image.styles.desktop.height = value + "px";
+        newData.image.styles.desktop.height = `${value}px`;
       }
       
       updateItemStyles(newData);
@@ -283,7 +332,7 @@ const AboutBookComponentV2StyleSettings = () => {
       } else {
         // Switch to fixed height (default to 200px)
         const defaultHeight = 200;
-        newData.image.styles.desktop.height = defaultHeight + "px";
+        newData.image.styles.desktop.height = `${defaultHeight}px`;
         setImageHeight(defaultHeight);
       }
       
