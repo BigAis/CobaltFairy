@@ -165,8 +165,8 @@ const createSocialLinkString = (socialLinkBlock) => {
       .map((socialLinkItem) => {
         const { image, title, link } = socialLinkItem;
         return `<a target="_black" href="${link || '#'}" style="${socialLinkBlock.styleConfig.desktop};display:inline-block;">
-        <img src="${image}" alt="${title}" style="width:${socialLinkBlock.imageWidth}px;" 
-        ${socialLinkBlock.styleConfig.mobile ? `class="${socialLinkBlock.styleConfig.className}"` : ""}/> 
+        <img src="${image}" alt="${title}" style="width:${socialLinkItem.imageWidth}px;" 
+        ${socialLinkItem.styleConfig.mobile ? `class="${socialLinkItem.styleConfig.className}"` : ""}/> 
       </a>`;
       })
       .join("")}
@@ -232,10 +232,10 @@ const blockListToHtml = (blockList, bodySettings) => {
       }
       
       // Add text content with proper styling for wrapping
-      content += `<div class="parent-about_book_v2 text" style="${textStyles}; word-wrap: break-word; word-break: normal; white-space: normal;">${item.text}</div>`;
+      content += `<div class="parent-about_book_v2 text" style="${textStyles}; word-wrap: break-word; word-break: break-word; white-space: normal;">${item.text}</div>`; // Changed word-break to break-word
       
       // Clear float and close the container
-      content += `<div style="clear: both;"></div></div>`;
+      content += `</div>`; // Removed redundant clear:both div
     }
 
     if (item.key === "content") {
@@ -368,21 +368,13 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
   let pixel = `${PIXEL_URL}/pixel.gif?cid=${''}&uid={{pixel_uid}}&v={{cmp_version}}`
   if(fontList.length>0) {
     fontStyles += `
-      <!--[if mso]>
-      <!--style>
-        * {
-        font-family: sans-serif !important;
-      }
-      </style-->
       <![endif]-->
-      <!--[if !mso]><!-->
       `;
       for(const font of fontList){
         fontStyles += ` <link href='https://fonts.googleapis.com/css?family=${font}' rel='stylesheet' type='text/css'> `
         fontMediaStyles += ` @import url('https://fonts.googleapis.com/css2?family=${font}&display=swap');`
       }
       fontStyles += `
-      <!--<![endif]-->
       <style>
           @font-face {
             font-family: 'Inter';
@@ -449,8 +441,7 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
       .about-the-book-container {
         position: relative;
         width: 100%;
-        display: flex;
-        clear: both;
+        display: flow-root; /* Changed from display: flex; clear: both; */
       }
 
       .block-item.image.parent-about_the_book .block-item-tools,
@@ -479,16 +470,11 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
       .about-book-v2-container {
         position: relative;
         width: 100%;
-        overflow: visible; /* Allow content to be visible */
-        display: block;
+        display: flow-root; /* Changed from overflow: visible; display: block; */
         margin-bottom: 15px;
       }
 
-      .about-book-v2-container:after {
-        content: "";
-        display: table;
-        clear: both; /* Proper clearfix */
-      }
+      /* Removed the :after pseudo-element rule as display: flow-root handles it */
 
       .parent-about_book_v2.image {
         position: relative;
@@ -498,7 +484,7 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
       .parent-about_book_v2.text {
         display: block;
         word-wrap: break-word;
-        word-break: normal;
+        word-break: break-word; /* Added for aggressive breaking of long words */
         white-space: normal;
       }
 
@@ -515,7 +501,7 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
 
         /* V1 mobile fixes */
         .about-the-book-container {
-          flex-direction: column !important;
+          flex-direction: column !important; /* This might be overridden by flow-root for desktop, but useful for mobile flex context if applied */
         }
 
         .block-item.image.parent-about_the_book {

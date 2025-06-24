@@ -134,7 +134,7 @@ const AboutBookComponentV2 = (props) => {
           onClick={handleTextClick}
           style={{
             wordWrap: "break-word",
-            wordBreak: "normal",
+            wordBreak: "break-word", // Changed from "normal" to "break-word"
             whiteSpace: "normal"
           }}
         >
@@ -143,14 +143,13 @@ const AboutBookComponentV2 = (props) => {
             <div style={{
               ...styles,
               wordWrap: "break-word",
-              wordBreak: "normal",
+              wordBreak: "break-word", // Changed from "normal" to "break-word"
               whiteSpace: "normal"
             }} dangerouslySetInnerHTML={{ __html: blockItem.text }}></div>
           }
         </div>
         
-        {/* Clear the float to prevent layout issues */}
-        <div style={{ clear: "both" }}></div>
+        {/* Removed the redundant clear: "both" div */}
       </div>
     </div>
   );
