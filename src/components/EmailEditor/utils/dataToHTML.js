@@ -187,58 +187,54 @@ const blockListToHtml = (blockList, bodySettings) => {
     }
 
     if (item.key === "about_book_v2") {
-      // Create a container with text wrapping around image
+      // Get container styles
       const containerStyles = item.contentStyles && item.contentStyles.desktop ? 
         Object.entries(item.contentStyles.desktop)
           .map(([key, value]) => `${key}:${value}`)
           .join(';') : '';
       
-      content += `<div class="about-book-v2-container" style="overflow:auto; width:100%; ${containerStyles}">`;
-      
-      // Get image width safely
+      // Get image width and determine layout
       const imageWidth = item.imageWidth || 35;
-      const useVerticalLayout = imageWidth >= 100;
+      const useVerticalLayout = imageWidth >= 65;
       
-      // Generate image styles
-      const imageFloatStyle = useVerticalLayout ? 
-        "float:none; margin-right:0; margin-bottom:20px;" : 
-        "float:left; margin-right:20px; margin-bottom:10px;";
+      // Start the container
+      content += `<div style="${containerStyles}; position: relative; width: 100%;">`;
       
-      // Get image height if defined
-      const imageHeight = item.image && item.image.styles && item.image.styles.desktop && item.image.styles.desktop.height ? 
-        `height:${item.image.styles.desktop.height};` : '';
-      
-      // Add the image
+      // Add the image with float for text wrapping
       if (item.src) {
-        const imageStyle = `max-width:100%; width:${imageWidth}%; display:block; ${imageFloatStyle} ${imageHeight}`;
-        const imageString = `<img src="${item.src}" alt="${item.alt || ''}" style="${imageStyle}" />`;
+        const imageHeight = item.image && item.image.styles && item.image.styles.desktop && item.image.styles.desktop.height ?
+          `height: ${item.image.styles.desktop.height};` : '';
+          
+        const floatStyle = useVerticalLayout ? 
+          'float: none; width: 100%; margin-bottom: 20px;' : 
+          `float: left; width: ${imageWidth}%; margin-right: 20px; margin-bottom: 10px;`;
+          
+        const imageString = `<img src="${item.src}" alt="${item.alt || ''}" style="width: 100%; display: block; ${imageHeight}" />`;
         
-        content += `<div style="display:block; ${imageFloatStyle} width:${imageWidth}%;">
-            ${item.linkURL ? 
-              `<a href="${item.linkURL}" target="_blank">${imageString}</a>` : 
-              imageString}
+        content += `<div style="${floatStyle}">
+          ${item.linkURL ? `<a href="${item.linkURL}" target="_blank">${imageString}</a>` : imageString}
         </div>`;
       } else {
-        // Placeholder for missing image - respect custom height if set
-        const placeholderHeight = imageHeight || 'height:150px;';
-        content += `<div style="${imageFloatStyle} width:${imageWidth}%; background-color:#f0f0f0; ${placeholderHeight} display:flex; align-items:center; justify-content:center;">
-          <span style="color:#999; text-align:center; width:100%;">Image Placeholder</span>
+        // Placeholder for missing image
+        const floatStyle = useVerticalLayout ? 
+          'float: none; width: 100%; margin-bottom: 20px;' : 
+          `float: left; width: ${imageWidth}%; margin-right: 20px; margin-bottom: 10px;`;
+          
+        content += `<div style="${floatStyle}; background-color: #f0f0f0; height: 150px; display: flex; align-items: center; justify-content: center;">
+          <span style="color: #999; text-align: center; width: 100%;">Image Placeholder</span>
         </div>`;
       }
       
-      // Add text content
+      // Add text content without any container to allow wrapping
       const textStyles = item.styles && item.styles.desktop ? 
         Object.entries(item.styles.desktop)
           .map(([key, value]) => `${key}:${value}`)
           .join(';') : '';
       
-      content += `<div style="${textStyles}">${item.text}</div>`;
+      content += `<div style="${textStyles}; word-wrap: break-word; word-break: normal; white-space: normal;">${item.text}</div>`;
       
-      // Clear floats
-      content += `<div style="clear:both;"></div>`;
-      
-      // Close container
-      content += `</div>`;
+      // Clear float and close the container
+      content += `<div style="clear: both;"></div></div>`;
     }
 
     if (item.key === "content") {
@@ -476,6 +472,38 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
         float: left;
         margin-right: 20px;
       }
+
+      /* About Book V2 styles for proper text wrapping */
+      .about-book-v2-container {
+        position: relative;
+        width: 100%;
+        overflow: visible; /* Allow content to be visible */
+      }
+
+      .about-book-v2-container:after {
+        content: "";
+        display: table;
+        clear: both; /* Proper clearfix */
+      }
+
+      .parent-about_book_v2.image {
+        float: left;
+        margin-right: 20px;
+        margin-bottom: 10px;
+      }
+
+      .parent-about_book_v2.text {
+        /* No specific width to allow text to flow naturally */
+        word-wrap: break-word;
+        word-break: normal;
+        white-space: normal;
+      }
+
+      .parent-about_book_v2 img,
+      .parent-about_book_v2 .empty-image {
+        max-width: 100%;
+        display: block;
+      }
       
       @media(max-width:620px) {
         td {
@@ -512,75 +540,11 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
         .image-content-about_the_book img {
           width: 100% !important;
         }
-      }
 
-      .about-book-v2-container {
-        position: relative;
-        overflow: auto; /* Creates a block formatting context */
-        width: 100%;
-        clear: both;
-      }
-
-      .about-book-v2-container::after {
-        content: "";
-        display: table;
-        clear: both; /* Proper clearfix */
-      }
-
-      @media(max-width:620px) {
-        .about-book-v2-container img {
-          float: none !important;
-          width: 100% !important;
-          margin-right: 0 !important;
-          margin-bottom: 20px !important;
-        }
-      }
-
-      .parent-about_book_v2 img,
-      .parent-about_book_v2 .empty-image {
-        max-width: 100%;
-        display: block;
-      }
-
-      .parent-about_book_v2.image {
-        float: left;
-        margin-right: 20px;
-        margin-bottom: 10px;
-      }
-
-      @media(max-width:620px) {
+        /* Media query for mobile devices */
         .parent-about_book_v2.image {
-          float: none;
-          width: 100% !important;
-          margin-right: 0;
-          margin-bottom: 20px;
-        }
-      }
-      /* Add these styles to src/components/EmailEditor/assets/App.css or the appropriate CSS file */
-
-      /* Updates for handling custom image heights in the About Book V2 component */
-      .about-book-v2-container img {
-        max-width: 100%;
-        display: block;
-        height: auto; /* Default to auto height */
-      }
-
-      /* Ensure the empty-image placeholder respects custom heights */
-      .about-book-v2-container .empty-image {
-        width: 100%;
-        min-height: 150px;
-        background-color: #f0f0f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      /* Media queries for responsive behavior */
-      @media(max-width: 620px) {
-        .about-book-v2-container img,
-        .about-book-v2-container .empty-image {
-          width: 100% !important;
           float: none !important;
+          width: 100% !important;
           margin-right: 0 !important;
           margin-bottom: 20px !important;
         }

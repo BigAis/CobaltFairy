@@ -369,10 +369,37 @@
   min-height: unset;
   clear: inherit;
 }
+
+/* About Book V2 component styling */
 .block-item.image.parent-about_book_v2 .block-item-tools,
 .block-item.text.parent-about_book_v2 .block-item-tools {
   width: 100%;
   height: 100%;
   min-height: unset;
-  overflow: hidden; /* Prevent scrollbar */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Allow text to properly wrap around the image */
+.block-item.text.parent-about_book_v2 {
+  /* No specific width to allow natural flow */
+  word-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
+  overflow: visible;
+}
+
+/* Ensure the text component doesn't create its own line unnecessarily */
+.block-item.text.parent-about_book_v2:not(.float-none) {
+  display: inline; /* Allow inline flow */
+}
+
+/* Ensure editing works properly */
+.text-block.text-content_editable {
+  word-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
 }

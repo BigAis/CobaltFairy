@@ -276,6 +276,7 @@ const AboutBookComponentV2StyleSettings = () => {
     // Check if height is set to auto
     const isHeightAuto = !currentItem.data.image?.styles?.desktop?.height;
     
+
     const handleWidthChange = (value) => {
       setImageWidth(value);
       
@@ -285,7 +286,7 @@ const AboutBookComponentV2StyleSettings = () => {
       newData.imageWidth = value;
       
       // Use consistent threshold (65%) for layout switching
-      const useVerticalLayout = value > 65;
+      const useVerticalLayout = value >= 65;
       
       // Update the image object if it exists
       if (newData.image && newData.image.styles && newData.image.styles.desktop) {

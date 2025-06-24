@@ -58,7 +58,7 @@ const AboutBookComponentV2 = (props) => {
   
   const imageWidth = getImageWidth();
   const imageHeight = getImageHeight();
-  const useVerticalLayout = imageWidth >= 100;
+  const useVerticalLayout = imageWidth >= 65;
   
   const handleImageClick = (e) => {
     e.preventDefault();
@@ -83,49 +83,40 @@ const AboutBookComponentV2 = (props) => {
       });
     }
   };
-  
-  // Consolidated styles for container
-  const containerStyle = {
-    ...contentStyles,
-    overflow: "auto",
-    width: "100%",
-    position: "relative"
-  };
-  
-  // Image container styles with proper float behavior
-  const imageContainerStyle = {
-    float: useVerticalLayout ? "none" : "left",
-    width: `${imageWidth}%`,
-    marginRight: useVerticalLayout ? 0 : "20px",
-    marginBottom: useVerticalLayout ? "20px" : "10px",
-    display: "block"
-  };
-  
-  // Image styles
-  const imageStyle = {
-    width: "100%",
-    display: "block",
-    height: imageHeight
-  };
-  
+
   return (
     <div className="relative">
-      <div style={containerStyle} className="about-book-v2-container">
-        {/* Image component with float styling */}
+      {/* Container that allows proper text wrapping */}
+      <div style={{
+        ...contentStyles,
+        position: "relative",
+        width: "100%"
+      }}>
+        {/* Image with float styling to allow text wrapping */}
         <div 
           className="block-item image parent-about_book_v2"
           onClick={handleImageClick}
-          style={imageContainerStyle}
+          style={{
+            float: useVerticalLayout ? "none" : "left",
+            width: `${imageWidth}%`,
+            marginRight: useVerticalLayout ? 0 : "20px",
+            marginBottom: useVerticalLayout ? "20px" : "10px",
+            position: "relative"
+          }}
         >
           {blockItem.src ? (
             <img 
               src={blockItem.src} 
               alt={blockItem.alt || ""} 
-              style={imageStyle} 
+              style={{
+                width: "100%",
+                display: "block",
+                height: imageHeight
+              }} 
             />
           ) : (
             <div className="empty-image" style={{
-              ...imageStyle,
+              width: "100%",
               height: imageHeight !== 'auto' ? imageHeight : "150px",
               display: "flex",
               alignItems: "center",
@@ -137,19 +128,29 @@ const AboutBookComponentV2 = (props) => {
           )}
         </div>
         
-        {/* Text component with natural wrapping */}
+        {/* Text content - no separate container to allow proper wrapping */}
         <div 
           className="block-item text parent-about_book_v2"
           onClick={handleTextClick}
+          style={{
+            wordWrap: "break-word",
+            wordBreak: "normal",
+            whiteSpace: "normal"
+          }}
         >
           {isEdit ? 
             richTextElement : 
-            <div style={styles} dangerouslySetInnerHTML={{ __html: blockItem.text }}></div>
+            <div style={{
+              ...styles,
+              wordWrap: "break-word",
+              wordBreak: "normal",
+              whiteSpace: "normal"
+            }} dangerouslySetInnerHTML={{ __html: blockItem.text }}></div>
           }
         </div>
         
-        {/* Clear floating elements */}
-        <div style={{clear: "both"}}></div>
+        {/* Clear the float to prevent layout issues */}
+        <div style={{ clear: "both" }}></div>
       </div>
     </div>
   );
