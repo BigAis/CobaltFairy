@@ -113,12 +113,13 @@ const AboutBookComponentV2StyleSettings = () => {
   };
    
   const actionSettings = () => {
-    const { linkURL } = currentItem.data;
+    // Get linkURL directly from the component data
+    const linkURL = currentItem.data.linkURL || "";
 
     const linkChange = (event) => {
       const newValue = event.target.value;
       const newCurrentItem = deepClone(currentItem);
-      currentItem.data.linkURL = newValue;
+      newCurrentItem.data.linkURL = newValue;
       updateItemStyles(newCurrentItem.data);
     };
 

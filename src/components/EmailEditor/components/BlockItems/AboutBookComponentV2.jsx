@@ -105,15 +105,29 @@ const AboutBookComponentV2 = (props) => {
           }}
         >
           {blockItem.src ? (
-            <img 
-              src={blockItem.src} 
-              alt={blockItem.alt || ""} 
-              style={{
-                width: "100%",
-                display: "block",
-                height: imageHeight
-              }} 
-            />
+            blockItem.linkURL ? (
+              <a href={blockItem.linkURL} target="_blank" rel="noopener noreferrer">
+                <img 
+                  src={blockItem.src} 
+                  alt={blockItem.alt || ""} 
+                  style={{
+                    width: "100%",
+                    display: "block",
+                    height: imageHeight
+                  }} 
+                />
+              </a>
+            ) : (
+              <img 
+                src={blockItem.src} 
+                alt={blockItem.alt || ""} 
+                style={{
+                  width: "100%",
+                  display: "block",
+                  height: imageHeight
+                }} 
+              />
+            )
           ) : (
             <div className="empty-image" style={{
               width: "100%",
@@ -134,7 +148,7 @@ const AboutBookComponentV2 = (props) => {
           onClick={handleTextClick}
           style={{
             wordWrap: "break-word",
-            wordBreak: "break-word", // Changed from "normal" to "break-word"
+            wordBreak: "break-word",
             whiteSpace: "normal"
           }}
         >
@@ -143,13 +157,11 @@ const AboutBookComponentV2 = (props) => {
             <div style={{
               ...styles,
               wordWrap: "break-word",
-              wordBreak: "break-word", // Changed from "normal" to "break-word"
+              wordBreak: "break-word",
               whiteSpace: "normal"
             }} dangerouslySetInnerHTML={{ __html: blockItem.text }}></div>
           }
         </div>
-        
-        {/* Removed the redundant clear: "both" div */}
       </div>
     </div>
   );
