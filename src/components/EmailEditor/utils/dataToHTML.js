@@ -108,7 +108,7 @@ const parseItem = (item, index, styles, parentIndex) => {
   return newItem;
 }
 
-const createImageString = (imageConfig) => {
+const createImageString = (imageConfig,isAboutTheBookImage=false) => {
   if(imageConfig.linkURL && !imageConfig.linkURL.includes("://")) imageConfig.linkURL = `https://${imageConfig.linkURL}`
   
   // Add the width check for float behavior
@@ -117,7 +117,7 @@ const createImageString = (imageConfig) => {
     : 50;
   
   // Adjust styles based on width
-  const floatStyle = imageWidth > 65 ? 'float: none; margin-bottom: 20px;' : 'float: right; margin-left: 20px;';
+  const floatStyle = imageWidth > 65 || !isAboutTheBookImage ? 'float: none; margin-bottom: 20px;' : 'float: right; margin-left: 20px;';
   
   const imageStyle = `max-width:100%;${imageConfig.styleConfig.desktop};${floatStyle}`;
   
@@ -164,9 +164,15 @@ const createSocialLinkString = (socialLinkBlock) => {
     ${socialLinkBlock.list
       .map((socialLinkItem) => {
         const { image, title, link } = socialLinkItem;
+        // Check if imageWidth exists on the item or use from parent
+        const imageWidth = socialLinkItem.imageWidth || socialLinkBlock.imageWidth || 32;
+        
+        // Only add class if styleConfig exists and has mobile property
+        const classAttr = socialLinkItem.styleConfig && socialLinkItem.styleConfig.mobile ? 
+          `class="${socialLinkItem.styleConfig.className}"` : "";
+        
         return `<a target="_black" href="${link || '#'}" style="${socialLinkBlock.styleConfig.desktop};display:inline-block;">
-        <img src="${image}" alt="${title}" style="width:${socialLinkItem.imageWidth}px;" 
-        ${socialLinkItem.styleConfig.mobile ? `class="${socialLinkItem.styleConfig.className}"` : ""}/> 
+        <img src="${image}" alt="${title}" style="width:${imageWidth}px;" ${classAttr}/> 
       </a>`;
       })
       .join("")}
@@ -298,7 +304,7 @@ const blockListToHtml = (blockList, bodySettings) => {
       
       // Create a container for the book content with clearfix
       content += `<div class="about-the-book-container" style="position: relative; display: block; width: 100%; overflow: hidden;">`;
-      content += createImageString(item.image);
+      content += createImageString(item.image,true);
       content += createTextString(item.text);
       content += `</div>`;
     }
