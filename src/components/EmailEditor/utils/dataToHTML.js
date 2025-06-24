@@ -109,7 +109,7 @@ const parseItem = (item, index, styles, parentIndex) => {
 }
 
 const createImageString = (imageConfig) => {
-  if(!imageConfig.linkURL.includes("://")) imageConfig.linkURL = `https://${imageConfig.linkURL}`
+  if(imageConfig.linkURL && !imageConfig.linkURL.includes("://")) imageConfig.linkURL = `https://${imageConfig.linkURL}`
   
   // Add the width check for float behavior
   const imageWidth = imageConfig.styles.desktop.width && imageConfig.styles.desktop.width.includes('%') 
@@ -146,7 +146,7 @@ const createButtonString = (buttonBlock) => {
   return `<div ${buttonBlock.contentStyleConfig.mobile ? `class="${buttonBlock.contentStyleConfig.className}"` : ""} 
   style="${buttonBlock.contentStyleConfig.desktop}">
     <a ${buttonBlock.styleConfig.mobile ? `class="${buttonBlock.styleConfig.className}"` : ""} 
-    style="${buttonBlock.styleConfig.desktop};text-decoration:none!important" target="_black" href="https://${buttonBlock.linkURL}">${buttonBlock.text}</a>
+    style="${buttonBlock.styleConfig.desktop};text-decoration:none!important" target="_black" href="${buttonBlock.linkURL && buttonBlock.linkURL.startsWith('http') ? buttonBlock.linkURL : `https://${buttonBlock.linkURL}`}">${buttonBlock.text}</a>
   </div>`;
 };
 
@@ -164,8 +164,7 @@ const createSocialLinkString = (socialLinkBlock) => {
     ${socialLinkBlock.list
       .map((socialLinkItem) => {
         const { image, title, link } = socialLinkItem;
-        console.log('socialLinkItem',socialLinkItem)
-        return `<a target="_black" href="${link}" style="${socialLinkBlock.styleConfig.desktop};display:inline-block;">
+        return `<a target="_black" href="${link || '#'}" style="${socialLinkBlock.styleConfig.desktop};display:inline-block;">
         <img src="${image}" alt="${title}" style="width:${socialLinkBlock.imageWidth}px;" 
         ${socialLinkBlock.styleConfig.mobile ? `class="${socialLinkBlock.styleConfig.className}"` : ""}/> 
       </a>`;
@@ -193,25 +192,32 @@ const blockListToHtml = (blockList, bodySettings) => {
           .map(([key, value]) => `${key}:${value}`)
           .join(';') : '';
       
+      // Get text styles
+      const textStyles = item.styles && item.styles.desktop ? 
+        Object.entries(item.styles.desktop)
+          .map(([key, value]) => `${key}:${value}`)
+          .join(';') : '';
+      
       // Get image width and determine layout
       const imageWidth = item.imageWidth || 35;
       const useVerticalLayout = imageWidth >= 65;
       
-      // Start the container
-      content += `<div style="${containerStyles}; position: relative; width: 100%;">`;
+      // Get image height if specified
+      const imageHeight = item.image && item.image.styles && item.image.styles.desktop && item.image.styles.desktop.height ?
+        `height: ${item.image.styles.desktop.height};` : '';
       
-      // Add the image with float for text wrapping
+      // Start the container with proper class for styling
+      content += `<div class="about-book-v2-container" style="${containerStyles}; position: relative; width: 100%;">`;
+      
+      // Add the image with proper float for text wrapping
       if (item.src) {
-        const imageHeight = item.image && item.image.styles && item.image.styles.desktop && item.image.styles.desktop.height ?
-          `height: ${item.image.styles.desktop.height};` : '';
-          
         const floatStyle = useVerticalLayout ? 
           'float: none; width: 100%; margin-bottom: 20px;' : 
           `float: left; width: ${imageWidth}%; margin-right: 20px; margin-bottom: 10px;`;
           
-        const imageString = `<img src="${item.src}" alt="${item.alt || ''}" style="width: 100%; display: block; ${imageHeight}" />`;
+        const imageString = `<img src="${item.src}" alt="${item.alt || ''}" style="width: 100%; display: block; ${imageHeight}" class="about-book-v2-img" />`;
         
-        content += `<div style="${floatStyle}">
+        content += `<div class="parent-about_book_v2 image" style="${floatStyle}">
           ${item.linkURL ? `<a href="${item.linkURL}" target="_blank">${imageString}</a>` : imageString}
         </div>`;
       } else {
@@ -220,18 +226,13 @@ const blockListToHtml = (blockList, bodySettings) => {
           'float: none; width: 100%; margin-bottom: 20px;' : 
           `float: left; width: ${imageWidth}%; margin-right: 20px; margin-bottom: 10px;`;
           
-        content += `<div style="${floatStyle}; background-color: #f0f0f0; height: 150px; display: flex; align-items: center; justify-content: center;">
+        content += `<div class="parent-about_book_v2 image" style="${floatStyle}; background-color: #f0f0f0; height: ${imageHeight || '150px'}; display: flex; align-items: center; justify-content: center;">
           <span style="color: #999; text-align: center; width: 100%;">Image Placeholder</span>
         </div>`;
       }
       
-      // Add text content without any container to allow wrapping
-      const textStyles = item.styles && item.styles.desktop ? 
-        Object.entries(item.styles.desktop)
-          .map(([key, value]) => `${key}:${value}`)
-          .join(';') : '';
-      
-      content += `<div style="${textStyles}; word-wrap: break-word; word-break: normal; white-space: normal;">${item.text}</div>`;
+      // Add text content with proper styling for wrapping
+      content += `<div class="parent-about_book_v2 text" style="${textStyles}; word-wrap: break-word; word-break: normal; white-space: normal;">${item.text}</div>`;
       
       // Clear float and close the container
       content += `<div style="clear: both;"></div></div>`;
@@ -444,6 +445,7 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
         font-weight: bold;
       }
       
+      /* About the Book V1 styles */
       .about-the-book-container {
         position: relative;
         width: 100%;
@@ -478,6 +480,8 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
         position: relative;
         width: 100%;
         overflow: visible; /* Allow content to be visible */
+        display: block;
+        margin-bottom: 15px;
       }
 
       .about-book-v2-container:after {
@@ -487,20 +491,18 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
       }
 
       .parent-about_book_v2.image {
-        float: left;
-        margin-right: 20px;
-        margin-bottom: 10px;
+        position: relative;
+        display: block;
       }
 
       .parent-about_book_v2.text {
-        /* No specific width to allow text to flow naturally */
+        display: block;
         word-wrap: break-word;
         word-break: normal;
         white-space: normal;
       }
 
-      .parent-about_book_v2 img,
-      .parent-about_book_v2 .empty-image {
+      .about-book-v2-img {
         max-width: 100%;
         display: block;
       }
@@ -511,23 +513,24 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
           width: 100% !important;
         }
 
-          .about-the-book-container {
+        /* V1 mobile fixes */
+        .about-the-book-container {
           flex-direction: column !important;
         }
 
-          .block-item.image.parent-about_the_book {
+        .block-item.image.parent-about_the_book {
           width: 100% !important;
           margin-right: 0 !important;
           margin-bottom: 20px !important;
         }
 
         .about-the-book-container img {
-        max-width: 100% !important;
-        float: none !important;
-        margin-right: 0 !important;
-        margin-bottom: 20px;
-        width: 100% !important;
-      }
+          max-width: 100% !important;
+          float: none !important;
+          margin-right: 0 !important;
+          margin-bottom: 20px;
+          width: 100% !important;
+        }
         
         .image-content-about_the_book {
           width: 100% !important;
@@ -541,12 +544,21 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
           width: 100% !important;
         }
 
-        /* Media query for mobile devices */
+        /* V2 mobile fixes */
         .parent-about_book_v2.image {
           float: none !important;
           width: 100% !important;
           margin-right: 0 !important;
           margin-bottom: 20px !important;
+        }
+        
+        .parent-about_book_v2.text {
+          display: block;
+          width: 100% !important;
+        }
+        
+        .about-book-v2-img {
+          width: 100% !important;
         }
       }
 
@@ -554,7 +566,7 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
   </head>
   <body style="background-color:${bodySettings.styles.backgroundColor};${backgroundImageString}">
       <div style="opacity:0;height:0;overflow:hidden;">${bodySettings.preHeader}</div>
-      <div style="color:${bodySettings.styles.color}; font-family:${bodySettings.styles.fontFamily.attribute};"> ${content}</div>
+      <div style="color:${bodySettings.styles.color}; font-family:${bodySettings.styles.fontFamily}; width:100%;"> ${content}</div>
   </body>
   </html>`;
 };
