@@ -261,7 +261,16 @@ const AboutBookComponentV2StyleSettings = () => {
   };
 
   const imageStyleSettings = () => {
-    const width = findStyleItem(currentItem.data.styles, "width");
+    // Get width value by checking image styles first, then component property
+    const getWidthValue = () => {
+      if (currentItem?.data?.image?.styles?.desktop?.width === "auto") {
+        return "auto";
+      }
+      return null;
+    };
+    
+    const width = getWidthValue();
+    const isWidthAuto = width === "auto";
     const textAlign = findStyleItem(currentItem.data.contentStyles, "textAlign");
     
     // Check if height is set to auto
@@ -312,6 +321,46 @@ const AboutBookComponentV2StyleSettings = () => {
       updateItemStyles(newData);
     };
 
+    const toggleWidthAuto = (checked) => {
+      const newData = deepClone(currentItem.data);
+      
+      if (!newData.image) {
+        newData.image = { styles: { desktop: {}, mobile: {} } };
+      } else if (!newData.image.styles) {
+        newData.image.styles = { desktop: {}, mobile: {} };
+      } else if (!newData.image.styles.desktop) {
+        newData.image.styles.desktop = {};
+      }
+      
+      if (checked) {
+        // Switch to auto width
+        newData.image.styles.desktop.width = "auto";
+        if (newData.image.styles.desktop.maxWidth) {
+          delete newData.image.styles.desktop.maxWidth;
+        }
+      } else {
+        // Switch to fixed width (default to 35%)
+        const defaultWidth = 35;
+        newData.image.styles.desktop.width = `${defaultWidth}%`;
+        newData.image.styles.desktop.maxWidth = `${defaultWidth}%`;
+        newData.imageWidth = defaultWidth;
+        setImageWidth(defaultWidth);
+        
+        // Set correct layout properties based on width
+        if (defaultWidth > 65) {
+          newData.image.styles.desktop.float = "none";
+          newData.image.styles.desktop.marginRight = "0";
+          newData.image.styles.desktop.marginBottom = "20px";
+        } else {
+          newData.image.styles.desktop.float = "left";
+          newData.image.styles.desktop.marginRight = "20px";
+          newData.image.styles.desktop.marginBottom = "10px";
+        }
+      }
+      
+      updateItemStyles(newData);
+    };
+
     const toggleHeightAuto = (checked) => {
       const newData = deepClone(currentItem.data);
       
@@ -345,15 +394,12 @@ const AboutBookComponentV2StyleSettings = () => {
         {cardItemElement(
           t("width_auto"),
           <Switch
-            checked={width === "auto"}
-            className={classNames(width === "auto" ? "switch-active" : "switch-disabled")}
-            onChange={() => {
-              const value = width === "auto" ? "100%" : "auto";
-              inputChange("width")(value);
-            }}
+            checked={isWidthAuto}
+            className={classNames(isWidthAuto ? "switch-active" : "switch-disabled")}
+            onChange={toggleWidthAuto}
           />
         )}
-        {width !== "auto" && (
+        {!isWidthAuto && (
           <div>
             <div className="card-item-title">Image Width: {imageWidth}%</div>
             <Slider 
