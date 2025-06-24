@@ -473,7 +473,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									}}
 								>
 									{' '}
-									{node?.meta?.label ?? 'Select delay type'}
+									{node?.meta?.label ?? (node?.data?.delayValue[0]?.label ?? 'Select delay type')}
 								</Dropdown>
 							</div>
 						</Card>
