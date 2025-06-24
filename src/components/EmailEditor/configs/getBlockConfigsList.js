@@ -354,64 +354,8 @@ const getBlockConfigsList = (t) => {
     },
     {
       name: "About the book",
-      key: "about_the_book",
-      styles: {
-        desktop: {},
-        mobile: {},
-      },
-      image: {
-        src: "",
-        alt: "About the book",
-        parentKey: 'about_the_book',
-        type: "link",
-        linkURL: "",
-        contentStyles: {
-          desktop: {
-            paddingTop: 12,
-            paddingLeft: 12,
-            paddingRight: 12,
-            textAlign: "center",
-          },
-          mobile: {
-            width: '100%'
-          },
-        },
-        styles: {
-          desktop: {
-            width: "50%",
-            maxWidth: "50%",
-            float: "left",
-            marginRight: "20px"
-          },
-          mobile: {
-            width: "100%",
-            float: "none",
-          },
-        },
-      },
-      text: {
-        parentKey: 'about_the_book',
-        text: t("text_content"),
-        styles: {
-          desktop: {
-            fontSize: 14,
-            fontFamily: "Inter",
-            color: undefined,
-            lineHeight: "140%",
-            paddingBottom: 12,
-            paddingLeft: 12,
-            paddingRight: 12,
-            textAlign: "left",
-          },
-          mobile: {
-            width: '100%'
-          },
-        },
-      }
-    },
-    {
-      name: "About Book V2",
       key: "about_book_v2",
+      icon: "/images/editor-icons/about_the_book.png",
       src: "",
       alt: "About the book",
       linkURL: "",

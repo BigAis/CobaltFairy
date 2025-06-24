@@ -408,7 +408,7 @@ const AboutBookComponentV2StyleSettings = () => {
               max={100} 
               onChange={handleWidthChange} 
             />
-            <div className="card-item-title" style={{marginTop: "10px", fontSize: "12px"}}>
+            <div style={{marginTop: "10px", marginBottom: "15px", fontSize: "12px", fontWeight: "normal", color: "#666"}}>
               Note: Width over 65% will stack image above text on all devices
             </div>
           </div>

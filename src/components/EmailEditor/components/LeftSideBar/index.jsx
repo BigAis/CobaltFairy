@@ -77,13 +77,18 @@ const LeftSideBar = (props) => {
 								<div className="sidebar-block">
 									{/* <FontAwesomeIcon icon={icons[item.key]} className="sidebar-block-icon" /> */}
 									{item.key == 'column' ? (
-										<>
-											<img src={`/images/editor-icons/${item.columnType}.png`} />
-										</>
+									<>
+										<img src={`/images/editor-icons/${item.columnType}.png`} />
+									</>
+									) : item.key == 'about_book_v2' ? (
+									// Special case for the About Book V2 component
+									<>
+										<img src={`/images/editor-icons/about_the_book.png`} />
+									</>
 									) : (
-										<>
-											<img src={`/images/editor-icons/${item.key}.png`} />
-										</>
+									<>
+										<img src={item.icon || `/images/editor-icons/${item.key}.png`} />
+									</>
 									)}
 									<div className="sidebar-block-text">{item.name}</div>
 								</div>
