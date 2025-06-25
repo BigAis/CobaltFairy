@@ -10,16 +10,18 @@ import ButtonGroup from '../../components/ButtonGroup'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService, APP_VERSION } from '../../service/api-service'
+import User from '../../service/User'
 import CampaignsTable from '../../components/DataTable/CampaignsTable'
 import { useNavigate } from 'react-router-dom'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import PopupText from '../../components/PopupText/PopupText'
 import DashboardChart from '../../components/DashboardChart/DashboardChart'
+import OnboardingGuide from '../../components/OnboardingGuide/OnboardingGuide'
 
 const Dashboard = () => {
 	const navigate = useNavigate()
-	const { user, account, loading: accountLoading, dataInitialized } = useAccount()
+	const { user, account, loading: accountLoading, dataInitialized, createNotification } = useAccount()
 	const [statsData, setStatsData] = useState({})
 	const [statsKey, setStatsKey] = useState('d7')
 	const [subsStats, setSubsStats] = useState(null)
@@ -28,6 +30,8 @@ const Dashboard = () => {
 	const [stats, setStats] = useState([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+	const [showOnboarding, setShowOnboarding] = useState(true)
+	const [setupComplete, setSetupComplete] = useState(false)
   
 	// Chart data and options
 	const isPositive = true
@@ -92,7 +96,7 @@ const Dashboard = () => {
 	// Improved loadStats function with retry mechanism
 	const loadStats = async () => {
 		if (!user || !user.jwt || !account) {
-		  console.log('User or account data not available, skipping stats load');
+		  console.log('User or account data not available, skipping stats load')
 		  return;
 		}
 		
@@ -103,42 +107,118 @@ const Dashboard = () => {
 		
 		const attemptLoadStats = async () => {
 		  try {
-			console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`);
-			let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt);
-			console.log('Stats loaded successfully:', stats.data);
-			setStatsData(stats.data);
+			console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`)
+			let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt)
+			console.log('Stats loaded successfully:', stats.data)
+			setStatsData(stats.data)
 			
 			let resp = await ApiService.get(
 			  `fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
 			  user.jwt
-			);
-			console.log('Campaigns loaded:', resp.data);
+			)
+			console.log('Campaigns loaded:', resp.data)
 			if (resp.data && resp.data.data) {
-			  setLatestCampaigns(resp.data.data);
+			  setLatestCampaigns(resp.data.data)
 			}
-			return true; // Success
+
+			// Check if account needs onboarding
+			checkAccountSetup()
+			
+			return true // Success
 		  } catch (error) {
-			console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error);
+			console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error)
 			retries++;
 			
 			if (retries < maxRetries) {
-			  console.log(`Retrying in 1 second... (${retries}/${maxRetries})`);
-			  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
-			  return await attemptLoadStats(); // Recursively retry
+			  console.log(`Retrying in 1 second... (${retries}/${maxRetries})`)
+			  await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second before retry
+			  return await attemptLoadStats() // Recursively retry
 			}
-			return false; // Failed after max retries
+			return false // Failed after max retries
 		  }
 		};
 		
 		const success = await attemptLoadStats();
 		
 		if (!success) {
-		  console.error('Failed to load dashboard data after multiple attempts');
+		  console.error('Failed to load dashboard data after multiple attempts')
 		  // You could show an error message to the user here
 		}
 		
 		setIsLoading(false);
 	};
+
+	const checkAccountSetup = async () => {
+		try {
+			// First check if we should skip the onboarding (for development/testing)
+			const skipOnboarding = localStorage.getItem('fairymail_skip_onboarding') === 'true'
+			if (skipOnboarding) {
+				setShowOnboarding(false)
+				setSetupComplete(true)
+				return
+			}
+			
+			// Check if setup is already complete using the User service
+			if (User.isSetupComplete()) {
+				setShowOnboarding(false)
+				setSetupComplete(true)
+				return
+			}
+			
+			// If not in localStorage, check with backend
+			try {
+				const setupResponse = await ApiService.getAccountSetupStatus(user.jwt)
+				if (setupResponse && setupResponse.isComplete) {
+					// Setup is complete according to backend
+					// Store this in localStorage
+					User.setAccountSetup({
+						accountId: account?.id,
+						setupDate: setupResponse.setupDate || new Date().toISOString(),
+						completedSteps: [1, 2, 3] // All steps completed
+					})
+					setShowOnboarding(false)
+					setSetupComplete(true)
+				} else {
+					// Setup is not complete or no data from backend
+					// Initialize with whatever data we got from backend
+					const completedSteps = setupResponse?.completedSteps || []
+					User.setAccountSetup({
+						accountId: account?.id,
+						setupDate: setupResponse?.setupDate || new Date().toISOString(),
+						completedSteps
+					})
+					
+					// Show onboarding if any steps are incomplete
+					setShowOnboarding(completedSteps.length < 3)
+					setSetupComplete(completedSteps.length === 3)
+				}
+			} catch (error) {
+				console.error('Error checking account setup status:', error)
+				// If error, assume setup is needed
+				setShowOnboarding(true)
+				setSetupComplete(false)
+				
+				// Initialize setup data in localStorage if it doesn't exist
+				if (!User.getAccountSetup()) {
+					User.setAccountSetup({
+						accountId: account?.id,
+						setupDate: new Date().toISOString(),
+						completedSteps: []
+					})
+				}
+			}
+		} catch (error) {
+			console.error('Error in checkAccountSetup:', error)
+			// Default to showing onboarding
+			setShowOnboarding(true)
+			setSetupComplete(false)
+		}
+	}
+
+	const handleSetupComplete = () => {
+		setShowOnboarding(false)
+		setSetupComplete(true)
+	}
 
 	const createStatsMetrics = () => {
 		let key = statsKey
@@ -176,12 +256,12 @@ const Dashboard = () => {
 	useEffect(() => {
 		// Only load stats when account is fully initialized and not in loading state
 		if (user && account && dataInitialized && !accountLoading) {
-			console.log('Account initialized, loading stats');
-			loadStats();
+			console.log('Account initialized, loading stats')
+			loadStats()
 		} else {
-			console.log('Waiting for account data initialization');
+			console.log('Waiting for account data initialization')
 		}
-	}, [user, account, dataInitialized, accountLoading]);
+	}, [user, account, dataInitialized, accountLoading])
 
 	// Loading state UI
 	if (accountLoading || isLoading) {
@@ -204,6 +284,12 @@ const Dashboard = () => {
 		)
 	}
 
+	// If onboarding is required, show only the onboarding component
+	if (showOnboarding) {
+		return <OnboardingGuide onSetupComplete={handleSetupComplete} />
+	}
+
+	// Only show dashboard content when setup is complete
 	return (
 		<>
 			<div className="dashboard-wrapper">
@@ -213,6 +299,7 @@ const Dashboard = () => {
 					<div className="page-name-container">
 						<div className="page-name">Dashboard <small style={{fontSize:'14px',letterSpacing: '.2em'}}>v{APP_VERSION}</small></div>
 					</div>
+					
 					<Card className="dashboard-stats">
 						<div className="stats-head">
 							<span className="stats-title">Campaigns</span>

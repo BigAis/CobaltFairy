@@ -255,6 +255,37 @@ export const insertSubscriber = async (subscriberData) => {
     }
 }
 
+// Get account setup status
+export const getAccountSetupStatus = async (jwt) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/fairymailer/account-setup-status`, {
+            headers: {
+                Authorization: 'Bearer ' + jwt,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error checking account setup status:", error);
+        throw error;
+    }
+}
+
+// Update account setup status
+export const updateAccountSetupStatus = async (setupData, jwt) => {
+    try {
+        const response = await axios.post(`${BASE_URL}/fairymailer/update-account-setup`, setupData, {
+            headers: {
+                Authorization: 'Bearer ' + jwt,
+                'Content-Type': 'application/json'
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error updating account setup status:", error);
+        throw error;
+    }
+}
+
 const ApiService = {
 	get_external: (endpoint) => {
 		const url = `${endpoint}`
@@ -383,6 +414,15 @@ const ApiService = {
     // Method to get session data
     getSessionData: () => {
         return getSessionData();
+    },
+    
+    // Account setup methods
+    getAccountSetupStatus: (jwt) => {
+        return getAccountSetupStatus(jwt);
+    },
+    
+    updateAccountSetupStatus: (setupData, jwt) => {
+        return updateAccountSetupStatus(setupData, jwt);
     }
 }
 
