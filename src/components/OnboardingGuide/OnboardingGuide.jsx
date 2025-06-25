@@ -6,7 +6,6 @@ import { useAccount } from '../../context/AccountContext'
 import User from '../../service/User'
 import Card from '../Card'
 import Button from '../Button'
-import Logo from '../Logo/Logo'
 
 const OnboardingGuide = ({ onSetupComplete }) => {
   const { user, account, createNotification } = useAccount()
@@ -95,46 +94,41 @@ const OnboardingGuide = ({ onSetupComplete }) => {
   }
 
   return (
-    <div className="onboarding-overlay">
-      <div className="onboarding-container">
-        <Logo />
-        <Card className="onboarding-guide">
-          <div className="guide-header">
-            <h2>Get Started</h2>
-          </div>
-
-          <div className="steps-container">
-            {steps.map((step, index) => (
-              <div key={step.id} className={`step-item ${step.completed ? 'completed' : ''}`}>
-                <div className="step-indicator">
-                  <div className="step-number">
-                    {step.completed ? (
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 16.2L4.8 12L3.4 13.4L9 19L21 7L19.6 5.6L9 16.2Z" fill="white"/>
-                      </svg>
-                    ) : (
-                      step.id
-                    )}
-                  </div>
-                  <div className="connector-line" style={{ display: index === steps.length - 1 ? 'none' : 'block' }}></div>
-                </div>
-                
-                <div className="step-content">
-                  <h3>{step.label}</h3>
-                  <p>{step.description}</p>
-                  <Button 
-                    onClick={() => handleStepAction(step.id)}
-                    disabled={step.completed}
-                  >
-                    {step.completed ? 'Completed' : `Set up ${step.label.toLowerCase()}`}
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+    <Card className="onboarding-guide">
+      <div className="guide-header">
+        <h2>Get Started</h2>
       </div>
-    </div>
+
+      <div className="steps-container">
+        {steps.map((step, index) => (
+          <div key={step.id} className={`step-item ${step.completed ? 'completed' : ''}`}>
+            <div className="step-indicator">
+              <div className="step-number">
+                {step.completed ? (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 16.2L4.8 12L3.4 13.4L9 19L21 7L19.6 5.6L9 16.2Z" fill="white"/>
+                  </svg>
+                ) : (
+                  step.id
+                )}
+              </div>
+              <div className="connector-line" style={{ display: index === steps.length - 1 ? 'none' : 'block' }}></div>
+            </div>
+            
+            <div className="step-content">
+              <h3>{step.label}</h3>
+              <p>{step.description}</p>
+              <Button 
+                onClick={() => handleStepAction(step.id)}
+                disabled={step.completed}
+              >
+                {step.completed ? 'Completed' : `Set up ${step.label.toLowerCase()}`}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
   )
 }
 

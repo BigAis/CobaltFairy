@@ -30,8 +30,8 @@ const Dashboard = () => {
 	const [stats, setStats] = useState([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
-	const [showOnboarding, setShowOnboarding] = useState(true)
-	const [setupComplete, setSetupComplete] = useState(false)
+	const [showOnboarding, setShowOnboarding] = useState(false)
+	const [setupComplete, setSetupComplete] = useState(true)
   
 	// Chart data and options
 	const isPositive = true
@@ -284,12 +284,6 @@ const Dashboard = () => {
 		)
 	}
 
-	// If onboarding is required, show only the onboarding component
-	if (showOnboarding) {
-		return <OnboardingGuide onSetupComplete={handleSetupComplete} />
-	}
-
-	// Only show dashboard content when setup is complete
 	return (
 		<>
 			<div className="dashboard-wrapper">
@@ -299,6 +293,11 @@ const Dashboard = () => {
 					<div className="page-name-container">
 						<div className="page-name">Dashboard <small style={{fontSize:'14px',letterSpacing: '.2em'}}>v{APP_VERSION}</small></div>
 					</div>
+					
+					{/* Show Onboarding Guide if needed */}
+					{showOnboarding && (
+						<OnboardingGuide onSetupComplete={handleSetupComplete} />
+					)}
 					
 					<Card className="dashboard-stats">
 						<div className="stats-head">
