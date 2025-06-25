@@ -10,7 +10,6 @@ import ButtonGroup from '../../components/ButtonGroup'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService, APP_VERSION } from '../../service/api-service'
-import User from '../../service/User'
 import CampaignsTable from '../../components/DataTable/CampaignsTable'
 import { useNavigate } from 'react-router-dom'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
@@ -30,8 +29,15 @@ const Dashboard = () => {
 	const [stats, setStats] = useState([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
-	const [showOnboarding, setShowOnboarding] = useState(false)
-	const [setupComplete, setSetupComplete] = useState(true)
+	
+	// State for onboarding - In the future, this will be read from account data from API
+	// Set to true to show onboarding, false to hide it
+	const [needsOnboarding, setNeedsOnboarding] = useState(true)
+	
+	// For development only - button to toggle onboarding visibility
+	const toggleOnboarding = () => {
+		setNeedsOnboarding(prev => !prev)
+	}
   
 	// Chart data and options
 	const isPositive = true
@@ -120,9 +126,9 @@ const Dashboard = () => {
 			if (resp.data && resp.data.data) {
 			  setLatestCampaigns(resp.data.data)
 			}
-
-			// Check if account needs onboarding
-			checkAccountSetup()
+			
+			// In the future, we'll read the onboarding status from account data
+			// setNeedsOnboarding(account.needsOnboarding || false)
 			
 			return true // Success
 		  } catch (error) {
@@ -148,76 +154,16 @@ const Dashboard = () => {
 		setIsLoading(false);
 	};
 
-	const checkAccountSetup = async () => {
-		try {
-			// First check if we should skip the onboarding (for development/testing)
-			const skipOnboarding = localStorage.getItem('fairymail_skip_onboarding') === 'true'
-			if (skipOnboarding) {
-				setShowOnboarding(false)
-				setSetupComplete(true)
-				return
-			}
-			
-			// Check if setup is already complete using the User service
-			if (User.isSetupComplete()) {
-				setShowOnboarding(false)
-				setSetupComplete(true)
-				return
-			}
-			
-			// If not in localStorage, check with backend
-			try {
-				const setupResponse = await ApiService.getAccountSetupStatus(user.jwt)
-				if (setupResponse && setupResponse.isComplete) {
-					// Setup is complete according to backend
-					// Store this in localStorage
-					User.setAccountSetup({
-						accountId: account?.id,
-						setupDate: setupResponse.setupDate || new Date().toISOString(),
-						completedSteps: [1, 2, 3] // All steps completed
-					})
-					setShowOnboarding(false)
-					setSetupComplete(true)
-				} else {
-					// Setup is not complete or no data from backend
-					// Initialize with whatever data we got from backend
-					const completedSteps = setupResponse?.completedSteps || []
-					User.setAccountSetup({
-						accountId: account?.id,
-						setupDate: setupResponse?.setupDate || new Date().toISOString(),
-						completedSteps
-					})
-					
-					// Show onboarding if any steps are incomplete
-					setShowOnboarding(completedSteps.length < 3)
-					setSetupComplete(completedSteps.length === 3)
-				}
-			} catch (error) {
-				console.error('Error checking account setup status:', error)
-				// If error, assume setup is needed
-				setShowOnboarding(true)
-				setSetupComplete(false)
-				
-				// Initialize setup data in localStorage if it doesn't exist
-				if (!User.getAccountSetup()) {
-					User.setAccountSetup({
-						accountId: account?.id,
-						setupDate: new Date().toISOString(),
-						completedSteps: []
-					})
-				}
-			}
-		} catch (error) {
-			console.error('Error in checkAccountSetup:', error)
-			// Default to showing onboarding
-			setShowOnboarding(true)
-			setSetupComplete(false)
-		}
-	}
-
 	const handleSetupComplete = () => {
-		setShowOnboarding(false)
-		setSetupComplete(true)
+		// Mark onboarding as completed
+		setNeedsOnboarding(false)
+		
+		// In the future, this will send an API request to update the account status
+		createNotification({
+			message: 'Setup completed! You\'re all set to start using FairyMail.',
+			type: 'default',
+			autoClose: 5000
+		})
 	}
 
 	const createStatsMetrics = () => {
@@ -284,8 +230,39 @@ const Dashboard = () => {
 		)
 	}
 
+	// If onboarding is required, show only the onboarding component
+	if (needsOnboarding) {
+		// Add the testing button for development
+		return (
+			<>
+				{/* Dev button for testing */}
+				<div style={{ position: 'fixed', top: '10px', right: '10px', zIndex: 2000 }}>
+					<Button 
+						type="secondary" 
+						onClick={toggleOnboarding}
+						style={{ fontSize: '12px', padding: '5px 10px' }}
+					>
+						Skip Onboarding (DEV)
+					</Button>
+				</div>
+				<OnboardingGuide onSetupComplete={handleSetupComplete} />
+			</>
+		)
+	}
+
 	return (
 		<>
+			{/* DEV ONLY: Button to toggle onboarding visibility for testing */}
+			<div style={{ position: 'fixed', top: '10px', right: '10px', zIndex: 2000 }}>
+				<Button 
+					type="secondary" 
+					onClick={toggleOnboarding}
+					style={{ fontSize: '12px', padding: '5px 10px' }}
+				>
+					Show Onboarding (DEV)
+				</Button>
+			</div>
+			
 			<div className="dashboard-wrapper">
 				<Sidemenu />
 				<div className="dashboard-container">
@@ -293,11 +270,6 @@ const Dashboard = () => {
 					<div className="page-name-container">
 						<div className="page-name">Dashboard <small style={{fontSize:'14px',letterSpacing: '.2em'}}>v{APP_VERSION}</small></div>
 					</div>
-					
-					{/* Show Onboarding Guide if needed */}
-					{showOnboarding && (
-						<OnboardingGuide onSetupComplete={handleSetupComplete} />
-					)}
 					
 					<Card className="dashboard-stats">
 						<div className="stats-head">
