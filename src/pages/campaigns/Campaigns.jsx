@@ -133,18 +133,21 @@ const Campaigns = () => {
 
 	// Filter campaigns whenever selectedCampaignType or campaigns change
 	useEffect(() => {
-		if (campaigns && campaigns.length > 0) {
-			const filtered = campaigns.filter(campaign => {
-				if (selectedCampaignType === 'outbox') {
-					return campaign.status === 'draft' && campaign.date;
-				} else {
-					return campaign.status === selectedCampaignType;
-				}
-			});
-			setFilteredCampaigns(filtered);
-		} else {
-			setFilteredCampaigns([]);
+	if (campaigns && campaigns.length > 0) {
+		const filtered = campaigns.filter(campaign => {
+		if (selectedCampaignType === 'sent') {
+			return campaign.status === 'sent';
+		} else if (selectedCampaignType === 'outbox') {
+			return campaign.status === 'draft' && campaign.date; // Drafts WITH a date
+		} else if (selectedCampaignType === 'draft') {
+			return campaign.status === 'draft' && !campaign.date; // Drafts WITHOUT a date
 		}
+		return false;
+		});
+		setFilteredCampaigns(filtered);
+	} else {
+		setFilteredCampaigns([]);
+	}
 	}, [campaigns, selectedCampaignType]);
 	// Updated search function with loading state
 	const updateSearchTerm = async (search) => {
@@ -210,32 +213,33 @@ const Campaigns = () => {
 	};
 
 	const getCampaigns = async (page = 1) => {
-		try {
-			setLoading(true);
-			let resp = await ApiService.get(
-				`fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
-				user.jwt
-			)
-			if (resp && resp.data && resp.data.data) {
-				setCampaigns(
-					resp.data.data.map((item) => ({
-						...item,
-						image: '/images/cmp.png',
-					}))
-				)
+	try {
+		setLoading(true);
+		let resp = await ApiService.get(
+		`fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
+		user.jwt
+		);
+		
+		if (resp && resp.data && resp.data.data) {
+		setCampaigns(
+			resp.data.data.map((item) => ({
+			...item,
+			image: '/images/cmp.png',
+			}))
+		);
 
-				setCampaignsMeta(resp.data.meta)
-			}
-			setLoading(false);
-		} catch (error) {
-			console.error(error)
-			createNotification({
-				message: 'Error loading campaigns. Please try again.',
-				type: 'warning'
-			})
-			setLoading(false);
+		setCampaignsMeta(resp.data.meta);
 		}
+		setLoading(false);
+	} catch (error) {
+		console.error(error);
+		createNotification({
+		message: 'Error loading campaigns. Please try again.',
+		type: 'warning'
+		});
+		setLoading(false);
 	}
+	};
 
 	const getTemplates = async (page = 1) => {
 		try {
