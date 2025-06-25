@@ -1,3 +1,5 @@
+// Update in src/components/EmailEditor/configs/getColumnConfigFunc.js
+
 const getColumnConfigFunc = (t) => {
   return (item) => {
     const contentConfig = {
@@ -25,8 +27,8 @@ const getColumnConfigFunc = (t) => {
         desktop: {
           backgroundColor: "transparent",
           paddingTop: 0,
-          paddingLeft: 0,
-          paddingRight: 0,
+          paddingLeft: 15,  // Changed from 0 to 15
+          paddingRight: 15, // Changed from 0 to 15
           paddingBottom: 0,
           contentBackground: "transparent",
         },
@@ -42,8 +44,8 @@ const getColumnConfigFunc = (t) => {
             desktop: {
               backgroundColor: "transparent",
               paddingTop: 0,
-              paddingLeft: 0,
-              paddingRight: 0,
+              paddingLeft: 15,  // Changed from 0 to 15
+              paddingRight: 15, // Changed from 0 to 15
               paddingBottom: 0,
               contentBackground: "transparent",
             },
