@@ -20,6 +20,9 @@ import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
 import CampaignCalendar from './CampaignCalendar'
 import { v4 as uuidv4 } from 'uuid'
 import SearchBar from '../../components/SearchBar/SearchBar'
+import DatePicker from '../../components/DatePicker'
+import MultipleDropdown from '../../components/MultipleDropdown/MultipleDropdown'
+
 const Campaigns = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
@@ -41,10 +44,23 @@ const Campaigns = () => {
 
 	const [campaignsMeta, setCampaignsMeta] = useState([])
 	const [selectedCampaignType, setSelectedCampaignType] = useState('sent')
+	
+	// New state for filters
+	const [showFilters, setShowFilters] = useState(false)
+	const [campaignFilters, setCampaignFilters] = useState({
+		dateFrom: '',
+		dateTo: '',
+		minOpenRate: '',
+		maxOpenRate: '',
+		minClickRate: '',
+		maxClickRate: '',
+		recipientGroups: []
+	})
 
 	const totalCampaignsSent = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.sent : 2
 	const totalCampaignsDraft = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.draft : 1
 	const totalCampaignsOutBox = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.outbox : 0
+	
 	// Handle window resize for mobile detection
 	useEffect(() => {
 		const handleResize = () => {
@@ -149,6 +165,136 @@ const Campaigns = () => {
 		setFilteredCampaigns([]);
 	}
 	}, [campaigns, selectedCampaignType]);
+	
+	// Handle filter changes
+	const handleFilterChange = (key, value) => {
+		setCampaignFilters(prev => ({
+			...prev,
+			[key]: value
+		}));
+	};
+
+	// Handle group selection
+	const handleGroupSelection = (selected) => {
+		setCampaignFilters(prev => ({
+			...prev,
+			recipientGroups: selected
+		}));
+	};
+
+	// Apply filters
+	const applyCampaignFilters = () => {
+		// Use all campaigns as the source for filtering
+		const filtered = campaigns.filter(campaign => {
+			// First apply standard type filtering (sent, draft, outbox)
+			// This ensures we maintain the basic filtering by campaign type
+			if (selectedCampaignType === 'sent') {
+				if (campaign.status !== 'sent') return false;
+			} else if (selectedCampaignType === 'outbox') {
+				if (campaign.status !== 'draft' || !campaign.date) return false;
+			} else if (selectedCampaignType === 'draft') {
+				if (campaign.status !== 'draft' || campaign.date) return false;
+			}
+			
+			// Date filter - for sent campaigns use sent_at, for outbox use date
+			const campaignDate = campaign.status === 'sent' ? campaign.sent_at : campaign.date;
+			
+			if (campaignFilters.dateFrom && campaignDate) {
+				const filterDate = new Date(campaignFilters.dateFrom);
+				const campDate = new Date(campaignDate);
+				if (campDate < filterDate) return false;
+			}
+			
+			if (campaignFilters.dateTo && campaignDate) {
+				const filterDate = new Date(campaignFilters.dateTo);
+				const campDate = new Date(campaignDate);
+				if (campDate > filterDate) return false;
+			}
+			
+			// Open rate filter - ensure we handle missing stats
+			const openRate = campaign.stats?.or;
+			if (campaignFilters.minOpenRate && openRate !== undefined) {
+				if (openRate < parseFloat(campaignFilters.minOpenRate)) {
+					return false;
+				}
+			}
+			
+			if (campaignFilters.maxOpenRate && openRate !== undefined) {
+				if (openRate > parseFloat(campaignFilters.maxOpenRate)) {
+					return false;
+				}
+			}
+			
+			// Click rate filter - ensure we handle missing stats
+			const clickRate = campaign.stats?.cr;
+			if (campaignFilters.minClickRate && clickRate !== undefined) {
+				if (clickRate < parseFloat(campaignFilters.minClickRate)) {
+					return false;
+				}
+			}
+			
+			if (campaignFilters.maxClickRate && clickRate !== undefined) {
+				if (clickRate > parseFloat(campaignFilters.maxClickRate)) {
+					return false;
+				}
+			}
+			
+			// Recipient groups filter
+			if (campaignFilters.recipientGroups.length > 0) {
+				// Check if the campaign has any of the selected groups
+				const campaignGroupIds = campaign.recp_groups?.map(g => 
+					typeof g === 'object' ? g.id : g
+				) || [];
+				
+				const selectedGroupIds = campaignFilters.recipientGroups.map(g => g.value);
+				const hasSelectedGroup = campaignGroupIds.some(id => 
+					selectedGroupIds.includes(id.toString())
+				);
+				
+				if (!hasSelectedGroup) {
+					return false;
+				}
+			}
+			
+			return true;
+		});
+		
+		// Update the filtered campaigns state - this will update both the list and card views
+		setFilteredCampaigns(filtered);
+		
+		// Show a notification with the results
+		createNotification({
+			message: `Found ${filtered.length} campaigns matching your filters.`,
+			type: 'default',
+			autoClose: 3000
+		});
+	};
+	
+	// Create group options for dropdown
+	const groupOptions = () => {
+		// Get all groups from campaigns
+		const allGroups = new Map();
+		
+		campaigns.forEach(campaign => {
+			if (campaign.recp_groups && campaign.recp_groups.length > 0) {
+				campaign.recp_groups.forEach(group => {
+					const groupId = typeof group === 'object' ? group.id : group;
+					const groupName = typeof group === 'object' ? group.name : `Group ${groupId}`;
+					
+					if (!allGroups.has(groupId.toString())) {
+						allGroups.set(groupId.toString(), groupName);
+					}
+				});
+			}
+		});
+		
+		// Convert to array of options
+		return Array.from(allGroups).map(([value, label]) => ({
+			value,
+			label
+		}));
+	};
+	
 	// Updated search function with loading state
 	const updateSearchTerm = async (search) => {
 		try {
@@ -640,6 +786,18 @@ const Campaigns = () => {
 	// Clear search term when changing tabs
 	setSearchTerm('');
 	
+	// Reset filters when changing tabs
+	setShowFilters(false);
+	setCampaignFilters({
+		dateFrom: '',
+		dateTo: '',
+		minOpenRate: '',
+		maxOpenRate: '',
+		minClickRate: '',
+		maxClickRate: '',
+		recipientGroups: []
+	});
+	
 	// Store the selected tab in localStorage for returning later
 	localStorage.setItem('fairymail_last_active_tab', value);
 	
@@ -809,28 +967,153 @@ const Campaigns = () => {
 							</div>
 						)}
 						
-						<div className="row d-flex content-space-between">
-							{dropdownViewer === 'campaigns' ? (
-								<SearchBar
-									placeholder="Search Campaigns"
-									label="Search Campaigns"
-									initialValue={searchTerm}
-									onSearch={(value) => {
-										updateSearchTerm(value);
-									}}
-								/>
-							) : (
-								<SearchBar
-									placeholder="Search Templates"
-									label="Search Templates"
-									initialValue={searchTerm}
-									onSearch={(value) => {
-										updateSearchTerm(value);
-									}}
-								/>
-							)}
-						</div>
+						{viewMode === 'list' && (
+							<div className="input-text-container" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+								{dropdownViewer === 'campaigns' ? (
+									<>
+										<SearchBar
+											placeholder="Search Campaigns"
+											label="Search Campaigns"
+											initialValue={searchTerm}
+											onSearch={(value) => {
+												updateSearchTerm(value);
+											}}
+											style={{ width: '100%', marginRight: '20px' }}
+										/>
+										<Button
+											type="secondary"
+											icon={'Filters'}
+											className="button-filters"
+											onClick={() => {
+												setShowFilters((prev) => !prev);
+											}}
+										>
+											Filters
+										</Button>
+									</>
+								) : (
+									<SearchBar
+										placeholder="Search Templates"
+										label="Search Templates"
+										initialValue={searchTerm}
+										onSearch={(value) => {
+											updateSearchTerm(value);
+										}}
+									/>
+								)}
+							</div>
+						)}
 					</div>
+					
+					{/* Campaign Filter Card */}
+					{dropdownViewer === 'campaigns' && (
+						<Card 
+							style={{ display: showFilters ? 'flex' : 'none' }} 
+							className={'d-flex flex-column campaign-filters-card gap-20 mt20'}
+						>
+							<div className="d-flex gap-20">
+								<DatePicker
+									label="Date From"
+									hasMinDate={false}
+									hasDefaultDate={false}
+									dateFormat="d/m/Y"
+									timeFormat={'H:i'}
+									pickerType="date"
+									onChange={(date) => handleFilterChange('dateFrom', date)}
+									value={campaignFilters.dateFrom}
+								/>
+								<DatePicker
+									label="Date To"
+									hasMinDate={false}
+									dateFormat="d/m/Y"
+									timeFormat={'H:i'}
+									pickerType="date"
+									onChange={(date) => handleFilterChange('dateTo', date)}
+									value={campaignFilters.dateTo}
+								/>
+							</div>
+							
+							{selectedCampaignType === 'sent' && (
+								<>
+									<div className="d-flex gap-20">
+										<InputText 
+											label="Min Open Rate (%)"
+											type="number" 
+											value={campaignFilters.minOpenRate} 
+											onChange={(e) => handleFilterChange('minOpenRate', e.target.value)}
+										/>
+										<InputText 
+											label="Max Open Rate (%)"
+											type="number" 
+											value={campaignFilters.maxOpenRate} 
+											onChange={(e) => handleFilterChange('maxOpenRate', e.target.value)}
+										/>
+									</div>
+									
+									<div className="d-flex gap-20">
+										<InputText 
+											label="Min Click Rate (%)"
+											type="number" 
+											value={campaignFilters.minClickRate} 
+											onChange={(e) => handleFilterChange('minClickRate', e.target.value)}
+										/>
+										<InputText 
+											label="Max Click Rate (%)"
+											type="number" 
+											value={campaignFilters.maxClickRate} 
+											onChange={(e) => handleFilterChange('maxClickRate', e.target.value)}
+										/>
+									</div>
+								</>
+							)}
+							
+							<div className="d-flex gap-20">
+								<div style={{ flex: 1 }}>
+									<label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', textAlign: 'left' }}>
+										Recipient Groups
+									</label>
+									<MultipleDropdown
+										placeholder="Select Groups"
+										options={groupOptions() || []}
+										selectedValues={campaignFilters.recipientGroups}
+										onOptionSelect={handleGroupSelection}
+									/>
+								</div>
+							</div>
+							
+							<div className="d-flex justify-content-end mt10">
+								<Button onClick={() => {
+									setCampaignFilters({
+										dateFrom: '',
+										dateTo: '',
+										minOpenRate: '',
+										maxOpenRate: '',
+										minClickRate: '',
+										maxClickRate: '',
+										recipientGroups: []
+									});
+									// Reset filteredCampaigns to match selected campaign type
+									const filtered = campaigns.filter(campaign => {
+										if (selectedCampaignType === 'sent') {
+											return campaign.status === 'sent';
+										} else if (selectedCampaignType === 'outbox') {
+											return campaign.status === 'draft' && campaign.date;
+										} else if (selectedCampaignType === 'draft') {
+											return campaign.status === 'draft' && !campaign.date;
+										}
+										return false;
+									});
+									setFilteredCampaigns(filtered);
+								}} type="secondary" style={{ marginRight: '10px' }}>
+									Clear Filters
+								</Button>
+								<Button onClick={applyCampaignFilters}>
+									Apply Filters
+								</Button>
+							</div>
+						</Card>
+					)}
+
 					{loading ? (
 						<div className="loading-indicator">Loading...</div>
 					) : (

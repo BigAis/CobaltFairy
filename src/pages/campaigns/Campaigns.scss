@@ -213,6 +213,42 @@ p.template-card-label {
   }
 }
 
+/* Campaign filter styles */
+.campaign-filters-card {
+  margin-bottom: 20px;
+  
+  .d-flex {
+    flex: 1;
+    
+    > div {
+      flex: 1;
+    }
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .mt10 {
+    margin-top: 10px;
+  }
+}
+
+/* Make the filter button consistent with subscribers page */
+.button-filters {
+  min-width: 120px;
+  min-height: 51px;
+  
+  @media (max-width: 768px) {
+    min-width: 80px;
+    min-height: 44px;
+  }
+}
+
 /* Mobile styles for campaigns page */
 @media(max-width: 768px) {
 	.fm-content-wrapper {
@@ -505,5 +541,27 @@ p.template-card-label {
 		text-align: center;
 		padding: 2rem 0;
 		color: #887D76;
+	}
+	
+	/* Campaign filter responsive adjustments */
+	.campaign-filters-card {
+		.d-flex {
+			flex-direction: column;
+			gap: 10px !important;
+		}
+	}
+	
+	.input-text-container {
+		flex-direction: column;
+		align-items: flex-start !important;
+		
+		.searchbar-wrapper {
+			width: 100%;
+			margin-bottom: 10px;
+		}
+		
+		.button-filters {
+			align-self: flex-end;
+		}
 	}
 }
