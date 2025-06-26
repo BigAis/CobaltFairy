@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import './OnboardingGuide.scss'
 import { useNavigate } from 'react-router-dom'
-import { ApiService } from '../../service/api-service'
-import { useAccount } from '../../context/AccountContext'
-import Card from '../Card'
-import Button from '../Button'
-import Logo from '../Logo/Logo'
+import { ApiService } from '../../../service/api-service'
+import { useAccount } from '../../../context/AccountContext'
+import Card from '../../../components/Card'
+import Button from '../../../components/Button'
+import Logo from '../../../components/Logo/Logo'
 
-const OnboardingGuide = ({ onSetupComplete }) => {
+const OnboardingGuide = ({ onSetupComplete, onClose }) => {
   const { user, account, createNotification } = useAccount()
   const navigate = useNavigate()
   const [steps, setSteps] = useState([
@@ -78,6 +78,9 @@ const OnboardingGuide = ({ onSetupComplete }) => {
         <Card className="onboarding-guide">
           <div className="guide-header">
             <h2>Get Started</h2>
+            {onClose && (
+              <button className="close-button" onClick={onClose}>×</button>
+            )}
           </div>
 
           <div className="steps-container">

@@ -16,7 +16,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { Line } from 'react-chartjs-2'
 import PopupText from '../../components/PopupText/PopupText'
 import DashboardChart from '../../components/DashboardChart/DashboardChart'
-import OnboardingGuide from '../../components/OnboardingGuide/OnboardingGuide'
+// Updated import path for OnboardingGuide
+import OnboardingGuide from './OnboardingGuide/OnboardingGuide'
 
 const Dashboard = () => {
 	const navigate = useNavigate()
@@ -30,13 +31,13 @@ const Dashboard = () => {
 	const [isLoading, setIsLoading] = useState(true)
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 	
-	// State for onboarding - In the future, this will be read from account data from API
-	// Set to true to show onboarding, false to hide it
-	const [needsOnboarding, setNeedsOnboarding] = useState(true)
+	// Set needsOnboarding to false by default
+	const [needsOnboarding, setNeedsOnboarding] = useState(false)
+	const [showOnboarding, setShowOnboarding] = useState(false)
 	
 	// For development only - button to toggle onboarding visibility
 	const toggleOnboarding = () => {
-		setNeedsOnboarding(prev => !prev)
+		setShowOnboarding(prev => !prev)
 	}
   
 	// Chart data and options
@@ -157,6 +158,7 @@ const Dashboard = () => {
 	const handleSetupComplete = () => {
 		// Mark onboarding as completed
 		setNeedsOnboarding(false)
+		setShowOnboarding(false)
 		
 		// In the future, this will send an API request to update the account status
 		createNotification({
@@ -230,26 +232,6 @@ const Dashboard = () => {
 		)
 	}
 
-	// If onboarding is required, show only the onboarding component
-	if (needsOnboarding) {
-		// Add the testing button for development
-		return (
-			<>
-				{/* Dev button for testing */}
-				<div style={{ position: 'fixed', top: '10px', right: '10px', zIndex: 2000 }}>
-					<Button 
-						type="secondary" 
-						onClick={toggleOnboarding}
-						style={{ fontSize: '12px', padding: '5px 10px' }}
-					>
-						Skip Onboarding (DEV)
-					</Button>
-				</div>
-				<OnboardingGuide onSetupComplete={handleSetupComplete} />
-			</>
-		)
-	}
-
 	return (
 		<>
 			{/* DEV ONLY: Button to toggle onboarding visibility for testing */}
@@ -259,9 +241,17 @@ const Dashboard = () => {
 					onClick={toggleOnboarding}
 					style={{ fontSize: '12px', padding: '5px 10px' }}
 				>
-					Show Onboarding (DEV)
+					{showOnboarding ? "Hide Onboarding" : "Show Onboarding"} (DEV)
 				</Button>
 			</div>
+			
+			{/* Show onboarding as an overlay when needed, but don't block dashboard rendering */}
+			{showOnboarding && (
+				<OnboardingGuide 
+					onSetupComplete={handleSetupComplete} 
+					onClose={() => setShowOnboarding(false)}
+				/>
+			)}
 			
 			<div className="dashboard-wrapper">
 				<Sidemenu />
