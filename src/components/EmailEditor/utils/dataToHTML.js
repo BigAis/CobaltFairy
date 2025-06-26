@@ -191,18 +191,26 @@ const blockListToHtml = (blockList, bodySettings) => {
        </table></div>`;
     }
 
-    if (item.key === "about_book_v2") {
-      // Get container styles
-      const containerStyles = item.contentStyles && item.contentStyles.desktop ? 
-        Object.entries(item.contentStyles.desktop)
-          .map(([key, value]) => `${key}:${value}`)
-          .join(';') : '';
-      
-      // Get text styles
-      const textStyles = item.styles && item.styles.desktop ? 
-        Object.entries(item.styles.desktop)
-          .map(([key, value]) => `${key}:${value}`)
-          .join(';') : '';
+  if (item.key === "about_book_v2") {
+    // Convert contentStyles properly with kebab-case and proper units
+    const containerStyles = item.contentStyles && item.contentStyles.desktop ? 
+      Object.entries(item.contentStyles.desktop)
+        .map(([key, value]) => {
+          // Convert camelCase to kebab-case (paddingTop → padding-top)
+          const kebabKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+          // Add 'px' to numeric values if needed
+          return `${kebabKey}:${typeof value === 'number' ? value + 'px' : value}`;
+        })
+        .join(';') : '';
+    
+    // Get text styles with the same conversion
+    const textStyles = item.styles && item.styles.desktop ? 
+      Object.entries(item.styles.desktop)
+        .map(([key, value]) => {
+          const kebabKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+          return `${kebabKey}:${typeof value === 'number' ? value + 'px' : value}`;
+        })
+        .join(';') : '';
       
       // Get image width and determine layout
       const imageWidth = item.imageWidth || 35;
