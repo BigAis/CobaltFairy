@@ -112,7 +112,7 @@ const FlowEditor = () => {
 		}
 	  }, [isMobile, autId, navigate]);
 
-	const { user, account } = useAccount()
+	const { user, account, createNotification } = useAccount()
 	const steps = [{ label: 'Automations' }, { label: 'Edit Automation' }, { label: 'Editor' }]
 	//State for Sidebar Setting
 	const [selectedNode, setSelectedNode] = useState(null)
@@ -258,8 +258,14 @@ const FlowEditor = () => {
 			if (component.components && component.components.length > 0) {
 				links = [...extractLinksFromCampaignDesign(component.components, links)]
 			}
-			if (component.type === 'link') {
+			if (component.children && component.children.length > 0) {
+				links = [...extractLinksFromCampaignDesign(component.children, links)]
+			}
+			if (component.type && component.type === 'link') {
 				links.push(component?.attributes?.href)
+			}
+			if (component.key && ['image', 'button'].includes(component.key) && component.linkURL && component.linkURL.length > 9) {
+				links.push(component.linkURL)
 			}
 		})
 		return links
@@ -279,11 +285,78 @@ const FlowEditor = () => {
 			resp = await ApiService.post(`fairymailer/save-automation/`, newData, user.jwt)
 		} else {
 			PopupText.fire({ icon: 'error', text: 'Failed to save your changes :(', showCancelButton: false })
+			return false
 		}
 		if (resp?.data?.data?.id) {
 			if (showSuccessMessage) PopupText.fire({ icon: 'success', text: 'You changes are successfully saved!', showCancelButton: false })
+			return true
 		} else {
 			PopupText.fire({ icon: 'error', text: 'Failed to save your changes. If this problem persists, contact our support team.', showCancelButton: false })
+			return false
+		}
+	}
+
+	// New function to update automation status
+	const updateAutomationStatus = async (newStatus) => {
+		try {
+			// First update the local state
+			setData({
+				...data,
+				active: newStatus
+			});
+
+			// Then update in the backend
+			let resp = await ApiService.put(`automations/${data.id}`, 
+				{ data: { active: newStatus } }, 
+				user.jwt
+			);
+
+			if (resp.status === 200) {
+				// Show notification of success
+				createNotification({
+					message: `Automation ${newStatus ? 'activated' : 'deactivated'} successfully.`,
+					type: 'default',
+					autoClose: 3000
+				});
+				
+				// Update data to match backend
+				if (resp.data && resp.data.data) {
+					setData(prevData => ({
+						...prevData,
+						active: resp.data.data.attributes.active
+					}));
+				}
+				
+				return true;
+			} else {
+				// Revert local state change if API call fails
+				setData(prevData => ({
+					...prevData,
+					active: !newStatus
+				}));
+				
+				PopupText.fire({ 
+					icon: 'error', 
+					text: 'Failed to update automation status.', 
+					showCancelButton: false 
+				});
+				return false;
+			}
+		} catch (error) {
+			console.error("Error updating automation status:", error);
+			
+			// Revert local state change if API call fails
+			setData(prevData => ({
+				...prevData,
+				active: !newStatus
+			}));
+			
+			PopupText.fire({ 
+				icon: 'error', 
+				text: 'Error updating automation status. Please try again.', 
+				showCancelButton: false 
+			});
+			return false;
 		}
 	}
 
@@ -912,10 +985,7 @@ const FlowEditor = () => {
 						label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
 						checked={data?.active || false}
 						onChange={(value) => {
-						setData({
-							...data,
-							active: value,
-						});
+						  updateAutomationStatus(value);
 						}}
 					/>
 					<Button

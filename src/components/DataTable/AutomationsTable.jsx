@@ -13,12 +13,13 @@ import NotificationBar from '../../components/NotificationBar/NotificationBar'
 import { ApiService } from '../../service/api-service'
 import { useAccount } from '../../context/AccountContext'
 import PopupText from '../PopupText/PopupText'
-const AutomationsTable = ({ incomingAutomations }) => {
-    console.log('incomingAutomations',incomingAutomations);
-    const {user,account} = useAccount()
+
+const AutomationsTable = ({ incomingAutomations, refreshData }) => {
+    console.log('incomingAutomations', incomingAutomations);
+    const {user, account, createNotification} = useAccount()
     const [selectedAutomations, setSelectedAutomations] = useState([])
-    const [automations,setAutomations] = useState(incomingAutomations);
-    const [notifications,setNotifications] = useState([]);
+    const [automations, setAutomations] = useState(incomingAutomations);
+    const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate()
     const [currentPage, setCurrentPage] = useState(1)
     const rowsPerPage = 20
@@ -46,6 +47,55 @@ const AutomationsTable = ({ incomingAutomations }) => {
     useEffect(() => {
 
     }, [selectedAutomations])
+
+    // Function to update automation active status
+    const updateAutomationStatus = async (automation, newStatus) => {
+        try {
+            // Call API to update the automation status
+            let resp = await ApiService.put(
+                `automations/${automation.id}`, 
+                { data: { active: newStatus } }, 
+                user.jwt
+            );
+            
+            if (resp.status === 200) {
+                // Update local state to reflect the change
+                setAutomations(currentAutomations => 
+                    currentAutomations.map(a => 
+                        a.id === automation.id 
+                            ? {...a, active: newStatus} 
+                            : a
+                    )
+                );
+                
+                // Show notification
+                createNotification({
+                    message: `Automation ${newStatus ? 'activated' : 'deactivated'} successfully.`,
+                    type: 'default',
+                    autoClose: 3000
+                });
+                
+                return true;
+            } else {
+                PopupText.fire({ 
+                    icon: 'error', 
+                    text: 'Failed to update automation status.', 
+                    showConfirmButton: false, 
+                    cancelButtonText: 'Ok' 
+                });
+                return false;
+            }
+        } catch (error) {
+            console.error("Error updating automation status:", error);
+            PopupText.fire({ 
+                icon: 'error', 
+                text: 'An error occurred while updating the automation status.', 
+                showConfirmButton: false, 
+                cancelButtonText: 'Ok' 
+            });
+            return false;
+        }
+    }
 
     const actionsBodyTemplate = (item) => {
         return (
@@ -134,47 +184,16 @@ const AutomationsTable = ({ incomingAutomations }) => {
     const enabledSwitchTemplate = (item) => {
         return (
             <div>
-                <Switch checked={item.active} onChange={async (e)=>{
-                    const newActiveStatus = !item.active;
-                    
-                    try {
-                        let resp = await ApiService.put(`automations/${item.id}`, { data: { active: newActiveStatus } }, user.jwt);
+                <Switch 
+                    checked={item.active} 
+                    onChange={async () => {
+                        const newActiveStatus = !item.active;
+                        const success = await updateAutomationStatus(item, newActiveStatus);
                         
-                        // Update the item in the automations state
-                        setAutomations(currentAutomations => 
-                            currentAutomations.map(automation => 
-                                automation.id === item.id 
-                                    ? {...automation, active: newActiveStatus} 
-                                    : automation
-                            )
-                        );
-                        
-                        const notificationId = Date.now();
-                        setNotifications(current => [
-                            ...current,
-                            {
-                                id: notificationId, 
-                                type: 'warning', 
-                                message: 'Automation status was updated.', 
-                                onClose: () => {
-                                    setNotifications(n => n.filter(notification => notification.id !== notificationId))
-                                }
-                            }
-                        ]);
-                        
-                        setTimeout(() => {
-                            setNotifications(current => current.filter(n => n.id !== notificationId));
-                        }, 5000);
-                    } catch (error) {
-                        console.error("Error updating automation status:", error);
-                        PopupText.fire({ 
-                            icon: 'error', 
-                            text: 'Failed to update automation status.', 
-                            showConfirmButton: false, 
-                            cancelButtonText:'Ok' 
-                        });
-                    }
-                }}></Switch>
+                        // If the update was successful, no need to do anything here
+                        // as the state is already updated in the updateAutomationStatus function
+                    }}
+                />
             </div>
         )
     }
