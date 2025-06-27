@@ -14,7 +14,7 @@ import Strikethrough from "./Strikethrough";
 import InsertOrderedList from "./InsertOrderedList";
 import InsertUnorderedList from "./InsertUnorderedList";
 import Link from "./Link";
-import TextAlign from "./TextAlign";
+import TextAlign from "./TextAlign"; // Keep importing it, but don't render it
 import FontColor from "./FontColor";
 import Icon from "../../../Icon/Icon";
 
@@ -404,7 +404,8 @@ const RichText = ({ index, textBlock, styles }) => {
               <InsertOrderedList modifyText={modifyText} setTextContent={setTextContent} />
               <InsertUnorderedList modifyText={modifyText} setTextContent={setTextContent} />
               <Link modifyText={modifyText} setTextContent={setTextContent} />
-              <TextAlign modifyText={modifyText} setTextContent={setTextContent} />
+              {/* Text align buttons are hidden from the toolbar 
+                  BUT we keep the component imported so we can restore it later if needed */}
               
               {/* Emoji Picker Button */}
               <button

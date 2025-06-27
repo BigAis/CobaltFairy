@@ -17,7 +17,7 @@ import Button from "../../../Button"
 import useDataSource from "../../configs/useDataSource"
 
 const AboutBookComponentV2StyleSettings = () => {
-    const { currentItem, previewMode, blockList, setBlockList } = useContext(GlobalContext);
+    const { currentItem, previewMode, blockList, setBlockList, selectionRange, setCurrentItem } = useContext(GlobalContext);
     const [ pickerVisible, setPickerVisible ] = useState(false);
     const [ imageWidth, setImageWidth ] = useState(35); // Default to 35% - left-aligned
     const [ imageHeight, setImageHeight ] = useState(null); // Default to null (auto height)
@@ -252,13 +252,87 @@ const AboutBookComponentV2StyleSettings = () => {
     updateItemStyles(newData);
   };
 
-  const updateContentTextAlign = (textAlign) => {
-    const newData = deepClone(currentItem.data);
-    newData.contentStyles[previewMode] = {
-      ...newData.contentStyles[previewMode],
-      textAlign,
-    };
-    updateItemStyles(newData);
+  // Completely rewritten updateContentTextAlign function to properly handle text selections
+  const updateContentTextAlign = (alignValue) => {
+    // Check if there's a current selection
+    const selection = window.getSelection();
+    const hasSelection = selection && !selection.isCollapsed;
+    
+    // Find the editable element
+    const editableElement = document.querySelector('.text-content_editable');
+    if (!editableElement) return;
+    
+    if (hasSelection) {
+      // When text is selected, apply alignment only to selection
+      
+      // First, determine if we need to create a wrapper for the selection
+      const range = selection.getRangeAt(0);
+      
+      // Check if the selection is within a block-level element
+      const isInBlockElement = range.commonAncestorContainer.nodeType === 1 && 
+        ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(range.commonAncestorContainer.tagName);
+      
+      if (isInBlockElement) {
+        // We can apply the alignment directly to the block element
+        range.commonAncestorContainer.style.textAlign = alignValue;
+      } else {
+        // We need to wrap the selection in a div with the proper alignment
+        const div = document.createElement('div');
+        div.style.textAlign = alignValue;
+        
+        try {
+          // Try to surround the selection with our div
+          range.surroundContents(div);
+        } catch (e) {
+          // If surroundContents fails (often due to partial node selection),
+          // extract the contents, wrap them, and insert back
+          const fragment = range.extractContents();
+          div.appendChild(fragment);
+          range.insertNode(div);
+        }
+      }
+      
+      // Update the component's text content in the block list
+      if (currentItem && currentItem.index) {
+        const indexParts = currentItem.index.toString().split('-');
+        if (indexParts.length >= 3) {
+          const blockIndex = parseInt(indexParts[0]);
+          const contentIndex = parseInt(indexParts[1]);
+          const itemIndex = parseInt(indexParts[2]);
+          
+          // Create a deep clone of the current block list
+          const newBlockList = deepClone(blockList);
+          
+          // Find and update the component
+          const component = newBlockList[blockIndex].children[contentIndex].children[itemIndex];
+          if (component) {
+            // Update text from the DOM after our changes
+            component.text = editableElement.innerHTML;
+            
+            // Update the block list and current item
+            setBlockList(newBlockList, `edit_${new Date().getTime()}`);
+            
+            // Also update the current item
+            const newCurrentItem = deepClone(currentItem);
+            newCurrentItem.data.text = editableElement.innerHTML;
+            setCurrentItem(newCurrentItem);
+          }
+        }
+      }
+    } else {
+      // No selection, apply to the entire block
+      const newData = deepClone(currentItem.data);
+      newData.contentStyles[previewMode] = {
+        ...newData.contentStyles[previewMode],
+        textAlign: alignValue,
+      };
+      updateItemStyles(newData);
+      
+      // Also apply to the current DOM element for immediate visual feedback
+      if (editableElement) {
+        editableElement.style.textAlign = alignValue;
+      }
+    }
   };
 
   const imageStyleSettings = () => {
