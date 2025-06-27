@@ -4,17 +4,46 @@ import Icon from '../../../Icon/Icon';
 import { useContext } from 'react';
 import { GlobalContext } from '../../reducers';
 import { deepClone } from '../../utils/helpers';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 const ContextMenu = ({ children }) => {
   const { blockList, setBlockList, currentItem, setCurrentItem } = useContext(GlobalContext);
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [menuItems, setMenuItems] = useState([]);
+  const [expandedSections, setExpandedSections] = useState({
+    text: false,
+    block: false
+  });
+  // Store the selection range when right-clicking
+  const savedSelectionRef = useRef(null);
   const menuRef = useRef(null);
   const contentRef = useRef(null);
 
+  // Helper function to save the current selection
+  const saveSelection = () => {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      savedSelectionRef.current = selection.getRangeAt(0).cloneRange();
+    }
+  };
+
+  // Helper function to restore the saved selection
+  const restoreSelection = () => {
+    if (savedSelectionRef.current) {
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(savedSelectionRef.current);
+      return true;
+    }
+    return false;
+  };
+
   const handleContextMenu = (e) => {
     e.preventDefault();
+    
+    // Save the current selection when right-clicking
+    saveSelection();
     
     // Check if we have text selection
     const selection = window.getSelection();
@@ -40,57 +69,19 @@ const ContextMenu = ({ children }) => {
       target = target.parentElement;
     }
     
-    // Determine menu items based on context
-    const items = [];
+    // Determine if we should show the menu
+    const showTextOptions = hasTextSelection || isEditableElement(e.target);
+    const showBlockOptions = isInBlock && currentItem;
     
-    // Case 1: Text is selected within a block
-    if (hasTextSelection) {
-      items.push({
-        icon: 'Copy',
-        label: 'Copy',
-        action: handleCopyText
-      });
-      
-      // Paste operations make sense only if we're in an editable element
-      if (isEditableElement(e.target)) {
-        items.push({
-          icon: 'Import',
-          label: 'Paste',
-          action: handlePasteText
-        });
-        
-        items.push({
-          icon: 'Import',
-          label: 'Paste as plain text',
-          action: handlePastePlainText
-        });
-      }
-    }
-    // Case 2: Block is selected but no text is selected
-    else if (isInBlock && currentItem) {
-      items.push({
-        icon: 'Copy',
-        label: 'Copy Block',
-        action: handleCopyBlock
-      });
-      
-      items.push({
-        icon: 'Import',
-        label: 'Paste After',
-        action: handlePasteBlock
-      });
-      
-      items.push({
-        icon: 'Import',
-        label: 'Paste as plain text',
-        action: handlePastePlainBlock
-      });
-    }
-    
-    if (items.length > 0) {
-      setMenuItems(items);
+    if (showTextOptions || showBlockOptions) {
       setPosition({ x: e.clientX, y: e.clientY });
       setVisible(true);
+      
+      // Reset expanded sections
+      setExpandedSections({
+        text: false,
+        block: false
+      });
     }
   };
   
@@ -102,30 +93,135 @@ const ContextMenu = ({ children }) => {
            element.closest('.text-content_editable') !== null;
   };
   
+  // Toggle a section's expanded state
+  const toggleSection = (section) => {
+    setExpandedSections({
+      ...expandedSections,
+      [section]: !expandedSections[section]
+    });
+  };
+  
   // Text operations
   const handleCopyText = () => {
-    document.execCommand('copy');
+    try {
+      // Restore the selection first to make sure we're copying the right content
+      if (restoreSelection()) {
+        // Focus the element containing the selection
+        const selection = window.getSelection();
+        if (selection.focusNode) {
+          // Find the closest editable parent if any
+          let editableParent = selection.focusNode;
+          while (editableParent && !editableParent.isContentEditable && editableParent.parentNode) {
+            editableParent = editableParent.parentNode;
+          }
+          
+          if (editableParent && editableParent.focus) {
+            editableParent.focus();
+          }
+        }
+        
+        // Get the selected text
+        const selectedText = selection.toString();
+        
+        if (selectedText) {
+          // Use modern clipboard API if available
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(selectedText)
+              .catch(() => {
+                // Fallback to execCommand if clipboard API fails
+                document.execCommand('copy');
+              });
+          } else {
+            // Fallback for older browsers
+            document.execCommand('copy');
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+      // Ultimate fallback
+      document.execCommand('copy');
+    }
     setVisible(false);
   };
 
   const handlePasteText = async () => {
     try {
-      const text = await navigator.clipboard.readText();
-      document.execCommand('insertHTML', false, text);
+      // First restore the selection to place the cursor in the right position
+      if (restoreSelection()) {
+        // Focus the element containing the selection to ensure commands work
+        const selection = window.getSelection();
+        if (selection.focusNode) {
+          // Find the editable parent
+          let editableParent = selection.focusNode;
+          while (editableParent && !editableParent.isContentEditable) {
+            editableParent = editableParent.parentNode;
+          }
+          
+          if (editableParent && editableParent.focus) {
+            editableParent.focus();
+          }
+        }
+        
+        const text = await navigator.clipboard.readText();
+        document.execCommand('insertHTML', false, text);
+      }
     } catch (err) {
+      console.error('Failed to paste text:', err);
       // Fallback
-      document.execCommand('paste');
+      if (restoreSelection()) {
+        document.execCommand('paste');
+      }
     }
     setVisible(false);
   };
 
   const handlePastePlainText = async () => {
     try {
-      const text = await navigator.clipboard.readText();
-      // For plain text, we just insert the raw text without formatting
-      document.execCommand('insertText', false, text);
+      // First restore the selection
+      if (restoreSelection()) {
+        // Focus the element containing the selection
+        const selection = window.getSelection();
+        if (selection.focusNode) {
+          // Find the editable parent
+          let editableParent = selection.focusNode;
+          while (editableParent && !editableParent.isContentEditable) {
+            editableParent = editableParent.parentNode;
+          }
+          
+          if (editableParent && editableParent.focus) {
+            editableParent.focus();
+          }
+        }
+        
+        // Get text from clipboard
+        const clipboardText = await navigator.clipboard.readText();
+        
+        // Strip all HTML tags and formatting
+        const tempElement = document.createElement('div');
+        tempElement.innerHTML = clipboardText;
+        const plainText = tempElement.textContent || tempElement.innerText || '';
+        
+        // Insert as plain text
+        document.execCommand('insertText', false, plainText);
+      }
     } catch (err) {
       console.error('Failed to paste plain text:', err);
+      
+      // Fallback method - try to do manual stripping if possible
+      try {
+        if (restoreSelection()) {
+          const tempInput = document.createElement('textarea');
+          document.body.appendChild(tempInput);
+          tempInput.value = await navigator.clipboard.readText();
+          const plainText = tempInput.value;
+          document.body.removeChild(tempInput);
+          
+          document.execCommand('insertText', false, plainText);
+        }
+      } catch (fallbackErr) {
+        console.error('Plain text fallback failed:', fallbackErr);
+      }
     }
     setVisible(false);
   };
@@ -284,12 +380,59 @@ const ContextMenu = ({ children }) => {
           }}
         >
           <ul>
-            {menuItems.map((item, index) => (
-              <li key={index} onClick={item.action}>
-                <Icon name={item.icon} size={16} />
-                <span>{item.label}</span>
-              </li>
-            ))}
+            {/* Text Section */}
+            <li className="menu-section" onClick={() => toggleSection('text')}>
+              <div className="section-header">
+                <FontAwesomeIcon 
+                  icon={expandedSections.text ? faChevronDown : faChevronRight} 
+                  className="section-icon" 
+                />
+                <span>Text</span>
+              </div>
+            </li>
+            {expandedSections.text && (
+              <>
+                <li className="menu-item menu-subitem" onClick={handleCopyText}>
+                  <Icon name="Copy" size={16} />
+                  <span>Copy Text</span>
+                </li>
+                <li className="menu-item menu-subitem" onClick={handlePasteText}>
+                  <Icon name="Import" size={16} />
+                  <span>Paste</span>
+                </li>
+                <li className="menu-item menu-subitem" onClick={handlePastePlainText}>
+                  <Icon name="Import" size={16} />
+                  <span>Paste as plain text</span>
+                </li>
+              </>
+            )}
+
+            {/* Block Section */}
+            <li className="menu-section" onClick={() => toggleSection('block')}>
+              <div className="section-header">
+                <FontAwesomeIcon 
+                  icon={expandedSections.block ? faChevronDown : faChevronRight} 
+                  className="section-icon" 
+                />
+                <span>Block</span>
+              </div>
+            </li>
+            {expandedSections.block && (
+              <>
+                <li className="menu-item menu-subitem" onClick={handleCopyBlock}>
+                  <Icon name="Copy" size={16} />
+                  <span>Copy Block</span>
+                </li>
+                <li className="menu-item menu-subitem" onClick={handlePasteBlock}>
+                  <Icon name="Import" size={16} />
+                  <span>Paste After</span>
+                </li>
+                <li className="menu-item menu-subitem" onClick={handlePastePlainBlock}>
+                  <Icon name="Import" size={16} />
+                  <span>Paste as plain text</span>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       )}

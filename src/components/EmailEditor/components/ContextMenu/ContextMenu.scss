@@ -33,6 +33,30 @@
       span {
         margin-left: 8px;
       }
+      
+      &.menu-section {
+        font-weight: 600;
+        
+        .section-header {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          
+          .section-icon {
+            margin-right: 6px;
+            font-size: 12px;
+          }
+        }
+      }
+      
+      &.menu-subitem {
+        padding-left: 24px;
+        font-weight: normal;
+        
+        .icon {
+          opacity: 0.8;
+        }
+      }
     }
   }
 }
