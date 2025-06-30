@@ -1,0 +1,191 @@
+.edit-user-container {
+  max-width: 900px;
+  margin: 0 auto;
+  
+  .page-title {
+    font-family: 'Bitter', serif;
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .user-details-card,
+  .role-permissions-card {
+    margin-bottom: 30px;
+    
+    .card-title {
+      font-family: 'Bitter', serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+  }
+  
+  .form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    
+    .input-field {
+      display: flex;
+      flex-direction: column;
+      
+      label {
+        font-size: 14px;
+        margin-bottom: 5px;
+        color: #666;
+      }
+      
+      input {
+        padding: 10px;
+        border: 1px solid rgba(218, 209, 197, 1);
+        border-radius: 5px;
+        font-size: 14px;
+      }
+    }
+    
+    .password-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+  }
+  
+  .role-section {
+    margin-bottom: 30px;
+    
+    .section-title {
+      font-family: 'Bitter', serif;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    
+    .role-options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+      
+      .role-option {
+        display: flex;
+        align-items: center;
+        
+        input[type="radio"] {
+          margin-right: 10px;
+          width: 20px;
+          height: 20px;
+          accent-color: #FF635D;
+        }
+        
+        label {
+          font-size: 16px;
+        }
+      }
+    }
+    
+    .role-description {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      margin-top: 15px;
+    }
+  }
+  
+  .custom-permissions-section {
+    .section-title {
+      font-family: 'Bitter', serif;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    
+    .permissions-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+      
+      .permissions-column {
+        flex: 1;
+      }
+      
+      .permission-category {
+        margin-bottom: 25px;
+        
+        .category-title {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+        
+        .permission-items {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .permission-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 12px;
+          border-radius: 5px;
+          
+          span {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+  
+  .actions-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+    margin-bottom: 50px;
+    
+    button {
+      min-width: 120px;
+    }
+  }
+}
+
+.go-back-container {
+  padding: 15px 0 5px 20px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  font-size: 18px;
+  color: #666;
+}
+
+// Mobile responsive styles
+@media (max-width: 768px) {
+  .edit-user-container {
+    padding: 0 15px;
+    
+    .custom-permissions-section {
+      .permissions-grid {
+        flex-direction: column;
+      }
+    }
+    
+    .actions-container {
+      flex-direction: column-reverse;
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
+}

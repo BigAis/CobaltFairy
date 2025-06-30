@@ -20,7 +20,7 @@ const menu_items_upper = [
 const menu_items_lower = [
 	{ label: 'Settings', path: '/settings', icon: 'Settings', disabled: false },
 	{ label: 'Billing', path: '/billing', icon: 'Billing', disabled: false },
-	{ label: 'Team', path: '/team', icon: 'Team', disabled: true },
+	{ label: 'Team', path: '/team', icon: 'Team', disabled: false },
 	{ label: 'Refer a Friend', path: '/refer-a-friend', icon: 'ReferAFriend', disabled: true },
 ]
 

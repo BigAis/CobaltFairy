@@ -26,6 +26,9 @@ import NewCustomField from './pages/subscribers/NewCustomField'
 import NotificationContainer from './components/NotificationContainer/NotificationContainer'
 import Settings from './pages/settings/settings'
 import Billing from './pages/billing/billing'
+import Team from './pages/Team/Team'
+import NewUser from './pages/Team/NewUser'
+import EditUser from './pages/Team/EditUser'
 
 
 // A wrapper component to handle authentication check
@@ -152,6 +155,11 @@ function App() {
         <Route path="/billing/invoice-details" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
         <Route path="/billing/payment-methods" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        {/* Team routes */}
+        <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
+        <Route path="/team/new" element={<ProtectedRoute><NewUser /></ProtectedRoute>} />
+        <Route path="/team/:id" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
+        <Route path="/team/:id/role" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
       </Routes>
     </div>
   );
