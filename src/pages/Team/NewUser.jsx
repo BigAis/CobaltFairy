@@ -23,7 +23,7 @@ const NewUser = () => {
   })
   const [emailInvites, setEmailInvites] = useState('')
   const [createMode, setCreateMode] = useState(true)
-  const [selectedRole, setSelectedRole] = useState('Admin')
+  const [selectedRole, setSelectedRole] = useState('Owner')
   
   const steps = [
     { label: 'Users' },
@@ -158,85 +158,88 @@ const NewUser = () => {
       <div className="permissions-container">
         <h2>Permissions</h2>
         
-        <div className="roles-section">
-          <div className="role-option">
-            <input 
-              type="radio" 
-              id="role-owner" 
-              name="role" 
-              checked={selectedRole === 'Owner'} 
-              onChange={() => setSelectedRole('Owner')}
-            />
-            <label htmlFor="role-owner">Owner</label>
-            <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
+        <div className="permissions-layout">
+          {/* Left side - Role selection */}
+          <div className="roles-section">
+            <div className="role-option">
+              <input 
+                type="radio" 
+                id="role-owner" 
+                name="role" 
+                checked={selectedRole === 'Owner'} 
+                onChange={() => setSelectedRole('Owner')}
+              />
+              <label htmlFor="role-owner">Owner</label>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
+            </div>
+            
+            <div className="role-option">
+              <input 
+                type="radio" 
+                id="role-admin" 
+                name="role" 
+                checked={selectedRole === 'Admin'} 
+                onChange={() => setSelectedRole('Admin')}
+              />
+              <label htmlFor="role-admin">Admin</label>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
+            </div>
+            
+            <div className="role-option">
+              <input 
+                type="radio" 
+                id="role-manager" 
+                name="role" 
+                checked={selectedRole === 'Manager'} 
+                onChange={() => setSelectedRole('Manager')}
+              />
+              <label htmlFor="role-manager">Manager</label>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
+            </div>
+            
+            <div className="role-option">
+              <input 
+                type="radio" 
+                id="role-author" 
+                name="role" 
+                checked={selectedRole === 'Author'} 
+                onChange={() => setSelectedRole('Author')}
+              />
+              <label htmlFor="role-author">Author</label>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
+            </div>
+            
+            <div className="role-option">
+              <input 
+                type="radio" 
+                id="role-viewer" 
+                name="role" 
+                checked={selectedRole === 'Viewer'} 
+                onChange={() => setSelectedRole('Viewer')}
+              />
+              <label htmlFor="role-viewer">Viewer</label>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
+            </div>
+            
+            <div className="role-option">
+              <input 
+                type="radio" 
+                id="role-custom" 
+                name="role" 
+                checked={selectedRole === 'Custom'} 
+                onChange={() => setSelectedRole('Custom')}
+              />
+              <label htmlFor="role-custom">Custom</label>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
+            </div>
           </div>
           
-          <div className="role-option">
-            <input 
-              type="radio" 
-              id="role-admin" 
-              name="role" 
-              checked={selectedRole === 'Admin'} 
-              onChange={() => setSelectedRole('Admin')}
-            />
-            <label htmlFor="role-admin">Admin</label>
-            <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
-          </div>
-          
-          <div className="role-option">
-            <input 
-              type="radio" 
-              id="role-manager" 
-              name="role" 
-              checked={selectedRole === 'Manager'} 
-              onChange={() => setSelectedRole('Manager')}
-            />
-            <label htmlFor="role-manager">Manager</label>
-            <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
-          </div>
-          
-          <div className="role-option">
-            <input 
-              type="radio" 
-              id="role-author" 
-              name="role" 
-              checked={selectedRole === 'Author'} 
-              onChange={() => setSelectedRole('Author')}
-            />
-            <label htmlFor="role-author">Author</label>
-            <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
-          </div>
-          
-          <div className="role-option">
-            <input 
-              type="radio" 
-              id="role-viewer" 
-              name="role" 
-              checked={selectedRole === 'Viewer'} 
-              onChange={() => setSelectedRole('Viewer')}
-            />
-            <label htmlFor="role-viewer">Viewer</label>
-            <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
-          </div>
-          
-          <div className="role-option">
-            <input 
-              type="radio" 
-              id="role-custom" 
-              name="role" 
-              checked={selectedRole === 'Custom'} 
-              onChange={() => setSelectedRole('Custom')}
-            />
-            <label htmlFor="role-custom">Custom</label>
-            <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
-          </div>
-        </div>
-        
-        <div className="permissions-grid">
-          <div className="permissions-column">
-            <div className="permission-category">
-              <h3>Campaigns</h3>
-              <div className="permission-items">
+          {/* Right side - Permission categories */}
+          <div className="permissions-categories">
+            {/* First column */}
+            <div className="permissions-column">
+              <div className="permission-category">
+                <h3>Campaigns</h3>
                 <div className="permission-item">
                   <span>View</span>
                   <Switch checked={true} />
@@ -246,11 +249,9 @@ const NewUser = () => {
                   <Switch checked={true} />
                 </div>
               </div>
-            </div>
-            
-            <div className="permission-category">
-              <h3>Subscribers</h3>
-              <div className="permission-items">
+              
+              <div className="permission-category">
+                <h3>Subscribers</h3>
                 <div className="permission-item">
                   <span>View</span>
                   <Switch checked={true} />
@@ -268,11 +269,21 @@ const NewUser = () => {
                   <Switch checked={true} />
                 </div>
               </div>
-            </div>
-            
-            <div className="permission-category">
-              <h3>Automations</h3>
-              <div className="permission-items">
+              
+              <div className="permission-category">
+                <h3>Integrations</h3>
+                <div className="permission-item">
+                  <span>View</span>
+                  <Switch checked={true} />
+                </div>
+                <div className="permission-item">
+                  <span>Edit</span>
+                  <Switch checked={true} />
+                </div>
+              </div>
+              
+              <div className="permission-category">
+                <h3>Stats</h3>
                 <div className="permission-item">
                   <span>View</span>
                   <Switch checked={true} />
@@ -284,39 +295,10 @@ const NewUser = () => {
               </div>
             </div>
             
-            <div className="permission-category">
-              <h3>Stats</h3>
-              <div className="permission-items">
-                <div className="permission-item">
-                  <span>View</span>
-                  <Switch checked={true} />
-                </div>
-                <div className="permission-item">
-                  <span>Edit</span>
-                  <Switch checked={true} />
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="permissions-column">
-            <div className="permission-category">
-              <h3>Integrations</h3>
-              <div className="permission-items">
-                <div className="permission-item">
-                  <span>View</span>
-                  <Switch checked={true} />
-                </div>
-                <div className="permission-item">
-                  <span>Edit</span>
-                  <Switch checked={true} />
-                </div>
-              </div>
-            </div>
-            
-            <div className="permission-category">
-              <h3>Templates</h3>
-              <div className="permission-items">
+            {/* Second column */}
+            <div className="permissions-column">
+              <div className="permission-category">
+                <h3>Templates</h3>
                 <div className="permission-item">
                   <span>View</span>
                   <Switch checked={true} />
@@ -334,11 +316,21 @@ const NewUser = () => {
                   <Switch checked={true} />
                 </div>
               </div>
-            </div>
-            
-            <div className="permission-category">
-              <h3>Billing</h3>
-              <div className="permission-items">
+              
+              <div className="permission-category">
+                <h3>Automations</h3>
+                <div className="permission-item">
+                  <span>View</span>
+                  <Switch checked={true} />
+                </div>
+                <div className="permission-item">
+                  <span>Edit</span>
+                  <Switch checked={true} />
+                </div>
+              </div>
+              
+              <div className="permission-category">
+                <h3>Billing</h3>
                 <div className="permission-item">
                   <span>View</span>
                   <Switch checked={true} />
@@ -353,10 +345,10 @@ const NewUser = () => {
         </div>
         
         <div className="action-button-container">
-          <Button type="primary" onClick={() => handleCreateUser()}>Add user</Button>
+          <Button type="primary" onClick={handleCreateUser}>Add user</Button>
         </div>
       </div>
-    )
+    );
   }
   
   const renderCurrentStep = () => {
