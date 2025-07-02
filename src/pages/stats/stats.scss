@@ -1,0 +1,271 @@
+.stats-page {
+  display: flex;
+  background-color: #FFF1DF;
+  min-height: 100vh;
+  
+  .stats-content {
+    flex: 1;
+    padding: 3em;
+    
+    @media (max-width: 768px) {
+      padding: 1em;
+      padding-top: 70px; // Account for fixed header
+    }
+    
+    h1 {
+      font-family: 'Bitter', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #100F1C;
+      margin: 0;
+    }
+    
+    h2 {
+      font-family: 'Bitter', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: #100F1C;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    
+    .stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        
+        .date-display {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 16px 20px;
+          background: rgba(255, 255, 255, 0.5);
+          border: 2px solid #DAD1C5;
+          border-radius: 8px;
+          
+          svg {
+            width: 20px;
+            height: 20px;
+          }
+        }
+        
+        .export-button {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 16px 20px;
+          
+          svg {
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
+    }
+    
+    .stats-card {
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid #DAD1C5;
+      border-radius: 8px;
+      
+      .stats-grid {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        
+        @media (max-width: 768px) {
+          flex-wrap: wrap;
+        }
+        
+        .stat-item {
+          width: 23%;
+          
+          @media (max-width: 768px) {
+            width: 48%;
+            margin-bottom: 20px;
+          }
+          
+          .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            
+            span {
+              font-family: 'Inter', sans-serif;
+              font-size: 14px;
+              font-weight: 500;
+              color: #887D76;
+            }
+            
+            .caret-icon {
+              transform: rotate(90deg);
+              width: 16px;
+              height: 16px;
+              
+              path {
+                fill: #887D76;
+              }
+            }
+          }
+          
+          .stat-value {
+            font-family: 'Inter', sans-serif;
+            font-size: 32px;
+            font-weight: 600;
+            color: #100F1C;
+            margin-bottom: 5px;
+          }
+          
+          .stat-chart-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            
+            .small-chart {
+              width: 70px;
+              height: 33px;
+            }
+            
+            .positive {
+              color: #60C700;
+              font-family: 'Inter', sans-serif;
+              font-size: 16px;
+              font-weight: 500;
+            }
+            
+            .negative {
+              color: #F4A622;
+              font-family: 'Inter', sans-serif;
+              font-size: 16px;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+      
+      .chart-container {
+        height: 180px;
+        margin-bottom: 20px;
+      }
+      
+      .campaigns-table {
+        margin-top: 20px;
+        
+        .campaign-name-cell {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          
+          .campaign-thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+          }
+          
+          .campaign-info {
+            .campaign-title {
+              font-family: 'Inter', sans-serif;
+              font-size: 16px;
+              font-weight: 500;
+              color: #100F1C;
+              margin-bottom: 5px;
+            }
+            
+            .campaign-subject {
+              font-family: 'Inter', sans-serif;
+              font-size: 14px;
+              font-weight: 500;
+              color: #887D76;
+            }
+          }
+        }
+        
+        .report-dropdown {
+          .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 12px;
+            background: #FFFFFF;
+            
+            .caret-icon {
+              margin-left: 10px;
+              transform: rotate(90deg);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// DataTable styles to match Figma exactly
+.p-datatable {
+  .p-datatable-thead > tr > th {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #887D76;
+    background-color: transparent;
+    border-bottom: 2px solid #DAD1C5;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .p-datatable-tbody > tr {
+    background-color: #FFF8EF;
+    height: 112px;
+    margin-bottom: 30px;
+    border-spacing: 0 30px;
+    
+    > td {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #100F1C;
+      border-top: 2px solid #DAD1C5;
+      border-bottom: 2px solid #DAD1C5;
+      padding: 12px;
+      
+      &:first-child {
+        border-left: 2px solid #DAD1C5;
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+      }
+      
+      &:last-child {
+        border-right: 2px solid #DAD1C5;
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+      }
+    }
+  }
+  
+  .p-datatable-table {
+    border-collapse: separate;
+    border-spacing: 0 30px;
+  }
+}
+
+// Customize checkbox to match Figma
+.custom-checkbox {
+  .checkmark {
+    border: 2px solid #DAD1C5;
+    background-color: #FFF8EF;
+    border-radius: 4px;
+  }
+  
+  input:checked ~ .checkmark {
+    background-color: rgba(255, 99, 93, 0.5);
+    border: 1px solid rgba(255, 99, 93, 1);
+  }
+}

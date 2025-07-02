@@ -15,7 +15,7 @@ const menu_items_upper = [
 	{ label: 'Subscribers', path: '/subscribers', icon: 'Subscribers' },
 	{ label: 'Automations', path: '/automations', icon: 'Automations' },
 	{ label: 'Integrations', path: '/integrations', icon: 'Integrations' },
-	{ label: 'Stats', path: '/stats', icon: 'Stats', disabled: true },
+	{ label: 'Stats', path: '/stats', icon: 'Stats', disabled: false },
 ]
 const menu_items_lower = [
 	{ label: 'Settings', path: '/settings', icon: 'Settings', disabled: false },

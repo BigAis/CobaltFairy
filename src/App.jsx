@@ -29,7 +29,7 @@ import Billing from './pages/billing/billing'
 import Team from './pages/Team/Team'
 import NewUser from './pages/Team/NewUser'
 import EditUser from './pages/Team/EditUser'
-
+import Stats from './pages/stats/stats'
 
 // A wrapper component to handle authentication check
 const ProtectedRoute = ({ children }) => {
@@ -160,6 +160,8 @@ function App() {
         <Route path="/team/new" element={<ProtectedRoute><NewUser /></ProtectedRoute>} />
         <Route path="/team/:id" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
         <Route path="/team/:id/role" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
+        {/* Stats routes */}
+        <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
       </Routes>
     </div>
   );
