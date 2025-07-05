@@ -97,6 +97,8 @@ function App() {
         <Route path="/login/2FA" element={<TwoFactorLogin />} />
         <Route path="/register" element={<User />} />
         <Route path="/reset-password/:id" element={<ResetPassword />} />
+        <Route path="/redirection/:url" element={<Redirection />} />
+        <Route path="/redirection/:url/:redirect" element={<Redirection />} />
         
         {/* Default route - redirect based on auth status */}
         <Route 

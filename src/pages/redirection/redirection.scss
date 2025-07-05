@@ -1,0 +1,170 @@
+.redirection-component {
+	.notification-container {
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 0;
+		z-index: 9999;
+		background: white;
+	}
+
+	.redirection-wrapper {
+		display: flex;
+		align-items: center;
+		background-color: #fff1df;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 2em 0;
+
+        .card{
+            margin-top: 5vh;
+        }
+
+        pre{
+            padding:40px 0;
+            text-wrap: auto;
+            overflow-wrap: anywhere;
+        }
+		
+		.input-text-wrapper {
+			.floating-label {
+				// top: calc(50% - 8px);
+			}
+			&:focus + .floating-label,
+			&:not(:placeholder-shown) + .floating-label {
+				// top: 14px !important;
+			}
+			
+			.error-message {
+				position: absolute;
+				bottom: -25px;
+				left: 0;
+				width: 100%;
+			}
+		}
+		
+		.card {
+			width: 100%;
+			max-width: 450px;
+			padding: 40px;
+		}
+	}
+
+	.header-info {
+		width: 100%;
+		margin-bottom: 20px;
+	}
+
+	.header-info header {
+		text-align: center;
+	}
+
+	.header-info header h1 {
+		font-family: 'Bitter', serif;
+		font-weight: 700;
+		font-size: 32px;
+		color: #333;
+		margin: 0;
+	}
+
+	.header-info header p {
+		font-family: 'Inter', sans-serif;
+		font-weight: 500;
+		font-size: 16px;
+		color: #777;
+		margin: 5px 0 0 0;
+	}
+
+	
+
+	.breakpoint-or {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		margin: 20px 0;
+	}
+
+	.breakpoint-or::before,
+	.breakpoint-or::after {
+		content: '';
+		flex: 1;
+		height: 2px;
+		background-color: #dad1c5;
+	}
+
+	.breakpoint-or span {
+		margin: 0 10px;
+		font-size: 16px;
+		color: #dad1c5;
+		font-family: 'Inter', sans-serif;
+		font-weight: 500;
+	}
+
+	.email-form {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		gap: 30px;
+		margin-bottom: 20px;
+	}
+
+
+	.input-rows {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 20px 0 40px 0;
+	}
+
+	.input-groups {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		max-width: 400px;
+		margin: 0 auto;
+		position: relative;
+		.input-text-wrapper {
+			width: 100%;
+			margin-bottom: 30px;
+		}
+	}
+
+	.user-password {
+		flex: 1;
+		font-size: 14px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		box-sizing: border-box;
+	}
+
+
+	@media (max-width: 768px) {
+		.login-wrapper {
+			padding: 20px;
+			background-color: #fff1df;
+		}
+
+		.card {
+			background-color: #fff1df;
+			border: 0;
+		}
+		
+		.email-form {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			max-width: 450px;
+			gap: 30px;
+		}
+
+		.google-login-btn {
+			width: 100%;
+			padding: 12px;
+		}
+
+		.breakpoint-or {
+			margin: 10px 0;
+		}
+	}
+}
