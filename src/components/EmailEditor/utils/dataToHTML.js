@@ -167,7 +167,8 @@ const createDividerString = (dividerBLock) => {
   </div>`;
 };
 
-const createSocialLinkString = (socialLinkBlock) => {
+const createSocialLinkString = (socialLinkBlock,accountContext,isPreview) => {
+  const linkdomain = accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? `https://link-${accountContext?.account?.sending_identity?.domain}/` : `https://link.${accountContext?.account?.sending_identity?.domain}/`;
   return `<div ${socialLinkBlock.contentStyleConfig.mobile ? `class="${socialLinkBlock.contentStyleConfig.className}"` : ""} 
   style="${socialLinkBlock.contentStyleConfig.desktop}">
   ${socialLinkBlock.list
@@ -297,7 +298,7 @@ const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=fals
     }
 
     if (item.key === "social_link") {
-      content += createSocialLinkString(item);
+      content += createSocialLinkString(item,accountContext,isPreview);
     }
     
     if (item.key === "about_the_book") {
