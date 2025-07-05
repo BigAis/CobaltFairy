@@ -18,6 +18,7 @@ import dataToHtml from './utils/dataToHTML'
 import Main from './components/Main/index'
 import ContextMenu from './components/ContextMenu/ContextMenu'
 import './assets/App.css'
+import { useAccount } from '../../context/AccountContext'
 
 const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = 'en', customLanguageLibraries, setStep, currentCampaign, editorType, setDesign }, ref) => {
 	const [state, dispatch] = useReducer(reducer, {
@@ -27,12 +28,15 @@ const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = 
 		blockList: blockList ?? defaultState.blockList,
 		languageLibraries: customLanguageLibraries,
 	})
+	const accountContext = useAccount();
+
 	useImperativeHandle(ref, () => ({
 		blockList: state.blockList,
 		actionType: state.actionType,
-		exportHtml: (fontList = []) => dataToHtml({ bodySettings: state.bodySettings, blockList: state.blockList, fontList }),
+		exportHtml: (fontList = []) => dataToHtml({ bodySettings: state.bodySettings, blockList: state.blockList, fontList, accountContext }),
+		exportHtmlPreview: (fontList = []) => dataToHtml({ bodySettings: state.bodySettings, blockList: state.blockList, fontList, accountContext,isPreview:true }),
 		exportData: (fontList = []) => {
-			return { bodySettings: state.bodySettings, blockList: state.blockList, fontList }
+			return { bodySettings: state.bodySettings, blockList: state.blockList, fontList,accountContext }
 		},
 	}))
 

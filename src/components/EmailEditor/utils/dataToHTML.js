@@ -108,9 +108,9 @@ const parseItem = (item, index, styles, parentIndex) => {
   return newItem;
 }
 
-const createImageString = (imageConfig,isAboutTheBookImage=false) => {
-  if(imageConfig.linkURL && !imageConfig.linkURL.includes("://")) imageConfig.linkURL = `https://${imageConfig.linkURL}`
-  
+const createImageString = (imageConfig,isAboutTheBookImage=false,accountContext,isPreview) => {
+  const linkdomain = accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? `https://link-${accountContext?.account?.sending_identity?.domain}/` : `https://link.${accountContext?.account?.sending_identity?.domain}/`;
+
   // Add the width check for float behavior
   const imageWidth = imageConfig.styles.desktop.width && imageConfig.styles.desktop.width.includes('%') 
     ? parseInt(imageConfig.styles.desktop.width) 
@@ -123,10 +123,14 @@ const createImageString = (imageConfig,isAboutTheBookImage=false) => {
   
   const imageString = `<img src="${imageConfig.src}" alt="${imageConfig.alt}" style="${imageStyle}" 
       ${imageConfig.styleConfig.mobile ? `class="${imageConfig.styleConfig.className}"` : ""}/> `
-      
+    
+  let linkURL = imageConfig.linkURL;
+  if(linkURL && accountContext?.account && isPreview){
+    if(!linkURL.includes(linkdomain)) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+  }
   return `<div ${imageConfig.contentStyleConfig.mobile ? `class="${imageConfig.contentStyleConfig.className}"` : ""} 
   style="${imageConfig.contentStyleConfig.desktop}">
-      ${imageConfig.linkURL && imageConfig.linkURL.length>0 ? `<a href="${imageConfig.linkURL}" target="_blank">${imageString}</a>` : imageString}
+      ${imageConfig.linkURL && imageConfig.linkURL.length>0 ? `<a href="${linkURL}" target="_blank">${imageString}</a>` : imageString}
   </div>`;
 };
 
@@ -142,11 +146,16 @@ const createHeaderString = (headerBlock) => {
   </${headerBlock.type}>`;
 };
 
-const createButtonString = (buttonBlock) => {
+const createButtonString = (buttonBlock,accountContext,isPreview) => {
+  let linkURL = buttonBlock.linkURL;
+  const linkdomain = accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? `https://link-${accountContext?.account?.sending_identity?.domain}/` : `https://link.${accountContext?.account?.sending_identity?.domain}/`;
+  if(linkURL && accountContext?.account && isPreview){
+    if(!linkURL.includes(linkdomain)) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+  }
   return `<div ${buttonBlock.contentStyleConfig.mobile ? `class="${buttonBlock.contentStyleConfig.className}"` : ""} 
   style="${buttonBlock.contentStyleConfig.desktop}">
     <a ${buttonBlock.styleConfig.mobile ? `class="${buttonBlock.styleConfig.className}"` : ""} 
-    style="${buttonBlock.styleConfig.desktop};text-decoration:none!important" target="_black" href="${buttonBlock.linkURL && buttonBlock.linkURL.startsWith('http') ? buttonBlock.linkURL : `https://${buttonBlock.linkURL}`}">${buttonBlock.text}</a>
+    style="${buttonBlock.styleConfig.desktop};text-decoration:none!important" target="_blank" href="${linkURL && linkURL.startsWith('http') ? linkURL : `https://${linkURL}`}">${buttonBlock.text}</a>
   </div>`;
 };
 
@@ -161,17 +170,21 @@ const createDividerString = (dividerBLock) => {
 const createSocialLinkString = (socialLinkBlock) => {
   return `<div ${socialLinkBlock.contentStyleConfig.mobile ? `class="${socialLinkBlock.contentStyleConfig.className}"` : ""} 
   style="${socialLinkBlock.contentStyleConfig.desktop}">
-    ${socialLinkBlock.list
-      .map((socialLinkItem) => {
-        const { image, title, link } = socialLinkItem;
-        // Check if imageWidth exists on the item or use from parent
+  ${socialLinkBlock.list
+    .map((socialLinkItem) => {
+      const { image, title, link } = socialLinkItem;
+        let linkURL = link;
+        if(linkURL && accountContext?.account && isPreview){
+          if(!linkURL.includes(linkdomain)) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+        }
+      // Check if imageWidth exists on the item or use from parent
         const imageWidth = socialLinkItem.imageWidth || socialLinkBlock.imageWidth || 32;
         
         // Only add class if styleConfig exists and has mobile property
         const classAttr = socialLinkItem.styleConfig && socialLinkItem.styleConfig.mobile ? 
           `class="${socialLinkItem.styleConfig.className}"` : "";
         
-        return `<a target="_black" href="${link || '#'}" style="${socialLinkBlock.styleConfig.desktop};display:inline-block;">
+        return `<a target="_blank" href="${linkURL || '#'}" style="${socialLinkBlock.styleConfig.desktop};display:inline-block;">
         <img src="${image}" alt="${title}" style="width:${imageWidth}px;" ${classAttr}/> 
       </a>`;
       })
@@ -179,15 +192,17 @@ const createSocialLinkString = (socialLinkBlock) => {
   </div>`;
 };
 
-const blockListToHtml = (blockList, bodySettings) => {
+const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=false) => {
   let content = "";
+  const linkdomain = accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? `https://link-${accountContext?.account?.sending_identity?.domain}/` : `https://link.${accountContext?.account?.sending_identity?.domain}/`;
+
   blockList.forEach((item) => {
     if (item.key === "column") {
       content += `<div ${item.styleConfig.mobile ? `class="${item.styleConfig.className}"` : ""} 
       style="${item.styleConfig.desktop};width:100%;display:block;">
         <table ${item.contentStyleConfig.mobile ? `class="${item.contentStyleConfig.className}"` : ""} 
         style="width:100%;max-width:${bodySettings.contentWidth}px;margin:0 auto;${item.contentStyleConfig.desktop}">
-      <tbody><tr>${blockListToHtml(item.children)}</tr></tbody>
+      <tbody><tr>${blockListToHtml(item.children, bodySettings, accountContext, isPreview)}</tr></tbody>
        </table></div>`;
     }
 
@@ -224,6 +239,10 @@ const blockListToHtml = (blockList, bodySettings) => {
       content += `<div class="about-book-v2-container" style="${containerStyles}; position: relative; width: 100%;">`;
       
       // Add the image with proper float for text wrapping
+      let linkURL = item.linkURL;
+      if(linkURL && accountContext?.account && isPreview){
+        if(!linkURL.includes(linkdomain)) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+      }
       if (item.src) {
         const floatStyle = useVerticalLayout ? 
           'float: none; width: 100%; margin-bottom: 20px;' : 
@@ -232,7 +251,7 @@ const blockListToHtml = (blockList, bodySettings) => {
         const imageString = `<img src="${item.src}" alt="${item.alt || ''}" style="width: 100%; display: block; ${imageHeight}" class="about-book-v2-img" />`;
         
         content += `<div class="parent-about_book_v2 image" style="${floatStyle}">
-          ${item.linkURL ? `<a href="${item.linkURL}" target="_blank">${imageString}</a>` : imageString}
+          ${item.linkURL ? `<a href="${linkURL}" target="_blank">${imageString}</a>` : imageString}
         </div>`;
       } else {
         // Placeholder for missing image
@@ -254,7 +273,7 @@ const blockListToHtml = (blockList, bodySettings) => {
 
     if (item.key === "content") {
       content += `<td ${item.styleConfig.mobile ? `class="${item.styleConfig.className}"` : ""} 
-      style="width:${item.width}; ${item.styleConfig.desktop}">${blockListToHtml(item.children)}</td>`;
+      style="width:${item.width}; ${item.styleConfig.desktop}">${blockListToHtml(item.children, bodySettings, accountContext, isPreview)}</td>`;
     }
 
     if (item.key === "text") {
@@ -266,11 +285,11 @@ const blockListToHtml = (blockList, bodySettings) => {
     }
 
     if (item.key === "image") {
-      content += createImageString(item);
+      content += createImageString(item,false,accountContext,isPreview);
     }
 
     if (item.key === "button") {
-      content += createButtonString(item);
+      content += createButtonString(item,accountContext,isPreview);
     }
 
     if (item.key === "divider") {
@@ -312,7 +331,7 @@ const blockListToHtml = (blockList, bodySettings) => {
       
       // Create a container for the book content with clearfix
       content += `<div class="about-the-book-container" style="position: relative; display: block; width: 100%; overflow: hidden;">`;
-      content += createImageString(item.image,true);
+      content += createImageString(item.image,true,accountContext,isPreview);
       content += createTextString(item.text);
       content += `</div>`;
     }
@@ -343,11 +362,11 @@ const extractUrls = (htmlText) => {
   const matches = htmlText.match(urlRegex)
   return [...new Set(matches)]
 }
-const dataToHtml = ({ bodySettings, blockList, isPreview=false }) => {
+const dataToHtml = ({ bodySettings, blockList, isPreview=false, accountContext={} }) => {
   const fontList = extractFonts(blockList); //recursively itterate blocklist to export all fonts, and find the required urls to add.
   let content = "";
   const { newBlockList, styles } = createStyleTag(blockList);
-  content = blockListToHtml(newBlockList, bodySettings);
+  content = blockListToHtml(newBlockList, bodySettings, accountContext, isPreview);
   let links = extractUrls(content)
 
   // if (links)

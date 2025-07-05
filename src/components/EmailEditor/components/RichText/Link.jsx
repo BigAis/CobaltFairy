@@ -6,6 +6,7 @@ import classNames from '../../utils/classNames'
 import { GlobalContext } from '../../reducers'
 import { Modal, Input } from 'antd'
 import PopupText from '../../../PopupText/PopupText'
+import { useAccount } from '../../../../context/AccountContext'
 
 const Link = ({ modifyText, setTextContent }) => {
 	const { selectionRange, blockList, bodySettings } = useContext(GlobalContext)
@@ -15,6 +16,7 @@ const Link = ({ modifyText, setTextContent }) => {
 		value: '',
 		range: null,
 	})
+	const accountContext = useAccount();
 
 	const node = useMemo(() => {
 		if (selectionRange) {
@@ -35,7 +37,7 @@ const Link = ({ modifyText, setTextContent }) => {
 		}
 
 		if (rangeIsLink) {
-			range.commonAncestorContainer.parentNode.href = value
+			range.commonAncestorContainer.parentNode.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
 		} else {
 			try {
 				// Check if the range can be surrounded
@@ -50,7 +52,8 @@ const Link = ({ modifyText, setTextContent }) => {
 				// Try to surround contents, but handle cases where it fails
 				let link = document.createElement('a')
 				link.target = '_blank'
-				link.href = value
+				// link.href = `https://link.${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
+				link.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
 				if (bodySettings.styles.linkColor) link.style = `color:${bodySettings.styles.linkColor}`
 
 				// Use a more robust approach for creating links
@@ -63,7 +66,7 @@ const Link = ({ modifyText, setTextContent }) => {
 						const selectedText = range.toString()
 						const linkElement = document.createElement('a')
 						linkElement.target = '_blank'
-						linkElement.href = value
+						linkElement.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
 						if (bodySettings.styles.linkColor) linkElement.style = `color:${bodySettings.styles.linkColor}`
 						linkElement.textContent = selectedText
 
@@ -75,7 +78,7 @@ const Link = ({ modifyText, setTextContent }) => {
 					// If no text is selected, insert the link at cursor position
 					const linkElement = document.createElement('a')
 					linkElement.target = '_blank'
-					linkElement.href = value
+					linkElement.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
 					if (bodySettings.styles.linkColor) linkElement.style = `color:${bodySettings.styles.linkColor}`
 					linkElement.textContent = value
 					range.insertNode(linkElement)
@@ -107,7 +110,13 @@ const Link = ({ modifyText, setTextContent }) => {
 				return
 			}
 			newInputConfig.rangeIsLink = true
-			newInputConfig.value = rangeParentNode.href //.replace("https://", "").replace("http://","");
+			let currenthref = rangeParentNode.href
+			if(rangeParentNode.href.includes('link.') && rangeParentNode.href.includes('?url=')){
+				currenthref = currenthref.split('?url=')[1];
+				currenthref = currenthref.split('/https')[0];
+				currenthref = decodeURIComponent(currenthref)
+			}
+			newInputConfig.value = currenthref //.replace("https://", "").replace("http://","");
 		}
 		setInputConfig(newInputConfig)
 		setIsModalOpen(true)

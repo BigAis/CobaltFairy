@@ -30,6 +30,7 @@ import Team from './pages/Team/Team'
 import NewUser from './pages/Team/NewUser'
 import EditUser from './pages/Team/EditUser'
 import Stats from './pages/stats/stats'
+import Redirection from './pages/redirection/redirection'
 
 // A wrapper component to handle authentication check
 const ProtectedRoute = ({ children }) => {
