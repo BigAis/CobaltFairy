@@ -14,7 +14,7 @@ const NewUser = () => {
   const navigate = useNavigate()
   const { user, account, createNotification } = useAccount()
   
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(2)
   const [userData, setUserData] = useState({
     email: '',
     name: '',

@@ -59,7 +59,6 @@ const Team = () => {
 
   const dropdownOptions = [
     { value: 'edit_user', label: 'Edit' },
-    { value: 'change_role', label: 'Change Role' },
     { value: 'delete_user', label: 'Delete' }
   ]
 
@@ -67,9 +66,6 @@ const Team = () => {
     switch (selectedValue.value) {
       case 'edit_user':
         navigate(`/team/${rowData.id}`)
-        break
-      case 'change_role':
-        navigate(`/team/${rowData.id}/role`)
         break
       case 'delete_user':
         // Show confirmation dialog
@@ -106,13 +102,13 @@ const Team = () => {
       <div className="fm-page-container">
         <PageHeader user={user} account={account} />
         <div className="page-name-container">
-          <div className="page-name">Team Members</div>
+          <div className="page-name">Users</div>
           <Button icon={'Plus'} type="action" onClick={handleAddUser}>
             New User
           </Button>
         </div>
 
-        <div className="filters-container">
+        <div className="filters-container" style={{ display: 'none' }}>
           <div className="row" style={{ marginBottom: '1rem' }}></div>
           <div className="row d-flex content-space-between">
             <SearchBar
