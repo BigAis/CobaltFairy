@@ -22,9 +22,20 @@ const Stats = () => {
   const [loading, setLoading] = useState(true)
   const [statsData, setStatsData] = useState(null)
   const [activeTimeframe, setActiveTimeframe] = useState('month')
-  const [currentDate, setCurrentDate] = useState('12/05/2024')
+  const [currentDate, setCurrentDate] = useState(new Date().toLocaleDateString('en-GB'))
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
-  // Stats data exactly matching the Figma mockup
+  // Handle responsive layout
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Example stats data (matching the Figma mockup)
   const subscriberStats = [
     { label: 'Total Active', value: '894', percentage: 19 },
     { label: 'Unsubscribed', value: '158', percentage: 35 },
@@ -46,6 +57,11 @@ const Stats = () => {
       
       setLoading(true)
       try {
+        // In a real implementation, this would be an API call
+        // const response = await ApiService.get('fairymailer/stats', user.jwt)
+        // setStatsData(response.data)
+        
+        // Using mock data for now to match Figma design
         setStatsData({
           subscribers: {
             total: 894,
@@ -78,18 +94,32 @@ const Stats = () => {
     fetchStatsData()
   }, [user])
 
+  if (loading) {
+    return (
+      <div className="fm-page-wrapper">
+        <Sidemenu />
+        <div className="fm-page-container">
+          <PageHeader />
+          <div className="loading-container">
+            <p>Loading stats data...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="fm-page-wrapper">
       <Sidemenu />
       <div className="fm-page-container">
-        {user && account && <PageHeader />}
+        <PageHeader />
 
-        {/* Header exactly like Figma */}
+        {/* Header Section */}
         <div className="figma-stats-header">
           <div className="figma-header-left">
             <h1 className="figma-stats-title">Stats</h1>
             <div className="figma-stats-date">
-              <Icon name="Calendar" size={16} />
+              <Icon name="Clock" size={16} />
               {currentDate}
             </div>
           </div>
@@ -118,13 +148,13 @@ const Stats = () => {
           </div>
         </div>
 
-        {/* Subscribers Section - exactly like Figma */}
+        {/* Subscribers Section */}
         <Card className="figma-stats-card">
           <div className="figma-card-header">
             <h2 className="figma-card-title">Subscribers</h2>
           </div>
           
-          <div className="figma-stats-row">
+          <div className={`figma-stats-row ${isMobile ? 'mobile-stats-row' : ''}`}>
             <div className="figma-stat-item">
               <Stat stats={subscriberStats} hasChart={true} defaultLabel="Total Active" />
             </div>
@@ -144,13 +174,13 @@ const Stats = () => {
           </div>
         </Card>
 
-        {/* Campaigns Section - exactly like Figma */}
+        {/* Campaigns Section */}
         <Card className="figma-stats-card">
           <div className="figma-card-header">
             <h2 className="figma-card-title">Campaigns</h2>
           </div>
           
-          <div className="figma-stats-row">
+          <div className={`figma-stats-row ${isMobile ? 'mobile-stats-row' : ''}`}>
             <div className="figma-stat-item">
               <Stat stats={campaignStats} hasChart={true} defaultLabel="Emails Sent" />
             </div>
@@ -171,7 +201,7 @@ const Stats = () => {
         </Card>
 
         {/* Two column layout for Device Type and Engagement */}
-        <div className="figma-two-columns">
+        <div className={`figma-two-columns ${isMobile ? 'mobile-columns' : ''}`}>
           {/* Device Type */}
           <Card className="figma-device-card">
             <div className="figma-card-header">
@@ -215,13 +245,6 @@ const Stats = () => {
           </div>
           <LocationData campaign={statsData} />
         </Card>
-
-        {/* Hide the campaigns table that appears at bottom */}
-        <style jsx>{`
-          .fm-page-container > *:not(.figma-stats-header):not(.figma-stats-card):not(.figma-two-columns):not(.figma-location-card) {
-            display: none !important;
-          }
-        `}</style>
       </div>
     </div>
   )
