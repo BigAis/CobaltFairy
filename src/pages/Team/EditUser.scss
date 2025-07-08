@@ -65,21 +65,21 @@
     margin-top: 20px;
     
     h2 {
-      text-align: left; /* Left align the permissions heading */
-      margin-bottom: 20px;
+      text-align: left !important; /* Override center alignment for permissions heading */
+      margin-bottom: 20px !important;
     }
     
     .permissions-layout {
       display: flex;
       justify-content: space-between;
       margin-bottom: 30px;
-      gap: 50px;
+      gap: 40px;
       
       .roles-section {
-        flex: 0 0 40%;
+        width: 40%;
         
         .role-option {
-          margin-bottom: 15px;
+          margin-bottom: 12px;
           position: relative;
           display: flex;
           flex-direction: column;
@@ -117,7 +117,7 @@
           label {
             font-size: 16px;
             font-weight: 500;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             padding-left: 40px;
           }
           
@@ -132,34 +132,28 @@
       }
       
       .permissions-categories {
-        flex: 0 0 55%;
+        width: 60%;
         display: flex;
-        gap: 30px;
+        gap: 20px;
         
         .permissions-column {
           flex: 1;
           
           .permission-category {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             
             h3 {
               font-family: 'Bitter', serif;
               font-size: 18px;
               font-weight: 600;
-              margin-bottom: 15px;
-            }
-            
-            .permission-items {
-              display: flex;
-              flex-direction: column;
-              gap: 10px;
+              margin-bottom: 10px;
             }
             
             .permission-item {
               display: flex;
               justify-content: space-between;
               align-items: center;
-              margin-bottom: 5px;
+              margin-bottom: 6px;
               
               span {
                 font-size: 14px;
@@ -226,15 +220,10 @@
         .roles-section,
         .permissions-categories {
           width: 100%;
-          flex: 0 0 100%;
         }
         
         .permissions-categories {
           flex-direction: column;
-          
-          .permissions-column {
-            width: 100%;
-          }
         }
       }
       

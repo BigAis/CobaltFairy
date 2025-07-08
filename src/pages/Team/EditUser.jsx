@@ -196,9 +196,7 @@ const EditUser = () => {
                 onChange={() => setSelectedRole('Owner')}
               />
               <label htmlFor="role-owner">Owner</label>
-              <p className="role-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.
-              </p>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
             </div>
             
             <div className="role-option">
@@ -210,9 +208,7 @@ const EditUser = () => {
                 onChange={() => setSelectedRole('Admin')}
               />
               <label htmlFor="role-admin">Admin</label>
-              <p className="role-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.
-              </p>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
             </div>
             
             <div className="role-option">
@@ -224,9 +220,7 @@ const EditUser = () => {
                 onChange={() => setSelectedRole('Manager')}
               />
               <label htmlFor="role-manager">Manager</label>
-              <p className="role-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.
-              </p>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
             </div>
             
             <div className="role-option">
@@ -238,9 +232,7 @@ const EditUser = () => {
                 onChange={() => setSelectedRole('Author')}
               />
               <label htmlFor="role-author">Author</label>
-              <p className="role-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.
-              </p>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
             </div>
             
             <div className="role-option">
@@ -252,9 +244,7 @@ const EditUser = () => {
                 onChange={() => setSelectedRole('Viewer')}
               />
               <label htmlFor="role-viewer">Viewer</label>
-              <p className="role-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.
-              </p>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
             </div>
             
             <div className="role-option">
@@ -266,184 +256,168 @@ const EditUser = () => {
                 onChange={() => setSelectedRole('Custom')}
               />
               <label htmlFor="role-custom">Custom</label>
-              <p className="role-description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.
-              </p>
+              <p className="role-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In quis suscipit justo.</p>
             </div>
           </div>
           
           {/* Right side - Permission categories */}
           <div className="permissions-categories">
-            {/* Left column */}
+            {/* First column */}
             <div className="permissions-column">
               <div className="permission-category">
                 <h3>Campaigns</h3>
-                <div className="permission-items">
-                  <div className="permission-item">
-                    <span>View</span>
-                    <Switch 
-                      checked={userData.permissions.campaigns.view}
-                      onChange={() => handlePermissionChange("campaigns", "view")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Edit</span>
-                    <Switch 
-                      checked={userData.permissions.campaigns.edit}
-                      onChange={() => handlePermissionChange("campaigns", "edit")}
-                    />
-                  </div>
+                <div className="permission-item">
+                  <span>View</span>
+                  <Switch 
+                    checked={userData.permissions.campaigns.view}
+                    onChange={() => handlePermissionChange("campaigns", "view")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Edit</span>
+                  <Switch 
+                    checked={userData.permissions.campaigns.edit}
+                    onChange={() => handlePermissionChange("campaigns", "edit")}
+                  />
                 </div>
               </div>
               
               <div className="permission-category">
                 <h3>Subscribers</h3>
-                <div className="permission-items">
-                  <div className="permission-item">
-                    <span>View</span>
-                    <Switch 
-                      checked={userData.permissions.subscribers.view}
-                      onChange={() => handlePermissionChange("subscribers", "view")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Edit</span>
-                    <Switch 
-                      checked={userData.permissions.subscribers.edit}
-                      onChange={() => handlePermissionChange("subscribers", "edit")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Export</span>
-                    <Switch 
-                      checked={userData.permissions.subscribers.export}
-                      onChange={() => handlePermissionChange("subscribers", "export")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Import</span>
-                    <Switch 
-                      checked={userData.permissions.subscribers.import}
-                      onChange={() => handlePermissionChange("subscribers", "import")}
-                    />
-                  </div>
+                <div className="permission-item">
+                  <span>View</span>
+                  <Switch 
+                    checked={userData.permissions.subscribers.view}
+                    onChange={() => handlePermissionChange("subscribers", "view")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Edit</span>
+                  <Switch 
+                    checked={userData.permissions.subscribers.edit}
+                    onChange={() => handlePermissionChange("subscribers", "edit")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Export</span>
+                  <Switch 
+                    checked={userData.permissions.subscribers.export}
+                    onChange={() => handlePermissionChange("subscribers", "export")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Import</span>
+                  <Switch 
+                    checked={userData.permissions.subscribers.import}
+                    onChange={() => handlePermissionChange("subscribers", "import")}
+                  />
                 </div>
               </div>
               
               <div className="permission-category">
-                <h3>Automations</h3>
-                <div className="permission-items">
-                  <div className="permission-item">
-                    <span>View</span>
-                    <Switch 
-                      checked={userData.permissions.automations.view}
-                      onChange={() => handlePermissionChange("automations", "view")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Edit</span>
-                    <Switch 
-                      checked={userData.permissions.automations.edit}
-                      onChange={() => handlePermissionChange("automations", "edit")}
-                    />
-                  </div>
+                <h3>Integrations</h3>
+                <div className="permission-item">
+                  <span>View</span>
+                  <Switch 
+                    checked={userData.permissions.integrations.view}
+                    onChange={() => handlePermissionChange("integrations", "view")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Edit</span>
+                  <Switch 
+                    checked={userData.permissions.integrations.edit}
+                    onChange={() => handlePermissionChange("integrations", "edit")}
+                  />
                 </div>
               </div>
               
               <div className="permission-category">
                 <h3>Stats</h3>
-                <div className="permission-items">
-                  <div className="permission-item">
-                    <span>View</span>
-                    <Switch 
-                      checked={userData.permissions.stats.view}
-                      onChange={() => handlePermissionChange("stats", "view")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Edit</span>
-                    <Switch 
-                      checked={userData.permissions.stats.edit}
-                      onChange={() => handlePermissionChange("stats", "edit")}
-                    />
-                  </div>
+                <div className="permission-item">
+                  <span>View</span>
+                  <Switch 
+                    checked={userData.permissions.stats.view}
+                    onChange={() => handlePermissionChange("stats", "view")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Edit</span>
+                  <Switch 
+                    checked={userData.permissions.stats.edit}
+                    onChange={() => handlePermissionChange("stats", "edit")}
+                  />
                 </div>
               </div>
             </div>
             
-            {/* Right column */}
+            {/* Second column */}
             <div className="permissions-column">
               <div className="permission-category">
-                <h3>Integrations</h3>
-                <div className="permission-items">
-                  <div className="permission-item">
-                    <span>View</span>
-                    <Switch 
-                      checked={userData.permissions.integrations.view}
-                      onChange={() => handlePermissionChange("integrations", "view")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Edit</span>
-                    <Switch 
-                      checked={userData.permissions.integrations.edit}
-                      onChange={() => handlePermissionChange("integrations", "edit")}
-                    />
-                  </div>
+                <h3>Templates</h3>
+                <div className="permission-item">
+                  <span>View</span>
+                  <Switch 
+                    checked={userData.permissions.templates?.view || false}
+                    onChange={() => handlePermissionChange("templates", "view")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Edit</span>
+                  <Switch 
+                    checked={userData.permissions.templates?.edit || false}
+                    onChange={() => handlePermissionChange("templates", "edit")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Export</span>
+                  <Switch 
+                    checked={userData.permissions.templates?.export || false}
+                    onChange={() => handlePermissionChange("templates", "export")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Import</span>
+                  <Switch 
+                    checked={userData.permissions.templates?.import || false}
+                    onChange={() => handlePermissionChange("templates", "import")}
+                  />
                 </div>
               </div>
               
               <div className="permission-category">
-                <h3>Templates</h3>
-                <div className="permission-items">
-                  <div className="permission-item">
-                    <span>View</span>
-                    <Switch 
-                      checked={userData.permissions.templates?.view || false}
-                      onChange={() => handlePermissionChange("templates", "view")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Edit</span>
-                    <Switch 
-                      checked={userData.permissions.templates?.edit || false}
-                      onChange={() => handlePermissionChange("templates", "edit")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Export</span>
-                    <Switch 
-                      checked={userData.permissions.templates?.export || false}
-                      onChange={() => handlePermissionChange("templates", "export")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Import</span>
-                    <Switch 
-                      checked={userData.permissions.templates?.import || false}
-                      onChange={() => handlePermissionChange("templates", "import")}
-                    />
-                  </div>
+                <h3>Automations</h3>
+                <div className="permission-item">
+                  <span>View</span>
+                  <Switch 
+                    checked={userData.permissions.automations.view}
+                    onChange={() => handlePermissionChange("automations", "view")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Edit</span>
+                  <Switch 
+                    checked={userData.permissions.automations.edit}
+                    onChange={() => handlePermissionChange("automations", "edit")}
+                  />
                 </div>
               </div>
               
               <div className="permission-category">
                 <h3>Billing</h3>
-                <div className="permission-items">
-                  <div className="permission-item">
-                    <span>View</span>
-                    <Switch 
-                      checked={userData.permissions.billing.view}
-                      onChange={() => handlePermissionChange("billing", "view")}
-                    />
-                  </div>
-                  <div className="permission-item">
-                    <span>Edit</span>
-                    <Switch 
-                      checked={userData.permissions.billing.edit}
-                      onChange={() => handlePermissionChange("billing", "edit")}
-                    />
-                  </div>
+                <div className="permission-item">
+                  <span>View</span>
+                  <Switch 
+                    checked={userData.permissions.billing.view}
+                    onChange={() => handlePermissionChange("billing", "view")}
+                  />
+                </div>
+                <div className="permission-item">
+                  <span>Edit</span>
+                  <Switch 
+                    checked={userData.permissions.billing.edit}
+                    onChange={() => handlePermissionChange("billing", "edit")}
+                  />
                 </div>
               </div>
             </div>
@@ -451,7 +425,7 @@ const EditUser = () => {
         </div>
         
         <div className="action-button-container">
-          <Button type="primary" onClick={handleSave}>Add user</Button>
+          <Button type="primary" onClick={handleSave}>Update user</Button>
         </div>
       </div>
     );
