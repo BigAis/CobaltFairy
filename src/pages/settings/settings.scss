@@ -312,57 +312,19 @@
         }
     }
     // Notification styles - Two column layout
-    .notifications-row {
-        display: flex;
-        gap: 30px;
+    .notification-section {
+        width: 100%;
         margin-bottom: 30px;
-        
-        .notification-column {
-            flex: 1;
-            
-            .notification-setting {
-                margin-bottom: 15px;
-                
-                .toggle-switch {
-                    margin-bottom: 0;
-                    
-                    .slider {
-                        background-color: rgba(255, 255, 255, 1);
-                        border: 2px solid rgba(218, 209, 197, 1);
-                        
-                        &:before {
-                            background-color: rgba(217, 217, 217, 1);
-                        }
-                    }
-                    
-                    input:checked + .slider {
-                        background-color: rgba(255, 99, 93, 0.5);
-                        border: 2px solid rgba(255, 99, 93, 1);
-                        
-                        &:before {
-                            background-color: white;
-                        }
-                    }
-                }
-            }
-            
-            .notification-email {
-                .input-text-wrapper {
-                    width: 100%;
-                    margin-bottom: 0;
-                }
-            }
-        }
-        
-        // Responsive layout for mobile
-        @media (max-width: 768px) {
-            flex-direction: column;
-            
-            .notification-column {
-                width: 100%;
-                margin-bottom: 20px;
-            }
-        }
+        text-align: left;
+    }
+
+    // Remove the two-column layout for notifications-row if still present
+    .notifications-row, .notification-column {
+        display: block !important;
+        width: 100% !important;
+        gap: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
     // Notification settings - Updated to display horizontally
     .notification-setting {

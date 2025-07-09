@@ -336,44 +336,38 @@ const Settings = () => {
             case 'notifications':
                 return (
                     <div className="settings-tab-content">
-                        <div className="notifications-row">
-                            <div className="notification-column">
-                                <div className="notification-setting">
-                                    <Switch 
-                                        checked={notificationSettings.monthlyActivity} 
-                                        label="Monthly account activity" 
-                                        onChange={(checked) => setNotificationSettings({...notificationSettings, monthlyActivity: checked})}
-                                    />
-                                </div>
-                                
-                                <div className="notification-email">
-                                    <InputText
-                                        label="Email"
-                                        value={notificationSettings.monthlyActivityEmail}
-                                        onChange={(e) => setNotificationSettings({...notificationSettings, monthlyActivityEmail: e.target.value})}
-                                    />
-                                </div>
+                        <div className="notification-section">
+                            <div className="notification-setting">
+                                <Switch 
+                                    checked={notificationSettings.monthlyActivity} 
+                                    label="Monthly account activity" 
+                                    onChange={(checked) => setNotificationSettings({...notificationSettings, monthlyActivity: checked})}
+                                />
                             </div>
-                            
-                            <div className="notification-column">
-                                <div className="notification-setting">
-                                    <Switch 
-                                        checked={notificationSettings.campaignNotifications} 
-                                        label="Campaign Notifications" 
-                                        onChange={(checked) => setNotificationSettings({...notificationSettings, campaignNotifications: checked})}
-                                    />
-                                </div>
-                                
-                                <div className="notification-email">
-                                    <InputText
-                                        label="Email"
-                                        value={notificationSettings.campaignNotificationsEmail}
-                                        onChange={(e) => setNotificationSettings({...notificationSettings, campaignNotificationsEmail: e.target.value})}
-                                    />
-                                </div>
+                            <div className="notification-email">
+                                <InputText
+                                    label="Email"
+                                    value={notificationSettings.monthlyActivityEmail}
+                                    onChange={(e) => setNotificationSettings({...notificationSettings, monthlyActivityEmail: e.target.value})}
+                                />
                             </div>
                         </div>
-                        
+                        <div className="notification-section">
+                            <div className="notification-setting">
+                                <Switch 
+                                    checked={notificationSettings.campaignNotifications} 
+                                    label="Campaign Notifications" 
+                                    onChange={(checked) => setNotificationSettings({...notificationSettings, campaignNotifications: checked})}
+                                />
+                            </div>
+                            <div className="notification-email">
+                                <InputText
+                                    label="Email"
+                                    value={notificationSettings.campaignNotificationsEmail}
+                                    onChange={(e) => setNotificationSettings({...notificationSettings, campaignNotificationsEmail: e.target.value})}
+                                />
+                            </div>
+                        </div>
                         <div className="settings-action-buttons">
                             <Button type="primary" onClick={handleSaveChanges} loading={isLoading}>Save Changes</Button>
                         </div>
