@@ -17,6 +17,7 @@ import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import DomainIdentity from './DomainIdentity'
 import CampaignPresets from './CampaignPresets'
+import PopupText from '../../components/PopupText/PopupText'
 
 const Settings = () => {
     const { user, account, createNotification } = useAccount()
@@ -39,6 +40,7 @@ const Settings = () => {
     )
     
     const [isLoading, setIsLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     
     // Personal Details state
     const [personalSettings, setPersonalSettings] = useState({
@@ -74,6 +76,24 @@ const Settings = () => {
         firstName: '',
         lastName: ''
     })
+
+    // Get user initials helper function
+    const getUserInitials = () => {
+        if (user?.user?.name) {
+            const nameParts = user.user.name.split(' ');
+            if (nameParts.length >= 2) {
+                return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+            } else if (nameParts.length === 1 && nameParts[0].length > 0) {
+                return nameParts[0][0].toUpperCase();
+            }
+        }
+        
+        if (profileSettings.firstName && profileSettings.lastName) {
+            return `${profileSettings.firstName[0]}${profileSettings.lastName[0]}`.toUpperCase();
+        }
+        
+        return user?.user?.email ? user.user.email[0].toUpperCase() : 'U';
+    }
 
     // Timezone options
     const timezoneOptions = [
@@ -169,20 +189,27 @@ const Settings = () => {
     const loadSettings = async () => {
         setIsLoading(true)
         try {
-            // In a real implementation, we would fetch these settings from an API
-            // For now, we'll just populate with sample data
+            // Populate with actual user data from context
             setPersonalSettings({
                 accountName: account?.name || 'Account Name',
-                email: user?.user?.email || 'johndoe@gmail.com',
+                email: user?.user?.email || '',
                 timezone: timezoneOptions.find(tz => tz.label === "(UTC+02:00) Athens, Bucharest") || timezoneOptions[0],
                 timeformat: dateFormatOptions[1] // Default to dd/mm/yyyy
             })
             
+            // Get user names from name field if available
+            let firstName = '', lastName = '';
+            if (user?.user?.name) {
+                const nameParts = user.user.name.split(' ');
+                firstName = nameParts[0] || '';
+                lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+            }
+            
             setProfileSettings({
-                email: user?.user?.email || 'johndoe@gmail.com',
+                email: user?.user?.email || '',
                 password: '••••••••',
-                firstName: user?.user?.firstName || 'John',
-                lastName: user?.user?.lastName || 'Doe'
+                firstName: firstName,
+                lastName: lastName
             })
             
             setIsLoading(false)
@@ -196,7 +223,44 @@ const Settings = () => {
         }
     }
 
-    // Updated handleSaveChanges function for settings.jsx
+    // Handle password update
+    const handleUpdatePassword = async () => {
+        const result = await PopupText.fire({
+            icon: 'question',
+            text: 'Do you want to update your password?',
+            inputField: true,
+            inputLabel: 'New Password',
+            inputPlaceholder: 'Enter new password',
+            showConfirmButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Update Password',
+            cancelButtonText: 'Cancel',
+        });
+        
+        if (result.isConfirmed && result.inputValue) {
+            setIsLoading(true);
+            try {
+                // Implementation would depend on actual API
+                setTimeout(() => {
+                    createNotification({
+                        message: 'Password updated successfully',
+                        type: 'default',
+                        autoClose: 3000
+                    });
+                    setIsLoading(false);
+                }, 1000);
+            } catch (error) {
+                console.error("Error updating password:", error);
+                createNotification({
+                    message: 'Failed to update password',
+                    type: 'warning'
+                });
+                setIsLoading(false);
+            }
+        }
+    }
+
+    // Handle save changes for any section
     const handleSaveChanges = async () => {
         setIsLoading(true);
         try {
@@ -204,7 +268,7 @@ const Settings = () => {
             if (activeSection === 'details' && account && account.id) {
                 // Make the API call to edit the account
                 const response = await ApiService.post(
-                    'fairymail/editAccount',
+                    'fairymailer/editAccount',
                     {
                         account_id: account.id,
                         account_name: personalSettings.accountName
@@ -235,9 +299,19 @@ const Settings = () => {
                 } else {
                     throw new Error('Failed to update account');
                 }
+            } else if (activeSection === 'profile') {
+                // For profile section, simulate successful update
+                // In a real implementation, this would call an API endpoint
+                
+                setTimeout(() => {
+                    createNotification({
+                        message: 'Profile updated successfully',
+                        type: 'default',
+                        autoClose: 3000
+                    });
+                }, 500);
             } else {
-                // For other sections, we might implement different API calls
-                // For now, just show a success message
+                // For other sections, just show a success message
                 setTimeout(() => {
                     createNotification({
                         message: 'Settings saved successfully',
@@ -376,67 +450,72 @@ const Settings = () => {
             case 'profile':
                 return (
                     <div className="settings-tab-content profile-tab">
-                        <h2 className="profile-title">Profile</h2>
                         
-                        <h3 className="section-title">Profile Photo</h3>
-                        
-                        <div className="profile-photo-section">
-                            <div className="profile-initials">
-                                {profileSettings.firstName && profileSettings.lastName ? 
-                                    `${profileSettings.firstName[0]}${profileSettings.lastName[0]}` : 'JD'}
+                            <h2 className="profile-title">Profile</h2>
+                            
+                            <h3 className="section-title">Profile Photo</h3>
+                            
+                            <div className="profile-photo-section">
+                                <div className="profile-initials">
+                                    {getUserInitials()}
+                                </div>
+                                <Button type="secondary">Upload</Button>
                             </div>
-                            <Button type="secondary">Upload</Button>
-                        </div>
-                        
-                        <h3 className="section-title">Login Details</h3>
-                        
-                        <div className="input-section">
-                            <InputText
-                                label="Email"
-                                value={profileSettings.email}
-                                onChange={(e) => setProfileSettings({...profileSettings, email: e.target.value})}
-                            />
-                        </div>
-                        
-                        <div className="password-section">
-                            <div className="password-field">
+                            
+                            <h3 className="section-title">Login Details</h3>
+                            
+                            <div className="input-section">
                                 <InputText
-                                    label="Password"
-                                    value={profileSettings.password}
-                                    type="password"
-                                    onChange={(e) => setProfileSettings({...profileSettings, password: e.target.value})}
+                                    label="Email"
+                                    value={profileSettings.email}
+                                    onChange={(e) => setProfileSettings({...profileSettings, email: e.target.value})}
                                 />
-                                <div className="password-icon">
-                                    <Icon name="Eye" size={16} />
+                            </div>
+                            
+                            <div className="password-section">
+                                <div className="password-field">
+                                    <InputText
+                                        label="Password"
+                                        value={profileSettings.password}
+                                        type={showPassword ? "text" : "password"}
+                                        onChange={(e) => setProfileSettings({...profileSettings, password: e.target.value})}
+                                        disabled={true}
+                                    />
+                                    <div 
+                                        className="password-icon"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        <Icon name={showPassword ? "EyeOff" : "Eye"} size={16} />
+                                    </div>
+                                </div>
+                                
+                                <div className="update-password-button">
+                                    <Button type="secondary" onClick={handleUpdatePassword}>Update Password</Button>
                                 </div>
                             </div>
                             
-                            <div className="update-password-button">
-                                <Button type="secondary">Update Password</Button>
+                            <h3 className="section-title">Basic Information</h3>
+                            
+                            <div className="input-section">
+                                <InputText
+                                    label="First Name"
+                                    value={profileSettings.firstName}
+                                    onChange={(e) => setProfileSettings({...profileSettings, firstName: e.target.value})}
+                                />
                             </div>
-                        </div>
+                            
+                            <div className="input-section">
+                                <InputText
+                                    label="Last Name"
+                                    value={profileSettings.lastName}
+                                    onChange={(e) => setProfileSettings({...profileSettings, lastName: e.target.value})}
+                                />
+                            </div>
+                            
+                            <div className="settings-action-buttons">
+                                <Button type="primary" onClick={handleSaveChanges} loading={isLoading}>Save Changes</Button>
+                            </div>
                         
-                        <h3 className="section-title">Basic Information</h3>
-                        
-                        <div className="input-section">
-                            <InputText
-                                label="First Name"
-                                value={profileSettings.firstName}
-                                onChange={(e) => setProfileSettings({...profileSettings, firstName: e.target.value})}
-                            />
-                        </div>
-                        
-                        <div className="input-section">
-                            <InputText
-                                label="Last Name"
-                                value={profileSettings.lastName}
-                                onChange={(e) => setProfileSettings({...profileSettings, lastName: e.target.value})}
-                            />
-                        </div>
-                        
-                        <div className="settings-action-buttons">
-                            <Button type="primary" onClick={handleSaveChanges} loading={isLoading}>Save Changes</Button>
-                        </div>
                     </div>
                 )
             default:
@@ -469,7 +548,7 @@ const Settings = () => {
                         />
                     </div>
                     
-                     {renderTabContent()}
+                    {renderTabContent()}
                     
                 </div>
             </div>

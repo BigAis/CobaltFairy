@@ -120,7 +120,7 @@
     .settings-action-buttons {
         margin-top: 30px;
         display: flex;
-        justify-content: center;
+        justify-content: flex-start;
         
         .btn {
             min-width: 150px;
@@ -392,6 +392,49 @@
         }
     }
     
+    // Enhanced profile styling
+    &.profile-tab {
+        max-width: 100%;
+        margin: 0;
+        padding: 20px 0;
+        
+        .profile-card {
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(218, 209, 197, 1);
+            border-radius: 8px;
+            padding: 30px;
+            
+            @media (max-width: 768px) {
+                padding: 20px;
+            }
+        }
+    }
+    
+    .profile-photo-section {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        
+        .profile-initials {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(218, 209, 197, 1);
+            font-family: 'Bitter', serif;
+            font-size: 28px;
+            font-weight: 600;
+            margin-right: 20px;
+        }
+        
+        .btn {
+            height: 45px;
+        }
+    }
+    
     .password-section {
         position: relative;
         margin-bottom: 30px;
@@ -410,6 +453,16 @@
                 top: 50%;
                 transform: translateY(-50%);
                 cursor: pointer;
+                color: #887D76;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                
+                &:hover {
+                    color: #FF635D;
+                }
                 
                 svg {
                     width: 20px;
@@ -420,18 +473,12 @@
         
         .update-password-button {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             margin-top: 15px;
             
             .btn {
-                width: auto;
+                min-width: 150px;
             }
         }
-    }
-    
-    &.profile-tab {
-        max-width: 500px;
-        margin: 0 auto;
-        padding: 20px 0;
     }
 }
