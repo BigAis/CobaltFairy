@@ -3,6 +3,7 @@ import Card from '../../components/Card'
 import Button from '../../components/Button'
 import InputText from '../../components/InputText/InputText'
 import VerificationBadge from '../../components/VerificationBadge'
+import Icon from '../../components/Icon/Icon'
 import { ApiService } from '../../service/api-service'
 import { useAccount } from '../../context/AccountContext'
 import './DomainIdentity.scss'
@@ -38,10 +39,7 @@ const DomainIdentity = () => {
             return
         }
         
-        // Prevent duplicate requests while loading
-        if (domainSettings.isAddingDomain) {
-            return;
-        }
+        if (domainSettings.isAddingDomain) return;
         
         setDomainSettings(prevState => ({...prevState, isAddingDomain: true}))
         
@@ -52,24 +50,17 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            console.log('Domain add response:', response.data)
-            
-            // Check for response code 200
             if (response.data && response.data.code === 200) {
-                // Extract the verification token from the correct location in the response
                 const verificationToken = response.data.data?.VerificationToken || '';
                 
                 setDomainSettings(prevState => ({
                     ...prevState,
                     domainStatus: 'PENDING',
-                    // Use the domain name from state to build the TXT record name
                     domainTxtName: `_amazon.${prevState.sendingDomain}`,
-                    // Use the verification token from the response
                     domainTxtValue: verificationToken,
                     isAddingDomain: false
                 }))
                 
-                // Fetch DKIM records immediately after adding domain
                 setTimeout(() => {
                     getDkimRecords()
                 }, 500)
@@ -109,7 +100,6 @@ const DomainIdentity = () => {
             return
         }
         
-        // Check if email domain matches sending domain
         const emailParts = domainSettings.sendingEmail.split('@');
         if (emailParts.length !== 2 || emailParts[1].toLowerCase() !== domainSettings.sendingDomain.toLowerCase()) {
             createNotification({
@@ -120,10 +110,7 @@ const DomainIdentity = () => {
             return
         }
         
-        // Prevent duplicate requests
-        if (domainSettings.isAddingEmail) {
-            return;
-        }
+        if (domainSettings.isAddingEmail) return;
         
         setDomainSettings(prevState => ({...prevState, isAddingEmail: true}))
         
@@ -133,8 +120,6 @@ const DomainIdentity = () => {
                 { email: domainSettings.sendingEmail },
                 user.jwt
             )
-            
-            console.log('Email add response:', response.data)
             
             if (response.data && response.data.code === 200) {
                 setDomainSettings(prevState => ({
@@ -169,10 +154,7 @@ const DomainIdentity = () => {
     
     // Function to verify domain DKIM
     const handleVerifyDomainDkim = async () => {
-        // Prevent duplicate requests
-        if (domainSettings.isVerifyingDkim) {
-            return;
-        }
+        if (domainSettings.isVerifyingDkim) return;
         
         setDomainSettings(prevState => ({...prevState, isVerifyingDkim: true}))
         
@@ -182,10 +164,7 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            console.log('DKIM verify response:', response.data)
-            
             if (response.data && (response.data.success || response.data.code === 200)) {
-                // Improved verification check - multiple ways it might be represented in the response
                 const isVerified = response.data.verified || 
                                   (response.data.data && response.data.data.verified) || 
                                   false;
@@ -224,10 +203,7 @@ const DomainIdentity = () => {
     
     // Function to verify email
     const handleVerifyEmail = async () => {
-        // Prevent duplicate requests
-        if (domainSettings.isVerifyingEmail) {
-            return;
-        }
+        if (domainSettings.isVerifyingEmail) return;
         
         setDomainSettings(prevState => ({...prevState, isVerifyingEmail: true}))
         
@@ -237,10 +213,7 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            console.log('Email verify response:', response.data)
-            
             if (response.data) {
-                // Improved verification check - multiple ways it might be represented in the response
                 let isVerified = false;
                 
                 if (response.data.verified !== undefined) {
@@ -250,7 +223,6 @@ const DomainIdentity = () => {
                 } else if (response.data.status === 'Verified' || response.data.data?.status === 'Verified') {
                     isVerified = true;
                 } else if (response.data.success || response.data.code === 200) {
-                    // If we get success but no explicit verification flag, consider it verified
                     isVerified = true;
                 }
                 
@@ -294,26 +266,21 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            console.log('Domain status response:', response.data)
-            
             if (response.data && (response.data.success || response.data.code === 200)) {
                 const domainData = response.data.data || {};
                 let domainName = domainData && domainData.VerificationAttributes ? Object.keys(domainData.VerificationAttributes)[0] : '';
 
-                // Improved verification check with fallbacks
                 let isVerified = false;
                 
                 if (domainData && 
                     domainData.VerificationAttributes && 
                     domainData.VerificationAttributes[domainName]) {
                     
-                    // Check for exact string match or for any indicator of verification
                     if (domainData.VerificationAttributes[domainName].VerificationStatus === "Verified") {
                         isVerified = true;
                     } else if (response.data.verified || response.data.status === 'Verified') {
                         isVerified = true;
                     } else if (response.data.success || response.data.code === 200) {
-                        // If API returns success but doesn't specify status, assume it's verified
                         isVerified = true;
                     }
                 }
@@ -345,24 +312,18 @@ const DomainIdentity = () => {
                 user.jwt
             );
             
-            console.log('DKIM records response:', response.data);
-            
             if (response.data && (response.data.success || response.data.code === 200)) {
-                // Handle the response data directly from the API without creating placeholders
                 const dkimData = response.data.data || response.data;
                 
-                // Extract the DKIM records from the response
                 let records = [];
                 
                 if (dkimData.DkimTokens && Array.isArray(dkimData.DkimTokens)) {
-                    // If API returns records in the expected format
                     records = dkimData.DkimTokens.map(token => ({
                         name: token.name || `${token}._domainkey.${domainSettings.sendingDomain}`,
                         value: token.value || `${token}.dkim.amazonses.com`
                     }));
                 }
                 
-                // Improved verification check
                 let isVerified = false;
                 
                 if (dkimData.verified !== undefined) {
@@ -370,12 +331,9 @@ const DomainIdentity = () => {
                 } else if (dkimData.status === 'Verified') {
                     isVerified = true;
                 } else if (response.data.success || response.data.code === 200) {
-                    // If API returns success but doesn't specify status, assume it's verified
                     isVerified = true;
                 }
                 
-                // IMPORTANT: This line was commented out in the original code
-                // Now we're setting the DKIM status based on verification
                 setDomainSettings(prev => ({
                     ...prev,
                     dkimRecords: records,
@@ -384,11 +342,6 @@ const DomainIdentity = () => {
             }
         } catch (error) {
             console.error('Error getting DKIM records:', error);
-            createNotification({
-                message: 'Error retrieving DKIM records: ' + (error.response?.data?.message || error.message),
-                type: 'warning',
-                autoClose: 3000
-            });
         }
     }
     
@@ -400,26 +353,20 @@ const DomainIdentity = () => {
                 user.jwt
             )
             
-            console.log('Email status response:', response.data)
-            
             if (response.data) {
                 const emailData = response.data.data || response.data;
                 
-                // Improved verification check with multiple paths
                 let isVerified = false;
                 let emailAddress = '';
                 
                 if (emailData) {
-                    // Try to get the email address
                     emailAddress = emailData.email || '';
                     
-                    // Check verification status in different possible locations
                     if (emailData.verified !== undefined) {
                         isVerified = emailData.verified;
                     } else if (emailData.status === 'Verified') {
                         isVerified = true;
                     } else if (response.data.success || response.data.code === 200) {
-                        // If API returns success but doesn't specify status, assume it's verified
                         isVerified = true;
                     }
                 }
@@ -481,7 +428,6 @@ const DomainIdentity = () => {
         
         fetchDomainData();
         
-        // Cleanup function
         return () => {
             isMounted = false;
         };
@@ -489,33 +435,43 @@ const DomainIdentity = () => {
 
     return (
         <div className="domain-identity-container">
-                <h3 className="section-title">Sending domain & identity</h3>
+            
+                <h3 className="section-title">Sending domain</h3>
                 
-                {/* Moved verification badge above input */}
-                {domainSettings.domainStatus === 'VERIFIED' && (
-                    <div className="verification-badge-container">
-                        <VerificationBadge isVerified={true} />
+                <div className="domain-content">
+                    <div className="input-section">
+                        <InputText
+                            placeholder="Sending domain"
+                            value={domainSettings.sendingDomain}
+                            onChange={(e) => setDomainSettings({...domainSettings, sendingDomain: e.target.value})}
+                            disabled={domainSettings.domainStatus !== null}
+                        />
                     </div>
-                )}
-                
-                {domainSettings.domainStatus === 'PENDING' && (
-                    <div className="verification-badge-container">
-                        <VerificationBadge isVerified={false} />
+                    
+                    <div className="verification-status">
+                        {domainSettings.domainStatus && (
+                            <VerificationBadge isVerified={domainSettings.domainStatus === 'VERIFIED'} />
+                        )}
                     </div>
-                )}
-                
-                <div className="input-section">
-                    <InputText
-                        placeholder="Sending domain"
-                        value={domainSettings.sendingDomain}
-                        onChange={(e) => setDomainSettings({...domainSettings, sendingDomain: e.target.value})}
-                        disabled={domainSettings.domainStatus !== null}
-                    />
+                    
+                    {!domainSettings.domainStatus && (
+                        <div className="action-buttons">
+                            <Button 
+                                type="primary" 
+                                onClick={handleAddDomain} 
+                                loading={domainSettings.isAddingDomain}
+                            >
+                                Add Domain
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 
                 {domainSettings.domainStatus === 'PENDING' && (
-                    <div className="info-text mt-10">
-                        <p>Please make sure you have added the following (TXT) DNS record in order to verify your identity</p>
+                    <div className="verification-instructions">
+                        <div className="info-text">
+                            <p>Please add the following TXT record to your domain's DNS settings to verify ownership:</p>
+                        </div>
                         
                         <div className="record-group">
                             <div className="record-item">
@@ -530,31 +486,14 @@ const DomainIdentity = () => {
                     </div>
                 )}
                 
-                <div className="info-text">
-                    <p>Add your domain to verify ownership and enable email sending. You'll need access to modify your domain's DNS records.</p>
-                </div>
-                
-                {!domainSettings.domainStatus && (
-                    <div className="action-buttons">
-                        <Button 
-                            type="primary" 
-                            onClick={handleAddDomain} 
-                            loading={domainSettings.isAddingDomain}
-                        >
-                            Add Domain
-                        </Button>
-                    </div>
-                )}
-                
-                {/* Optional debug button that can be added for troubleshooting */}
                 {domainSettings.domainStatus === 'VERIFIED' && (
-                    <div className="debug-buttons" style={{ marginTop: '10px', textAlign: 'right' }}>
+                    <div className="refresh-button">
                         <Button 
                             type="secondary" 
-                            onClick={forceCheckAllVerificationStatuses} 
-                            style={{ fontSize: '12px', padding: '5px 10px' }}
+                            onClick={forceCheckAllVerificationStatuses}
+                            size="small"
                         >
-                            Refresh Status
+                            <Icon name="Refresh" size={14} /> Refresh Status
                         </Button>
                     </div>
                 )}
@@ -562,11 +501,18 @@ const DomainIdentity = () => {
             
             {domainSettings.domainStatus && (
                 <>
-                    <Card className="dkim-section">
+                    
                         <h3 className="section-title">DKIM Verification for domain {domainSettings.sendingDomain}</h3>
                         
+                        <div className="verification-status">
+                            <div className="status-label">Status:</div>
+                            <div className={`status-value ${domainSettings.dkimStatus === 'VERIFIED' ? 'verified' : 'pending'}`}>
+                                {domainSettings.dkimStatus === 'VERIFIED' ? 'Verified' : 'Pending verification'}
+                            </div>
+                        </div>
+                        
                         <div className="info-text">
-                            <p>You will need to add these CNAME records to make sure your mail is not marked as spam.</p>
+                            <p>Add these CNAME records to your domain's DNS settings to ensure your emails are not marked as spam:</p>
                         </div>
                         
                         {domainSettings.dkimRecords && domainSettings.dkimRecords.length > 0 && (
@@ -587,13 +533,7 @@ const DomainIdentity = () => {
                             </div>
                         )}
                         
-                        <div className="dkim-status">
-                            DKIM Verification status <span className={`status-${domainSettings.dkimStatus === 'VERIFIED' ? 'verified' : 'pending'}`}>
-                                {domainSettings.dkimStatus === 'VERIFIED' ? 'Verified' : 'Pending verification'}
-                            </span>
-                        </div>
-                        
-                        <div className="verification-buttons mt-20">
+                        <div className="verification-buttons">
                             <Button 
                                 type="secondary" 
                                 onClick={handleVerifyDomainDkim} 
@@ -602,49 +542,50 @@ const DomainIdentity = () => {
                                 Verify DKIM
                             </Button>
                         </div>
-                    </Card>
                     
-                    <Card className="email-section">
+                    
+                    
                         <h3 className="section-title">Sending email</h3>
                         
-                        <div className="input-section">
-                            <InputText
-                                placeholder={`Enter email (must use @${domainSettings.sendingDomain})`}
-                                value={domainSettings.sendingEmail}
-                                onChange={(e) => setDomainSettings({...domainSettings, sendingEmail: e.target.value})}
-                            />
-                        </div>
-                        
-                        <div className="verification-badge-container">
-                            <VerificationBadge isVerified={domainSettings.emailStatus === 'VERIFIED'} />
-                        </div>
-                        
-                        <div className="verification-buttons mt-10">
-                            <Button 
-                                type="secondary" 
-                                onClick={handleAddEmail} 
-                                loading={domainSettings.isAddingEmail}
-                            >
-                                Save Email
-                            </Button>
-                            {domainSettings.emailStatus === 'PENDING' && (
+                        <div className="email-content">
+                            <div className="input-section">
+                                <InputText
+                                    placeholder={`Enter email (must use @${domainSettings.sendingDomain})`}
+                                    value={domainSettings.sendingEmail}
+                                    onChange={(e) => setDomainSettings({...domainSettings, sendingEmail: e.target.value})}
+                                />
+                            </div>
+                            
+                            <div className="verification-status">
+                                <VerificationBadge isVerified={domainSettings.emailStatus === 'VERIFIED'} />
+                                <div className="status-text">
+                                    Status: <span className={`${domainSettings.emailStatus === 'VERIFIED' ? 'verified' : 'pending'}`}>
+                                        {domainSettings.emailStatus === 'VERIFIED' ? 'Verified' : 'Pending verification'}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div className="verification-buttons">
                                 <Button 
                                     type="secondary" 
-                                    onClick={handleVerifyEmail} 
-                                    loading={domainSettings.isVerifyingEmail}
-                                    className="ml-10"
+                                    onClick={handleAddEmail} 
+                                    loading={domainSettings.isAddingEmail}
                                 >
-                                    Verify Email
+                                    Save Email
                                 </Button>
-                            )}
+                                {domainSettings.emailStatus === 'PENDING' && (
+                                    <Button 
+                                        type="secondary" 
+                                        onClick={handleVerifyEmail} 
+                                        loading={domainSettings.isVerifyingEmail}
+                                        className="ml-10"
+                                    >
+                                        Verify Email
+                                    </Button>
+                                )}
+                            </div>
                         </div>
-                        
-                        <div className="status-text">
-                            Status: <span className={`status-${domainSettings.emailStatus === 'VERIFIED' ? 'verified' : 'pending'}`}>
-                                {domainSettings.emailStatus === 'VERIFIED' ? 'Verified' : 'Pending verification'}
-                            </span>
-                        </div>
-                    </Card>
+                    
                 </>
             )}
         </div>
