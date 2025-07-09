@@ -80,6 +80,12 @@ const Stats = () => {
               Desktop: 54,
               Mobile: 35,
               Tablet: 11
+            },
+            emailClient: {
+              Gmail: '41%',
+              Outlook: '20%',
+              AppleMail: '15%',
+              Yahoo: '10%'
             }
           }
         })
@@ -94,12 +100,17 @@ const Stats = () => {
     fetchStatsData()
   }, [user])
 
+  const handleExport = () => {
+    // In a real implementation, this would trigger a CSV/PDF export
+    console.log('Exporting stats data...')
+  }
+
   if (loading) {
     return (
       <div className="fm-page-wrapper">
         <Sidemenu />
         <div className="fm-page-container">
-          <PageHeader />
+          <PageHeader user={user} account={account} />
           <div className="loading-container">
             <p>Loading stats data...</p>
           </div>
@@ -112,7 +123,7 @@ const Stats = () => {
     <div className="fm-page-wrapper">
       <Sidemenu />
       <div className="fm-page-container">
-        <PageHeader />
+        <PageHeader user={user} account={account} />
 
         {/* Header Section */}
         <div className="figma-stats-header">
@@ -141,7 +152,7 @@ const Stats = () => {
               type="secondary" 
               className="figma-export-btn" 
               icon="Export"
-              onClick={() => console.log('Export clicked')}
+              onClick={handleExport}
             >
               Export
             </Button>
@@ -155,18 +166,11 @@ const Stats = () => {
           </div>
           
           <div className={`figma-stats-row ${isMobile ? 'mobile-stats-row' : ''}`}>
-            <div className="figma-stat-item">
-              <Stat stats={subscriberStats} hasChart={true} defaultLabel="Total Active" />
-            </div>
-            <div className="figma-stat-item">
-              <Stat stats={subscriberStats} hasChart={true} defaultLabel="Unsubscribed" />
-            </div>
-            <div className="figma-stat-item">
-              <Stat stats={subscriberStats} hasChart={true} defaultLabel="New Today" />
-            </div>
-            <div className="figma-stat-item">
-              <Stat stats={subscriberStats} hasChart={true} defaultLabel="New this Month" />
-            </div>
+            {subscriberStats.map((stat, index) => (
+              <div className="figma-stat-item" key={index}>
+                <Stat stats={subscriberStats} hasChart={true} defaultLabel={stat.label} />
+              </div>
+            ))}
           </div>
           
           <div className="figma-chart-area">
@@ -181,18 +185,11 @@ const Stats = () => {
           </div>
           
           <div className={`figma-stats-row ${isMobile ? 'mobile-stats-row' : ''}`}>
-            <div className="figma-stat-item">
-              <Stat stats={campaignStats} hasChart={true} defaultLabel="Emails Sent" />
-            </div>
-            <div className="figma-stat-item">
-              <Stat stats={campaignStats} hasChart={true} defaultLabel="Total Clicks" />
-            </div>
-            <div className="figma-stat-item">
-              <Stat stats={campaignStats} hasChart={true} defaultLabel="Total Opens" />
-            </div>
-            <div className="figma-stat-item">
-              <Stat stats={campaignStats} hasChart={true} defaultLabel="Spams/Complaints" />
-            </div>
+            {campaignStats.map((stat, index) => (
+              <div className="figma-stat-item" key={index}>
+                <Stat stats={campaignStats} hasChart={true} defaultLabel={stat.label} />
+              </div>
+            ))}
           </div>
           
           <div className="figma-chart-area">

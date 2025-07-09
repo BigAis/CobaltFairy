@@ -31,14 +31,8 @@ const Dashboard = () => {
 	const [isLoading, setIsLoading] = useState(true)
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 	
-	// Set needsOnboarding to false by default
-	const [needsOnboarding, setNeedsOnboarding] = useState(false)
-	const [showOnboarding, setShowOnboarding] = useState(false)
-	
-	// For development only - button to toggle onboarding visibility
-	const toggleOnboarding = () => {
-		setShowOnboarding(prev => !prev)
-	}
+	// State to control onboarding visibility
+	const [showOnboarding, setShowOnboarding] = useState(true)
   
 	// Chart data and options
 	const isPositive = true
@@ -128,9 +122,6 @@ const Dashboard = () => {
 			  setLatestCampaigns(resp.data.data)
 			}
 			
-			// In the future, we'll read the onboarding status from account data
-			// setNeedsOnboarding(account.needsOnboarding || false)
-			
 			return true // Success
 		  } catch (error) {
 			console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error)
@@ -155,12 +146,16 @@ const Dashboard = () => {
 		setIsLoading(false);
 	};
 
+	// Toggle the onboarding guide visibility
+	const toggleOnboarding = () => {
+		setShowOnboarding(prev => !prev);
+	}
+
 	const handleSetupComplete = () => {
 		// Mark onboarding as completed
-		setNeedsOnboarding(false)
 		setShowOnboarding(false)
 		
-		// In the future, this will send an API request to update the account status
+		// Notify user
 		createNotification({
 			message: 'Setup completed! You\'re all set to start using FairyMail.',
 			type: 'default',
@@ -224,7 +219,6 @@ const Dashboard = () => {
 					<Card className="dashboard-stats">
 						<div style={{ textAlign: 'center', padding: '20px' }}>
 							<p>Loading dashboard data...</p>
-							{/* You could add a spinner here */}
 						</div>
 					</Card>
 				</div>
@@ -233,166 +227,161 @@ const Dashboard = () => {
 	}
 
 	return (
-		<>
-			{/* DEV ONLY: Button to toggle onboarding visibility for testing */}
-			<div style={{ position: 'fixed', top: '10px', right: '10px', zIndex: 2000 }}>
-				<Button 
-					type="secondary" 
-					onClick={toggleOnboarding}
-					style={{ fontSize: '12px', padding: '5px 10px' }}
-				>
-					{showOnboarding ? "Hide Onboarding" : "Show Onboarding"} (DEV)
-				</Button>
-			</div>
-			
-			{/* Show onboarding as an overlay when needed, but don't block dashboard rendering */}
-			{showOnboarding && (
-				<OnboardingGuide 
-					onSetupComplete={handleSetupComplete} 
-					onClose={() => setShowOnboarding(false)}
-				/>
-			)}
-			
-			<div className="dashboard-wrapper">
-				<Sidemenu />
-				<div className="dashboard-container">
-					<PageHeader />
-					<div className="page-name-container">
-						<div className="page-name">Dashboard <small style={{fontSize:'14px',letterSpacing: '.2em'}}>v{APP_VERSION}</small></div>
-					</div>
-					
-					<Card className="dashboard-stats">
-						<div className="stats-head">
-							<span className="stats-title">Campaigns</span>
-							<ButtonGroup
-								value="d7"
-								options={[
-									{ value: 'today', label: 'Today' },
-									{ value: 'd7', label: '7 Days' },
-									{ value: 'd30', label: '30 Days' },
-									{ value: 'all', label: 'All' },
-								]}
-								onChange={(value) => {
-									setStatsKey(value)
-								}}
-							></ButtonGroup>
-						</div>
-						<div>
-							<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
-								{stats && (
-									<>
-										<Stat stats={stats} hasChart={true} defaultLabel={'Emails Sent'} />
-										<Stat stats={stats} hasChart={true} defaultLabel={'Total Clicks'} />
-										<Stat stats={stats} hasChart={true} defaultLabel={'Total Opens'} />
-										<Stat stats={stats} hasChart={true} defaultLabel={'Spam'} />
-									</>
-								)}
-							</div>
-						</div>
-					</Card>
-					<div className={`dashboard-ctas ${isMobile ? 'mobile-ctas' : ''}`}>
-					<Button type={'secondary'} onClick={() => {
-					if (isMobile) {
-						PopupText.fire({
-						icon: 'info',
-						text: 'You can create a campaign on mobile, but the campaign editor is not available. You will be able to set up campaign details and review, but design editing requires a desktop device.',
-						showCancelButton: false,
-						confirmButtonText: 'Continue',
-						}).then(() => {
-						navigate('/campaigns/new');
-						});
-					} else {
-						navigate('/campaigns/new');
-					}
-					}}>
-					<Icon name="Campaigns" />
-					<span>Create Campaign</span>
+		<div className="dashboard-wrapper">
+			<Sidemenu />
+			<div className="dashboard-container">
+				<PageHeader />
+				<div className="page-name-container">
+					<div className="page-name">Dashboard <small style={{fontSize:'14px',letterSpacing: '.2em'}}>v{APP_VERSION}</small></div>
+					<Button
+						type="secondary"
+						onClick={toggleOnboarding}
+					>
+						{showOnboarding ? "Hide Setup Guide" : "Show Setup Guide"}
 					</Button>
-						<Button type={'secondary'} onClick={()=>{
-							navigate('/subscribers/import')
-						}}>
-							<Icon name="Contacts" />
-							<span>Import Contacts</span>
-						</Button>
-						<Button type={'secondary'} onClick={() => {
-							if (isMobile) {
-							PopupText.fire({
-								icon: 'warning',
-								text: 'Automation editor is not available on mobile devices. Please use a desktop to design your automations.',
-								showCancelButton: false,
-								confirmButtonText: 'OK',
-							});
-							} else {
-							navigate('/automations/new');
-							}
-						}}>
-							<Icon name="Automations" />
-							<span>Create Automation</span>
-						</Button>
-					</div>
-					<div className={`columns-2 ${isMobile ? 'mobile-columns' : ''}`}>
-						<Card className="subscribers-stats">
+				</div>
+				
+				{/* Conditionally render either onboarding guide or regular dashboard */}
+				{showOnboarding ? (
+					<OnboardingGuide 
+						onSetupComplete={handleSetupComplete} 
+						onClose={() => setShowOnboarding(false)}
+					/>
+				) : (
+					<>
+						<Card className="dashboard-stats">
 							<div className="stats-head">
-								<span className="stats-title">Subscribers</span>
+								<span className="stats-title">Campaigns</span>
 								<ButtonGroup
-									value="today"
+									value="d7"
 									options={[
 										{ value: 'today', label: 'Today' },
 										{ value: 'd7', label: '7 Days' },
+										{ value: 'd30', label: '30 Days' },
 										{ value: 'all', label: 'All' },
 									]}
 									onChange={(value) => {
-										setSubsStatsKey(value)
+										setStatsKey(value)
 									}}
 								></ButtonGroup>
 							</div>
-							<br></br>
-							<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
-								{subsStats && (
-									<>
-										<div>
-											<Stat stats={subsStats} hasChart={false} defaultLabel={'Total'} />
-										</div>
-										<div>
-											<Stat stats={subsStats} hasChart={false} defaultLabel={'Unsubscribed'} />
-										</div>
-									</>
-								)}
+							<div>
+								<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
+									{stats && (
+										<>
+											<Stat stats={stats} hasChart={true} defaultLabel={'Emails Sent'} />
+											<Stat stats={stats} hasChart={true} defaultLabel={'Total Clicks'} />
+											<Stat stats={stats} hasChart={true} defaultLabel={'Total Opens'} />
+											<Stat stats={stats} hasChart={true} defaultLabel={'Spam'} />
+										</>
+									)}
+								</div>
 							</div>
-							<br></br>
-							<div style={{ height: isMobile ? '200px' : '350px' }}>
-								<DashboardChart isPositive={true} />
-							</div>
-							<br></br>
-							<Button
-								type={'secondary'}
-								onClick={() => {
-									navigate('/subscribers')
-								}}
-							>
-								All Subscribers
-							</Button>
 						</Card>
-						<Card className="subscribers-stats latest-campaigns-card">
-							<div className="stats-head">
-								<span className="stats-title">Latest Campaigns</span>
-							</div>
-							<br></br>
-							<CampaignsTable campaigns={latestCampaigns.filter((campaign) => campaign.status === 'sent')} dashboardPreviewOnly={true} />
-							<br></br>
-							<Button
-								type={'secondary'}
-								onClick={() => {
-									navigate('/campaigns')
-								}}
-							>
-								All Campaigns
+						<div className={`dashboard-ctas ${isMobile ? 'mobile-ctas' : ''}`}>
+						<Button type={'secondary'} onClick={() => {
+						if (isMobile) {
+							PopupText.fire({
+							icon: 'info',
+							text: 'You can create a campaign on mobile, but the campaign editor is not available. You will be able to set up campaign details and review, but design editing requires a desktop device.',
+							showCancelButton: false,
+							confirmButtonText: 'Continue',
+							}).then(() => {
+							navigate('/campaigns/new');
+							});
+						} else {
+							navigate('/campaigns/new');
+						}
+						}}>
+						<Icon name="Campaigns" />
+						<span>Create Campaign</span>
+						</Button>
+							<Button type={'secondary'} onClick={()=>{
+								navigate('/subscribers/import')
+							}}>
+								<Icon name="Contacts" />
+								<span>Import Contacts</span>
 							</Button>
-						</Card>
-					</div>
-				</div>
+							<Button type={'secondary'} onClick={() => {
+								if (isMobile) {
+								PopupText.fire({
+									icon: 'warning',
+									text: 'Automation editor is not available on mobile devices. Please use a desktop to design your automations.',
+									showCancelButton: false,
+									confirmButtonText: 'OK',
+								});
+								} else {
+								navigate('/automations/new');
+								}
+							}}>
+								<Icon name="Automations" />
+								<span>Create Automation</span>
+							</Button>
+						</div>
+						<div className={`columns-2 ${isMobile ? 'mobile-columns' : ''}`}>
+							<Card className="subscribers-stats">
+								<div className="stats-head">
+									<span className="stats-title">Subscribers</span>
+									<ButtonGroup
+										value="today"
+										options={[
+											{ value: 'today', label: 'Today' },
+											{ value: 'd7', label: '7 Days' },
+											{ value: 'all', label: 'All' },
+										]}
+										onChange={(value) => {
+											setSubsStatsKey(value)
+										}}
+									></ButtonGroup>
+								</div>
+								<br></br>
+								<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
+									{subsStats && (
+										<>
+											<div>
+												<Stat stats={subsStats} hasChart={false} defaultLabel={'Total'} />
+											</div>
+											<div>
+												<Stat stats={subsStats} hasChart={false} defaultLabel={'Unsubscribed'} />
+											</div>
+										</>
+									)}
+								</div>
+								<br></br>
+								<div style={{ height: isMobile ? '200px' : '350px' }}>
+									<DashboardChart isPositive={true} />
+								</div>
+								<br></br>
+								<Button
+									type={'secondary'}
+									onClick={() => {
+										navigate('/subscribers')
+									}}
+								>
+									All Subscribers
+								</Button>
+							</Card>
+							<Card className="subscribers-stats latest-campaigns-card">
+								<div className="stats-head">
+									<span className="stats-title">Latest Campaigns</span>
+								</div>
+								<br></br>
+								<CampaignsTable campaigns={latestCampaigns.filter((campaign) => campaign.status === 'sent')} dashboardPreviewOnly={true} />
+								<br></br>
+								<Button
+									type={'secondary'}
+									onClick={() => {
+										navigate('/campaigns')
+									}}
+								>
+									All Campaigns
+								</Button>
+							</Card>
+						</div>
+					</>
+				)}
 			</div>
-		</>
+		</div>
 	)
 }
 
