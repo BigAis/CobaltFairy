@@ -489,7 +489,6 @@ const DomainIdentity = () => {
 
     return (
         <div className="domain-identity-container">
-            <Card className="domain-section">
                 <h3 className="section-title">Sending domain & identity</h3>
                 
                 {/* Moved verification badge above input */}
@@ -559,7 +558,7 @@ const DomainIdentity = () => {
                         </Button>
                     </div>
                 )}
-            </Card>
+            
             
             {domainSettings.domainStatus && (
                 <>

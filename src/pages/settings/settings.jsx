@@ -475,9 +475,8 @@ const Settings = () => {
                         />
                     </div>
                     
-                    <Card className="settings-content-card">
-                        {renderTabContent()}
-                    </Card>
+                     {renderTabContent()}
+                    
                 </div>
             </div>
         </>
