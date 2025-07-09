@@ -1,42 +1,25 @@
 .domain-identity-container {
     width: 100%;
+    text-align: left;
     
-    .domain-section,
-    .dkim-section,
-    .email-section {
-        background: rgba(255, 255, 255, 0.5);
-        border: 2px solid rgba(218, 209, 197, 1);
-        margin-bottom: 20px;
-        padding: 20px;
-        border-radius: 8px;
-        
-        .section-title {
-            font-family: 'Bitter', serif;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            text-align: left;
-        }
+    h3, p, div, span {
+        text-align: left;
     }
     
-    .domain-content,
+    .section-title {
+        font-family: 'Bitter', serif;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    
+    .domain-content, 
     .email-content {
-        display: flex;
-        flex-direction: column;
+        margin-bottom: 20px;
     }
     
     .input-section {
         margin-bottom: 15px;
-        
-        .input-text {
-            background: rgba(255, 255, 255, 0.5);
-            border: 2px solid rgba(218, 209, 197, 1);
-            
-            &:focus {
-                outline: none;
-                box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
-            }
-        }
     }
     
     .verification-status {
@@ -45,13 +28,11 @@
         margin: 15px 0;
         
         .status-label {
-            margin-right: 10px;
             font-weight: 500;
+            margin-right: 10px;
         }
         
         .status-value {
-            font-weight: 500;
-            
             &.verified {
                 color: #99EA0F;
             }
@@ -61,95 +42,41 @@
             }
         }
         
-        .verified-badge {
-            margin-right: 15px;
-        }
-        
         .status-text {
-            font-style: italic;
-            
             .verified {
                 color: #99EA0F;
-                font-weight: 500;
             }
             
             .pending {
                 color: #FFA600;
-                font-weight: 500;
             }
         }
     }
     
-    .verification-instructions {
-        background: rgba(255, 248, 239, 0.5);
-        border: 1px solid rgba(218, 209, 197, 0.5);
-        border-radius: 6px;
-        padding: 15px;
-        margin: 15px 0;
-    }
-    
     .info-text {
-        color: #666;
         margin: 15px 0;
-        text-align: left;
-        
-        p {
-            margin: 0;
-            font-size: 14px;
-            line-height: 1.5;
-        }
     }
     
     .record-group {
         margin-bottom: 20px;
         
         .record-heading {
-            text-align: left;
             margin-bottom: 10px;
             font-weight: 500;
         }
-        
-        .record-item {
-            display: flex;
-            margin-bottom: 10px;
-            
-            .record-label {
-                min-width: 80px;
-                text-align: left;
-                font-weight: 500;
-            }
-            
-            .record-value {
-                flex: 1;
-                text-align: left;
-                background-color: rgba(255, 255, 255, 0.5);
-                padding: 8px 15px;
-                border-radius: 5px;
-                border: 1px dashed #DAD1C5;
-                word-break: break-all;
-                font-family: monospace;
-                font-size: 14px;
-            }
-        }
     }
     
-    .action-buttons {
+    .record-item {
         display: flex;
-        justify-content: flex-start;
-        margin-top: 20px;
+        margin-bottom: 10px;
         
-        .btn {
-            min-width: 150px;
-            
-            &.btn-primary {
-                background-color: rgba(255, 195, 173, 0.5);
-                border: 2px solid #FF635D;
-                
-                &:hover {
-                    background-color: rgba(255, 195, 173, 0.75);
-                    box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
-                }
-            }
+        .record-label {
+            min-width: 80px;
+            font-weight: 500;
+        }
+        
+        .record-value {
+            flex: 1;
         }
     }
     
@@ -157,68 +84,30 @@
         display: flex;
         margin: 15px 0;
         
-        .btn {
-            background: rgba(255, 255, 255, 0.5);
-            border: 2px solid rgba(218, 209, 197, 1);
-            
-            &:hover {
-                background-color: rgba(255, 255, 255, 0.7);
-                box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
-            }
-            
-            &.loading {
-                cursor: not-allowed;
-            }
-        }
-        
         .ml-10 {
             margin-left: 10px;
         }
     }
     
-    .refresh-button {
-        display: flex;
-        justify-content: flex-end;
-        
-        .btn {
-            font-size: 12px;
-            padding: 5px 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-    }
-    
+    .verification-instructions,
+    .refresh-button,
+    .action-buttons,
     .dkim-records-container {
-        margin-bottom: 25px;
-        max-height: 300px;
-        overflow-y: auto;
-        border: 1px solid rgba(218, 209, 197, 0.5);
-        border-radius: 6px;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.3);
+        margin: 15px 0;
     }
 }
 
 @media (max-width: 768px) {
     .domain-identity-container {
-        .domain-section,
-        .dkim-section,
-        .email-section {
-            padding: 15px;
-            
-            .section-title {
-                font-size: 16px;
-            }
+        .section-title {
+            font-size: 16px;
         }
         
-        .record-group {
-            .record-item {
-                flex-direction: column;
-                
-                .record-label {
-                    margin-bottom: 5px;
-                }
+        .record-item {
+            flex-direction: column;
+            
+            .record-label {
+                margin-bottom: 5px;
             }
         }
         
