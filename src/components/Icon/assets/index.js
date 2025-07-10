@@ -39,8 +39,12 @@ import PlusCircle from './plus-circle.svg?react'
 import PlusLight from './PlusLight.svg?react'
 import Import from './import.svg?react'
 import Copy from './copy.svg?react'
-
 import Filters from './filters.svg?react'
+
+// Import the Group SVGs
+import Group44 from './Group-44.svg?react'
+import Group45 from './Group-45.svg?react'
+import Group46 from './Group-46.svg?react'
 
 const icons = {
 	AlignCenter,
@@ -84,6 +88,10 @@ const icons = {
 	CloseCircle,
 	PlusCircle,
 	Copy,
+	// Add the Group SVGs to the icons object
+	Group44,
+	Group45,
+	Group46
 }
 
 export default icons

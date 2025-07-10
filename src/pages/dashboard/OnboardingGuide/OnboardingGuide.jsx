@@ -1,12 +1,10 @@
 import React, { useState } from 'react'
 import './OnboardingGuide.scss'
 import { useNavigate } from 'react-router-dom'
-import { ApiService } from '../../../service/api-service'
 import { useAccount } from '../../../context/AccountContext'
 import Card from '../../../components/Card'
 import Button from '../../../components/Button'
 import Icon from '../../../components/Icon/Icon'
-import InputText from '../../../components/InputText/InputText'
 
 const OnboardingGuide = ({ onSetupComplete, onClose }) => {
   const { user, account, createNotification } = useAccount()
@@ -19,10 +17,7 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
       description: 'Vivamus commodo nunc et metus sagittis, at malesuada erat scelerisque. Vestibulum volutpat sodales volutpat. Vestibulum posuere vulputate posuere. Morbi ultrices velit auctor, venenatis neque vel.',
       action: 'Set up sender',
       actionLink: '/settings/sender',
-      preview: {
-        type: 'input',
-        placeholder: 'hi@fairymail.gr'
-      }
+      iconName: 'Group45'
     },
     { 
       id: 2, 
@@ -35,12 +30,7 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
         label: 'Migrate from Mailchimp',
         link: '/subscribers/import'
       },
-      preview: {
-        type: 'importBox',
-        title: 'Import Subscribers',
-        subtitle: 'Import 156 subscribers',
-        button: 'Continue with Mailchimp'
-      }
+      iconName: 'Group46'
     },
     { 
       id: 3, 
@@ -49,12 +39,7 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
       description: 'Vivamus commodo nunc et metus sagittis, at malesuada erat scelerisque. Vestibulum volutpat sodales volutpat. Vestibulum posuere vulputate posuere. Morbi ultrices velit auctor, venenatis neque vel.',
       action: 'Create Campaign',
       actionLink: '/campaigns/new',
-      preview: {
-        type: 'emailPreview',
-        sender: 'Sender',
-        subject: 'Subject goes here',
-        preheader: 'Your email preheader will appear here.'
-      }
+      iconName: 'Group44'
     }
   ])
 
@@ -65,15 +50,8 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
     )
     setSteps(updatedSteps)
 
-    // In the future, this will send an API request to update the account setup status
     try {
       if (user && user.jwt) {
-        // This is commented out as we're using state-only approach for now
-        // await ApiService.post('fairymailer/update-account-setup', {
-        //   step: stepId,
-        //   completed: true,
-        //   setupDate: new Date().toISOString()
-        // }, user.jwt)
         console.log(`Step ${stepId} marked as completed (would be saved to API in production)`)
       }
     } catch (error) {
@@ -97,64 +75,6 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
   const handleStepAction = (stepId, link) => {
     navigate(link)
     completeStep(stepId)
-  }
-
-  const renderStepPreview = (preview) => {
-    switch (preview.type) {
-      case 'input':
-        return (
-          <div className="step-preview input-preview">
-            <div className="input-container">
-              <InputText
-                value={preview.placeholder}
-                onChange={() => {}}
-                placeholder={preview.placeholder}
-                className="sender-input"
-              />
-              <div className="cursor-pointer"></div>
-            </div>
-          </div>
-        )
-      case 'importBox':
-        return (
-          <div className="step-preview import-preview">
-            <Card className="import-box">
-              <div className="import-header">
-                <h3>{preview.title}</h3>
-              </div>
-              <p>{preview.subtitle}</p>
-              <Button 
-                type="secondary" 
-                className="mailchimp-button"
-                onClick={() => {}}
-              >
-                <span className="mailchimp-icon">ᛙ</span> {preview.button}
-              </Button>
-            </Card>
-          </div>
-        )
-      case 'emailPreview':
-        return (
-          <div className="step-preview email-preview">
-            <div className="preview-label">
-              <Icon name="Email" size={12} /> Inbox Preview
-            </div>
-            <Card className="email-box">
-              <div className="email-header-preview"></div>
-              <div className="email-content-preview">
-                <div className="sender-info">
-                  <div className="sender-label">Sender</div>
-                  <div className="subject-line">{preview.subject}</div>
-                  <div className="preheader">{preview.preheader}</div>
-                </div>
-                <div className="email-body-preview"></div>
-              </div>
-            </Card>
-          </div>
-        )
-      default:
-        return null
-    }
   }
 
   return (
@@ -204,7 +124,9 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
             </div>
             
             <div className="step-preview-container">
-              {renderStepPreview(step.preview)}
+              <div className="step-icon-preview">
+                <Icon name={step.iconName} size={140} />
+              </div>
             </div>
           </div>
         ))}
