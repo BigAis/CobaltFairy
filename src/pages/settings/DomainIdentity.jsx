@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import Card from '../../components/Card'
 import Button from '../../components/Button'
 import InputText from '../../components/InputText/InputText'
 import VerificationBadge from '../../components/VerificationBadge'
@@ -445,6 +444,7 @@ const DomainIdentity = () => {
                             value={domainSettings.sendingDomain}
                             onChange={(e) => setDomainSettings({...domainSettings, sendingDomain: e.target.value})}
                             disabled={domainSettings.domainStatus !== null}
+                            className="centered-input"
                         />
                     </div>
                     
@@ -506,9 +506,7 @@ const DomainIdentity = () => {
                         
                         <div className="verification-status">
                             <div className="status-label">Status:</div>
-                            <div className={`status-value ${domainSettings.dkimStatus === 'VERIFIED' ? 'verified' : 'pending'}`}>
-                                {domainSettings.dkimStatus === 'VERIFIED' ? 'Verified' : 'Pending verification'}
-                            </div>
+                            <VerificationBadge isVerified={domainSettings.dkimStatus === 'VERIFIED'} />
                         </div>
                         
                         <div className="info-text">
@@ -553,16 +551,12 @@ const DomainIdentity = () => {
                                     placeholder={`Enter email (must use @${domainSettings.sendingDomain})`}
                                     value={domainSettings.sendingEmail}
                                     onChange={(e) => setDomainSettings({...domainSettings, sendingEmail: e.target.value})}
+                                    className="centered-input"
                                 />
                             </div>
                             
                             <div className="verification-status">
                                 <VerificationBadge isVerified={domainSettings.emailStatus === 'VERIFIED'} />
-                                <div className="status-text">
-                                    Status: <span className={`${domainSettings.emailStatus === 'VERIFIED' ? 'verified' : 'pending'}`}>
-                                        {domainSettings.emailStatus === 'VERIFIED' ? 'Verified' : 'Pending verification'}
-                                    </span>
-                                </div>
                             </div>
                             
                             <div className="verification-buttons">

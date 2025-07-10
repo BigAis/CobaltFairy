@@ -20,6 +20,40 @@
     
     .input-section {
         margin-bottom: 15px;
+        
+        /* Improved styles for InputText */
+        .input-text-wrapper {
+            width: 100%;
+            
+            .input-text {
+                width: 100%;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                padding: 0 18px;
+                
+                &::placeholder {
+                    opacity: 1;
+                    line-height: normal;
+                    vertical-align: middle;
+                }
+            }
+            
+            .floating-label {
+                display: flex;
+                align-items: center;
+            }
+        }
+        
+        /* Specific style for centered inputs */
+        .centered-input {
+            .input-text {
+                display: flex;
+                align-items: center;
+                padding: 0 18px !important;
+                height: 50px;
+            }
+        }
     }
     
     .verification-status {
@@ -30,31 +64,72 @@
         .status-label {
             font-weight: 500;
             margin-right: 10px;
+            display: flex;
+            align-items: center;
+            height: 36px; /* Match badge height */
         }
         
         .status-value {
+            display: flex;
+            align-items: center;
+            height: 36px;
+            
             &.verified {
-                color: #99EA0F;
+                color: rgba(153, 234, 15, 1);
             }
             
             &.pending {
-                color: #FFA600;
+                color: rgba(255, 166, 0, 1);
             }
         }
         
-        .status-text {
-            .verified {
-                color: #99EA0F;
+        /* Ensure consistent styling for verification badges */
+        .verified-badge {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgb(218, 209, 197);
+            padding: 0 15px;
+            border-radius: 49px;
+            min-width: 120px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            p {
+                margin: 0;
+                line-height: 1;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
             }
             
-            .pending {
-                color: #FFA600;
+            .badge {
+                border-radius: 50%;
+                width: 14px;
+                height: 14px;
+                margin-right: 10px;
+                flex-shrink: 0;
+            }
+            
+            .badge-unverified {
+                background: rgba(255, 166, 0, 1);
+            }
+            
+            .badge-verified {
+                background: rgba(153, 234, 15, 1);
             }
         }
     }
     
     .info-text {
         margin: 15px 0;
+        
+        p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
     }
     
     .record-group {
@@ -73,16 +148,39 @@
         .record-label {
             min-width: 80px;
             font-weight: 500;
+            display: flex;
+            align-items: center;
         }
         
         .record-value {
             flex: 1;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px dashed #DAD1C5;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            min-height: 36px; /* Match other elements height */
         }
     }
     
     .verification-buttons {
         display: flex;
         margin: 15px 0;
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            
+            &.loading {
+                cursor: not-allowed;
+            }
+        }
         
         .ml-10 {
             margin-left: 10px;
@@ -95,8 +193,32 @@
     .dkim-records-container {
         margin: 15px 0;
     }
+    
+    /* Ensure buttons have consistent height and alignment */
+    .action-buttons {
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+        }
+    }
+    
+    /* Improve refresh button styling */
+    .refresh-button {
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            svg {
+                margin-right: 5px;
+            }
+        }
+    }
 }
 
+/* Handle mobile responsiveness */
 @media (max-width: 768px) {
     .domain-identity-container {
         .section-title {
@@ -109,6 +231,10 @@
             .record-label {
                 margin-bottom: 5px;
             }
+            
+            .record-value {
+                width: 100%;
+            }
         }
         
         .verification-buttons {
@@ -116,6 +242,7 @@
             
             .btn {
                 margin-bottom: 10px;
+                width: 100%;
             }
             
             .ml-10 {
