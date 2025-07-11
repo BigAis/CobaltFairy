@@ -126,7 +126,7 @@ const createImageString = (imageConfig,isAboutTheBookImage=false,accountContext,
     
   let linkURL = imageConfig.linkURL;
   if(linkURL && accountContext?.account && proxyLink){
-    if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+    if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com') && !linkURL.includes('amazon.ca') && !linkURL.includes('amazon.co.uk') && !linkURL.includes('amazon.com.au')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
   }
   return `<div ${imageConfig.contentStyleConfig.mobile ? `class="${imageConfig.contentStyleConfig.className}"` : ""} 
   style="${imageConfig.contentStyleConfig.desktop}">
@@ -150,7 +150,7 @@ const createButtonString = (buttonBlock,accountContext,proxyLink) => {
   let linkURL = buttonBlock.linkURL;
   const linkdomain = accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? `https://link-${accountContext?.account?.sending_identity?.domain}/` : `https://link.${accountContext?.account?.sending_identity?.domain}/`;
   if(linkURL && accountContext?.account && proxyLink){
-    if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+    if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com') && !linkURL.includes('amazon.ca') && !linkURL.includes('amazon.co.uk') && !linkURL.includes('amazon.com.au')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
   }
   return `<div ${buttonBlock.contentStyleConfig.mobile ? `class="${buttonBlock.contentStyleConfig.className}"` : ""} 
   style="${buttonBlock.contentStyleConfig.desktop}">
@@ -176,7 +176,7 @@ const createSocialLinkString = (socialLinkBlock,accountContext,proxyLink) => {
       const { image, title, link } = socialLinkItem;
         let linkURL = link;
         if(linkURL && accountContext?.account && proxyLink){
-          if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+          if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com') && !linkURL.includes('amazon.ca') && !linkURL.includes('amazon.co.uk') && !linkURL.includes('amazon.com.au')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
         }
       // Check if imageWidth exists on the item or use from parent
         const imageWidth = socialLinkItem.imageWidth || socialLinkBlock.imageWidth || 32;
@@ -242,7 +242,7 @@ const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=fals
       // Add the image with proper float for text wrapping
       let linkURL = item.linkURL;
       if(linkURL && accountContext?.account && proxyLink){
-        if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+        if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com') && !linkURL.includes('amazon.ca') && !linkURL.includes('amazon.co.uk') && !linkURL.includes('amazon.com.au')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
       }
       if (item.src) {
         const floatStyle = useVerticalLayout ? 

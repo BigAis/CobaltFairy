@@ -37,7 +37,11 @@ const Link = ({ modifyText, setTextContent }) => {
 		}
 
 		if (rangeIsLink) {
-			range.commonAncestorContainer.parentNode.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
+			if(!value.includes('amazon.com') && !value.includes('amazon.com.au') && !value.includes('amazon.co.uk') && !value.includes('amazon.ca')){
+				range.commonAncestorContainer.parentNode.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
+			}else{
+				range.commonAncestorContainer.parentNode.href = value
+			}
 		} else {
 			try {
 				// Check if the range can be surrounded
@@ -53,7 +57,11 @@ const Link = ({ modifyText, setTextContent }) => {
 				let link = document.createElement('a')
 				link.target = '_blank'
 				// link.href = `https://link.${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
-				link.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
+				if(!value.includes('amazon.com') && !value.includes('amazon.com.au') && !value.includes('amazon.co.uk') && !value.includes('amazon.ca')){
+					link.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
+				}else{
+					link.href = value
+				}
 				if (bodySettings.styles.linkColor) link.style = `color:${bodySettings.styles.linkColor}`
 
 				// Use a more robust approach for creating links
@@ -66,7 +74,11 @@ const Link = ({ modifyText, setTextContent }) => {
 						const selectedText = range.toString()
 						const linkElement = document.createElement('a')
 						linkElement.target = '_blank'
-						linkElement.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
+						if(!value.includes('amazon.com') && !value.includes('amazon.com.au') && !value.includes('amazon.co.uk') && !value.includes('amazon.ca')){
+							linkElement.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
+						}else{
+							linkElement.href = value
+						}
 						if (bodySettings.styles.linkColor) linkElement.style = `color:${bodySettings.styles.linkColor}`
 						linkElement.textContent = selectedText
 
@@ -78,7 +90,11 @@ const Link = ({ modifyText, setTextContent }) => {
 					// If no text is selected, insert the link at cursor position
 					const linkElement = document.createElement('a')
 					linkElement.target = '_blank'
-					linkElement.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
+					if(!value.includes('amazon.com') && !value.includes('amazon.com.au') && !value.includes('amazon.co.uk') && !value.includes('amazon.ca')){
+						linkElement.href = `https://link${accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? '-':'.'}${accountContext?.account?.sending_identity?.domain}/?url=${window.encodeURIComponent(value)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`
+					}else{
+						linkElement.href = value
+					}
 					if (bodySettings.styles.linkColor) linkElement.style = `color:${bodySettings.styles.linkColor}`
 					linkElement.textContent = value
 					range.insertNode(linkElement)
