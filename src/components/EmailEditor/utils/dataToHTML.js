@@ -108,7 +108,7 @@ const parseItem = (item, index, styles, parentIndex) => {
   return newItem;
 }
 
-const createImageString = (imageConfig,isAboutTheBookImage=false,accountContext,isPreview) => {
+const createImageString = (imageConfig,isAboutTheBookImage=false,accountContext,proxyLink=false) => {
   const linkdomain = accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? `https://link-${accountContext?.account?.sending_identity?.domain}/` : `https://link.${accountContext?.account?.sending_identity?.domain}/`;
 
   // Add the width check for float behavior
@@ -125,8 +125,8 @@ const createImageString = (imageConfig,isAboutTheBookImage=false,accountContext,
       ${imageConfig.styleConfig.mobile ? `class="${imageConfig.styleConfig.className}"` : ""}/> `
     
   let linkURL = imageConfig.linkURL;
-  if(linkURL && accountContext?.account && isPreview){
-    if(!linkURL.includes(linkdomain)) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+  if(linkURL && accountContext?.account && proxyLink){
+    if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
   }
   return `<div ${imageConfig.contentStyleConfig.mobile ? `class="${imageConfig.contentStyleConfig.className}"` : ""} 
   style="${imageConfig.contentStyleConfig.desktop}">
@@ -146,11 +146,11 @@ const createHeaderString = (headerBlock) => {
   </${headerBlock.type}>`;
 };
 
-const createButtonString = (buttonBlock,accountContext,isPreview) => {
+const createButtonString = (buttonBlock,accountContext,proxyLink) => {
   let linkURL = buttonBlock.linkURL;
   const linkdomain = accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? `https://link-${accountContext?.account?.sending_identity?.domain}/` : `https://link.${accountContext?.account?.sending_identity?.domain}/`;
-  if(linkURL && accountContext?.account && isPreview){
-    if(!linkURL.includes(linkdomain)) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+  if(linkURL && accountContext?.account && proxyLink){
+    if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
   }
   return `<div ${buttonBlock.contentStyleConfig.mobile ? `class="${buttonBlock.contentStyleConfig.className}"` : ""} 
   style="${buttonBlock.contentStyleConfig.desktop}">
@@ -167,7 +167,7 @@ const createDividerString = (dividerBLock) => {
   </div>`;
 };
 
-const createSocialLinkString = (socialLinkBlock,accountContext,isPreview) => {
+const createSocialLinkString = (socialLinkBlock,accountContext,proxyLink) => {
   const linkdomain = accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? `https://link-${accountContext?.account?.sending_identity?.domain}/` : `https://link.${accountContext?.account?.sending_identity?.domain}/`;
   return `<div ${socialLinkBlock.contentStyleConfig.mobile ? `class="${socialLinkBlock.contentStyleConfig.className}"` : ""} 
   style="${socialLinkBlock.contentStyleConfig.desktop}">
@@ -175,8 +175,8 @@ const createSocialLinkString = (socialLinkBlock,accountContext,isPreview) => {
     .map((socialLinkItem) => {
       const { image, title, link } = socialLinkItem;
         let linkURL = link;
-        if(linkURL && accountContext?.account && isPreview){
-          if(!linkURL.includes(linkdomain)) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+        if(linkURL && accountContext?.account && proxyLink){
+          if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
         }
       // Check if imageWidth exists on the item or use from parent
         const imageWidth = socialLinkItem.imageWidth || socialLinkBlock.imageWidth || 32;
@@ -193,7 +193,7 @@ const createSocialLinkString = (socialLinkBlock,accountContext,isPreview) => {
   </div>`;
 };
 
-const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=false) => {
+const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=false, proxyLink=false) => {
   let content = "";
   const linkdomain = accountContext?.account?.sending_identity?.domain?.includes('cobaltfairy.com') ? `https://link-${accountContext?.account?.sending_identity?.domain}/` : `https://link.${accountContext?.account?.sending_identity?.domain}/`;
 
@@ -203,7 +203,7 @@ const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=fals
       style="${item.styleConfig.desktop};width:100%;display:block;">
         <table ${item.contentStyleConfig.mobile ? `class="${item.contentStyleConfig.className}"` : ""} 
         style="width:100%;max-width:${bodySettings.contentWidth}px;margin:0 auto;${item.contentStyleConfig.desktop}">
-      <tbody><tr>${blockListToHtml(item.children, bodySettings, accountContext, isPreview)}</tr></tbody>
+      <tbody><tr>${blockListToHtml(item.children, bodySettings, accountContext, isPreview, proxyLink)}</tr></tbody>
        </table></div>`;
     }
 
@@ -241,8 +241,8 @@ const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=fals
       
       // Add the image with proper float for text wrapping
       let linkURL = item.linkURL;
-      if(linkURL && accountContext?.account && isPreview){
-        if(!linkURL.includes(linkdomain)) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
+      if(linkURL && accountContext?.account && proxyLink){
+        if(!linkURL.includes(linkdomain) && !linkURL.includes('amazon.com')) linkURL = `${linkdomain}?url=${window.encodeURIComponent(linkURL)}/${window.encodeURIComponent(accountContext?.account?.sending_identity?.domain.startsWith('http')?accountContext?.account?.sending_identity?.domain:'https://'+accountContext?.account?.sending_identity?.domain)}`;
       }
       if (item.src) {
         const floatStyle = useVerticalLayout ? 
@@ -274,7 +274,7 @@ const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=fals
 
     if (item.key === "content") {
       content += `<td ${item.styleConfig.mobile ? `class="${item.styleConfig.className}"` : ""} 
-      style="width:${item.width}; ${item.styleConfig.desktop}">${blockListToHtml(item.children, bodySettings, accountContext, isPreview)}</td>`;
+      style="width:${item.width}; ${item.styleConfig.desktop}">${blockListToHtml(item.children, bodySettings, accountContext, isPreview, proxyLink)}</td>`;
     }
 
     if (item.key === "text") {
@@ -286,11 +286,11 @@ const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=fals
     }
 
     if (item.key === "image") {
-      content += createImageString(item,false,accountContext,isPreview);
+      content += createImageString(item,false,accountContext,proxyLink);
     }
 
     if (item.key === "button") {
-      content += createButtonString(item,accountContext,isPreview);
+      content += createButtonString(item,accountContext,proxyLink);
     }
 
     if (item.key === "divider") {
@@ -298,7 +298,7 @@ const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=fals
     }
 
     if (item.key === "social_link") {
-      content += createSocialLinkString(item,accountContext,isPreview);
+      content += createSocialLinkString(item,accountContext,proxyLink);
     }
     
     if (item.key === "about_the_book") {
@@ -332,7 +332,7 @@ const blockListToHtml = (blockList, bodySettings, accountContext, isPreview=fals
       
       // Create a container for the book content with clearfix
       content += `<div class="about-the-book-container" style="position: relative; display: block; width: 100%; overflow: hidden;">`;
-      content += createImageString(item.image,true,accountContext,isPreview);
+      content += createImageString(item.image,true,accountContext,proxyLink);
       content += createTextString(item.text);
       content += `</div>`;
     }
@@ -363,11 +363,11 @@ const extractUrls = (htmlText) => {
   const matches = htmlText.match(urlRegex)
   return [...new Set(matches)]
 }
-const dataToHtml = ({ bodySettings, blockList, isPreview=false, accountContext={} }) => {
+const dataToHtml = ({ bodySettings, blockList, isPreview=false, accountContext={}, proxyLink=false }) => {
   const fontList = extractFonts(blockList); //recursively itterate blocklist to export all fonts, and find the required urls to add.
   let content = "";
   const { newBlockList, styles } = createStyleTag(blockList);
-  content = blockListToHtml(newBlockList, bodySettings, accountContext, isPreview);
+  content = blockListToHtml(newBlockList, bodySettings, accountContext, isPreview, proxyLink);
   let links = extractUrls(content)
 
   // if (links)

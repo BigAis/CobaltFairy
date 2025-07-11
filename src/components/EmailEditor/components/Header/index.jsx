@@ -41,7 +41,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 	// console.log('currentCampaign',currentCampaign)
 	const saveCampaign = async (showConfirmationMsg = true) => {
 		if (editorRef && editorRef.current) {
-			const html = editorRef.current.exportHtmlPreview(['Inter:400,700'])
+			const html = editorRef.current.exportHtmlWithProxyLink(['Inter:400,700'])
 			const data = editorRef.current.exportData(['Inter:400,700'])
 			let updResp = await ApiService.post(`fairymailer/updateCampaign`, { assignses:true, data: { uuid: currentCampaign.uuid, design: JSON.stringify(data), html } }, user.jwt)
 			console.log('updresp', updResp)
@@ -70,7 +70,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 	const saveTemplate = async (showConfirmationMsg = true) => {
 		if (editorRef && editorRef.current) {
 			console.log('currentCampaign from saveTemplate is : ', currentCampaign)
-			const html = editorRef.current.exportHtmlPreview(['Inter:400,700'])
+			const html = editorRef.current.exportHtmlWithProxyLink(['Inter:400,700'])
 			const data = editorRef.current.exportData(['Inter:400,700'])
 			// let updResp = await ApiService.put(`templates/${currentCampaign.id}`, { data: { design: JSON.stringify(data), html } }, user.jwt)
 			let updResp = await ApiService.post(`fairymailer/updateTemplate`, { data: { design: JSON.stringify(data), html, uuid:currentCampaign.uuid } }, user.jwt)
@@ -89,7 +89,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 			try {
 				const templateUuid = uuidv4()
 				console.log('currentCampaign from saveTemplate is : ', currentCampaign)
-				const html = editorRef.current.exportHtmlPreview(['Inter:400,700'])
+				const html = editorRef.current.exportHtmlWithProxyLink(['Inter:400,700'])
 				const data = editorRef.current.exportData(['Inter:400,700'])
 				let updResp = await ApiService.post(`templates/`, { data: { uuid: templateUuid, name: templateName, design: JSON.stringify(data), html, account: account.id } }, user.jwt)
 				console.log('updresp', updResp)
@@ -443,7 +443,7 @@ const Header = ({ setStep, currentCampaign, editorType, setDesign }) => {
 						<div className="header-drawer-head-item"></div>
 					</div>
 					<div className="header-drawer-content">
-						<iframe src={'data:text/html,' + encodeURIComponent(dataToHtml({ bodySettings, blockList, isPreview:true, accountContext:{user,account} }))} title="preview" scrolling="no" className="header-drawer-iframe"></iframe>
+						<iframe src={'data:text/html,' + encodeURIComponent(dataToHtml({ bodySettings, blockList, isPreview:true, proxyLink:true, accountContext:{user,account} }))} title="preview" scrolling="no" className="header-drawer-iframe"></iframe>
 					</div>
 				</div>
 			</Drawer>

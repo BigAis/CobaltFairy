@@ -35,6 +35,7 @@ const EmailEditor = forwardRef(({ blockList, bodySettings, fontList, language = 
 		actionType: state.actionType,
 		exportHtml: (fontList = []) => dataToHtml({ bodySettings: state.bodySettings, blockList: state.blockList, fontList, accountContext }),
 		exportHtmlPreview: (fontList = []) => dataToHtml({ bodySettings: state.bodySettings, blockList: state.blockList, fontList, accountContext,isPreview:true }),
+		exportHtmlWithProxyLink: (fontList = []) => dataToHtml({ bodySettings: state.bodySettings, blockList: state.blockList, fontList, accountContext,isPreview:false,proxyLink:true }),
 		exportData: (fontList = []) => {
 			return { bodySettings: state.bodySettings, blockList: state.blockList, fontList,accountContext }
 		},
