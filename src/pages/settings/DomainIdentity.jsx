@@ -547,12 +547,12 @@ const DomainIdentity = () => {
                         
                         <div className="email-content">
                             <div className="input-section">
-                                <InputText
-                                    placeholder={`Enter email (must use @${domainSettings.sendingDomain})`}
-                                    value={domainSettings.sendingEmail}
-                                    onChange={(e) => setDomainSettings({...domainSettings, sendingEmail: e.target.value})}
-                                    className="centered-input"
-                                />
+                            <InputText
+                                label={`Enter email (must use @${domainSettings.sendingDomain})`}
+                                value={domainSettings.sendingEmail}
+                                onChange={(e) => setDomainSettings({...domainSettings, sendingEmail: e.target.value})}
+                                className="centered-input"
+                            />
                             </div>
                             
                             <div className="verification-status">
