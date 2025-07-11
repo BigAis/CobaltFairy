@@ -172,20 +172,23 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		margin: 20px 0 40px 0;
+		margin: 20px 0 10px 0;
+		width: 100%;
 	}
 
-	.input-groups {
-		display: flex;
-		align-items: center;
-		gap: 10px;
+	.password-input-wrapper {
+		position: relative;
 		width: 100%;
 		max-width: 400px;
 		margin: 0 auto;
-		position: relative;
+		
 		.input-text-wrapper {
 			width: 100%;
-			margin-bottom: 30px;
+			margin-bottom: 0;
+			
+			.input-text {
+				padding-right: 50px; // Make room for the eye icon
+			}
 		}
 	}
 
@@ -198,6 +201,10 @@
 	}
 
 	.eye-button {
+		position: absolute;
+		top: 50%;
+		right: 16px;
+		transform: translateY(-50%);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -205,12 +212,37 @@
 		border: none;
 		padding: 8px;
 		cursor: pointer;
-		position: absolute;
-		right: 8px;
+		z-index: 1;
+		transition: opacity 0.2s ease;
+		
+		&:hover {
+			opacity: 0.7;
+		}
+		
+		svg {
+			width: 25px;
+			height: 25px;
+			
+			path {
+				fill: #333;
+			}
+		}
 	}
 
-	.eye-button:hover svg {
-		fill: #007bff;
+	.forgot-password {
+		display: block;
+		text-align: right;
+		margin: 10px 0 20px 0;
+		font-size: 14px;
+		font-weight: 500;
+		font-family: 'Inter', sans-serif;
+		color: #333;
+		cursor: pointer;
+		transition: color 0.3s;
+		
+		&:hover {
+			color: #e45016;
+		}
 	}
 
 	.remember-me {
@@ -233,21 +265,6 @@
 		color: #ff635d;
 		path {
 			fill: #ff635d;
-		}
-	}
-
-	.forgot-password {
-		position: absolute;
-		bottom: -30px;
-		right: 0;
-		font-size: 14px;
-		font-weight: 500;
-		font-family: 'Inter', sans-serif;
-		color: #333;
-		cursor: pointer;
-		transition: color 0.3s;
-		&:hover {
-			color: #e45016;
 		}
 	}
 
@@ -282,6 +299,18 @@
 
 		.breakpoint-or {
 			margin: 10px 0;
+		}
+		
+		.password-input-wrapper {
+			.input-text-wrapper {
+				.input-text {
+					padding-right: 45px; // Slightly less padding on mobile
+				}
+			}
+		}
+		
+		.eye-button {
+			right: 12px; // Adjust position for mobile
 		}
 	}
 }

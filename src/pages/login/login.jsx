@@ -123,11 +123,10 @@ const LogIn = () => {
 
 	const resetPassword = async () => {
 		if (!email) {
-			setNotifications([{ 
-				id: Date.now(), 
+			createNotification({ 
 				message: 'Email is required for password reset.', 
 				type: 'warning' 
-			}])
+			})
 			return
 		}
 		
@@ -138,21 +137,19 @@ const LogIn = () => {
 			console.log("Password reset response:", response)
 			
 			if (response === true) {
-				setNotifications([{ 
-					id: Date.now(), 
+				createNotification({ 
 					message: `We've sent you an email with a password reset link. Please check your inbox and follow the instructions.`, 
 					type: 'default' 
-				}])
+				})
 			} else {
 				throw new Error("Failed to send reset email")
 			}
 		} catch (error) {
 			console.error("Error resetting password:", error)
-			setNotifications([{ 
-				id: Date.now(), 
+			createNotification({ 
 				message: 'Failed to send reset email. Please try again.', 
 				type: 'warning' 
-			}])
+			})
 			setRefreshReCaptcha(!refreshReCaptcha)
 		} finally {
 			setIsLoading(false)
@@ -163,11 +160,10 @@ const LogIn = () => {
 		onSuccess: (tokenResponse) => googleSignIn(tokenResponse),
 		onError: (error) => {
 			console.error("Google login error:", error)
-			setNotifications([{ 
-				id: Date.now(), 
+			createNotification({ 
 				message: 'Google login failed. Please try again.', 
 				type: 'warning' 
-			}])
+			})
 		}
 	})
 
@@ -197,11 +193,10 @@ const LogIn = () => {
 			}
 		} catch (error) {
 			console.error("Error during Google Sign In:", error)
-			setNotifications([{ 
-				id: Date.now(), 
+			createNotification({ 
 				message: 'Error during Google Sign In. Please try again.', 
 				type: 'warning' 
-			}])
+			})
 		} finally {
 			setIsLoading(false)
 		}
@@ -275,7 +270,7 @@ const LogIn = () => {
 
 									<form onSubmit={checkValidPassword}>
 										<div className="input-rows">
-											<div className="input-groups">
+											<div className="password-input-wrapper">
 												<InputText
 													className="user-password"
 													placeholder="Password"
@@ -301,15 +296,15 @@ const LogIn = () => {
 												>
 													<Icon name="Eye" size={25} />
 												</button>
-
-												<p
-													className="forgot-password"
-													onClick={resetPassword}
-												>
-													Forgot Password
-												</p>
 											</div>
 										</div>
+
+										<p
+											className="forgot-password"
+											onClick={resetPassword}
+										>
+											Forgot Password
+										</p>
 
 										<label className="remember-me">
 											<Checkbox className="remember-me" checked={true} label="Remember Me"></Checkbox>
