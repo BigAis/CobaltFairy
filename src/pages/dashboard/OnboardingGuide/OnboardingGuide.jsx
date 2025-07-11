@@ -17,7 +17,8 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
       description: 'Vivamus commodo nunc et metus sagittis, at malesuada erat scelerisque. Vestibulum volutpat sodales volutpat. Vestibulum posuere vulputate posuere. Morbi ultrices velit auctor, venenatis neque vel.',
       action: 'Set up sender',
       actionLink: '/settings/sender',
-      iconName: 'Group45'
+      iconName: 'Group45',
+      iconSize: 200
     },
     { 
       id: 2, 
@@ -30,7 +31,8 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
         label: 'Migrate from Mailchimp',
         link: '/subscribers/import'
       },
-      iconName: 'Group46'
+      iconName: 'Group46',
+      iconSize: 200
     },
     { 
       id: 3, 
@@ -39,7 +41,8 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
       description: 'Vivamus commodo nunc et metus sagittis, at malesuada erat scelerisque. Vestibulum volutpat sodales volutpat. Vestibulum posuere vulputate posuere. Morbi ultrices velit auctor, venenatis neque vel.',
       action: 'Create Campaign',
       actionLink: '/campaigns/new',
-      iconName: 'Group44'
+      iconName: 'Group44',
+      iconSize: 200
     }
   ])
 
@@ -125,7 +128,7 @@ const OnboardingGuide = ({ onSetupComplete, onClose }) => {
             
             <div className="step-preview-container">
               <div className="step-icon-preview">
-                <Icon name={step.iconName} size={140} />
+                <Icon name={step.iconName} size={step.iconSize || 140} />
               </div>
             </div>
           </div>

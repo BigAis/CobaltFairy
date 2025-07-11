@@ -62,7 +62,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-right: 20px;
+    margin-right: 30px;
     min-width: 32px;
   }
   
@@ -148,12 +148,12 @@
   }
   
   .step-preview-container {
-    width: 200px;
-    min-width: 200px;
-    margin-left: 20px;
+    width: 250px; /* Increased width to match Figma */
+    min-width: 250px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-left: 20px;
     
     .step-icon-preview {
       width: 100%;
@@ -165,32 +165,38 @@
       svg {
         max-width: 100%;
         height: auto;
-        transform: scale(0.9); /* Slightly reduce size to fit better */
+        transform: scale(1.2); /* Make images larger to match Figma */
+      }
+    }
+  }
+  
+  @media (max-width: 1200px) {
+    .step-content {
+      max-width: 500px;
+      
+      p {
+        max-width: 100%;
       }
     }
   }
   
   @media (max-width: 1100px) {
     .step-content {
-      max-width: 450px;
-      
-      p {
-        max-width: 100%;
-      }
+      max-width: 400px;
     }
     
     .step-preview-container {
-      width: 180px;
-      min-width: 180px;
+      width: 230px;
+      min-width: 230px;
       
       .step-icon-preview svg {
-        transform: scale(0.8);
+        transform: scale(1.1);
       }
     }
   }
   
   @media (max-width: 992px) {
-    .step-content p {
+    .step-content {
       max-width: 100%;
     }
     
@@ -200,13 +206,16 @@
     
     .step-preview-container {
       width: 100%;
-      margin-left: 0;
-      margin-top: 20px;
-      margin-left: 52px;
+      margin: 20px 0 0 52px;
       justify-content: flex-start;
+      padding-left: 0;
       
-      .step-icon-preview svg {
-        transform: scale(0.9);
+      .step-icon-preview {
+        width: 250px;
+        
+        svg {
+          transform: scale(1);
+        }
       }
     }
   }
@@ -263,8 +272,8 @@
         margin-left: 10px;
         margin-top: 15px;
         
-        .step-icon-preview svg {
-          transform: scale(0.7);
+        .step-icon-preview {
+          width: 200px;
         }
       }
     }
