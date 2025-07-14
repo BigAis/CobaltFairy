@@ -7,6 +7,7 @@ const CELL_COUNT = 6;
 const TwoFactorInput = ({ value, onChange, onIncompleteSubmit }) => {
   const ref = useRef(null);
   const [isError, setIsError] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   const codeDigitsArray = new Array(CELL_COUNT).fill(0);
 
@@ -18,10 +19,12 @@ const TwoFactorInput = ({ value, onChange, onIncompleteSubmit }) => {
     const isLastDigit = idx === CELL_COUNT - 1;
     const isCodeFull = value?.length === CELL_COUNT;
 
-    const isFocused = isCurrentDigit || (isLastDigit && isCodeFull);
+    // Only show the focus styling if the input actually has focus
+    const cellIsFocused = isFocused && (isCurrentDigit || (isLastDigit && isCodeFull));
+    
     const containerStyle = isError
       ? 'codeInputCellContainer error'
-      : isFocused
+      : cellIsFocused
       ? 'codeInputCellContainer focused'
       : 'codeInputCellContainer';
 
@@ -55,6 +58,14 @@ const TwoFactorInput = ({ value, onChange, onIncompleteSubmit }) => {
     }
   };
 
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+  };
+
   useEffect(() => {
     ref?.current?.focus();
   }, []);
@@ -68,6 +79,8 @@ const TwoFactorInput = ({ value, onChange, onIncompleteSubmit }) => {
           value={value || ''}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           type="text"
           maxLength={CELL_COUNT}
           className="hiddenCodeInput"
