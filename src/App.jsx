@@ -134,6 +134,9 @@ function App() {
         <Route path="/subscribers" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
         <Route path="/subscribers/list" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
         <Route path="/subscribers/groups" element={<ProtectedRoute><Subscribers initialView="groups" /></ProtectedRoute>} />
+        <Route path="/subscribers/segments" element={<ProtectedRoute><Subscribers initialView="segments" /></ProtectedRoute>} />
+        <Route path="/subscribers/history" element={<ProtectedRoute><Subscribers initialView="history" /></ProtectedRoute>} />
+        <Route path="/subscribers/stats" element={<ProtectedRoute><Subscribers initialView="stats" /></ProtectedRoute>} />
         <Route path="/subscribers/fields" element={<ProtectedRoute><Subscribers initialView="fields" /></ProtectedRoute>} />
         <Route path="/subscribers/cleanup" element={<ProtectedRoute><Subscribers initialView="cleanup" /></ProtectedRoute>} />
         <Route path="/subscribers/import" element={<ProtectedRoute><Subscribers initialView="import" /></ProtectedRoute>} />

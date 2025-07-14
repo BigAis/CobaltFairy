@@ -453,6 +453,9 @@ const Subscribers = ({ initialView }) => {
 							</div>
 						)}
 						{view === 'cleanup' && <div className="page-name">Cleanup Subscribers</div>}
+						{view === 'segments' && <div className="page-name">Segments</div>}
+						{view === 'history' && <div className="page-name">History</div>}
+						{view === 'stats' && <div className="page-name">Stats</div>}
 						{renderAddButton()}
 					</div>
 					
@@ -462,15 +465,15 @@ const Subscribers = ({ initialView }) => {
 								<ButtonGroup
 								options={[
 									{ value: 'subs', label: `All Subscribers (${totalSubs})` },
-									{ value: null, label: `Segments (0)` },
+									{ value: 'segments', label: `Segments (0)` },
 									{ value: 'groups', label: `Groups (${totalGroups})` },
 									{ value: 'fields', label: `Fields` },
-									{ value: null, label: `History` },
-									{ value: null, label: `Stats` },
-									{ value: 'cleanup', label: `Clean up` }, // Changed from null to 'cleanup'
+									{ value: 'history', label: `History` },
+									{ value: 'stats', label: `Stats` },
+									{ value: 'cleanup', label: `Clean up` },
 								]}
 								onChange={(value) => {
-									if (value) setView(value)
+									setView(value)
 									setShowFilters(false)
 								}}
 								value={view}
@@ -600,6 +603,39 @@ const Subscribers = ({ initialView }) => {
 						onUpdate={onUpdate}
 						/>
 					</div>
+					)}
+					
+					{view === 'segments' && (
+					  <Card>
+						<div style={{ textAlign: 'center', padding: '40px 20px' }}>
+						  <h3 style={{ marginBottom: '15px', fontFamily: 'Bitter, serif', fontWeight: 600 }}>
+							Segments Under Construction
+						  </h3>
+						  <p>This feature is coming soon. Stay tuned!</p>
+						</div>
+					  </Card>
+					)}
+
+					{view === 'history' && (
+					  <Card>
+						<div style={{ textAlign: 'center', padding: '40px 20px' }}>
+						  <h3 style={{ marginBottom: '15px', fontFamily: 'Bitter, serif', fontWeight: 600 }}>
+							History Under Construction
+						  </h3>
+						  <p>This feature is coming soon. Stay tuned!</p>
+						</div>
+					  </Card>
+					)}
+
+					{view === 'stats' && (
+					  <Card>
+						<div style={{ textAlign: 'center', padding: '40px 20px' }}>
+						  <h3 style={{ marginBottom: '15px', fontFamily: 'Bitter, serif', fontWeight: 600 }}>
+							Stats Under Construction
+						  </h3>
+						  <p>This feature is coming soon. Stay tuned!</p>
+						</div>
+					  </Card>
 					)}
 					
 					{/* Import options section with proper rendering */}
