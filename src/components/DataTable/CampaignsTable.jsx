@@ -46,6 +46,11 @@ const CampaignsTable = ({
 	const handlePageChange = (newPage) => {
 		setCurrentPage(newPage)
 		setSelectedCampaigns([])
+		
+		// If we're using server-side data, fetch the new page
+		if (propCampaigns === null) {
+			getCampaigns(newPage)
+		}
 	}
 
 	const dropdownOptions = [
@@ -291,8 +296,8 @@ const CampaignsTable = ({
 				console.log('cmps from getCampaigns inside campaignsTable', resp)
 				setCampaigns(resp.data.data)
 				setTotalResults(resp.data.meta.pagination.total)
+				setCurrentPage(page)
 			}
-			setCurrentPage(page)
 		} catch (error) {
 			console.error('Error fetching campaigns:', error)
 			createNotification({
@@ -305,22 +310,25 @@ const CampaignsTable = ({
 		}
 	}
 
+	// Calculate the paginated data (only used for client-side pagination)
 	const startIndex = (currentPage - 1) * rowsPerPage
 	const endIndex = startIndex + rowsPerPage
 	const paginatedData = campaigns.slice(startIndex, endIndex)
 
 	useEffect(() => {
 		if (user) {
-		// Only fetch if no campaigns were provided via props
-		if (propCampaigns === null) {
-			getCampaigns(currentPage)
-		} else {
-			// Use the campaigns provided via props
-			setCampaigns(propCampaigns)
-			setLoading(propLoading)
+			// Only fetch if no campaigns were provided via props
+			if (propCampaigns === null) {
+				getCampaigns(1) // Reset to page 1 when campaign type changes
+				setCurrentPage(1)
+			} else {
+				// Use the campaigns provided via props
+				setCampaigns(propCampaigns)
+				setTotalResults(propCampaigns.length)
+				setLoading(propLoading)
+			}
 		}
-		}
-	}, [user, currentPage, selectedCampaignType, propCampaigns, propLoading])
+	}, [user, selectedCampaignType, propCampaigns, propLoading])
 
 	const actionsBodyTemplate = (rowData) => {
 		return (
@@ -358,11 +366,13 @@ const CampaignsTable = ({
 		return rowData.date ? dayjs(rowData.date).tz('Europe/Athens').format('DD-MM-YYYY HH:mm') : ''
 	}
 
+	// Important: Determine which data to display based on whether we're using client-side or server-side pagination
+	const displayData = paginatedData
+
 	return (
-		// <div>
 		<>
 			{!dashboardPreviewOnly ? (
-				<DataTable value={campaigns} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey='id' rowClassName={() => 'p-table-row'}>
+				<DataTable value={displayData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey='id' rowClassName={() => 'p-table-row'}>
 					<Column
 						body={(rowData) =>
 							loading ? (
@@ -393,10 +403,10 @@ const CampaignsTable = ({
 						}
 						header={() => (
 							<Checkbox
-								checked={selectedCampaigns.length === paginatedData.length && selectedCampaigns.length > 0}
+								checked={selectedCampaigns.length === displayData.length && selectedCampaigns.length > 0}
 								onChange={(e) => {
 									if (e) {
-										setSelectedCampaigns([...paginatedData])
+										setSelectedCampaigns([...displayData])
 									} else {
 										setSelectedCampaigns([])
 									}
@@ -414,7 +424,7 @@ const CampaignsTable = ({
 					<Column field="uuid" header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
 				</DataTable>
 			) : (
-				<DataTable value={campaigns} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
+				<DataTable value={displayData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
 					<Column
 						body={(rowData) => (
 							<div style={{ position: 'relative' }}>
@@ -428,10 +438,10 @@ const CampaignsTable = ({
 						)}
 						header={() => (
 							<Checkbox
-								checked={selectedCampaigns.length === paginatedData.length && selectedCampaigns.length > 0}
+								checked={selectedCampaigns.length === displayData.length && selectedCampaigns.length > 0}
 								onChange={(e) => {
 									if (e) {
-										setSelectedCampaigns([...paginatedData])
+										setSelectedCampaigns([...displayData])
 									} else {
 										setSelectedCampaigns([])
 									}
@@ -445,9 +455,12 @@ const CampaignsTable = ({
 				</DataTable>
 			)}
 
-			<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
-
-			{/* </div> */}
+			<Pagination 
+				currentPage={currentPage} 
+				totalResults={totalResults} 
+				resultsPerPage={resultsPerPage} 
+				onChange={handlePageChange} 
+			/>
 		</>
 	)
 }

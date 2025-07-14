@@ -21,8 +21,14 @@ const Pagination = ({ currentPage = 1, totalResults, resultsPerPage, siblingCoun
 	}
 
 	const paginationNumbers = useMemo(() => {
+		// Handle cases where there's no pagination needed
+		if (totalPages <= 1) {
+			return []
+		}
+
 		const totalPageNumbers = siblingCount + 5
 
+		// If we have space to show all pages, just show them all
 		if (totalPageNumbers >= totalPages) {
 			return Array.from({ length: totalPages }, (_, i) => i + 1)
 		}
@@ -39,18 +45,30 @@ const Pagination = ({ currentPage = 1, totalResults, resultsPerPage, siblingCoun
 		const pages = []
 
 		if (!shouldShowLeftDots && shouldShowRightDots) {
+			// Show more pages on the left, dots on the right
 			const leftRange = Array.from({ length: 3 + 2 * siblingCount }, (_, i) => i + 1)
 			pages.push(...leftRange, '...', lastPageIndex)
 		} else if (shouldShowLeftDots && !shouldShowRightDots) {
+			// Show dots on the left, more pages on the right
 			const rightRange = Array.from({ length: 3 + 2 * siblingCount }, (_, i) => totalPages - (3 + 2 * siblingCount) + i + 1)
 			pages.push(firstPageIndex, '...', ...rightRange)
 		} else if (shouldShowLeftDots && shouldShowRightDots) {
+			// Show dots on both sides, focus on middle
 			const middleRange = Array.from({ length: rightSiblingIndex - leftSiblingIndex + 1 }, (_, i) => leftSiblingIndex + i)
 			pages.push(firstPageIndex, '...', ...middleRange, '...', lastPageIndex)
+		} else {
+			// Default case: we're close to the beginning/end but have multiple pages
+			// Show all pages from 1 to totalPages without dots
+			return Array.from({ length: totalPages }, (_, i) => i + 1)
 		}
 
 		return pages
 	}, [current, siblingCount, totalPages])
+
+	// Don't render pagination if there's only one page or less
+	if (totalPages <= 1) {
+		return null
+	}
 
 	return (
 		<div className={computedClassName}>
