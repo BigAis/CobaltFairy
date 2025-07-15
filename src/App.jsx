@@ -31,6 +31,7 @@ import NewUser from './pages/Team/NewUser'
 import EditUser from './pages/Team/EditUser'
 import Stats from './pages/stats/stats'
 import Redirection from './pages/redirection/redirection'
+import AutomationDetail from './pages/automations/AutomationDetail'
 
 // A wrapper component to handle authentication check
 const ProtectedRoute = ({ children }) => {
@@ -149,7 +150,11 @@ function App() {
         <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
         <Route path="/integrations/bookfunnel/:mode?" element={<ProtectedRoute><BookFunnel /></ProtectedRoute>} />
         <Route path="/automations" element={<ProtectedRoute><Automations /></ProtectedRoute>} />
-        <Route path="/automations/:autId" element={<ProtectedRoute><EditAutomation /></ProtectedRoute>} />
+        <Route path="/automations/new" element={<ProtectedRoute><EditAutomation /></ProtectedRoute>} />
+        <Route path="/automations/:autId/edit" element={<ProtectedRoute><EditAutomation /></ProtectedRoute>} />
+        <Route path="/automations/:autId" element={<ProtectedRoute><AutomationDetail /></ProtectedRoute>} />
+        <Route path="/automations/:autId/subscribers" element={<ProtectedRoute><AutomationDetail /></ProtectedRoute>} />
+        <Route path="/automations/:autId/history" element={<ProtectedRoute><AutomationDetail /></ProtectedRoute>} />
         <Route path="/automations/editor/:autId" element={<ProtectedRoute><FlowEditor /></ProtectedRoute>} />
         <Route path="/choose-account" element={<ProtectedRoute><AccountPicker /></ProtectedRoute>} />
         <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
