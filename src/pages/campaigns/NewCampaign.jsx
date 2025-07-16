@@ -242,6 +242,23 @@ const NewCampaign = () => {
 			}
 		}
 
+		// Check if there are no recipients selected for schedule or send now actions
+		if ((actionClicked === 'schedule' || actionClicked === 'sentNow') && 
+			(!selectedGroups || selectedGroups.length === 0)) {
+			const result = await PopupText.fire({
+				text: 'Cannot schedule or send campaign with 0 recipients. Please select at least one group.',
+				icon: 'warning',
+				confirmButtonText: 'OK',
+				showCancelButton: false,
+				showDenyButton: false,
+			})
+			
+			if (result.isConfirmed) {
+				return
+			}
+			return; // Prevent further execution
+		}
+
 		switch (actionClicked) {
 			case 'saveAndExit':
 				handleSaveAndExit()
