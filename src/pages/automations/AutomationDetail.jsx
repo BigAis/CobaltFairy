@@ -6,7 +6,6 @@ import Card from '../../components/Card'
 import Button from '../../components/Button'
 import Switch from '../../components/Switch'
 import ButtonGroup from '../../components/ButtonGroup'
-import PopupText from '../../components/PopupText/PopupText'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import Skeleton from 'react-loading-skeleton'
@@ -106,10 +105,10 @@ const AutomationDetail = () => {
           active: !newStatus
         }))
         
-        PopupText.fire({ 
-          icon: 'error', 
-          text: 'Failed to update automation status.', 
-          showCancelButton: false 
+        createNotification({
+          message: 'Failed to update automation status.',
+          type: 'warning',
+          autoClose: 3000
         })
         return false
       }
@@ -122,21 +121,21 @@ const AutomationDetail = () => {
         active: !newStatus
       }))
       
-      PopupText.fire({ 
-        icon: 'error', 
-        text: 'Error updating automation status. Please try again.', 
-        showCancelButton: false 
+      createNotification({
+        message: 'Error updating automation status. Please try again.',
+        type: 'warning',
+        autoClose: 3000
       })
       return false
     }
   }
 
   // Handle tab change
-  const handleTabChange = (tab) => {
-    if (tab === 'overview') {
+  const handleTabChange = (value) => {
+    if (value === 'overview') {
       navigate(`/automations/${autId}`)
     } else {
-      navigate(`/automations/${autId}/${tab}`)
+      navigate(`/automations/${autId}/${value}`)
     }
   }
 
@@ -144,88 +143,73 @@ const AutomationDetail = () => {
   const handleEditClick = () => {
     navigate(`/automations/${autId}/edit`)
   }
+  
+  // Tab options for ButtonGroup
+  const tabOptions = [
+    { value: 'overview', label: 'Overview' },
+    { value: 'subscribers', label: 'Subscribers' },
+    { value: 'history', label: 'History' }
+  ]
 
   return (
-    <>
-      <div className="fm-page-wrapper">
-        <Sidemenu />
-        <div className="fm-page-container">
-          <PageHeader />
-          
-          <div className="automation-detail-container">
-            {/* Header with breadcrumb and title */}
-            <div className="automation-header">
-              <div className="automation-breadcrumb" onClick={() => navigate('/automations')}>
-                <span>Automations</span> &gt; <span className="automation-name">{loading ? <Skeleton width={100} /> : automation?.name}</span>
-              </div>
-              
-              <div className="automation-title-actions">
-                <h1 className="automation-title">{loading ? <Skeleton width={200} /> : automation?.name || 'Demo Automation'}</h1>
-                
-                <div className="automation-actions">
-                  {!loading && (
-                <>
-                  <Switch
-                    checked={automation?.active || false}
-                    label={automation?.active ? 'Automation is running' : 'Automation is stopped'}
-                    onChange={(value) => updateAutomationStatus(value)}
-                  />
-                  <Button
-                    icon="Edit"
-                    type="action"
-                    onClick={handleEditClick}
-                    disabled={isReadOnly}
-                  >
-                    Edit Flow
-                  </Button>
-                </>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            {/* Tab navigation */}
-            <div className="automation-tabs-container">
-              <div className="automation-tabs">
-                <button 
-                  className={`automation-tab ${activeTab === 'overview' ? 'active' : ''}`}
-                  onClick={() => handleTabChange('overview')}
-                >
-                  Overview
-                </button>
-                <button 
-                  className={`automation-tab ${activeTab === 'subscribers' ? 'active' : ''}`}
-                  onClick={() => handleTabChange('subscribers')}
-                >
-                  Subscribers
-                </button>
-                <button 
-                  className={`automation-tab ${activeTab === 'history' ? 'active' : ''}`}
-                  onClick={() => handleTabChange('history')}
-                >
-                  History
-                </button>
-              </div>
-            </div>
-            
-            {/* Tab content */}
-            <div className="automation-tab-content">
-              {loading ? (
-                <Card>
-                  <Skeleton height={300} />
-                </Card>
-              ) : (
-                <>
-                  {activeTab === 'overview' && <AutomationOverview automation={automation} />}
-                  {activeTab === 'subscribers' && <AutomationSubscribers automation={automation} />}
-                  {activeTab === 'history' && <AutomationHistory automation={automation} />}
-                </>
-              )}
-            </div>
+    <div className="fm-page-wrapper">
+      <Sidemenu />
+      <div className="fm-page-container">
+        <PageHeader />
+        
+        <div className="page-name-container">
+          <div className="page-name">
+            <span className="automation-breadcrumb" onClick={() => navigate('/automations')}>
+              Automations
+            </span>{' '}
+            {'>'}{' '}
+            <span>
+              {loading ? <Skeleton width={150} /> : automation?.name || 'Demo Automation'}
+            </span>
           </div>
+          
+          {!loading && (
+            <div className="status-switch">
+              <Switch
+                checked={automation?.active || false}
+                label={automation?.active ? 'Automation is running' : 'Automation is stopped'}
+                onChange={(value) => updateAutomationStatus(value)}
+              />
+              <Button
+                icon="Edit"
+                type="action"
+                onClick={handleEditClick}
+                disabled={isReadOnly}
+              >
+                Edit Flow
+              </Button>
+            </div>
+          )}
         </div>
+        
+        {/* Using ButtonGroup component instead of custom tabs */}
+        <div className="button-group-wrapper">
+          <ButtonGroup
+            options={tabOptions}
+            value={activeTab}
+            onChange={handleTabChange}
+          />
+        </div>
+        
+        {/* Tab content */}
+        {loading ? (
+          <Card>
+            <Skeleton height={300} />
+          </Card>
+        ) : (
+          <>
+            {activeTab === 'overview' && <AutomationOverview automation={automation} />}
+            {activeTab === 'subscribers' && <AutomationSubscribers automation={automation} />}
+            {activeTab === 'history' && <AutomationHistory automation={automation} />}
+          </>
+        )}
       </div>
-    </>
+    </div>
   )
 }
 
