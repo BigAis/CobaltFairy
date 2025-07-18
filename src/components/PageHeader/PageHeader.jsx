@@ -87,6 +87,11 @@ const PageHeader = () => {
 			}
 		}
 	]
+
+	// Direct navigation to profile settings
+	const goToProfile = () => {
+		navigate('/settings/profile');
+	}
 	
 	return (
 		<div className="fm-page-head">
@@ -107,18 +112,42 @@ const PageHeader = () => {
 			
 			{/* Hide user menu in mobile view */}
 			{!isMobile && (
-				<div className="user-info" ref={userMenuRef} onClick={(e) => {
-					e.stopPropagation();
-					setUserMenuOpen(!userMenuOpen);
-				}}>
-					<Card style={{marginRight:'20px', cursor:'pointer'}}>{getNameInitials(user?.user?.name)}</Card>
+				<div className="user-info" ref={userMenuRef}>
+					{/* Make initials card clickable and go directly to profile */}
+					<Card 
+						style={{marginRight:'20px', cursor:'pointer'}} 
+						onClick={goToProfile}
+					>
+						{getNameInitials(user?.user?.name)}
+					</Card>
+					
 					<div className="user">
+						{/* User info section - name and email always visible */}
 						<h4>{user?.user?.name}</h4>
 						<span>{user?.user?.email}</span>
 					</div>
-					<Icon name="Caret" size={24}/>
+					
+					{/* Separate clickable area for dropdown toggle */}
+					<div 
+						className="dropdown-toggle"
+						onClick={(e) => {
+							e.stopPropagation();
+							setUserMenuOpen(!userMenuOpen);
+						}}
+						style={{cursor: 'pointer', padding: '0 8px'}}
+					>
+						<Icon name="Caret" size={24}/>
+					</div>
+					
 					{userMenuOpen && (
-						<Card className="user-menu" style={{background:'#FFF9EF'}}>
+						<Card className="user-menu" style={{
+							background:'#FFF9EF',
+							position: 'absolute',
+							right: '0',
+							top: '100%', /* Position below the user info */
+							marginTop: '10px',
+							zIndex: '1000'
+						}}>
 							{userMenuOptions.map((option) => (
 								<div style={{fontSize:'16px'}} key={option.label} className="user-menu-option" onClick={() => {option.callback()}}>
 									{option.label}
