@@ -32,7 +32,7 @@ const Dashboard = () => {
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 	
 	// State to control onboarding visibility
-	const [showOnboarding, setShowOnboarding] = useState(true)
+	const [showOnboarding, setShowOnboarding] = useState(false)
   
 	// Chart data and options
 	const isPositive = true
