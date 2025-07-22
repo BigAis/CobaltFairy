@@ -31,7 +31,7 @@ const Dashboard = () => {
 	const [isLoading, setIsLoading] = useState(true)
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 	
-	// State to control onboarding visibility
+	// State to control onboarding visibility - now initialized based on account.setup_complete
 	const [showOnboarding, setShowOnboarding] = useState(false)
   
 	// Chart data and options
@@ -94,6 +94,15 @@ const Dashboard = () => {
 		return () => window.removeEventListener('resize', handleResize)
 	}, [])
 
+	// Set showOnboarding based on account.setup_complete when account data is loaded
+	useEffect(() => {
+		if (account) {
+			// Show onboarding guide if setup_complete is null or false
+			setShowOnboarding(account.setup_complete !== true);
+			console.log('Onboarding guide visibility set based on account setup_complete:', account.setup_complete !== true);
+		}
+	}, [account]);
+
 	// Improved loadStats function with retry mechanism
 	const loadStats = async () => {
 		if (!user || !user.jwt || !account) {
@@ -146,21 +155,37 @@ const Dashboard = () => {
 		setIsLoading(false);
 	};
 
-	// Toggle the onboarding guide visibility
-	const toggleOnboarding = () => {
-		setShowOnboarding(prev => !prev);
-	}
-
-	const handleSetupComplete = () => {
-		// Mark onboarding as completed
-		setShowOnboarding(false)
-		
-		// Notify user
-		createNotification({
-			message: 'Setup completed! You\'re all set to start using FairyMail.',
-			type: 'default',
-			autoClose: 5000
-		})
+	// Updated to make API call to update setup_complete flag
+	const handleSetupComplete = async () => {
+		try {
+			// Make API call to update setup_complete flag
+			if (user && user.jwt) {
+				const response = await ApiService.post(
+					'fairymailer/updateAccountSetupGuide',
+					{ setup_complete: true },
+					user.jwt
+				);
+				
+				console.log('Setup guide completion updated:', response);
+				
+				// Hide the onboarding guide
+				setShowOnboarding(false);
+				
+				// Notify user
+				createNotification({
+					message: 'Setup completed! You\'re all set to start using FairyMail.',
+					type: 'default',
+					autoClose: 5000
+				});
+			}
+		} catch (error) {
+			console.error('Error updating setup guide status:', error);
+			createNotification({
+				message: 'Error updating setup status. Setup may reappear on next login.',
+				type: 'warning',
+				autoClose: 5000
+			});
+		}
 	}
 
 	const createStatsMetrics = () => {
@@ -233,19 +258,13 @@ const Dashboard = () => {
 				<PageHeader />
 				<div className="page-name-container">
 					<div className="page-name">Dashboard <small style={{fontSize:'14px',letterSpacing: '.2em'}}>v{APP_VERSION}</small></div>
-					<Button
-						type="secondary"
-						onClick={toggleOnboarding}
-					>
-						{showOnboarding ? "Hide Setup Guide" : "Show Setup Guide"}
-					</Button>
 				</div>
 				
 				{/* Conditionally render either onboarding guide or regular dashboard */}
 				{showOnboarding ? (
 					<OnboardingGuide 
-						onSetupComplete={handleSetupComplete} 
-						onClose={() => setShowOnboarding(false)}
+						onSetupComplete={handleSetupComplete}
+						onClose={() => handleSetupComplete()} // Closing should also mark as complete
 					/>
 				) : (
 					<>
