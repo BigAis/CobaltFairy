@@ -123,6 +123,7 @@ export const AccountProvider = ({ children }) => {
 				
 				User.setAccounts(resp.data.user.accounts);
 				const account = resp.data.user.account;
+				account.active_subs = resp.data.account.active_subs;
 				account.payment_plan = resp.data.account.payment_plan;
 				setAccount(account);
 				setDataInitialized(true); // Mark data as initialized

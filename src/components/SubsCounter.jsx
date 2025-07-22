@@ -30,7 +30,7 @@ const SubsCounter = ({ children, currentSubs, subsLimit, onClick, className, ...
 		<div className={computedClassName}>
 			<div className="leftPart">
 				<div className="text">
-					{currentSubs}/{formatNum(subsLimit)} Subscribers
+					{formatNum(currentSubs)}/{formatNum(subsLimit)} Subscribers
 				</div>
 				<div className="progress-container">
 					<div className="progress-bar" id="progressBar" style={{ width: progressValue() + '%' }}></div>
