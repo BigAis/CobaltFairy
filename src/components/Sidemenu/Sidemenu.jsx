@@ -123,6 +123,17 @@ const Sidemenu = () => {
 			.join('')
 	}
 
+	// Handle the case when navigating to billing/payment plan
+	const handleSubsCounterClick = () => {
+		// If user is on or below the limit, take them to settings/billing
+		if (account && account.active_subs <= account.subscriber_limit) {
+			navigate('/billing');
+		} else {
+			// If user is over the limit, take them to payment plan page
+			navigate('/payment-plan');
+		}
+	}
+
 	return (
 		<>
 			<div className={`sidemenu ${isMobile ? 'mobile' : ''} ${menuOpen ? 'open' : ''}`}>
@@ -231,11 +242,9 @@ const Sidemenu = () => {
 							</div>
 							<div className="menu_bottom">
 								<SubsCounter
-									currentSubs={200}
-									subsLimit={500}
-									onClick={() => {
-										console.log('SubsCounter clicked!')
-									}}
+									currentSubs={account?.active_subs || 0}
+									subsLimit={account?.subscriber_limit || 1000}
+									onClick={handleSubsCounterClick}
 								/>
 								<Button 
 									style={{ width: '100%', marginTop: '15px' }} 
