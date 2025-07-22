@@ -16,7 +16,6 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { Line } from 'react-chartjs-2'
 import PopupText from '../../components/PopupText/PopupText'
 import DashboardChart from '../../components/DashboardChart/DashboardChart'
-// Updated import path for OnboardingGuide
 import OnboardingGuide from './OnboardingGuide/OnboardingGuide'
 
 const Dashboard = () => {
@@ -34,56 +33,6 @@ const Dashboard = () => {
 	// State to control onboarding visibility - now initialized based on account.setup_complete
 	const [showOnboarding, setShowOnboarding] = useState(false)
   
-	// Chart data and options
-	const isPositive = true
-	const subsChartData = {
-		labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-		datasets: [
-			{
-				data: [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4],
-				borderColor: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
-				borderWidth: 3,
-				tension: 0.4,
-				pointRadius: 0,
-				fill: true,
-			},
-			{
-				data: [1, 1.5, 2, 1.5, 2, 1.5, 1, 2.7, 2, 3, 3.5, 2, 1.8, 1.5, 1.7, 2.3, 0.5, 2.5, 1, 0.5, 4],
-				borderColor: !isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
-				borderWidth: 3,
-				tension: 0.4,
-				pointRadius: 0,
-				fill: true,
-			},
-		],
-	}
-	const subsChartOptions = {
-		responsive: true,
-		maintainAspectRatio: false,
-		plugins: {
-			legend: {
-				display: false,
-			},
-			tooltip: {
-				enabled: false,
-			},
-		},
-		scales: {
-			x: {
-				display: false,
-			},
-			y: {
-				display: false,
-				min: 0,
-			},
-		},
-		elements: {
-			line: {
-				tension: 1,
-			},
-		},
-	}
-
 	// Handle responsive layout
 	useEffect(() => {
 		const handleResize = () => {
@@ -201,7 +150,7 @@ const Dashboard = () => {
 	}
 	
 	const createSubsStatsMetrics = () => {
-		let key = statsKey
+		let key = subsStatsKey
 		if (!key || !statsData || !statsData[key]) {
 			console.log(statsData, key)
 			return
@@ -272,7 +221,7 @@ const Dashboard = () => {
 							<div className="stats-head">
 								<span className="stats-title">Campaigns</span>
 								<ButtonGroup
-									value="d7"
+									value={statsKey}
 									options={[
 										{ value: 'today', label: 'Today' },
 										{ value: 'd7', label: '7 Days' },
@@ -288,10 +237,38 @@ const Dashboard = () => {
 								<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
 									{stats && (
 										<>
-											<Stat stats={stats} hasChart={true} defaultLabel={'Emails Sent'} />
-											<Stat stats={stats} hasChart={true} defaultLabel={'Total Clicks'} />
-											<Stat stats={stats} hasChart={true} defaultLabel={'Total Opens'} />
-											<Stat stats={stats} hasChart={true} defaultLabel={'Spam'} />
+											<Stat 
+												stats={stats} 
+												hasChart={true} 
+												defaultLabel={'Emails Sent'} 
+												timeseriesData={statsData.timeseries}
+												timeseriesKey={statsKey}
+												metricKey="emails"
+											/>
+											<Stat 
+												stats={stats} 
+												hasChart={true} 
+												defaultLabel={'Total Clicks'} 
+												timeseriesData={statsData.timeseries}
+												timeseriesKey={statsKey}
+												metricKey="clicks"
+											/>
+											<Stat 
+												stats={stats} 
+												hasChart={true} 
+												defaultLabel={'Total Opens'} 
+												timeseriesData={statsData.timeseries}
+												timeseriesKey={statsKey}
+												metricKey="opens"
+											/>
+											<Stat 
+												stats={stats} 
+												hasChart={true} 
+												defaultLabel={'Spam'} 
+												timeseriesData={statsData.timeseries}
+												timeseriesKey={statsKey}
+												metricKey="spam"
+											/>
 										</>
 									)}
 								</div>
@@ -342,7 +319,7 @@ const Dashboard = () => {
 								<div className="stats-head">
 									<span className="stats-title">Subscribers</span>
 									<ButtonGroup
-										value="today"
+										value={subsStatsKey}
 										options={[
 											{ value: 'today', label: 'Today' },
 											{ value: 'd7', label: '7 Days' },
@@ -358,17 +335,37 @@ const Dashboard = () => {
 									{subsStats && (
 										<>
 											<div>
-												<Stat stats={subsStats} hasChart={false} defaultLabel={'Total'} />
+												<Stat 
+													stats={subsStats} 
+													hasChart={false} 
+													defaultLabel={'Total'} 
+													timeseriesData={statsData.timeseries}
+													timeseriesKey={subsStatsKey}
+													metricKey="subs_count"
+												/>
 											</div>
 											<div>
-												<Stat stats={subsStats} hasChart={false} defaultLabel={'Unsubscribed'} />
+												<Stat 
+													stats={subsStats} 
+													hasChart={false} 
+													defaultLabel={'Unsubscribed'} 
+													timeseriesData={statsData.timeseries}
+													timeseriesKey={subsStatsKey}
+													metricKey="unsubs"
+												/>
 											</div>
 										</>
 									)}
 								</div>
 								<br></br>
 								<div style={{ height: isMobile ? '200px' : '350px' }}>
-									<DashboardChart isPositive={true} />
+									<DashboardChart 
+										isPositive={true} 
+										timeseriesData={statsData.timeseries} 
+										timeseriesKey={subsStatsKey}
+										metric1="subs_count"
+										metric2="unsubs"
+									/>
 								</div>
 								<br></br>
 								<Button

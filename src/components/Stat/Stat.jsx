@@ -13,7 +13,7 @@ import {
   Title, 
   Tooltip, 
   Legend,
-  Filler  // Import the Filler plugin
+  Filler
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 
@@ -27,7 +27,10 @@ const Stat = ({
 	stats, 
 	hasChart = false, 
 	defaultLabel = '', 
-	className = '' 
+	className = '',
+	timeseriesData = null,
+	timeseriesKey = 'd7',
+	metricKey = null
 }) => {
 	if(!stats) return <></>
 	
@@ -64,12 +67,68 @@ const Stat = ({
 	}
 
 	const computedClassName = classNames('stat-wrapper', className)
+	
+	// Get the appropriate metric key for the chart based on the selected option
+	const getMetricKeyForChart = () => {
+		if (metricKey) return metricKey;
+		
+		// Map stat label to metric key in timeseries data
+		switch(selectedOption?.label) {
+			case 'Emails Sent':
+				return 'emails';
+			case 'Total Opens':
+				return 'opens';
+			case 'Total Clicks':
+				return 'clicks';
+			case 'Open Rate':
+				return 'open_rate';
+			case 'Click Rate':
+				return 'click_rate';
+			case 'Total':
+				return 'subs_count';
+			case 'Unsubscribed':
+				return 'unsubs';
+			case 'Spam':
+				return 'spam';
+			default:
+				// If we can't match a key, return null
+				return null;
+		}
+	}
+	
+	// Extract chart data from timeseries if available
+	let chartLabels = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+	let chartData = [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4];
+	
+	const currentMetricKey = getMetricKeyForChart();
+	
+	if (timeseriesData && timeseriesData[timeseriesKey] && Array.isArray(timeseriesData[timeseriesKey]) && currentMetricKey) {
+		const seriesData = timeseriesData[timeseriesKey];
+		
+		// Format date labels based on timeseriesKey
+		if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
+			// For daily data: Format as "Jul 22"
+			chartLabels = seriesData.map(item => {
+				const date = new Date(item.date);
+				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+			});
+		} else if (timeseriesKey === 'all') {
+			// For monthly data: Format as "Jul 2025"
+			chartLabels = seriesData.map(item => {
+				const date = new Date(item.date);
+				return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+			});
+		}
+		
+		// Extract metric data
+		chartData = seriesData.map(item => item[currentMetricKey] || 0);
+	}
 
-	const chartData = selectedOption && (parseFloat(selectedOption.value) >= 0 || typeof selectedOption.value === 'number') ? {
-		labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+	const chartData2 = {
+		labels: chartLabels,
 		datasets: [
 			{
-				data: [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4],
+				data: chartData,
 				borderColor: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
 				backgroundColor: function(context) {
 					const chart = context.chart;
@@ -81,19 +140,6 @@ const Stat = ({
 					}
 					return createGradient(ctx, chartArea);
 				},
-				borderWidth: 3,
-				tension: 0.4,
-				pointRadius: 0,
-				fill: true,
-			},
-		],
-	} : 
-	{labels: ['','',''],
-		datasets: [
-			{
-				data: [0,0,0],
-				borderColor: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
-				backgroundColor: isPositive ? 'rgba(96, 199, 0, 0.2)' : 'rgba(255, 166, 0, 0.1)',
 				borderWidth: 3,
 				tension: 0.4,
 				pointRadius: 0,
@@ -125,7 +171,24 @@ const Stat = ({
 				display: false,
 			},
 			tooltip: {
-				enabled: false,
+				enabled: timeseriesData ? true : false, // Enable tooltips only when using real data
+				mode: 'index',
+				intersect: false,
+				callbacks: {
+					title: function(tooltipItems) {
+						return tooltipItems[0].label || '';
+					},
+					label: function(context) {
+						let label = selectedOption?.label || '';
+						if (label) {
+							label += ': ';
+						}
+						if (context.parsed.y !== null) {
+							label += context.parsed.y.toLocaleString();
+						}
+						return label;
+					}
+				}
 			},
 		},
 		scales: {
@@ -139,7 +202,7 @@ const Stat = ({
 		},
 		elements: {
 			line: {
-				tension: 1,
+				tension: 0.4,
 			},
 		},
 	}
@@ -155,12 +218,11 @@ const Stat = ({
 	}, [])
 	
 	useEffect(() => {
-		for(const ss of stats){
-			if(ss.label===defaultLabel){
-				setSelectedOption(ss)
-			}
+		const option = stats.find((stat) => stat.label === defaultLabel);
+		if (option) {
+			setSelectedOption(option);
 		}
-	},[stats, defaultLabel])
+	}, [stats, defaultLabel])
 	
 	return (
 		<div className={computedClassName}>
@@ -190,7 +252,7 @@ const Stat = ({
 			{hasChart && (
 				<div>
 					<div style={{ height: isMobile ? '50px' : '70px' }}>
-						<Line data={chartData} options={chartOptions} />
+						<Line data={chartData2} options={chartOptions} />
 					</div>
 
 					{selectedOption && selectedOption.value ? 
@@ -218,6 +280,9 @@ Stat.propTypes = {
 	hasChart: PropTypes.bool,
 	defaultLabel: PropTypes.string,
 	className: PropTypes.string,
+	timeseriesData: PropTypes.object, // New prop for timeseries data
+	timeseriesKey: PropTypes.string, // Which time period to use
+	metricKey: PropTypes.string, // Optional explicit metric key
 }
 
 export default Stat

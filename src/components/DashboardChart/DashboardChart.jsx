@@ -9,13 +9,19 @@ import {
   Title, 
   Tooltip, 
   Legend,
-  Filler  // Import the Filler plugin
+  Filler
 } from 'chart.js'
 
 // Register all required components including Filler plugin
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
 
-const DashboardChart = ({ isPositive = true }) => {
+const DashboardChart = ({ 
+  isPositive = true, 
+  timeseriesData = null, 
+  timeseriesKey = 'd7',
+  metric1 = 'subs_count',
+  metric2 = 'unsubs'
+}) => {
 	// Function to create gradients for chart
 	const createGradients = (ctx, area) => {
 		// Create gradient for first dataset
@@ -42,12 +48,41 @@ const DashboardChart = ({ isPositive = true }) => {
 		
 		return [gradient1, gradient2];
 	};
+	
+	// Process actual data if available, otherwise use default data
+	let chartLabels = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+	let chartData1 = [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4];
+	let chartData2 = [1, 1.5, 2, 1.5, 2, 1.5, 1, 2.7, 2, 3, 3.5, 2, 1.8, 1.5, 1.7, 2.3, 0.5, 2.5, 1, 0.5, 4];
+	
+	// Extract and process data from timeseriesData if available
+	if (timeseriesData && timeseriesData[timeseriesKey] && Array.isArray(timeseriesData[timeseriesKey])) {
+		const seriesData = timeseriesData[timeseriesKey];
+		
+		// Format date labels based on timeseriesKey
+		if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
+			// For daily data: Format as "Jul 22"
+			chartLabels = seriesData.map(item => {
+				const date = new Date(item.date);
+				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+			});
+		} else if (timeseriesKey === 'all') {
+			// For monthly data: Format as "Jul 2025"
+			chartLabels = seriesData.map(item => {
+				const date = new Date(item.date);
+				return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+			});
+		}
+		
+		// Extract metric data
+		chartData1 = seriesData.map(item => item[metric1] || 0);
+		chartData2 = seriesData.map(item => item[metric2] || 0);
+	}
 
 	const data = {
-		labels: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+		labels: chartLabels,
 		datasets: [
 			{
-				data: [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4],
+				data: chartData1,
 				borderColor: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
 				backgroundColor: function(context) {
 					const chart = context.chart;
@@ -65,7 +100,7 @@ const DashboardChart = ({ isPositive = true }) => {
 				fill: true,
 			},
 			{
-				data: [1, 1.5, 2, 1.5, 2, 1.5, 1, 2.7, 2, 3, 3.5, 2, 1.8, 1.5, 1.7, 2.3, 0.5, 2.5, 1, 0.5, 4],
+				data: chartData2,
 				borderColor: !isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
 				backgroundColor: function(context) {
 					const chart = context.chart;
@@ -93,12 +128,34 @@ const DashboardChart = ({ isPositive = true }) => {
 				display: false,
 			},
 			tooltip: {
-				enabled: false,
+				enabled: true, // Enable tooltips to show actual values
+				mode: 'index',
+				intersect: false,
+				callbacks: {
+					title: function(tooltipItems) {
+						return tooltipItems[0].label || '';
+					},
+					label: function(context) {
+						let label = context.dataset.label || '';
+						if (label) {
+							label += ': ';
+						}
+						if (context.parsed.y !== null) {
+							label += context.parsed.y.toLocaleString();
+						}
+						return label;
+					}
+				}
 			},
 		},
 		scales: {
 			x: {
-				display: false,
+				display: timeseriesData ? true : false, // Show axis labels if we have real data
+				ticks: {
+					autoSkip: true,
+					maxRotation: 45,
+					minRotation: 45
+				}
 			},
 			y: {
 				display: false,
@@ -107,7 +164,7 @@ const DashboardChart = ({ isPositive = true }) => {
 		},
 		elements: {
 			line: {
-				tension: 1,
+				tension: 0.4, // Slightly less curved lines for better data representation
 			},
 		},
 	}
