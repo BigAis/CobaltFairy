@@ -337,7 +337,8 @@ const Subscribers = ({ initialView }) => {
 			// Don't load groups here, it's handled by other useEffects
 			autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
 		}
-	}, [user, subscribersFilters, autoAppliedFilters])
+		// Remove subscribersFilters from the dependency array
+	}, [user, autoAppliedFilters])
 
 	useEffect(() => {
 		if (filterString && groups && groups.length > 0) {
