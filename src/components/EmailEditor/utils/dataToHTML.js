@@ -364,7 +364,9 @@ const extractUrls = (htmlText) => {
   return [...new Set(matches)]
 }
 const dataToHtml = ({ bodySettings, blockList, isPreview=false, accountContext={}, proxyLink=false }) => {
-  const fontList = extractFonts(blockList); //recursively itterate blocklist to export all fonts, and find the required urls to add.
+  const fontList = [
+    ...new Map(extractFonts(blockList).map(obj => [JSON.stringify(obj), obj])).values()
+  ]; //recursively itterate blocklist to export all fonts, and find the required urls to add.
   let content = "";
   const { newBlockList, styles } = createStyleTag(blockList);
   content = blockListToHtml(newBlockList, bodySettings, accountContext, isPreview, proxyLink);
@@ -401,6 +403,7 @@ const dataToHtml = ({ bodySettings, blockList, isPreview=false, accountContext={
   let fontMediaStyles = "";
   let pixel = `${PIXEL_URL}/pixel.gif?cid=${''}&uid={{pixel_uid}}&v={{cmp_version}}`
   if(fontList.length>0) {
+
     fontStyles += `
       <![endif]-->
       `;
