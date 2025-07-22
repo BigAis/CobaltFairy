@@ -47,15 +47,22 @@ const Campaigns = () => {
 	
 	// New state for filters
 	const [showFilters, setShowFilters] = useState(false)
+	// Calculate default dates (last 30 days)
+	const defaultFromDate = () => {
+		const date = new Date();
+		date.setDate(date.getDate() - 30);
+		return date;
+	};
+
 	const [campaignFilters, setCampaignFilters] = useState({
-		dateFrom: '',
-		dateTo: '',
+		dateFrom: defaultFromDate(),
+		dateTo: new Date(),
 		minOpenRate: '',
 		maxOpenRate: '',
 		minClickRate: '',
 		maxClickRate: '',
 		recipientGroups: []
-	})
+	});
 
 	const totalCampaignsSent = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.sent : 2
 	const totalCampaignsDraft = campaignsMeta && campaignsMeta.counts ? campaignsMeta.counts.draft : 1
@@ -183,91 +190,90 @@ const Campaigns = () => {
 	};
 
 	// Apply filters
-	const applyCampaignFilters = () => {
-		// Use all campaigns as the source for filtering
-		const filtered = campaigns.filter(campaign => {
-			// First apply standard type filtering (sent, draft, outbox)
-			// This ensures we maintain the basic filtering by campaign type
+	const applyCampaignFilters = async () => {
+		try {
+			setLoading(true);
+			
+			// Build API query with all filters
+			let endpoint = `fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${currentPage}`;
+			
+			// Add campaign type filtering
 			if (selectedCampaignType === 'sent') {
-				if (campaign.status !== 'sent') return false;
+				endpoint += `&filters[status]=sent`;
 			} else if (selectedCampaignType === 'outbox') {
-				if (campaign.status !== 'draft' || !campaign.date) return false;
+				endpoint += `&filters[status]=draft&filters[date][$notNull]=true`;
 			} else if (selectedCampaignType === 'draft') {
-				if (campaign.status !== 'draft' || campaign.date) return false;
+				endpoint += `&filters[status]=draft&filters[date][$null]=true`;
 			}
 			
-			// Date filter - for sent campaigns use sent_at, for outbox use date
-			const campaignDate = campaign.status === 'sent' ? campaign.sent_at : campaign.date;
-			
-			if (campaignFilters.dateFrom && campaignDate) {
-				const filterDate = new Date(campaignFilters.dateFrom);
-				const campDate = new Date(campaignDate);
-				if (campDate < filterDate) return false;
+			// Add date range filtering
+			if (campaignFilters.dateFrom) {
+				const dateField = selectedCampaignType === 'sent' ? 'sent_at' : 'date';
+				endpoint += `&filters[${dateField}][$gte]=${new Date(campaignFilters.dateFrom).toISOString()}`;
 			}
 			
-			if (campaignFilters.dateTo && campaignDate) {
-				const filterDate = new Date(campaignFilters.dateTo);
-				const campDate = new Date(campaignDate);
-				if (campDate > filterDate) return false;
+			if (campaignFilters.dateTo) {
+				const dateField = selectedCampaignType === 'sent' ? 'sent_at' : 'date';
+				endpoint += `&filters[${dateField}][$lte]=${new Date(campaignFilters.dateTo).toISOString()}`;
 			}
 			
-			// Open rate filter - ensure we handle missing stats
-			const openRate = campaign.stats?.or;
-			if (campaignFilters.minOpenRate && openRate !== undefined) {
-				if (openRate < parseFloat(campaignFilters.minOpenRate)) {
-					return false;
-				}
+			// Add open/click rate filtering if applicable
+			if (campaignFilters.minOpenRate) {
+				endpoint += `&filters[stats][or][$gte]=${parseFloat(campaignFilters.minOpenRate)}`;
 			}
 			
-			if (campaignFilters.maxOpenRate && openRate !== undefined) {
-				if (openRate > parseFloat(campaignFilters.maxOpenRate)) {
-					return false;
-				}
+			if (campaignFilters.maxOpenRate) {
+				endpoint += `&filters[stats][or][$lte]=${parseFloat(campaignFilters.maxOpenRate)}`;
 			}
 			
-			// Click rate filter - ensure we handle missing stats
-			const clickRate = campaign.stats?.cr;
-			if (campaignFilters.minClickRate && clickRate !== undefined) {
-				if (clickRate < parseFloat(campaignFilters.minClickRate)) {
-					return false;
-				}
+			if (campaignFilters.minClickRate) {
+				endpoint += `&filters[stats][cr][$gte]=${parseFloat(campaignFilters.minClickRate)}`;
 			}
 			
-			if (campaignFilters.maxClickRate && clickRate !== undefined) {
-				if (clickRate > parseFloat(campaignFilters.maxClickRate)) {
-					return false;
-				}
+			if (campaignFilters.maxClickRate) {
+				endpoint += `&filters[stats][cr][$lte]=${parseFloat(campaignFilters.maxClickRate)}`;
 			}
 			
-			// Recipient groups filter
+			// Add recipient group filtering
 			if (campaignFilters.recipientGroups.length > 0) {
-				// Check if the campaign has any of the selected groups
-				const campaignGroupIds = campaign.recp_groups?.map(g => 
-					typeof g === 'object' ? g.id : g
-				) || [];
-				
-				const selectedGroupIds = campaignFilters.recipientGroups.map(g => g.value);
-				const hasSelectedGroup = campaignGroupIds.some(id => 
-					selectedGroupIds.includes(id.toString())
-				);
-				
-				if (!hasSelectedGroup) {
-					return false;
-				}
+				const groupIds = campaignFilters.recipientGroups.map(g => g.value).join(',');
+				endpoint += `&filters[recp_groups][id][$in]=${groupIds}`;
 			}
 			
-			return true;
-		});
-		
-		// Update the filtered campaigns state - this will update both the list and card views
-		setFilteredCampaigns(filtered);
-		
-		// Show a notification with the results
-		createNotification({
-			message: `Found ${filtered.length} campaigns matching your filters.`,
-			type: 'default',
-			autoClose: 3000
-		});
+			console.log("API filter endpoint:", endpoint);
+			
+			// Make the API call with all filters
+			const response = await ApiService.get(endpoint, user.jwt);
+			
+			if (response && response.data && response.data.data) {
+				const filteredData = response.data.data.map((item) => ({
+					...item,
+					image: '/images/cmp.png',
+				}));
+				
+				setCampaigns(filteredData);
+				setFilteredCampaigns(filteredData);
+				
+				if (response.data.meta) {
+					setCampaignsMeta(response.data.meta);
+				}
+				
+				createNotification({
+					message: `Found ${filteredData.length} campaigns matching your filters.`,
+					type: 'default',
+					autoClose: 3000
+				});
+			}
+		} catch (error) {
+			console.error('Error applying filters:', error);
+			createNotification({
+				message: 'Error filtering campaigns. Please try again.',
+				type: 'warning',
+				autoClose: 5000
+			});
+		} finally {
+			setLoading(false);
+		}
 	};
 	
 	// Create group options for dropdown
@@ -1012,25 +1018,25 @@ const Campaigns = () => {
 							className={'d-flex flex-column campaign-filters-card gap-20 mt20'}
 						>
 							<div className="d-flex gap-20">
-								<DatePicker
-									label="Date From"
-									hasMinDate={false}
-									hasDefaultDate={false}
-									dateFormat="d/m/Y"
-									timeFormat={'H:i'}
-									pickerType="date"
-									onChange={(date) => handleFilterChange('dateFrom', date)}
-									value={campaignFilters.dateFrom}
-								/>
-								<DatePicker
-									label="Date To"
-									hasMinDate={false}
-									dateFormat="d/m/Y"
-									timeFormat={'H:i'}
-									pickerType="date"
-									onChange={(date) => handleFilterChange('dateTo', date)}
-									value={campaignFilters.dateTo}
-								/>
+							<DatePicker
+								label="Date From"
+								hasMinDate={false}
+								hasDefaultDate={false}
+								dateFormat="d/m/Y"
+								timeFormat={'H:i'}
+								pickerType="date"
+								onChange={(date) => handleFilterChange('dateFrom', date)}
+								value={campaignFilters.dateFrom}
+							/>
+							<DatePicker
+								label="Date To"
+								hasMinDate={false}
+								dateFormat="d/m/Y"
+								timeFormat={'H:i'}
+								pickerType="date"
+								onChange={(date) => handleFilterChange('dateTo', date)}
+								value={campaignFilters.dateTo}
+							/>
 							</div>
 							
 							{selectedCampaignType === 'sent' && (
@@ -1082,31 +1088,31 @@ const Campaigns = () => {
 							</div>
 							
 							<div className="d-flex justify-content-end mt10">
-								<Button onClick={() => {
-									setCampaignFilters({
-										dateFrom: '',
-										dateTo: '',
-										minOpenRate: '',
-										maxOpenRate: '',
-										minClickRate: '',
-										maxClickRate: '',
-										recipientGroups: []
-									});
-									// Reset filteredCampaigns to match selected campaign type
-									const filtered = campaigns.filter(campaign => {
-										if (selectedCampaignType === 'sent') {
-											return campaign.status === 'sent';
-										} else if (selectedCampaignType === 'outbox') {
-											return campaign.status === 'draft' && campaign.date;
-										} else if (selectedCampaignType === 'draft') {
-											return campaign.status === 'draft' && !campaign.date;
-										}
-										return false;
-									});
-									setFilteredCampaigns(filtered);
-								}} type="secondary" style={{ marginRight: '10px' }}>
-									Clear Filters
-								</Button>
+							<Button onClick={() => {
+								setCampaignFilters({
+									dateFrom: defaultFromDate(),
+									dateTo: new Date(),
+									minOpenRate: '',
+									maxOpenRate: '',
+									minClickRate: '',
+									maxClickRate: '',
+									recipientGroups: []
+								});
+								// Reset filteredCampaigns to match selected campaign type
+								const filtered = campaigns.filter(campaign => {
+									if (selectedCampaignType === 'sent') {
+										return campaign.status === 'sent';
+									} else if (selectedCampaignType === 'outbox') {
+										return campaign.status === 'draft' && campaign.date;
+									} else if (selectedCampaignType === 'draft') {
+										return campaign.status === 'draft' && !campaign.date;
+									}
+									return false;
+								});
+								setFilteredCampaigns(filtered);
+							}} type="secondary" style={{ marginRight: '10px' }}>
+								Clear Filters
+							</Button>
 								<Button onClick={applyCampaignFilters}>
 									Apply Filters
 								</Button>
