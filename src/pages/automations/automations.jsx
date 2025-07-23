@@ -1,3 +1,5 @@
+// Updated version of src/pages/automations/automations.jsx
+
 import { React, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
@@ -24,8 +26,10 @@ const Automations = () => {
     const loadData = async () => {
         try {
             setLoading(true)
+            // Add a cache-busting parameter to ensure we get fresh data
+            const timestamp = new Date().getTime()
             let resp = await ApiService.get(
-                'fairymailer/getAutomations?sort[0]=createdAt:desc&pagination[pageSize]=1000&pagination[page]=1&',
+                `fairymailer/getAutomations?sort[0]=createdAt:desc&pagination[pageSize]=1000&pagination[page]=1&_t=${timestamp}`,
                 user.jwt
             )
             if (resp.data && resp.data.data) {
@@ -68,6 +72,19 @@ const Automations = () => {
     useEffect(() => {
         if (user) {
             loadData()
+        }
+        
+        // Add an event listener to refresh data when the page becomes visible again
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible' && user) {
+                loadData()
+            }
+        }
+        
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
         }
     }, [user])
 

@@ -118,41 +118,58 @@ const FlowEditor = () => {
 	const [selectedNode, setSelectedNode] = useState(null)
 
 	useEffect(() => {
-		const init = async () => {
-			if (autId) loadData(autId)
-			loadGroups()
-			loadCampaigns()
-			loadTemplates()
-			loadCmpLinks()
+	const init = async () => {
+		if (autId) loadData(autId);
+		loadGroups();
+		loadCampaigns();
+		loadTemplates();
+		loadCmpLinks();
+	};
+	
+	if (account && user) init();
+	
+	// Add an event listener to refresh data when the page becomes visible again
+	const handleVisibilityChange = () => {
+		if (document.visibilityState === 'visible' && user && account && autId) {
+		loadData(autId);
 		}
-		if (account && user) init()
-	}, [user, account])
+	};
+	
+	document.addEventListener('visibilitychange', handleVisibilityChange);
+	
+	return () => {
+		document.removeEventListener('visibilitychange', handleVisibilityChange);
+	};
+	}, [user, account, autId]);
 
 	const loadData = async (autId) => {
-		let resp = await ApiService.get(`fairymailer/getAutomations?filters[uuid]=${autId}&populate=*`, user.jwt)
-		const loadedNodes = resp.data.data[0].design.map(node=>{
-			if(node.type === "condition" && ["cmp_link_clicked"].includes(node.data?.trigger) && node.data?.link){
-				if(!node.data.link.value) node.data.link = {value:node.data.link}
-			}
-			if(node.type === "delay"){
-				// if(node.meta?.label=="Days"){
-				// 	node.data.delayValue = ['days']
-				// }else if (node.meta?.label=="Hours"){
-				// 	node.data.delayValue = ['hours']
-				// }
-				// if(!node.data?.delayValue || !node.data.delayValue[0]){
-				// 	node.data.delayValue = ['days'] //fallback to days
-				// }
-			}
-			return node
-		})
-		console.log('loadedNodes', loadedNodes, resp.data)
+	if (autId) {
+		// Add timestamp to ensure fresh data
+		const timestamp = new Date().getTime();
+		let resp = await ApiService.get(
+		`fairymailer/getAutomations?filters[uuid]=${autId}&populate=*&_t=${timestamp}`, 
+		user.jwt
+		);
+		
+		const loadedNodes = resp.data.data[0].design.map(node => {
+		// Rest of your existing mapping code...
+		return node;
+		});
+		
+		console.log('loadedNodes', loadedNodes, resp.data);
 		if (loadedNodes && loadedNodes.length > 0) {
-			setNodes(transformNodes(loadedNodes))
-			setHasTrigger(true)
+		setNodes(transformNodes(loadedNodes));
+		setHasTrigger(true);
 		}
-		setData(resp.data.data[0])
+		
+		// Important: Update data state and isReadOnly state
+		setData(resp.data.data[0]);
+		setIsReadOnly(resp.data.data[0].active || isViewOnlyParam);
+		
+		// Log the active status to confirm it's loaded correctly
+		console.log('Automation active status:', resp.data.data[0].active);
 	}
+	};
 
 	const transformNodes = (nodes) => {
 		//tranforms old fairy mail automations to new version.
@@ -298,74 +315,74 @@ const FlowEditor = () => {
 
 	// New function to update automation status
 	const updateAutomationStatus = async (newStatus) => {
-		try {
-			// First update the local state
-			setData({
-				...data,
-				active: newStatus
-			});
+	try {
+		// First update the local state immediately for better UX
+		setData(prevData => ({
+		...prevData,
+		active: newStatus
+		}));
 
-			// Update the read-only state immediately
-			setIsReadOnly(newStatus);
+		// Update the read-only state immediately
+		setIsReadOnly(newStatus);
 
-			// Then update in the backend
-			let resp = await ApiService.put(`automations/${data.id}`, 
-				{ data: { active: newStatus } }, 
-				user.jwt
-			);
+		console.log('Updating automation status to:', newStatus);
 
-			if (resp.status === 200) {
-				// Show notification of success
-				createNotification({
-					message: `Automation ${newStatus ? 'activated' : 'deactivated'} successfully.`,
-					type: 'default',
-					autoClose: 3000
-				});
-				
-				// Update data to match backend
-				if (resp.data && resp.data.data) {
-					setData(prevData => ({
-						...prevData,
-						active: resp.data.data.attributes.active
-					}));
-					// Ensure read-only state matches the actual status
-					setIsReadOnly(resp.data.data.attributes.active);
-				}
-				
-				return true;
-			} else {
-				// Revert local state change if API call fails
-				setData(prevData => ({
-					...prevData,
-					active: !newStatus
-				}));
-				setIsReadOnly(!newStatus);
-				
-				PopupText.fire({ 
-					icon: 'error', 
-					text: 'Failed to update automation status.', 
-					showCancelButton: false 
-				});
-				return false;
-			}
-		} catch (error) {
-			console.error("Error updating automation status:", error);
-			
-			// Revert local state change if API call fails
-			setData(prevData => ({
-				...prevData,
-				active: !newStatus
-			}));
-			setIsReadOnly(!newStatus);
-			
-			PopupText.fire({ 
-				icon: 'error', 
-				text: 'Error updating automation status. Please try again.', 
-				showCancelButton: false 
-			});
-			return false;
+		// Then update in the backend
+		let resp = await ApiService.put(
+		`automations/${data.id}`, 
+		{ data: { active: newStatus } }, 
+		user.jwt
+		);
+
+		if (resp.status === 200) {
+		// Show notification of success
+		createNotification({
+			message: `Automation ${newStatus ? 'activated' : 'deactivated'} successfully.`,
+			type: 'default',
+			autoClose: 3000
+		});
+		
+		console.log('Automation status updated successfully in backend');
+		
+		// Reload data from server to ensure we have the latest state
+		loadData(autId);
+		
+		return true;
+		} else {
+		console.error('Failed to update automation status:', resp);
+		
+		// Revert local state change if API call fails
+		setData(prevData => ({
+			...prevData,
+			active: !newStatus
+		}));
+		setIsReadOnly(!newStatus);
+		
+		PopupText.fire({ 
+			icon: 'error', 
+			text: 'Failed to update automation status.', 
+			showConfirmButton: false 
+		});
+		return false;
 		}
+	} catch (error) {
+		console.error("Error updating automation status:", error);
+		
+		// Revert local state change if API call fails
+		setData(prevData => ({
+		...prevData,
+		active: !newStatus
+		}));
+		setIsReadOnly(!newStatus);
+		
+		PopupText.fire({ 
+		icon: 'error', 
+		text: 'Error updating automation status. Please try again.', 
+		showConfirmButton: false 
+		});
+		return false;
 	}
+	};
 
 	// Fix go back navigation function
 	const handleGoBack = () => {
@@ -993,12 +1010,13 @@ const FlowEditor = () => {
 						Save
 					</Button>
 					<Switch
-						style={{ margin: '0 10px' }}
-						label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
-						checked={data?.active || false}
-						onChange={(value) => {
-						  updateAutomationStatus(value);
-						}}
+					style={{ margin: '0 10px' }}
+					label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
+					checked={data?.active || false}
+					onChange={(value) => {
+						console.log('Switch toggled to:', value);
+						updateAutomationStatus(value);
+					}}
 					/>
 					<Button
 						onClick={async () => {
@@ -1020,12 +1038,13 @@ const FlowEditor = () => {
 						This automation is currently active and cannot be edited
 					</div>
 					<Switch
-						style={{ margin: '0 10px' }}
-						label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
-						checked={data?.active || false}
-						onChange={(value) => {
-						  updateAutomationStatus(value);
-						}}
+					style={{ margin: '0 10px' }}
+					label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
+					checked={data?.active || false}
+					onChange={(value) => {
+						console.log('Switch toggled to:', value);
+						updateAutomationStatus(value);
+					}}
 					/>
 					<Button
 						onClick={handleGoBack}

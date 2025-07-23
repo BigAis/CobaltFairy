@@ -26,8 +26,25 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
 
     // Update automations state when incomingAutomations changes
     useEffect(() => {
+        console.log('AutomationsTable received updated automations:', incomingAutomations);
         setAutomations(incomingAutomations);
     }, [incomingAutomations]);
+
+    // Add an effect to handle page visibility changes
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible' && typeof refreshData === 'function') {
+                console.log('Page visible again, refreshing automations data');
+                refreshData();
+            }
+        };
+        
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [refreshData]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page)
@@ -54,6 +71,17 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
     // Function to update automation active status
     const updateAutomationStatus = async (automation, newStatus) => {
         try {
+            console.log(`Updating automation ${automation.id} status to:`, newStatus);
+            
+            // Optimistically update UI first
+            setAutomations(currentAutomations => 
+                currentAutomations.map(a => 
+                    a.id === automation.id 
+                        ? {...a, active: newStatus} 
+                        : a
+                )
+            );
+            
             // Call API to update the automation status
             let resp = await ApiService.put(
                 `automations/${automation.id}`, 
@@ -62,14 +90,7 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
             );
             
             if (resp.status === 200) {
-                // Update local state to reflect the change
-                setAutomations(currentAutomations => 
-                    currentAutomations.map(a => 
-                        a.id === automation.id 
-                            ? {...a, active: newStatus} 
-                            : a
-                    )
-                );
+                console.log('Automation status updated successfully in backend');
                 
                 // Show notification
                 createNotification({
@@ -78,8 +99,25 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
                     autoClose: 3000
                 });
                 
+                // If we have a refreshData function, call it to ensure parent components are updated
+                if (typeof refreshData === 'function') {
+                    console.log('Refreshing data from parent');
+                    setTimeout(() => refreshData(), 500); // Small delay to ensure API update is complete
+                }
+                
                 return true;
             } else {
+                console.error('Failed to update automation status:', resp);
+                
+                // Revert UI changes
+                setAutomations(currentAutomations => 
+                    currentAutomations.map(a => 
+                        a.id === automation.id 
+                            ? {...a, active: !newStatus} 
+                            : a
+                    )
+                );
+                
                 PopupText.fire({ 
                     icon: 'error', 
                     text: 'Failed to update automation status.', 
@@ -90,6 +128,16 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
             }
         } catch (error) {
             console.error("Error updating automation status:", error);
+            
+            // Revert UI changes
+            setAutomations(currentAutomations => 
+                currentAutomations.map(a => 
+                    a.id === automation.id 
+                        ? {...a, active: !newStatus} 
+                        : a
+                )
+            );
+            
             PopupText.fire({ 
                 icon: 'error', 
                 text: 'An error occurred while updating the automation status.', 
@@ -189,11 +237,10 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
                 <Switch 
                     checked={item.active} 
                     onChange={async () => {
+                        console.log(`Switch clicked for automation ${item.id}, current status:`, item.active);
                         const newActiveStatus = !item.active;
                         const success = await updateAutomationStatus(item, newActiveStatus);
-                        
-                        // If the update was successful, no need to do anything here
-                        // as the state is already updated in the updateAutomationStatus function
+                        console.log(`Switch update result for automation ${item.id}:`, success ? 'success' : 'failed');
                     }}
                 />
             </div>

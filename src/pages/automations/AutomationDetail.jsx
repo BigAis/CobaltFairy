@@ -49,55 +49,91 @@ const AutomationDetail = () => {
   }, [])
 
   // Load automation data
-  useEffect(() => {
-    const loadAutomation = async () => {
-      try {
-        setLoading(true)
-        const resp = await ApiService.get(`fairymailer/getAutomations?filters[uuid]=${autId}&populate=*`, user.jwt)
-        if (resp.data && resp.data.data && resp.data.data.length > 0) {
-          setAutomation(resp.data.data[0])
-          setIsReadOnly(resp.data.data[0].active)
-        } else {
-          createNotification({
-            message: 'Automation not found',
-            type: 'warning',
-            autoClose: 3000
-          })
-          navigate('/automations')
-        }
-      } catch (error) {
-        console.error('Error loading automation:', error)
+  const loadAutomation = async () => {
+    try {
+      setLoading(true)
+      // Add a cache-busting parameter to ensure we get fresh data
+      const timestamp = new Date().getTime()
+      console.log(`Loading automation ${autId} at ${timestamp}`)
+      
+      const resp = await ApiService.get(
+        `fairymailer/getAutomations?filters[uuid]=${autId}&populate=*&_t=${timestamp}`, 
+        user.jwt
+      )
+      
+      if (resp.data && resp.data.data && resp.data.data.length > 0) {
+        const automationData = resp.data.data[0]
+        console.log('Loaded automation data:', automationData)
+        console.log('Automation active status:', automationData.active)
+        
+        setAutomation(automationData)
+        setIsReadOnly(automationData.active)
+      } else {
+        console.error('No automation data found for ID:', autId)
         createNotification({
-          message: 'Failed to load automation details',
+          message: 'Automation not found',
           type: 'warning',
           autoClose: 3000
         })
-      } finally {
-        setLoading(false)
+        navigate('/automations')
       }
+    } catch (error) {
+      console.error('Error loading automation:', error)
+      createNotification({
+        message: 'Failed to load automation details',
+        type: 'warning',
+        autoClose: 3000
+      })
+    } finally {
+      setLoading(false)
     }
+  }
 
+  // Initial data loading
+  useEffect(() => {
     if (user && autId) {
       loadAutomation()
+    }
+    
+    // Add event listeners for page visibility changes
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user && autId) {
+        console.log('Page visible again, reloading automation data')
+        loadAutomation()
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [user, autId])
 
   // Update automation status
   const updateAutomationStatus = async (newStatus) => {
     try {
-      // First update the local state
+      console.log('Updating automation status to:', newStatus)
+      
+      // First update the local state for immediate UI feedback
       setAutomation({
         ...automation,
         active: newStatus
       })
+      
+      // Update read-only status
+      setIsReadOnly(newStatus)
 
       // Then update in the backend
-      let resp = await ApiService.put(`automations/${automation.id}`, 
+      let resp = await ApiService.put(
+        `automations/${automation.id}`, 
         { data: { active: newStatus } }, 
         user.jwt
       )
 
       if (resp.status === 200) {
+        console.log('Automation status updated successfully in backend')
+        
         // Show notification of success
         createNotification({
           message: `Automation ${newStatus ? 'activated' : 'deactivated'} successfully.`,
@@ -105,16 +141,20 @@ const AutomationDetail = () => {
           autoClose: 3000
         })
         
-        // Update read-only status
-        setIsReadOnly(newStatus)
+        // Reload data to ensure we have the latest state
+        loadAutomation()
         
         return true
       } else {
+        console.error('Failed to update automation status:', resp)
+        
         // Revert local state change if API call fails
         setAutomation(prevData => ({
           ...prevData,
           active: !newStatus
         }))
+        
+        setIsReadOnly(!newStatus)
         
         createNotification({
           message: 'Failed to update automation status.',
@@ -131,6 +171,8 @@ const AutomationDetail = () => {
         ...prevData,
         active: !newStatus
       }))
+      
+      setIsReadOnly(!newStatus)
       
       createNotification({
         message: 'Error updating automation status. Please try again.',
@@ -193,7 +235,10 @@ const AutomationDetail = () => {
                 <Switch
                   checked={automation?.active || false}
                   label={automation?.active ? 'Running' : 'Stopped'}
-                  onChange={(value) => updateAutomationStatus(value)}
+                  onChange={(value) => {
+                    console.log('Switch toggled to:', value)
+                    updateAutomationStatus(value)
+                  }}
                 />
               </div>
               
