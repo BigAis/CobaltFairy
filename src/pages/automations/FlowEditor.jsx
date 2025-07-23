@@ -362,8 +362,8 @@ const FlowEditor = () => {
 
 	// Fix go back navigation function
 	const handleGoBack = () => {
-		// Always navigate back to the automation detail page, not stats
-		navigate(`/automations/${autId}`);
+		// Navigate back to edit automation page, not the overview
+		navigate(`/automations/${autId}/edit`);
 	}
 
 	const addNode = (type, input = 0, position = 0, name = '') => {
@@ -996,7 +996,7 @@ const FlowEditor = () => {
 					<Button
 						onClick={async () => {
 						await exportData(false)
-						navigate(`/automations/${autId}`)
+						navigate(`/automations/${autId}/edit`)
 						}}
 					>
 						Done Editing
@@ -1015,7 +1015,7 @@ const FlowEditor = () => {
 					<Button
 						onClick={handleGoBack}
 					>
-						{data?.active ? 'Back to Automation' : 'Edit Flow'}
+						{data?.active ? 'Back to Edit' : 'Back to Edit'}
 					</Button>
 					</>
 				)}
