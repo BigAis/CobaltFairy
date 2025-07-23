@@ -33,9 +33,12 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
         setCurrentPage(page)
     }
 
+    // Updated dropdown options to include Overview
     const dropdownOptions = [
+        { value: 'overview', label: 'Overview' },
         { value: 'delete', label: 'Delete' },
     ]
+    
     const handleLeftClick = (item) => {
         navigate('/automations/'+item.uuid)
     }
@@ -101,15 +104,14 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
         return (
             <div>
                 <Dropdown withDivider={true} icon={'Plus'} options={dropdownOptions} onLeftClick={()=>{
-                    // If automation is active, navigate to view-only mode
-                    if (item.active) {
-                        navigate(`/automations/${item.uuid}?viewOnly=true`);
-                    } else {
-                        handleLeftClick(item);
-                    }
+                    // Always navigate to the Edit Automation page first
+                    navigate(`/automations/${item.uuid}/edit`);
                 }} onOptionSelect={ async (selectedOption)=>{
                     switch(selectedOption.value){
-                                    case "delete": 
+                                case "overview": 
+                                    navigate(`/automations/${item.uuid}`);
+                                    break;
+                                case "delete": 
                                     if(item.active) {
                                         await PopupText.fire({
                                         icon: 'warning',
