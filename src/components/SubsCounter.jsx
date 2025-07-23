@@ -6,10 +6,10 @@ import './SubsCounter.scss'
 
 const SubsCounter = ({ children, currentSubs, subsLimit, onClick, className, ...props }) => {
 	const computedClassName = classNames('subs-counter', 'd-flex', className)
+	
 	const formatNum = (num) => {
 		if (num < 1000) {
 			return num
-			0
 		}
 		if (num < 1000000) {
 			return (num / 1000).toFixed(1) + 'k'
@@ -22,12 +22,13 @@ const SubsCounter = ({ children, currentSubs, subsLimit, onClick, className, ...
 		}
 		return (num / 1000000000000).toFixed(1) + 'T'
 	}
+	
 	const progressValue = () => {
 		return (currentSubs / subsLimit) * 100
 	}
 
 	return (
-		<div className={computedClassName}>
+		<div className={computedClassName} {...props}>
 			<div className="leftPart">
 				<div className="text">
 					{formatNum(currentSubs)}/{formatNum(subsLimit)} Subscribers
