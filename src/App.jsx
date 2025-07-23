@@ -32,6 +32,7 @@ import EditUser from './pages/Team/EditUser'
 import Stats from './pages/stats/stats'
 import Redirection from './pages/redirection/redirection'
 import AutomationDetail from './pages/automations/AutomationDetail'
+import EditSegment from './pages/subscribers/EditSegment'
 
 // A wrapper component to handle authentication check
 const ProtectedRoute = ({ children }) => {
@@ -136,6 +137,8 @@ function App() {
         <Route path="/subscribers/list" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
         <Route path="/subscribers/groups" element={<ProtectedRoute><Subscribers initialView="groups" /></ProtectedRoute>} />
         <Route path="/subscribers/segments" element={<ProtectedRoute><Subscribers initialView="segments" /></ProtectedRoute>} />
+        <Route path="/subscribers/segment/new" element={<ProtectedRoute><EditSegment /></ProtectedRoute>} />
+        <Route path="/subscribers/segment/:uuid" element={<ProtectedRoute><EditSegment /></ProtectedRoute>} />
         <Route path="/subscribers/history" element={<ProtectedRoute><Subscribers initialView="history" /></ProtectedRoute>} />
         <Route path="/subscribers/stats" element={<ProtectedRoute><Subscribers initialView="stats" /></ProtectedRoute>} />
         <Route path="/subscribers/fields" element={<ProtectedRoute><Subscribers initialView="fields" /></ProtectedRoute>} />

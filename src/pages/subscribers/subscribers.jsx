@@ -1,4 +1,7 @@
 import SubscribersTable from '../../components/DataTable/SubscribersTable'
+import GroupsTable from '../../components/DataTable/GroupsTable'
+import SegmentsTable from '../../components/DataTable/SegmentsTable'
+import CustomFieldsTable from '../../components/DataTable/CustomFieldsTable'
 import '../dashboard/dashboard.scss'
 import '../../fullpage.scss'
 
@@ -15,13 +18,11 @@ import InputText from '../../components/InputText/InputText'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
-import GroupsTable from '../../components/DataTable/GroupsTable'
 import MultipleDropdown from '../../components/MultipleDropdown/MultipleDropdown'
 import DatePicker from '../../components/DatePicker'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import CustomFieldsTable from '../../components/DataTable/CustomFieldsTable'
 import ImportCSV from './ImportCSV'
 import SubscribersCleanup from './SubscribersCleanup';
 import './SubscribersCleanup.scss';
@@ -41,15 +42,19 @@ const Subscribers = ({ initialView }) => {
 
 	const { filterString } = useParams()
 
-	// const [resultsPerPage, setResultsPerPage] = useState(10)
-	const [totalGroups, setTotalGroups] = useState(0)
-	// const [currentGroupPage, setCurrentGroupPage] = useState(1)
-
 	const { user, account } = useAccount()
 	const [subscribers, setSubscribers] = useState([])
 	const [totalSubs, setTotalSubs] = useState(0)
+	
 	const [groups, setGroups] = useState([])
+	const [totalGroups, setTotalGroups] = useState(0)
 	const [groupsLoading, setGroupsLoading] = useState(false)
+	
+	// New state for segments
+	const [segments, setSegments] = useState([])
+	const [totalSegments, setTotalSegments] = useState(0)
+	const [segmentsLoading, setSegmentsLoading] = useState(false)
+	const [segmentSearchValue, setSegmentSearchValue] = useState('')
 
 	// State to track selected subscribers
 	const [selectedSubscribers, setSelectedSubscribers] = useState([])
@@ -223,12 +228,137 @@ const Subscribers = ({ initialView }) => {
 		}
 	}
 
+	// Get segments
+	const getSegments = async (searchTerm = '') => {
+		if (segmentsLoading) return;
+		
+		setSegmentsLoading(true);
+		try {
+			const response = await ApiService.get('fairymailer/getSegments', user.jwt)
+			
+			console.log('Segments API response:', response.data); // Debug log
+			
+			if (response.data && response.data.data) {
+				// Filter by search term if provided
+				let filteredSegments = response.data.data;
+				
+				// Log all segments to see what we're getting
+				console.log('All segments before filtering:', filteredSegments);
+				
+				if (searchTerm) {
+					filteredSegments = filteredSegments.filter(segment => 
+						segment.name.toLowerCase().includes(searchTerm.toLowerCase())
+					);
+				}
+				
+				// Only show segments that are not explicitly marked as inactive
+				// Changed from "active !== false" to be more inclusive
+				filteredSegments = filteredSegments.filter(segment => segment.active !== false);
+				
+				console.log('Filtered segments to display:', filteredSegments);
+				
+				setSegments(filteredSegments)
+				setTotalSegments(filteredSegments.length)
+			} else {
+				console.log('No segments data found in response');
+				setSegments([]);
+				setTotalSegments(0);
+			}
+		} catch (error) {
+			console.error('Error fetching segments:', error)
+			PopupText.fire({
+				text: 'Error fetching segments. Please try again later.',
+				icon: 'error'
+			})
+			setSegments([]);
+			setTotalSegments(0);
+		} finally {
+			setSegmentsLoading(false)
+		}
+	}
+
+	// Search segments
+	const searchSegments = (searchTerm) => {
+		setSegmentSearchValue(searchTerm);
+		getSegments(searchTerm);
+	}
+
+	// Apply segment filter
+	const applySegmentFilter = (segment) => {
+		setShowFilters(true);
+		
+		// Apply the filters from the segment
+		const newFilters = { ...subscribersFilters };
+		
+		// Reset filters first
+		newFilters.email = '';
+		newFilters.name = '';
+		newFilters.groups = [];
+		newFilters.dateFrom = '';
+		newFilters.dateTo = '';
+		
+		// Apply email filter
+		if (segment.filters?.email?.$contains) {
+			newFilters.email = segment.filters.email.$contains;
+		}
+		
+		// Apply name filter
+		if (segment.filters?.name?.$contains) {
+			newFilters.name = segment.filters.name.$contains;
+		}
+		
+		// Apply date filters
+		if (segment.filters?.createdAt?.$gte) {
+			newFilters.dateFrom = new Date(segment.filters.createdAt.$gte);
+		}
+		
+		if (segment.filters?.createdAt?.$lte) {
+			newFilters.dateTo = new Date(segment.filters.createdAt.$lte);
+		}
+		
+		// Apply group filters
+		if (segment.filters?.groups?.id?.$in && segment.filters.groups.id.$in.length > 0) {
+			const groupIds = segment.filters.groups.id.$in;
+			
+			// Find the matching groups
+			const selectedGroups = groups
+				.filter(group => groupIds.includes(group.id))
+				.map(group => ({
+					value: group.udid,
+					label: group.name
+				}));
+			
+			newFilters.groups = selectedGroups;
+		}
+		
+		setSubscribersFilters(newFilters);
+		
+		// Apply the filters
+		setAutoAppliedFilters(true);
+		filterSubscribersAction();
+		
+		// Show a notification
+		PopupText.fire({
+			text: `Applied segment "${segment.name}" as filter`,
+			icon: 'success',
+			timer: 2000,
+			showConfirmButton: false
+		});
+	}
+
 	// Initial load of groups when user is available
 	useEffect(() => {
 		if (user && groups.length === 0 && !groupsLoading) {
 			getGroups(1, '');
 		}
 	}, [user])
+
+	// Load segments when the view is set to segments
+	useEffect(() => {
+		if (user && view === 'segments' && segments.length === 0 && !segmentsLoading) {
+			getSegments('');
+		}
+	}, [user, view])
 
 	// Handle search term changes for groups
 	useEffect(() => {
@@ -311,6 +441,12 @@ const Subscribers = ({ initialView }) => {
 						Add Group
 					</Button>
 				)
+			case 'segments':
+				return (
+					<Button onClick={() => navigate('/subscribers/segment/new')} icon={'Plus'} type="action">
+						Add Segment
+					</Button>
+				)
 			case 'fields':
 				return (
 					<Button onClick={() => navigate('/subscribers/field/new')} icon={'Plus'} type="action">
@@ -325,11 +461,14 @@ const Subscribers = ({ initialView }) => {
 	}
 
 	const onUpdate = async () => {
-		// Reload groups when called (e.g., after delete)
+		// Reload data based on current view
 		if (view === 'groups') {
 			await getGroups(1, groupSearchValue);
+		} else if (view === 'segments') {
+			await getSegments(segmentSearchValue);
+		} else {
+			autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers();
 		}
-		autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
 	}
 
 	useEffect(() => {
@@ -337,7 +476,6 @@ const Subscribers = ({ initialView }) => {
 			// Don't load groups here, it's handled by other useEffects
 			autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
 		}
-		// Remove subscribersFilters from the dependency array
 	}, [user, autoAppliedFilters])
 
 	useEffect(() => {
@@ -448,13 +586,13 @@ const Subscribers = ({ initialView }) => {
 						{view === 'subs' && <div className="page-name">Subscribers</div>}
 						{view === 'groups' && <div className="page-name">Groups</div>}
 						{view === 'fields' && <div className="page-name">Fields</div>}
+						{view === 'segments' && <div className="page-name">Segments</div>}
 						{view === 'import' && (
 							<div className="page-name">
 								{importMode === 'manual' ? 'Add Subscriber' : 'Import Subscribers'}
 							</div>
 						)}
 						{view === 'cleanup' && <div className="page-name">Cleanup Subscribers</div>}
-						{view === 'segments' && <div className="page-name">Segments</div>}
 						{view === 'history' && <div className="page-name">History</div>}
 						{view === 'stats' && <div className="page-name">Stats</div>}
 						{renderAddButton()}
@@ -466,7 +604,7 @@ const Subscribers = ({ initialView }) => {
 								<ButtonGroup
 								options={[
 									{ value: 'subs', label: `All Subscribers (${totalSubs})` },
-									{ value: 'segments', label: `Segments (0)` },
+									{ value: 'segments', label: `Segments (${totalSegments})` },
 									{ value: 'groups', label: `Groups (${totalGroups})` },
 									{ value: 'fields', label: `Fields` },
 									{ value: 'history', label: `History` },
@@ -506,7 +644,6 @@ const Subscribers = ({ initialView }) => {
 							</div>
 							)}
 
-
 							{view === 'groups' && (
 							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 								<SearchBar
@@ -514,6 +651,18 @@ const Subscribers = ({ initialView }) => {
 								label="Search Groups"
 								initialValue={groupSearchValue}
 								onSearch={searchGroups}
+								style={{ width: '100%' }}
+								/>
+							</div>
+							)}
+							
+							{view === 'segments' && (
+							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+								<SearchBar
+								placeholder="Search Segments"
+								label="Search Segments"
+								initialValue={segmentSearchValue}
+								onSearch={searchSegments}
 								style={{ width: '100%' }}
 								/>
 							</div>
@@ -589,6 +738,20 @@ const Subscribers = ({ initialView }) => {
 						</div>
 					)}
 
+					{view === 'segments' && (
+						<div className="segments">
+							<SegmentsTable 
+								segmentSearchValue={segmentSearchValue} 
+								onUpdate={() => getSegments(segmentSearchValue)} 
+								setView={setView}
+								segments={segments}
+								totalResults={totalSegments}
+								loading={segmentsLoading}
+								applySegmentFilter={applySegmentFilter}
+							/>
+						</div>
+					)}
+
 					{view === 'fields' && (
 						<div className="groups">
 							<CustomFieldsTable setView={setView} />
@@ -606,17 +769,6 @@ const Subscribers = ({ initialView }) => {
 					</div>
 					)}
 					
-					{view === 'segments' && (
-					  <Card>
-						<div style={{ textAlign: 'center', padding: '40px 20px' }}>
-						  <h3 style={{ marginBottom: '15px', fontFamily: 'Bitter, serif', fontWeight: 600 }}>
-							Segments Under Construction
-						  </h3>
-						  <p>This feature is coming soon. Stay tuned!</p>
-						</div>
-					  </Card>
-					)}
-
 					{view === 'history' && (
 					  <Card>
 						<div style={{ textAlign: 'center', padding: '40px 20px' }}>
