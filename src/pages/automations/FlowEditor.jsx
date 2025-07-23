@@ -305,6 +305,9 @@ const FlowEditor = () => {
 				active: newStatus
 			});
 
+			// Update the read-only state immediately
+			setIsReadOnly(newStatus);
+
 			// Then update in the backend
 			let resp = await ApiService.put(`automations/${data.id}`, 
 				{ data: { active: newStatus } }, 
@@ -325,6 +328,8 @@ const FlowEditor = () => {
 						...prevData,
 						active: resp.data.data.attributes.active
 					}));
+					// Ensure read-only state matches the actual status
+					setIsReadOnly(resp.data.data.attributes.active);
 				}
 				
 				return true;
@@ -334,6 +339,7 @@ const FlowEditor = () => {
 					...prevData,
 					active: !newStatus
 				}));
+				setIsReadOnly(!newStatus);
 				
 				PopupText.fire({ 
 					icon: 'error', 
@@ -350,6 +356,7 @@ const FlowEditor = () => {
 				...prevData,
 				active: !newStatus
 			}));
+			setIsReadOnly(!newStatus);
 			
 			PopupText.fire({ 
 				icon: 'error', 
@@ -1010,12 +1017,20 @@ const FlowEditor = () => {
 						marginRight: '20px',
 						fontFamily: 'Inter, sans-serif'
 					}}>
-						{data?.active ? 'This automation is currently active and cannot be edited' : 'View-only mode'}
+						This automation is currently active and cannot be edited
 					</div>
+					<Switch
+						style={{ margin: '0 10px' }}
+						label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
+						checked={data?.active || false}
+						onChange={(value) => {
+						  updateAutomationStatus(value);
+						}}
+					/>
 					<Button
 						onClick={handleGoBack}
 					>
-						{data?.active ? 'Back to Edit' : 'Back to Edit'}
+						Back to Edit
 					</Button>
 					</>
 				)}
