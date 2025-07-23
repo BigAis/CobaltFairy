@@ -1,130 +1,65 @@
 import React, { useState, useEffect } from 'react'
-import Card from '../../components/Card'
-import Button from '../../components/Button'
-import SearchBar from '../../components/SearchBar/SearchBar'
-import Dropdown from '../../components/Dropdown'
-import Checkbox from '../../components/Checkbox'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
-import Pagination from '../../components/Pagination'
+import Dropdown from '../../components/Dropdown'
+import Checkbox from '../../components/Checkbox'
 import { useAccount } from '../../context/AccountContext'
-import { ApiService } from '../../service/api-service'
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
+import { useNavigate } from 'react-router-dom'
 
 const AutomationSubscribers = ({ automation }) => {
   const { user } = useAccount()
-  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
   const [subscribers, setSubscribers] = useState([])
-  const [filteredSubscribers, setFilteredSubscribers] = useState([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [selectedFilter, setSelectedFilter] = useState('all')
   const [selectedSubscribers, setSelectedSubscribers] = useState([])
-  const subscribersPerPage = 10
+  const [loading, setLoading] = useState(false)
   
-  // Filter options
-  const filterOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'queued', label: 'Queued' },
-    { value: 'processing', label: 'Processing' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'errored', label: 'Errored' }
-  ]
-
+  // Mock data for subscribers
   useEffect(() => {
-    const loadSubscribers = async () => {
-      if (!automation || !automation.id) return
-
-      try {
-        setLoading(true)
-        
-        // In a real implementation, you would fetch actual subscribers from the API
-        // For now, we'll create some placeholder data
-        const mockSubscribers = Array(30).fill(0).map((_, index) => ({
-          id: index + 1,
-          firstName: 'Alice',
-          lastName: 'Jones',
-          email: `alicenack@aol.com`,
-          emailsSent: 5,
-          emailOpens: 1,
-          emailClicks: 5,
-          subscribed: '2024-04-17',
-          status: index % 4 === 0 ? 'queued' : index % 4 === 1 ? 'processing' : index % 4 === 2 ? 'completed' : 'errored'
-        }))
-
-        setSubscribers(mockSubscribers)
-        setFilteredSubscribers(mockSubscribers)
-      } catch (error) {
-        console.error('Error loading subscribers:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadSubscribers()
+    setLoading(true)
+    
+    // Create mock subscribers data that matches the image
+    const mockSubscribers = Array(6).fill(0).map((_, index) => ({
+      id: index + 1,
+      firstName: 'Alice',
+      lastName: 'Jones',
+      email: 'alicenack@aol.com',
+      emailsSent: 5,
+      emailOpens: 1,
+      emailClicks: 5,
+      subscribed: '2024-04-17'
+    }))
+    
+    setSubscribers(mockSubscribers)
+    setLoading(false)
   }, [automation])
 
-  // Filter subscribers based on search term and filter option
-  useEffect(() => {
-    let filtered = [...subscribers]
-    
-    // Apply status filter
-    if (selectedFilter !== 'all') {
-      filtered = filtered.filter(sub => sub.status === selectedFilter)
-    }
-    
-    // Apply search filter
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase()
-      filtered = filtered.filter(sub => 
-        sub.firstName.toLowerCase().includes(term) ||
-        sub.lastName.toLowerCase().includes(term) ||
-        sub.email.toLowerCase().includes(term)
-      )
-    }
-    
-    setFilteredSubscribers(filtered)
-    setCurrentPage(1) // Reset to first page when filters change
-  }, [searchTerm, selectedFilter, subscribers])
+  // Action dropdown options
+  const dropdownOptions = [
+    { value: 'remove', label: 'Remove' },
+    { value: 'resend', label: 'Resend Em' }
+  ]
 
-  // Calculate paginated data
-  const paginatedSubscribers = filteredSubscribers.slice(
-    (currentPage - 1) * subscribersPerPage,
-    currentPage * subscribersPerPage
-  )
-
-  // Handle search
-  const handleSearch = (term) => {
-    setSearchTerm(term)
-  }
-
-  // Handle filter change
-  const handleFilterChange = (option) => {
-    setSelectedFilter(option.value)
-  }
-
-  // Selection template
-  const selectionTemplate = (rowData) => (
+  // Checkbox template for rows
+  const rowCheckboxTemplate = (rowData) => (
     <Checkbox 
-      checked={selectedSubscribers.includes(rowData.id)} 
+      checked={selectedSubscribers.some(sub => sub.id === rowData.id)}
       onChange={(checked) => {
         if (checked) {
-          setSelectedSubscribers([...selectedSubscribers, rowData.id])
+          setSelectedSubscribers([...selectedSubscribers, rowData])
         } else {
-          setSelectedSubscribers(selectedSubscribers.filter(id => id !== rowData.id))
+          setSelectedSubscribers(selectedSubscribers.filter(sub => sub.id !== rowData.id))
         }
-      }} 
+      }}
     />
   )
-
-  // Header checkbox template
+  
+  // Header checkbox template for "select all"
   const headerCheckboxTemplate = () => (
     <Checkbox 
-      checked={selectedSubscribers.length === paginatedSubscribers.length && paginatedSubscribers.length > 0}
+      checked={selectedSubscribers.length === subscribers.length && subscribers.length > 0}
       onChange={(checked) => {
         if (checked) {
-          setSelectedSubscribers(paginatedSubscribers.map(sub => sub.id))
+          setSelectedSubscribers([...subscribers])
         } else {
           setSelectedSubscribers([])
         }
@@ -132,99 +67,68 @@ const AutomationSubscribers = ({ automation }) => {
     />
   )
 
-  // Action buttons template
+  // Actions template
   const actionsTemplate = (rowData) => {
     return (
-      <div className="actions-cell">
-        <Button type="secondary">Edit</Button>
-        <Button type="secondary" icon="Caret" />
+      <div>
+        <Dropdown 
+          withDivider={true}
+          options={dropdownOptions} 
+          onLeftClick={() => {
+            console.log('Edit subscriber:', rowData);
+          }} 
+          onOptionSelect={(selectedOption) => {
+            console.log(`Selected ${selectedOption.label} for subscriber:`, rowData);
+          }}
+        >
+          Edit
+        </Dropdown>
       </div>
     )
   }
 
-  // Status template with colored indicator
-  const statusTemplate = (rowData) => {
-    return (
-      <div className={`status-badge status-${rowData.status}`}>
-        {rowData.status.charAt(0).toUpperCase() + rowData.status.slice(1)}
-      </div>
-    )
-  }
+  const queuedOptions = [
+    { value: 'queued', label: 'Queued' },
+    { value: 'all', label: 'All' },
+    { value: 'processed', label: 'Processed' }
+  ]
 
   return (
     <div className="automation-subscribers">
-      {loading ? (
-        <Card>
-          <Skeleton height={400} />
-        </Card>
-      ) : (
-        <>
-          {/* Filters and search */}
-          <div className="subscribers-filters">
-            <div className="search-container">
-              <SearchBar
-                placeholder="Search subscribers"
-                label="Search subscribers"
-                initialValue={searchTerm}
-                onSearch={handleSearch}
-              />
-            </div>
-            
-            <div className="filter-container">
-              <Dropdown
-                options={filterOptions}
-                selectedValue={filterOptions.find(opt => opt.value === selectedFilter)}
-                onOptionSelect={handleFilterChange}
-              >
-                {filterOptions.find(opt => opt.value === selectedFilter)?.label || 'Filter'}
-              </Dropdown>
-            </div>
-          </div>
-          
-          {/* Subscribers table */}
-          <Card className="subscribers-table-card">
-            <DataTable 
-              value={paginatedSubscribers} 
-              className="subscribers-table" 
-              responsive
-              selection={selectedSubscribers}
-              onSelectionChange={e => setSelectedSubscribers(e.value)}
-            >
-              <Column selectionMode="multiple" headerStyle={{ width: '3em' }} body={selectionTemplate} header={headerCheckboxTemplate} />
-              <Column field="firstName" header="First Name" />
-              <Column field="lastName" header="Last Name" />
-              <Column field="email" header="Email" />
-              <Column field="emailsSent" header="Email Sent" />
-              <Column field="emailOpens" header="Email Opens" />
-              <Column field="emailClicks" header="Email Clicks" />
-              <Column field="subscribed" header="Subscribed" />
-              <Column field="status" header="Status" body={statusTemplate} />
-              <Column body={actionsTemplate} />
-            </DataTable>
-            
-            {filteredSubscribers.length === 0 ? (
-              <div className="no-results">
-                <p>No subscribers found matching your criteria.</p>
-                <Button type="secondary" onClick={() => {
-                  setSearchTerm('')
-                  setSelectedFilter('all')
-                }}>
-                  Clear Filters
-                </Button>
-              </div>
-            ) : (
-              <div className="pagination-container">
-                <Pagination 
-                  currentPage={currentPage}
-                  totalResults={filteredSubscribers.length}
-                  resultsPerPage={subscribersPerPage}
-                  onChange={setCurrentPage}
-                />
-              </div>
-            )}
-          </Card>
-        </>
-      )}
+      {/* Filter controls at the top */}
+      <div className="subscribers-header" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+        <Dropdown
+          options={queuedOptions}
+          selectedValue={queuedOptions[0]}
+          style={{ width: '150px' }}
+        >
+          Queued
+        </Dropdown>
+      </div>
+      
+      {/* Subscribers table */}
+      <DataTable 
+        value={subscribers} 
+        className="subscribers-table"
+        selection={selectedSubscribers}
+        onSelectionChange={(e) => setSelectedSubscribers(e.value)}
+        dataKey="id"
+        loading={loading}
+      >
+        <Column
+          body={rowCheckboxTemplate}
+          header={headerCheckboxTemplate}
+          headerStyle={{ width: '3em' }}
+        />
+        <Column field="firstName" header="First Name" />
+        <Column field="lastName" header="Last Name" />
+        <Column field="email" header="Email" />
+        <Column field="emailsSent" header="Email Sent" />
+        <Column field="emailOpens" header="Email Opens" />
+        <Column field="emailClicks" header="Email Clicks" />
+        <Column field="subscribed" header="Subscribed" />
+        <Column body={actionsTemplate} header="Actions" style={{ width: '150px' }} />
+      </DataTable>
     </div>
   )
 }

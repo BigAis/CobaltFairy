@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import Card from '../../components/Card'
 import Button from '../../components/Button'
 import Switch from '../../components/Switch'
-import ButtonGroup from '../../components/ButtonGroup'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import Skeleton from 'react-loading-skeleton'
@@ -130,26 +129,10 @@ const AutomationDetail = () => {
     }
   }
 
-  // Handle tab change
-  const handleTabChange = (value) => {
-    if (value === 'overview') {
-      navigate(`/automations/${autId}`)
-    } else {
-      navigate(`/automations/${autId}/${value}`)
-    }
-  }
-
   // Handle edit button click
   const handleEditClick = () => {
     navigate(`/automations/${autId}/edit`)
   }
-  
-  // Tab options for ButtonGroup
-  const tabOptions = [
-    { value: 'overview', label: 'Overview' },
-    { value: 'subscribers', label: 'Subscribers' },
-    { value: 'history', label: 'History' }
-  ]
 
   return (
     <div className="fm-page-wrapper">
@@ -159,9 +142,9 @@ const AutomationDetail = () => {
         
         <div className="page-name-container">
           <div className="page-name">
-            <span className="automation-breadcrumb" onClick={() => navigate('/automations')}>
+            <Link to="/automations" className="automation-breadcrumb">
               Automations
-            </span>{' '}
+            </Link>{' '}
             {'>'}{' '}
             <span>
               {loading ? <Skeleton width={150} /> : automation?.name || 'Demo Automation'}
@@ -187,13 +170,29 @@ const AutomationDetail = () => {
           )}
         </div>
         
-        {/* Using ButtonGroup component instead of custom tabs */}
-        <div className="button-group-wrapper">
-          <ButtonGroup
-            options={tabOptions}
-            value={activeTab}
-            onChange={handleTabChange}
-          />
+        {/* Tabs */}
+        <div className="automation-tabs">
+          <Button
+            type={activeTab === 'overview' ? 'primary' : 'secondary'} 
+            className={activeTab === 'overview' ? 'active-tab' : ''}
+            onClick={() => navigate(`/automations/${autId}`)}
+          >
+            Overview
+          </Button>
+          <Button
+            type={activeTab === 'subscribers' ? 'primary' : 'secondary'}
+            className={activeTab === 'subscribers' ? 'active-tab' : ''}
+            onClick={() => navigate(`/automations/${autId}/subscribers`)}
+          >
+            Subscribers
+          </Button>
+          <Button
+            type={activeTab === 'history' ? 'primary' : 'secondary'}
+            className={activeTab === 'history' ? 'active-tab' : ''}
+            onClick={() => navigate(`/automations/${autId}/history`)}
+          >
+            History
+          </Button>
         </div>
         
         {/* Tab content */}
@@ -209,6 +208,36 @@ const AutomationDetail = () => {
           </>
         )}
       </div>
+      
+      <style jsx>{`
+        .automation-tabs {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 20px;
+        }
+        
+        .active-tab {
+          background-color: rgba(255, 99, 93, 0.1);
+          border-color: #FF635D;
+          color: #FF635D;
+        }
+        
+        .automation-breadcrumb {
+          color: #887D76;
+          text-decoration: none;
+          cursor: pointer;
+        }
+        
+        .automation-breadcrumb:hover {
+          text-decoration: underline;
+        }
+        
+        .status-switch {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+      `}</style>
     </div>
   )
 }
