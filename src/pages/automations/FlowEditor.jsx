@@ -360,6 +360,12 @@ const FlowEditor = () => {
 		}
 	}
 
+	// Fix go back navigation function
+	const handleGoBack = () => {
+		// Always navigate back to the automation detail page, not stats
+		navigate(`/automations/${autId}`);
+	}
+
 	const addNode = (type, input = 0, position = 0, name = '') => {
 		let maxid = 0
 		nodes.map((n) => {
@@ -968,11 +974,10 @@ const FlowEditor = () => {
 			<div className="header" style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexDirection:'row'}}>
 				<Stepper
 				steps={steps}
-				current={3}
-				setStep={() => {
-					navigate(`/automations/${autId}`)
-				}}
+				current={2}
+				setStep={handleGoBack}
 				style={{width:'70%'}}
+				hasBack={true}
 				/>
 				<div className="buttons" style={{width:'40%'}}>
 				{!isReadOnly ? (
@@ -991,7 +996,7 @@ const FlowEditor = () => {
 					<Button
 						onClick={async () => {
 						await exportData(false)
-						navigate('/automations')
+						navigate(`/automations/${autId}`)
 						}}
 					>
 						Done Editing
@@ -1003,17 +1008,14 @@ const FlowEditor = () => {
 						color: '#ff635d', 
 						fontWeight: 'bold', 
 						marginRight: '20px',
-						fontFamily: 'Inter, sans-serif' // Fix: Add consistent font family
+						fontFamily: 'Inter, sans-serif'
 					}}>
 						{data?.active ? 'This automation is currently active and cannot be edited' : 'View-only mode'}
 					</div>
 					<Button
-						onClick={() => {
-						// Fix: Navigate directly to automations list instead of showing popup
-						navigate('/automations');
-						}}
+						onClick={handleGoBack}
 					>
-						{data?.active ? 'Back to List' : 'Edit Flow'}
+						{data?.active ? 'Back to Automation' : 'Edit Flow'}
 					</Button>
 					</>
 				)}
@@ -1047,7 +1049,7 @@ const FlowEditor = () => {
 							handleAdditionalChange={handleAdditionalChange}
 							data={{ groups, avlCampaigns, workflowCampaigns, templates, cmpLinks }}
 							setSideBarShown={setSideBarShown}
-							isReadOnly={isReadOnly}  // Pass the isReadOnly prop here
+							isReadOnly={isReadOnly}
 							onUpdate={(data) => {
 							setNodes(
 								nodes.map((n) => {
@@ -1233,13 +1235,6 @@ const FlowEditor = () => {
 											placeholder="Select a group" // Default placeholder for additional select
 										/>
 									)}
-
-									{/* Apply button to save the settings */}
-									{/* <div className="form-control form-control-lg ">
-										<button className="btn btn-primary mt-3" onClick={handleApply}>
-											Save Changes
-										</button>
-									</div> */}
 								</div>
 							)}
 
@@ -1453,41 +1448,8 @@ const FlowEditor = () => {
 											placeholder="Select a link" // Default placeholder for additional select
 										/>
 									)}
-									{/* Apply button to save the settings */}
-									{/* <div className="form-control form-control-lg ">
-										<button className="btn btn-primary mt-3" onClick={handleApply}>
-											Save Changes
-										</button>
-									</div> */}
 								</div>
 							)}
-
-							{/*<div className="p-4 dragflow-save-action-container" style={{ flexShrink: '0' }}>
-								 <div className="d-flex" style={{ gap: '10px' }}>
-									{selectedNode && (
-										<div
-											className="flow-save-btn btn  btn-success"
-											draggable={false}
-											onClick={() => {
-												//exportData()
-												handleApply()
-											}}
-										>
-											Save Node
-										</div>
-									)}
-									<div
-										className="flow-save-btn btn btn-success"
-										draggable={false}
-										onClick={() => {
-											exportData()
-											// handleApply()
-										}}
-									>
-										Save Flow
-									</div>
-								</div>
-							</div> */}
 						</>
 					) : (
 						<>

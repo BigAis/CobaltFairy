@@ -18,7 +18,11 @@ const Stepper = ({ steps, current, className, setStep, hasBack=true, minStep={st
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 	
-	const handleGoBack = () => {
+	const handleGoBack = (e) => {
+		// Prevent event bubbling and default behavior
+		e.preventDefault();
+		e.stopPropagation();
+		
 		// Special handling for campaign flow on mobile devices
 		if (isMobile) {
 			// Check if we're in the campaign flow (based on step labels)
@@ -26,7 +30,9 @@ const Stepper = ({ steps, current, className, setStep, hasBack=true, minStep={st
 			
 			// If we're on step 4 (Preview) in campaign flow on mobile, go directly to step 2 (Details)
 			if (campaignFlow && current === 3) { // current is 0-indexed, so 3 means step 4
-				setStep(2); // Go to step 2 (Details)
+				if (setStep) {
+					setStep(2); // Go to step 2 (Details)
+				}
 				return;
 			}
 		}
@@ -36,13 +42,26 @@ const Stepper = ({ steps, current, className, setStep, hasBack=true, minStep={st
 			navigate(minStep.url);
 			return;
 		}
-		setStep(current);
+		
+		// If setStep is provided, use it for going back one step
+		if (setStep) {
+			setStep(current);
+		}
 	};
 	
 	return (
 		<>
 			{hasBack && (
-				<div className='stepper-goback' onClick={handleGoBack}>
+				<div 
+					className='stepper-goback' 
+					onClick={handleGoBack}
+					style={{ 
+						cursor: 'pointer',
+						userSelect: 'none',
+						pointerEvents: 'auto',
+						zIndex: 10
+					}}
+				>
 					<Icon name="Caret" />
 					Go back
 				</div>
@@ -50,17 +69,29 @@ const Stepper = ({ steps, current, className, setStep, hasBack=true, minStep={st
 			<div className={classNames('stepper-container', className)} {...props}>
 				{steps.map((s, i) => {
 					return (
-						<>
-							<div key={i} className={'circle ' + (i <= current ? 'active' : '')}>
-								{i + 1}
-								<div className={'label ' + (i <= current ? 'active' : '')}>{s.label}</div>
-							</div>
-						</>
+						<div key={i} className={'circle ' + (i <= current ? 'active' : '')}>
+							{i + 1}
+							<div className={'label ' + (i <= current ? 'active' : '')}>{s.label}</div>
+						</div>
 					)
 				})}
 			</div>
 		</>
 	)
+}
+
+Stepper.propTypes = {
+	steps: PropTypes.arrayOf(PropTypes.shape({
+		label: PropTypes.string.isRequired
+	})).isRequired,
+	current: PropTypes.number.isRequired,
+	className: PropTypes.string,
+	setStep: PropTypes.func,
+	hasBack: PropTypes.bool,
+	minStep: PropTypes.shape({
+		step: PropTypes.number,
+		url: PropTypes.string
+	})
 }
 
 export default Stepper

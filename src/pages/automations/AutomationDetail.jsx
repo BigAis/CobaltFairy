@@ -13,6 +13,7 @@ import './automations.scss'
 import AutomationOverview from './AutomationOverview'
 import AutomationSubscribers from './AutomationSubscribers'
 import AutomationHistory from './AutomationHistory'
+import PopupText from '../../components/PopupText/PopupText'
 
 const AutomationDetail = () => {
   const { user, account, createNotification } = useAccount()
@@ -23,6 +24,7 @@ const AutomationDetail = () => {
   const [automation, setAutomation] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isReadOnly, setIsReadOnly] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   
   // Get active tab from URL
   useEffect(() => {
@@ -35,6 +37,16 @@ const AutomationDetail = () => {
       setActiveTab('overview')
     }
   }, [location])
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Load automation data
   useEffect(() => {
@@ -131,7 +143,30 @@ const AutomationDetail = () => {
 
   // Handle edit button click
   const handleEditClick = () => {
-    navigate(`/automations/${autId}/edit`)
+    if (isMobile) {
+      PopupText.fire({
+        icon: 'warning',
+        text: 'The automation flow editor is not available on mobile devices. Please use a desktop computer to edit your automation flow.',
+        showCancelButton: false,
+        confirmButtonText: 'OK',
+      })
+    } else {
+      navigate(`/automations/${autId}/edit`)
+    }
+  }
+
+  // Handle flow edit button click
+  const handleFlowEditClick = () => {
+    if (isMobile) {
+      PopupText.fire({
+        icon: 'warning',
+        text: 'The automation flow editor is not available on mobile devices. Please use a desktop computer to edit your automation flow.',
+        showCancelButton: false,
+        confirmButtonText: 'OK',
+      })
+    } else {
+      navigate(`/automations/editor/${automation.uuid}`)
+    }
   }
 
   return (
@@ -152,20 +187,33 @@ const AutomationDetail = () => {
           </div>
           
           {!loading && (
-            <div className="status-switch">
-              <Switch
-                checked={automation?.active || false}
-                label={automation?.active ? 'Automation is running' : 'Automation is stopped'}
-                onChange={(value) => updateAutomationStatus(value)}
-              />
-              <Button
-                icon="Edit"
-                type="action"
-                onClick={handleEditClick}
-                disabled={isReadOnly}
-              >
-                Edit Flow
-              </Button>
+            <div className="automation-controls">
+              {/* Switch for automation status */}
+              <div className="status-switch">
+                <Switch
+                  checked={automation?.active || false}
+                  label={automation?.active ? 'Running' : 'Stopped'}
+                  onChange={(value) => updateAutomationStatus(value)}
+                />
+              </div>
+              
+              {/* Action buttons */}
+              <div className="action-buttons">
+                <Button
+                  type="secondary"
+                  onClick={handleEditClick}
+                >
+                  Edit Details
+                </Button>
+                <Button
+                  icon="Edit"
+                  type="action"
+                  onClick={handleFlowEditClick}
+                  disabled={isReadOnly}
+                >
+                  {isReadOnly ? 'View Flow' : 'Edit Flow'}
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -232,10 +280,40 @@ const AutomationDetail = () => {
           text-decoration: underline;
         }
         
+        .automation-controls {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+        
         .status-switch {
           display: flex;
           align-items: center;
-          gap: 15px;
+        }
+        
+        .action-buttons {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+          .automation-controls {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+          }
+          
+          .action-buttons {
+            width: 100%;
+            justify-content: flex-start;
+          }
+          
+          .action-buttons button {
+            flex: 1;
+            min-width: 120px;
+          }
         }
       `}</style>
     </div>
