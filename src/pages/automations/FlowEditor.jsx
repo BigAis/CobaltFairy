@@ -629,22 +629,47 @@ const FlowEditor = () => {
 		
 		// Add an event listener to refresh data when the page becomes visible again
 		const handleVisibilityChange = async () => {
-			if (document.visibilityState === 'visible' && user && account && autId) {
-				console.log('Page visible again, reloading automation data with fresh API call');
+		if (document.visibilityState === 'visible' && user && account && autId) {
+			console.log('🔄 Page visible again - forcing fresh data load');
+			
+			try {
+			// Force a direct API call to get the current active state
+			const timestamp = new Date().getTime();
+			const resp = await ApiService.get(
+				`automations/${data?.id}?_t=${timestamp}`, 
+				user.jwt
+			);
+			
+			if (resp.data && resp.data.data) {
+				const serverActiveState = resp.data.data.attributes?.active;
 				
-				// Get fresh data from API to ensure sync with other views
-				const freshData = await loadData(autId);
+				// Check if we need to update our local state
+				if (data && serverActiveState !== undefined && serverActiveState !== data.active) {
+				console.log('🔄 Visibility check found state mismatch:', 
+					'Local:', data.active, 
+					'Server:', serverActiveState
+				);
 				
-				// Log the current state
-				console.log('Current data after visibility change:', freshData);
-				console.log('Current isReadOnly state:', isReadOnly);
-				console.log('Current active state:', freshData?.active);
+				// Immediately update local state
+				setData(prevData => ({
+					...prevData,
+					active: serverActiveState
+				}));
 				
-				// Force isReadOnly to match active state after visibility change
-				if (freshData && freshData.active !== undefined) {
-					setIsReadOnly(freshData.active || isViewOnlyParam);
+				// Update isReadOnly state
+				setIsReadOnly(serverActiveState || isViewOnlyParam);
 				}
 			}
+			
+			// Also perform a full data reload to refresh all fields
+			loadData(autId);
+			} catch (error) {
+			console.error('Error in visibility state check:', error);
+			
+			// Fall back to normal data load if direct check fails
+			loadData(autId);
+			}
+		}
 		};
 		
 		document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -653,7 +678,54 @@ const FlowEditor = () => {
 			document.removeEventListener('visibilitychange', handleVisibilityChange);
 		};
 	}, [user, account, autId, isViewOnlyParam]);
+	// Add these two useEffect hooks in FlowEditor.jsx right after the other useEffect hooks
+	// This ensures immediate state updates when data changes
+
+	// Immediate sync for data.active changes
+	useEffect(() => {
+	// This effect ensures isReadOnly is immediately updated when data.active changes
+	if (data) {
+		console.log('⚡ data.active sync effect - value is:', data.active);
+		setIsReadOnly(data.active || isViewOnlyParam);
+	}
+	}, [data?.active, isViewOnlyParam]);
+
+	// Additional polling with shorter interval for faster updates
+	useEffect(() => {
+	// This effect adds a faster polling interval specifically for active state changes
+	if (!user || !user.jwt || !account || !autId) return;
 	
+	const fastInterval = setInterval(async () => {
+		try {
+		const timestamp = new Date().getTime();
+		const resp = await ApiService.get(
+			`automations/${data?.id}?_t=${timestamp}`, 
+			user.jwt
+		);
+		
+		if (resp.data && resp.data.data) {
+			const currentActiveState = resp.data.data.attributes?.active;
+			
+			if (data && currentActiveState !== undefined && currentActiveState !== data.active) {
+			console.log('⚡ Fast polling detected active state change:', 
+				'Current:', data.active, 
+				'New:', currentActiveState
+			);
+			
+			// Force an immediate data update without a full reload
+			setData(prevData => ({
+				...prevData,
+				active: currentActiveState
+			}));
+			}
+		}
+		} catch (error) {
+		// Silent error - don't log to avoid console spam
+		}
+	}, 1000); // Check every 1 second specifically for active state changes
+	
+	return () => clearInterval(fastInterval);
+	}, [user, account, autId, data?.id]);
 	// Add effect to monitor data.active changes
 	useEffect(() => {
 		if (data && data.active !== undefined) {

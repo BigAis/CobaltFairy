@@ -8,16 +8,26 @@ const Switch = ({ checked, label, onChange, className, ...props }) => {
     
     const [isChecked, setIsChecked] = useState(checked);
 
+    // CRITICAL FIX: Add this effect to update isChecked when the checked prop changes
+    useEffect(() => {
+        setIsChecked(checked);
+    }, [checked]);
+
     if(!onChange){
         onChange = ()=>{}
     }
 
     return (
         <label className="toggle-switch" style={props.style}>
-            <input type="checkbox" checked={isChecked} onChange={()=>{
-                onChange(!isChecked)
-                setIsChecked(!isChecked)
-            }} />
+            <input 
+                type="checkbox" 
+                checked={isChecked} 
+                disabled={props.disabled}
+                onChange={()=>{
+                    onChange(!isChecked)
+                    setIsChecked(!isChecked)
+                }} 
+            />
             <span className="slider"></span>
             {label && (<span className='switch-label'>{label}</span>)}
         </label>
@@ -29,6 +39,7 @@ Switch.propTypes = {
     label: PropTypes.string,
     onChange: PropTypes.func,
     className: PropTypes.string,
+    disabled: PropTypes.bool
 }
 
 
