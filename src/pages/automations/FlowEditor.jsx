@@ -14,10 +14,18 @@ import PopupText from '../../components/PopupText/PopupText'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 
 const FlowEditor = () => {
+	// Get context, params, and navigation first
+	const { user, account, createNotification } = useAccount()
 	const { autId } = useParams()
 	const location = useLocation();
-	const automationContainerRef = useRef(null)
 	const navigate = useNavigate()
+	
+	// Setup refs
+	const automationContainerRef = useRef(null)
+	const isDragging = useRef(false)
+	const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
+	
+	// Initialize state variables
 	const [tab, setTab] = useState('actions')
 	const [data, setData] = useState({})
 	const [groups, setGroups] = useState([])
@@ -30,149 +38,76 @@ const FlowEditor = () => {
 	const [excludeNodes, setExcludeNodes] = useState([])
 	const [nodes, setNodes] = useState([])
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+	const [selectedNode, setSelectedNode] = useState(null)
+	
+	// Get URL parameters
   	const queryParams = new URLSearchParams(location.search);
   	const isViewOnlyParam = queryParams.get('viewOnly') === 'true';
   	const [isReadOnly, setIsReadOnly] = useState(isViewOnlyParam);
-	const isDragging = useRef(false)
-	const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
-
-	useEffect(() => {
-		const el = automationContainerRef.current
-		if (!el) return
-
-		const onMouseDown = (e) => {
-			isDragging.current = true
-			el.style.cursor = 'grabbing'
-			el.style.userSelect = 'none'
-
-			dragStart.current = {
-				x: e.pageX,
-				y: e.pageY,
-				scrollLeft: el.scrollLeft,
-				scrollTop: el.scrollTop,
-			}
-		}
-
-		const onMouseMove = (e) => {
-			if (!isDragging.current) return
-			const dx = e.pageX - dragStart.current.x
-			const dy = e.pageY - dragStart.current.y
-			el.scrollLeft = dragStart.current.scrollLeft - dx
-			el.scrollTop = dragStart.current.scrollTop - dy
-		}
-
-		const stopDragging = () => {
-			isDragging.current = false
-			el.style.cursor = 'grab'
-			el.style.removeProperty('user-select')
-		}
-
-		el.addEventListener('mousedown', onMouseDown)
-		window.addEventListener('mousemove', onMouseMove)
-		window.addEventListener('mouseup', stopDragging)
-
-		// Clean up
-		return () => {
-			el.removeEventListener('mousedown', onMouseDown)
-			window.removeEventListener('mousemove', onMouseMove)
-			window.removeEventListener('mouseup', stopDragging)
-		}
-	}, [])
-
-	// Add this useEffect for mobile detection
-	useEffect(() => {
-		const handleResize = () => {
-		setIsMobile(window.innerWidth <= 768);
-		};
-		
-		window.addEventListener('resize', handleResize);
-		return () => window.removeEventListener('resize', handleResize);
-	}, []);
-
-	// Update isReadOnly when data changes (to check active status)
-	useEffect(() => {
-		if (data?.active) {
-		setIsReadOnly(true);
-		} else if (!isViewOnlyParam) {
-		setIsReadOnly(false);
-		}
-	}, [data, isViewOnlyParam]);
-
-	// Add this useEffect to redirect mobile users away from the editor
-	useEffect(() => {
-		if (isMobile) {
-		  PopupText.fire({
-			icon: 'warning',
-			text: 'The automation flow editor is not available on mobile devices. Please use a desktop computer to edit your automation flow.',
-			showCancelButton: false,
-			confirmButtonText: 'OK',
-		  }).then(() => {
-			navigate(`/automations/${autId}`);
-		  });
-		}
-	  }, [isMobile, autId, navigate]);
-
-	const { user, account, createNotification } = useAccount()
+	
+	// Define steps for stepper
 	const steps = [{ label: 'Automations' }, { label: 'Edit Automation' }, { label: 'Editor' }]
-	//State for Sidebar Setting
-	const [selectedNode, setSelectedNode] = useState(null)
-
-	useEffect(() => {
-	const init = async () => {
-		if (autId) loadData(autId);
-		loadGroups();
-		loadCampaigns();
-		loadTemplates();
-		loadCmpLinks();
-	};
 	
-	if (account && user) init();
-	
-	// Add an event listener to refresh data when the page becomes visible again
-	const handleVisibilityChange = () => {
-		if (document.visibilityState === 'visible' && user && account && autId) {
-		loadData(autId);
-		}
-	};
-	
-	document.addEventListener('visibilitychange', handleVisibilityChange);
-	
-	return () => {
-		document.removeEventListener('visibilitychange', handleVisibilityChange);
-	};
-	}, [user, account, autId]);
-
+	// Function definitions
 	const loadData = async (autId) => {
-	if (autId) {
-		// Add timestamp to ensure fresh data
-		const timestamp = new Date().getTime();
-		let resp = await ApiService.get(
-		`fairymailer/getAutomations?filters[uuid]=${autId}&populate=*&_t=${timestamp}`, 
-		user.jwt
-		);
-		
-		const loadedNodes = resp.data.data[0].design.map(node => {
-		// Rest of your existing mapping code...
-		return node;
-		});
-		
-		console.log('loadedNodes', loadedNodes, resp.data);
-		if (loadedNodes && loadedNodes.length > 0) {
-		setNodes(transformNodes(loadedNodes));
-		setHasTrigger(true);
+		if (!autId || !user || !user.jwt) {
+			console.log('Cannot load data, missing autId or user JWT');
+			return null;
 		}
 		
-		// Important: Update data state and isReadOnly state
-		setData(resp.data.data[0]);
-		setIsReadOnly(resp.data.data[0].active || isViewOnlyParam);
-		
-		// Log the active status to confirm it's loaded correctly
-		console.log('Automation active status:', resp.data.data[0].active);
-	}
+		try {
+			// Add timestamp to ensure fresh data
+			const timestamp = new Date().getTime();
+			console.log(`Loading automation ${autId} at ${timestamp}`);
+			
+			let resp = await ApiService.get(
+				`fairymailer/getAutomations?filters[uuid]=${autId}&populate=*&_t=${timestamp}`, 
+				user.jwt
+			);
+			
+			if (resp.data && resp.data.data && resp.data.data.length > 0) {
+				const loadedNodes = resp.data.data[0].design.map(node => {
+					return node;
+				});
+				
+				console.log('loadedNodes', loadedNodes, resp.data);
+				if (loadedNodes && loadedNodes.length > 0) {
+					setNodes(transformNodes(loadedNodes));
+					setHasTrigger(true);
+				}
+				
+				// Important: Update data state and isReadOnly state
+				setData(resp.data.data[0]);
+				
+				// Always set isReadOnly based on active state from API, overriding any local state
+				const isActive = resp.data.data[0].active;
+				setIsReadOnly(isActive || isViewOnlyParam);
+				
+				// Log the active status to confirm it's loaded correctly
+				console.log('Automation active status from API:', isActive);
+				console.log('isReadOnly set to:', isActive || isViewOnlyParam);
+				
+				return resp.data.data[0];
+			} else {
+				console.error('No automation data found for ID:', autId);
+				if (createNotification) {
+					createNotification({
+						message: 'Automation not found',
+						type: 'warning',
+						autoClose: 3000
+					});
+				}
+				navigate('/automations');
+				return null;
+			}
+		} catch (error) {
+			console.error("Error loading automation data:", error);
+			return null;
+		}
 	};
-
+	
 	const transformNodes = (nodes) => {
-		//tranforms old fairy mail automations to new version.
+		//transforms old fairy mail automations to new version.
 		nodes = nodes.map((node) => {
 			switch (node.type) {
 				case 'email':
@@ -213,8 +148,6 @@ const FlowEditor = () => {
 								node.meta.triggerName = 'had a specific link not clicked'
 								break
 						}
-
-						//
 					}
 					break
 			}
@@ -222,73 +155,162 @@ const FlowEditor = () => {
 		})
 		return nodes
 	}
-
+	
 	const loadGroups = async () => {
-		let resp = await ApiService.get(`groups?polulate=*&filters[account]=${account.id}&pagination[pageSize]=100`, user.jwt)
-		setGroups(resp.data.data.map((v) => ({ value: `${v.id}`, label: v.attributes.name })))
-	}
-
-	const loadCampaigns = async () => {
-		let resp = await ApiService.get(`campaigns?filters[account]=${account.id}&pagination[pageSize]=100&pagination[page]=1&sort[createdAt]=desc`, user.jwt)
-		setAvlCampaigns(resp.data.data.map((v) => ({ value: v.id, label: v.attributes.name })))
-	}
-
-	const loadTemplates = async () => {
-		let resp = await ApiService.get(`templates?polulate=*&filters[account]=${account.id}`, user.jwt)
-		setTemplates(resp.data.data)
-	}
-
-	const loadCmpLinks = async () => {
-		let campaigns = (await ApiService.get(`campaigns?filters[account]=${account.id}&pagination[pageSize]=100&pagination[page]=1&sort[createdAt]=desc`, user.jwt)).data.data
-		if (campaigns) {
-			let links = []
-			campaigns.forEach((cmp) => {
-				if (cmp.attributes && cmp.attributes && cmp.attributes.design) {
-					let dsgn = cmp.attributes.design
-					let cmplinks = extractLinksFromCampaignDesign(dsgn.components)
-					if (cmplinks.length > 0)
-						cmplinks.forEach((ll) => {
-							if (!links.includes(ll)) links.push(ll)
-						})
-				}
-			})
-
-			const finalLinks = links
-				.map((link) => {
-					return {
-						label: link,
-						value: link,
-					}
-				})
-				.filter((item) => item.label !== null && item.label !== undefined && item.label !== '')
-
-			setCmpLinks(finalLinks)
+		if (!user || !user.jwt || !account) return;
+		
+		try {
+			let resp = await ApiService.get(`groups?polulate=*&filters[account]=${account.id}&pagination[pageSize]=100`, user.jwt)
+			setGroups(resp.data.data.map((v) => ({ value: `${v.id}`, label: v.attributes.name })))
+		} catch (error) {
+			console.error("Error loading groups:", error);
 		}
 	}
 
-	useEffect(() => {
-		console.log('Updated groups: ', groups) //DONT ERASE THIS.
-	}, [groups])
-
-	const extractLinksFromCampaignDesign = (components = [], links = []) => {
-		components.forEach((component) => {
-			if (component.components && component.components.length > 0) {
-				links = [...extractLinksFromCampaignDesign(component.components, links)]
-			}
-			if (component.children && component.children.length > 0) {
-				links = [...extractLinksFromCampaignDesign(component.children, links)]
-			}
-			if (component.type && component.type === 'link') {
-				links.push(component?.attributes?.href)
-			}
-			if (component.key && ['image', 'button'].includes(component.key) && component.linkURL && component.linkURL.length > 9) {
-				links.push(component.linkURL)
-			}
-		})
-		return links
+	const loadCampaigns = async () => {
+		if (!user || !user.jwt || !account) return;
+		
+		try {
+			let resp = await ApiService.get(`campaigns?filters[account]=${account.id}&pagination[pageSize]=100&pagination[page]=1&sort[createdAt]=desc`, user.jwt)
+			setAvlCampaigns(resp.data.data.map((v) => ({ value: v.id, label: v.attributes.name })))
+		} catch (error) {
+			console.error("Error loading campaigns:", error);
+		}
 	}
 
+	const loadTemplates = async () => {
+		if (!user || !user.jwt || !account) return;
+		
+		try {
+			let resp = await ApiService.get(`templates?polulate=*&filters[account]=${account.id}`, user.jwt)
+			setTemplates(resp.data.data)
+		} catch (error) {
+			console.error("Error loading templates:", error);
+		}
+	}
+
+	const loadCmpLinks = async () => {
+		if (!user || !user.jwt || !account) return;
+		
+		try {
+			let campaigns = (await ApiService.get(`campaigns?filters[account]=${account.id}&pagination[pageSize]=100&pagination[page]=1&sort[createdAt]=desc`, user.jwt)).data.data
+			if (campaigns) {
+				let links = []
+				campaigns.forEach((cmp) => {
+					if (cmp.attributes && cmp.attributes && cmp.attributes.design) {
+						let dsgn = cmp.attributes.design
+						let cmplinks = extractLinksFromCampaignDesign(dsgn.components)
+						if (cmplinks.length > 0)
+							cmplinks.forEach((ll) => {
+								if (!links.includes(ll)) links.push(ll)
+							})
+					}
+				})
+
+				const finalLinks = links
+					.map((link) => {
+						return {
+							label: link,
+							value: link,
+						}
+					})
+					.filter((item) => item.label !== null && item.label !== undefined && item.label !== '')
+
+				setCmpLinks(finalLinks)
+			}
+		} catch (error) {
+			console.error("Error loading campaign links:", error);
+		}
+	}
+	
+	const updateAutomationStatus = async (newStatus) => {
+		if (!user || !user.jwt || !data || !data.id) {
+			console.error("Cannot update automation status: missing user or data");
+			return false;
+		}
+		
+		try {
+			console.log('Updating automation status in FlowEditor to:', newStatus);
+			
+			// First update the local state immediately for better UX
+			setData(prevData => ({
+				...prevData,
+				active: newStatus
+			}));
+
+			// Update the read-only state immediately
+			setIsReadOnly(newStatus || isViewOnlyParam);
+
+			// Then update in the backend
+			let resp = await ApiService.put(
+				`automations/${data.id}`, 
+				{ data: { active: newStatus } }, 
+				user.jwt
+			);
+
+			if (resp.status === 200) {
+				// Show notification of success
+				if (createNotification) {
+					createNotification({
+						message: `Automation ${newStatus ? 'activated' : 'deactivated'} successfully.`,
+						type: 'default',
+						autoClose: 3000
+					});
+				}
+				
+				console.log('Automation status updated successfully in backend');
+				
+				// Reload data from server to ensure we have the latest state
+				// This is crucial for maintaining consistency across views
+				if (autId) {
+					const refreshedData = await loadData(autId);
+					console.log('Refreshed data after status update:', refreshedData);
+				}
+				
+				return true;
+			} else {
+				console.error('Failed to update automation status:', resp);
+				
+				// Revert local state change if API call fails
+				setData(prevData => ({
+					...prevData,
+					active: !newStatus
+				}));
+				
+				// Make sure isReadOnly is consistent with active state
+				setIsReadOnly(!newStatus || isViewOnlyParam);
+				
+				PopupText.fire({ 
+					icon: 'error', 
+					text: 'Failed to update automation status.', 
+					showConfirmButton: false 
+				});
+				return false;
+			}
+		} catch (error) {
+			console.error("Error updating automation status:", error);
+			
+			// Revert local state change if API call fails
+			setData(prevData => ({
+				...prevData,
+				active: !newStatus
+			}));
+			
+			// Make sure isReadOnly is consistent with active state
+			setIsReadOnly(!newStatus || isViewOnlyParam);
+			
+			PopupText.fire({ 
+				icon: 'error', 
+				text: 'Error updating automation status. Please try again.', 
+				showConfirmButton: false 
+			});
+			return false;
+		}
+	};
+	
 	const exportData = async (showSuccessMessage = true) => {
+		if (!user || !user.jwt || !data) return false;
+		
 		const isAutomationValid = validateNodes()
 		if (!isAutomationValid) {
 			PopupText.fire({ icon: 'error', text: 'You have empty actions in your flow. You need to delete unwanted actions.', showCancelButton: false })
@@ -312,84 +334,30 @@ const FlowEditor = () => {
 			return false
 		}
 	}
-
-	// New function to update automation status
-	const updateAutomationStatus = async (newStatus) => {
-	try {
-		// First update the local state immediately for better UX
-		setData(prevData => ({
-		...prevData,
-		active: newStatus
-		}));
-
-		// Update the read-only state immediately
-		setIsReadOnly(newStatus);
-
-		console.log('Updating automation status to:', newStatus);
-
-		// Then update in the backend
-		let resp = await ApiService.put(
-		`automations/${data.id}`, 
-		{ data: { active: newStatus } }, 
-		user.jwt
-		);
-
-		if (resp.status === 200) {
-		// Show notification of success
-		createNotification({
-			message: `Automation ${newStatus ? 'activated' : 'deactivated'} successfully.`,
-			type: 'default',
-			autoClose: 3000
-		});
-		
-		console.log('Automation status updated successfully in backend');
-		
-		// Reload data from server to ensure we have the latest state
-		loadData(autId);
-		
-		return true;
-		} else {
-		console.error('Failed to update automation status:', resp);
-		
-		// Revert local state change if API call fails
-		setData(prevData => ({
-			...prevData,
-			active: !newStatus
-		}));
-		setIsReadOnly(!newStatus);
-		
-		PopupText.fire({ 
-			icon: 'error', 
-			text: 'Failed to update automation status.', 
-			showConfirmButton: false 
-		});
-		return false;
-		}
-	} catch (error) {
-		console.error("Error updating automation status:", error);
-		
-		// Revert local state change if API call fails
-		setData(prevData => ({
-		...prevData,
-		active: !newStatus
-		}));
-		setIsReadOnly(!newStatus);
-		
-		PopupText.fire({ 
-		icon: 'error', 
-		text: 'Error updating automation status. Please try again.', 
-		showConfirmButton: false 
-		});
-		return false;
+	
+	// Other helper functions
+	const extractLinksFromCampaignDesign = (components = [], links = []) => {
+		components.forEach((component) => {
+			if (component.components && component.components.length > 0) {
+				links = [...extractLinksFromCampaignDesign(component.components, links)]
+			}
+			if (component.children && component.children.length > 0) {
+				links = [...extractLinksFromCampaignDesign(component.children, links)]
+			}
+			if (component.type && component.type === 'link') {
+				links.push(component?.attributes?.href)
+			}
+			if (component.key && ['image', 'button'].includes(component.key) && component.linkURL && component.linkURL.length > 9) {
+				links.push(component.linkURL)
+			}
+		})
+		return links
 	}
-	};
-
-	// Fix go back navigation function
+	
 	const handleGoBack = () => {
-		// Navigate back to edit automation page, not the overview
 		navigate(`/automations/${autId}/edit`);
 	}
-
+	
 	const addNode = (type, input = 0, position = 0, name = '') => {
 		let maxid = 0
 		nodes.map((n) => {
@@ -417,319 +385,74 @@ const FlowEditor = () => {
 	const selectNode = (node) => {
 		setSelectedNode(node)
 	}
-
-	const workflowConditionOptions = [
-		{ value: 'cmp_open', label: 'was opened' },
-		{ value: 'cmp_not_open', label: 'was not opened' },
-		{ value: 'cmp_link_clicked', label: 'had a specific link clicked' },
-		{ value: 'cmp_link_not_clicked', label: 'had a specific link not clicked' },
-	]
-
-	const getTplIdLinks = (nodeId) => {
-		let links = []
-		const tplId = nodes.filter((node) => node.id === nodeId)[0]?.data?.tplId
-
-		console.log('node inside getTplLinks are : ', nodeId, tplId)
-
-		if (templates.length > 0 && tplId) {
-			const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
-			const templateLinks = extractLinksFromCampaignDesign(tplDesign.components)
-
-			console.log('templateLinks', templateLinks)
-			if (templateLinks.length > 0) {
-				templateLinks.forEach((ll) => {
-					if (!links.includes(ll)) links.push(ll)
+	
+	const refreshNodes = () => {
+		let tmp = excludeNodes
+		nodes.forEach((n) => {
+			if (n.type == 'condition') {
+				n.output.forEach((o) => {
+					if (o && o.id) {
+						if (!excludeNodes.includes(o.id)) tmp.push(o.id)
+						let children0 = getChildrenOfCondition(nodes, o.id, 0).map((t) => t && t.id)
+						let children1 = getChildrenOfCondition(nodes, o.id, 1).map((t) => t && t.id)
+						children0.forEach((c) => {
+							if (!excludeNodes.includes(c)) tmp.push(c)
+						})
+						children1.forEach((c) => {
+							if (!excludeNodes.includes(c)) tmp.push(c)
+						})
+					} else {
+						console.log('No o.id', o)
+					}
 				})
 			}
-
-			links = links.map((link) => ({
-				value: link,
-				label: link,
-			}))
+		})
+		console.log('before setExcludeNodes', tmp)
+		setExcludeNodes(tmp)
+	}
+	
+	const getChildrenOfCondition = (nodes, nodeId, conditionIndex) => {
+		const node = nodes.find((n) => n && n.id && n.id == nodeId)
+		if (!node || !node.output) {
+			return []
 		}
-
-		return links
-	}
-
-	const workflowEmailLinkOptions = getTplIdLinks()
-
-	const conditionOptions = [
-		{ value: 'when-user-opens-campaign', label: 'If Subscriber has opened a campaign' },
-		{ value: 'when-user-clicks-link', label: 'If Subscriber has clicked a link' },
-	]
-
-	const actionOptions = [
-		{ value: 'copy-to-group', label: 'Copy to Group' },
-		{ value: 'move-to-group', label: 'Move to Group' },
-		{ value: 'remove-from-group', label: 'Remove from Group' },
-		{ value: 'unsubscribe', label: 'Unsubscribe' },
-	]
-
-	const templateOptions = templates.map((v) => ({ value: v.attributes.uuid, label: v.attributes.name }))
-	// const workflowCampaigns = workflowEmails.map(()=>({value : v.attributes.uuid, label: v.attributes.name}))
-	// const workflowCampaigns = [
-	// 	{ value: '123', label: 'This is a test email from workflow' },
-	// 	{ value: '1234', label: 'This is a test email from workflow 2' },
-	// ]
-
-	const workflowCampaigns =
-		nodes.filter((node) => node.type === 'email').length > 0
-			? nodes
-					.filter((node) => node.type === 'email')
-					.map((node) => {
-						if (node.data) return { value: node.id, label: node.data.emailSubject }
-					})
-			: []
-
-	const handleTriggerSelectChange = (ev) => {
-		// Update the `name` and reset additional settings in `selectedNode`
-
-		if (selectedNode.type === 'delay') {
-			ev.value = 'delay'
+		let nextNodeId
+		if (node.type == 'condition') {
+			nextNodeId = node.output[conditionIndex] ? node.output[conditionIndex].id : false
+		} else {
+			nextNodeId = node.output[conditionIndex] ? node.output[conditionIndex].id : node.output[conditionIndex - 1] ? node.output[conditionIndex - 1].id : false
 		}
-
-		setSelectedNode((prevNode) => ({
-			...prevNode,
-			name: ev.value, // Assign selected trigger option to name
-			// data: { ...prevNode.data, group: '' }, // Reset group data if the trigger changes
-		}))
-
-		if (selectedNode.type === 'email') {
-			const tplId = templates.find((item) => {
-				return item.attributes.uuid === ev.value
-			}).id
-
-			console.log('tplId is ', tplId)
-
-			setSelectedNode((prevNode) => ({
-				...prevNode,
-				templateName: ev.label,
-				data: { ...prevNode.data, tplId: tplId },
-			}))
+		if (!nextNodeId) {
+			return []
 		}
-	}
-
-	const handleDelayData = (ev) => {
-		if (!ev) return
-		console.log('handleDelayData event', ev)
-		// `selectedOptions` is an array of selected values for isMulti
-
-		if (ev.target.name === 'delayNumber') console.log(ev.target.value)
-
-		setSelectedNode((prevNode) => ({
-			...prevNode,
-			name: 'delay',
-			data: { ...prevNode.data, delayValue: ev.target.value }, // Update data.group with an array of selected groups
-		}))
-	}
-
-	const handleEmailSubjectData = (ev) => {
-		// `selectedOptions` is an array of selected values for isMulti
-
-		console.log(ev.target.name)
-
-		// return
-
-		if (ev.target.name === 'emailSubject') {
-			console.log('asdas', ev.target.value)
+		let children = getChildrenOfCondition(nodes, nextNodeId, conditionIndex)
+		let nextNode = nodes.filter((n) => n && n.id && n.id == nextNodeId)
+		let nextChildren = []
+		if (nextNode[0] && nextNode[0].output && nextNode[0].output.length > 0) {
+			if (nextNode[0].output[0]) nextChildren = [...nextChildren, ...getChildrenOfCondition(nodes, nextNode[0].output[0].id, conditionIndex)]
+			if (nextNode[0].output[1]) nextChildren = [...nextChildren, ...getChildrenOfCondition(nodes, nextNode[0].output[1].id, conditionIndex)]
 		}
-
-		setSelectedNode((prevNode) => ({
-			...prevNode,
-			// name: 'emailSubject',
-			data: { ...prevNode.data, emailSubject: ev.target.value }, // Update data.group with an array of selected groups
-		}))
-	}
-
-	const handleWorkflowCondition = (ev) => {
-		if (!ev) return
-		console.log('workflowCondtion is : ', ev.value)
-
-		setSelectedNode((prevNode) => ({
-			...prevNode,
-			data: { ...prevNode.data, trigger: ev.value },
-		}))
-	}
-
-	const handleWorkflowEmailLink = (ev) => {
-		if (!ev) return
-		console.log('workflowLink is : ', ev.value)
-
-		setSelectedNode((prevNode) => ({
-			...prevNode,
-			data: { ...prevNode.data, link: ev.value },
-		}))
-	}
-
-	const handleCmpEmailLink = (ev) => {
-		if (!ev) return
-		console.log('cmpLink is : ', ev.value)
-
-		setSelectedNode((prevNode) => ({
-			...prevNode,
-			data: { ...prevNode.data, link: ev.value },
-		}))
-	}
-
-	const handleAdditionalChange = (selectedOptions) => {
-		// Check if selectedOptions is an array (isMulti) or a single object
-		if (!Array.isArray(selectedOptions)) {
-			selectedOptions = [selectedOptions]
-		}
-
-		let selectedValue = selectedOptions.length > 0 ? selectedOptions.map((option) => option?.value) : []
-		let selectedLabel = selectedOptions.length > 0 ? selectedOptions.map((option) => option?.label) : []
-		let triggerType
-		if (!selectedNode.name) selectedNode.name = selectedNode.type
-		switch (selectedNode.name) {
-			case 'when-user-subscribes':
-				triggerType = 'group'
-				setHasTrigger(true)
-				break
-			case 'when-user-opens-campaign':
-				triggerType = 'cmp'
-				setHasTrigger(true)
-				break
-			case 'when-user-clicks-link':
-				triggerType = 'link'
-				setHasTrigger(true)
-				break
-			case 'delay':
-				selectedValue = selectedValue[0]
-				triggerType = 'delay'
-				if (['days', 'hours'].includes(selectedValue)) triggerType = 'delayValue'
-				break
-			case 'copy-to-group':
-				triggerType = 'group'
-				break
-			case 'move-to-group':
-				triggerType = 'group'
-				break
-			case 'remove-to-group':
-				triggerType = 'group'
-				break
-			case 'workflow-activity':
-				console.log('selectedValue inside workflow activity is : ', selectedValue)
-				triggerType = 'email_node_id'
-				selectedValue = selectedValue[0]
-				break
-			case 'cmp-activity':
-				console.log('selectedValue inside workflow activity is : ', selectedValue)
-				triggerType = 'cmp'
-				selectedValue = selectedValue[0]
-				break
-			default:
-				break
-		}
-		console.log(triggerType, selectedValue)
-		let newNode = { ...selectedNode, data: { [triggerType]: selectedValue }, meta: { label: selectedLabel && selectedLabel[0] ? selectedLabel[0] : '' } }
-		console.log('new Node', newNode)
-		const updatedNodes = nodes.map((node) => (node.id === selectedNode.id ? { ...newNode } : node))
-		console.log('updatedNodes ', updatedNodes)
-		setNodes(updatedNodes)
-		setSelectedNode(null)
-	}
-	const handleApply = async () => {
-		if (selectedNode) {
-			if (selectedNode.type === 'email') {
-				const getResponse = await ApiService.post(
-					'fairymailer/get-automation-campaigns',
-					{
-						automation_udid: autId,
-					},
-					User.get().jwt
-				)
-				console.log('get workflow cmp[s ', getResponse)
+		let childrenof = [nextNode[0], ...children]
+		let keymap = {}
+		nodes.forEach((c) => {
+			if (c && c.id) keymap[c.id] = c
+		})
+		for (let c = 0; c < childrenof.length; c++) {
+			if (childrenof[c] && childrenof[c].input && childrenof[c].input[0] && childrenof[c].input[0].id) {
+				childrenof[c].input[0] = keymap[childrenof[c].input[0].id]
 			}
-			const updatedNodes = nodes.map((node) => (node.id === selectedNode.id ? { ...selectedNode } : node))
-			setNodes(updatedNodes)
-			setSelectedNode(null)
-			console.log('Updated nodes:', updatedNodes)
 		}
-		setSelectedNode(null)
+		return childrenof
 	}
-
+	
 	const removeNode = async (node) => {
 		let res = await PopupText.fire({ icon: 'question', text: 'Are you sure you want to remove this node?', showCancelButton: true, focusCancel: true })
 		if (res.isConfirmed) {
 			getNodesToRemove(node, nodes)
 		}
 	}
-	const recursRemove = (nodeId, initNodes) => {
-		console.log('node id is ', nodeId)
-
-		initNodes = initNodes.filter((n) => n.id != nodeId)
-		console.log('initNodes are inside remove', initNodes)
-		setNodes(initNodes)
-
-		initNodes = initNodes.filter((n) => !n.input || n.input.length < 1 || (n.input && n.input[0] && n.input[0].id != nodeId))
-		console.log('initNodes are inside remove', initNodes)
-
-		for (let i = 0; i < initNodes.length; i++) {
-			if (initNodes[i] && initNodes[i].output && initNodes[i].output.length > 0) {
-				// initNodes[i].output = initNodes[i].output.filter((o) => o.id != nodeId)
-				if (initNodes[i].output[0] && initNodes[i].output[0].id && initNodes[i].output[0].id == nodeId) initNodes[i].output[0] = {}
-				if (initNodes[i].output[1] && initNodes[i].output[1].id && initNodes[i].output[1].id == nodeId) initNodes[i].output[0] = initNodes[i].output = [initNodes[i].output[0]]
-			}
-		}
-
-		console.log('initNodes are 2: ', initNodes)
-
-		setNodes(initNodes)
-		refreshNodes()
-	}
-
-	function recursRemoveCK(nodeIdToRemove, nodes) {
-		// console.log('node to remove : ', nodeIdToRemove)
-		// console.log('nodes ', nodes)
-
-		let nodeToRemove = nodes.find((node) => node.id === nodeIdToRemove)
-
-		let finalNodes = nodes
-		if (nodeToRemove.type !== 'condition') {
-			let nodeHasOutput = false
-			let output = -1
-
-			do {
-				if (Array.isArray(nodeToRemove.output) && nodeToRemove.output.length !== 0) {
-					output = nodeToRemove.output[0].id
-					finalNodes = finalNodes.filter((node) => node.id !== nodeToRemove.id)
-					nodeToRemove = finalNodes.find((node) => node.id === output)
-					nodeHasOutput = true
-				} else {
-					finalNodes = finalNodes.filter((node) => node.id !== nodeToRemove.id)
-					nodeHasOutput = false
-				}
-				console.log('finalNodes : ', finalNodes)
-				console.log('output : ', output)
-				console.log('nodeToRemove : ', nodeToRemove)
-			} while (nodeHasOutput)
-		} else {
-			console.log('nodeToRemove', nodeToRemove)
-			let nodesToBeRemoved = [nodeIdToRemove]
-
-			for (let i = 0; i < 2; i++) {
-				console.log('i is ', i)
-				let tempNodeToBeRemoved = nodeToRemove
-
-				while (tempNodeToBeRemoved.output.length !== 0) {
-					let output = tempNodeToBeRemoved.output.id
-					nodesToBeRemoved.push(output)
-					console.log('output is ', output)
-					tempNodeToBeRemoved = nodes.find((node) => node.id === output)
-					console.log('asda2', tempNodeToBeRemoved)
-					console.log('nodeToRemove.output.length !== 0', tempNodeToBeRemoved.output.length !== 0)
-				}
-			}
-
-			console.log('nodesToBeRemoved : ', nodesToBeRemoved)
-		}
-
-		setNodes(finalNodes)
-		refreshNodes()
-	}
-
-	function getNodesToRemove(nodeId, nodes) {
+	
+	const getNodesToRemove = (nodeId, nodes) => {
 		const nodesToBeRemoved = []
 		function traverse(nodeId) {
 			const node = nodes.find((n) => n.id === nodeId)
@@ -764,104 +487,8 @@ const FlowEditor = () => {
 		setNodes(finalNodes)
 		setSelectedNode(null)
 		refreshNodes()
-		// return nodesToBeRemoved
 	}
-
-	function recursivelyRemoe(nodeIdToRemove, nodes) {
-		const nodesToRemove = new Set()
-
-		function addNodeAndDescendants(nodeId) {
-			nodesToRemove.add(nodeId)
-			const node = nodes.find((n) => n.id === nodeId)
-
-			if (node && node.output && node.output.length > 0) {
-				node.output.forEach((outputNode) => {
-					addNodeAndDescendants(outputNode.id)
-				})
-			}
-		}
-
-		addNodeAndDescendants(nodeIdToRemove)
-		const initNodes = nodes.filter((node) => !nodesToRemove.has(node.id))
-		setNodes(initNodes)
-		refreshNodes()
-	}
-
-	const getChildrenOfCondition = (nodes, nodeId, conditionIndex) => {
-		const node = nodes.find((n) => n && n.id && n.id == nodeId)
-		if (!node || !node.output) {
-			return []
-		}
-		let nextNodeId
-		if (node.type == 'condition') {
-			nextNodeId = node.output[conditionIndex] ? node.output[conditionIndex].id : false
-		} else {
-			nextNodeId = node.output[conditionIndex] ? node.output[conditionIndex].id : node.output[conditionIndex - 1] ? node.output[conditionIndex - 1].id : false
-		}
-		if (!nextNodeId) {
-			return []
-		}
-		let children = getChildrenOfCondition(nodes, nextNodeId, conditionIndex)
-		let nextNode = nodes.filter((n) => n && n.id && n.id == nextNodeId)
-		let nextChildren = []
-		if (nextNode[0] && nextNode[0].output && nextNode[0].output.length > 0) {
-			if (nextNode[0].output[0]) nextChildren = [...nextChildren, ...getChildrenOfCondition(nodes, nextNode[0].output[0].id, conditionIndex)]
-			if (nextNode[0].output[1]) nextChildren = [...nextChildren, ...getChildrenOfCondition(nodes, nextNode[0].output[1].id, conditionIndex)]
-		}
-		let childrenof = [nextNode[0], ...children]
-		let keymap = {}
-		nodes.forEach((c) => {
-			if (c && c.id) keymap[c.id] = c
-		})
-		for (let c = 0; c < childrenof.length; c++) {
-			if (childrenof[c] && childrenof[c].input && childrenof[c].input[0] && childrenof[c].input[0].id) {
-				childrenof[c].input[0] = keymap[childrenof[c].input[0].id]
-			}
-		}
-		return childrenof
-	}
-	const refreshNodes = () => {
-		let tmp = excludeNodes
-		nodes.forEach((n) => {
-			if (n.type == 'condition') {
-				n.output.forEach((o) => {
-					if (o && o.id) {
-						if (!excludeNodes.includes(o.id)) tmp.push(o.id)
-						let children0 = getChildrenOfCondition(nodes, o.id, 0).map((t) => t && t.id)
-						let children1 = getChildrenOfCondition(nodes, o.id, 1).map((t) => t && t.id)
-						children0.forEach((c) => {
-							if (!excludeNodes.includes(c)) tmp.push(c)
-						})
-						children1.forEach((c) => {
-							if (!excludeNodes.includes(c)) tmp.push(c)
-						})
-					} else {
-						console.log('No o.id', o)
-					}
-				})
-			}
-		})
-		console.log('before setExcludeNodes', tmp)
-		setExcludeNodes(tmp)
-	}
-
-	useEffect(() => {
-		refreshNodes()
-	}, [nodes])
-	useEffect(() => {
-		const container = automationContainerRef.current
-		if (container) {
-			// const centerPosition = (container.clientWidth/2) +300
-			// container.scrollLeft = centerPosition
-			const contentWidth = container.scrollWidth
-			const containerWidth = container.clientWidth
-			const sidebarWidth = 200
-
-			const centerPosition = (contentWidth - containerWidth) / 2 + sidebarWidth
-			container.scrollLeft = centerPosition
-		}
-	}, [])
-
+	
 	const validateNode = (node) => {
 		let result = true
 		console.log('validateNode', node)
@@ -949,10 +576,6 @@ const FlowEditor = () => {
 									if (!node.data.link || !node.data.link.value || !node.data.link.value.length > 0) result = false
 								}
 							}
-
-							// if (!node.data.cmp[0] || !node.data.cmp.length > 0) {
-							// 	result = false
-							// }
 							break
 						case 'cmp-activity':
 							if (!node.data.cmp || !node.data.cmp > 0) {
@@ -966,10 +589,6 @@ const FlowEditor = () => {
 									if (!node.data.link || !node.data.link.length > 0) result = false
 								}
 							}
-
-							// if (!node.data.link[0] || !node.data.link.length > 0) {
-							// 	result = false
-							// }
 							break
 						default:
 							break
@@ -991,7 +610,194 @@ const FlowEditor = () => {
 		console.log('final validation result is ', result)
 		return result
 	}
+	
+	// useEffects
+	
+	// Initialize component
+	useEffect(() => {
+		const init = async () => {
+			if (autId && user && user.jwt) loadData(autId);
+			if (user && user.jwt && account) {
+				loadGroups();
+				loadCampaigns();
+				loadTemplates();
+				loadCmpLinks();
+			}
+		};
+		
+		if (account && user) init();
+		
+		// Add an event listener to refresh data when the page becomes visible again
+		const handleVisibilityChange = async () => {
+			if (document.visibilityState === 'visible' && user && account && autId) {
+				console.log('Page visible again, reloading automation data with fresh API call');
+				
+				// Get fresh data from API to ensure sync with other views
+				const freshData = await loadData(autId);
+				
+				// Log the current state
+				console.log('Current data after visibility change:', freshData);
+				console.log('Current isReadOnly state:', isReadOnly);
+				console.log('Current active state:', freshData?.active);
+				
+				// Force isReadOnly to match active state after visibility change
+				if (freshData && freshData.active !== undefined) {
+					setIsReadOnly(freshData.active || isViewOnlyParam);
+				}
+			}
+		};
+		
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+		
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
+	}, [user, account, autId, isViewOnlyParam]);
+	
+	// Add effect to monitor data.active changes
+	useEffect(() => {
+		if (data && data.active !== undefined) {
+			console.log('data.active changed to:', data.active);
+			// This ensures isReadOnly always reflects the current active state
+			setIsReadOnly(data.active || isViewOnlyParam);
+		}
+	}, [data?.active, isViewOnlyParam]);
+	
+	// Add polling mechanism to check for changes
+	useEffect(() => {
+		// Add polling to check for changes from other views
+		const interval = setInterval(async () => {
+			if (user && user.jwt && account && autId) {
+				// Get latest data without updating any state
+				try {
+					const timestamp = new Date().getTime();
+					const resp = await ApiService.get(
+						`fairymailer/getAutomations?filters[uuid]=${autId}&populate=*&_t=${timestamp}`, 
+						user.jwt
+					);
+					
+					if (resp.data && resp.data.data && resp.data.data.length > 0) {
+						const freshData = resp.data.data[0];
+						
+						// Only update if active state has changed
+						if (data && freshData.active !== data.active) {
+							console.log('Detected active state change from polling:', 
+								'Current:', data.active, 
+								'New:', freshData.active
+							);
+							
+							// Update the data state to match the server
+							setData(freshData);
+							
+							// Ensure isReadOnly is updated
+							setIsReadOnly(freshData.active || isViewOnlyParam);
+						}
+					}
+				} catch (error) {
+					console.error('Error in polling check:', error);
+				}
+			}
+		}, 5000); // Check every 5 seconds
+		
+		return () => clearInterval(interval);
+	}, [user, account, autId, data?.active]);
+	
+	// Add the drag-and-drop functionality
+	useEffect(() => {
+		const el = automationContainerRef.current
+		if (!el) return
 
+		const onMouseDown = (e) => {
+			isDragging.current = true
+			el.style.cursor = 'grabbing'
+			el.style.userSelect = 'none'
+
+			dragStart.current = {
+				x: e.pageX,
+				y: e.pageY,
+				scrollLeft: el.scrollLeft,
+				scrollTop: el.scrollTop,
+			}
+		}
+
+		const onMouseMove = (e) => {
+			if (!isDragging.current) return
+			const dx = e.pageX - dragStart.current.x
+			const dy = e.pageY - dragStart.current.y
+			el.scrollLeft = dragStart.current.scrollLeft - dx
+			el.scrollTop = dragStart.current.scrollTop - dy
+		}
+
+		const stopDragging = () => {
+			isDragging.current = false
+			el.style.cursor = 'grab'
+			el.style.removeProperty('user-select')
+		}
+
+		el.addEventListener('mousedown', onMouseDown)
+		window.addEventListener('mousemove', onMouseMove)
+		window.addEventListener('mouseup', stopDragging)
+
+		// Clean up
+		return () => {
+			el.removeEventListener('mousedown', onMouseDown)
+			window.removeEventListener('mousemove', onMouseMove)
+			window.removeEventListener('mouseup', stopDragging)
+		}
+	}, [])
+
+	// Add this useEffect for mobile detection
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth <= 768);
+		};
+		
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
+	// Update isReadOnly when data changes (to check active status)
+	useEffect(() => {
+		if (data?.active) {
+			setIsReadOnly(true);
+		} else if (!isViewOnlyParam) {
+			setIsReadOnly(false);
+		}
+	}, [data, isViewOnlyParam]);
+
+	// Add this useEffect to redirect mobile users away from the editor
+	useEffect(() => {
+		if (isMobile) {
+			PopupText.fire({
+				icon: 'warning',
+				text: 'The automation flow editor is not available on mobile devices. Please use a desktop computer to edit your automation flow.',
+				showCancelButton: false,
+				confirmButtonText: 'OK',
+			}).then(() => {
+				navigate(`/automations/${autId}`);
+			});
+		}
+	}, [isMobile, autId, navigate]);
+	
+	useEffect(() => {
+		refreshNodes()
+	}, [nodes])
+	
+	useEffect(() => {
+		const container = automationContainerRef.current
+		if (container) {
+			// const centerPosition = (container.clientWidth/2) +300
+			// container.scrollLeft = centerPosition
+			const contentWidth = container.scrollWidth
+			const containerWidth = container.clientWidth
+			const sidebarWidth = 200
+
+			const centerPosition = (contentWidth - containerWidth) / 2 + sidebarWidth
+			container.scrollLeft = centerPosition
+		}
+	}, [])
+
+	// Render the component
 	return (
 		<div className="flow-editor-container">
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
@@ -1010,13 +816,13 @@ const FlowEditor = () => {
 						Save
 					</Button>
 					<Switch
-					style={{ margin: '0 10px' }}
-					label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
-					checked={data?.active || false}
-					onChange={(value) => {
-						console.log('Switch toggled to:', value);
-						updateAutomationStatus(value);
-					}}
+						style={{ margin: '0 10px' }}
+						label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
+						checked={data?.active || false}
+						onChange={(value) => {
+							console.log('Switch toggled to:', value);
+							updateAutomationStatus(value);
+						}}
 					/>
 					<Button
 						onClick={async () => {
@@ -1038,13 +844,15 @@ const FlowEditor = () => {
 						This automation is currently active and cannot be edited
 					</div>
 					<Switch
-					style={{ margin: '0 10px' }}
-					label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
-					checked={data?.active || false}
-					onChange={(value) => {
-						console.log('Switch toggled to:', value);
-						updateAutomationStatus(value);
-					}}
+						style={{ margin: '0 10px' }}
+						label={data && data.active ? 'Automation is running' : 'Automation is stopped'}
+						checked={data?.active || false}
+						// Make sure we don't disable the switch even in read-only mode
+						disabled={false}
+						onChange={(value) => {
+							console.log('Switch toggled to:', value);
+							updateAutomationStatus(value);
+						}}
 					/>
 					<Button
 						onClick={handleGoBack}
