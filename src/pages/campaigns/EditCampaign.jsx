@@ -213,6 +213,7 @@ const EditCampaign = () => {
 														{campaign.stats?.l &&
 															Object.entries(total_cmp_links)
 																.sort((a, b) => b[1] - a[1]) // Sort by value (ascending order)
+																.filter(([key, value]) => !key.includes('https://fairymail.cobaltfairy.com/api/unsubscribe'))
 																.slice(0, 3)
 																.map(([key, value]) => (
 																	<div
@@ -350,6 +351,7 @@ const EditCampaign = () => {
 												{campaign.stats?.l &&
 													Object.entries(total_cmp_links)
 														.sort((a, b) => b[1] - a[1])
+														.filter(([key, value]) => !key.includes('https://fairymail.cobaltfairy.com/api/unsubscribe'))
 														.map(([key, value]) => (
 															<div
 																className="d-flex content-space-between align-items-center mt20"
