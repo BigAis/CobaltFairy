@@ -373,18 +373,29 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 						{!isReadOnly && <Icon name="Close" className="close" onClick={handleRemove} />}
 						<Card className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
 							<h4 className="node-type">{node?.name ? actionOptions.find((option) => option.value === node.name).label : ''}</h4>
-							{('copy-to-group' == node?.name || 'move-to-group' == node?.name) && (
-								<Dropdown
-									style={{ minWidth: '270px' }}
-									disabled={isReadOnly}
-									onOptionSelect={(v, l) => {
-										node = { ...node, data: { group: [v] }, meta: { label: v.label } }
-										onUpdate(node)
-									}}
-									options={data.groups}
-								>
-									{node.meta && node.meta.label ? node.meta.label : 'Choose destination group'}
-								</Dropdown>
+							{'copy-to-group' == node?.name || 'move-to-group' == node?.name && (
+							<Dropdown
+								style={{ minWidth: '270px' }}
+								disabled={isReadOnly}
+								onOptionSelect={(v, l) => {
+								node = { ...node, data: { group: [v] }, meta: { label: v.label } }
+								onUpdate(node)
+								}}
+								options={
+								// Filter out the trigger group
+								data.groups.filter(group => {
+									// Find trigger node
+									const triggerNode = nodes.find(n => n.type === 'trigger' && n.name === 'when-user-subscribes');
+									// If there's a trigger node with a group, filter it out
+									return !triggerNode || 
+										!triggerNode.data || 
+										!triggerNode.data.group || 
+										triggerNode.data.group[0] !== group.value;
+								})
+								}
+							>
+								{node.meta && node.meta.label ? node.meta.label : 'Choose destination group'}
+							</Dropdown>
 							)}
 							{'remove-from-group' == node?.name && (
 								<Dropdown
