@@ -54,100 +54,100 @@ const Dashboard = () => {
 
 	// Improved loadStats function with retry mechanism
 	const loadStats = async () => {
-	if (!user || !user.jwt || !account) {
-		console.log('User or account data not available, skipping stats load')
-		return;
-	}
-	
-	let retries = 0;
-	const maxRetries = 3;
-	
-	setIsLoading(true);
-	
-	const attemptLoadStats = async () => {
-		try {
-		console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`)
-		let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt)
+		if (!user || !user.jwt || !account) {
+			console.log('User or account data not available, skipping stats load')
+			return;
+		}
 		
-		// Process and validate timeseries data, especially for "all" timeframe
-		if (stats.data && stats.data.timeseries) {
-			// Handle the "all" timeframe date format (monthly data)
-			if (stats.data.timeseries.all && Array.isArray(stats.data.timeseries.all)) {
-			stats.data.timeseries.all = stats.data.timeseries.all.map(item => {
-				// Ensure date is properly formatted
-				if (item.date) {
-				const date = new Date(item.date);
-				if (!isNaN(date.getTime())) {
-					return {
-					...item,
-					date: date.toISOString().split('T')[0] // Format as YYYY-MM-DD
-					};
-				}
-				}
-				return item;
-			});
-			}
-			
-			// Process other timeframes as well for consistency
-			['today', 'd7', 'd30'].forEach(timeKey => {
-			if (stats.data.timeseries[timeKey] && Array.isArray(stats.data.timeseries[timeKey])) {
-				stats.data.timeseries[timeKey] = stats.data.timeseries[timeKey].map(item => {
-				if (item.date) {
-					const date = new Date(item.date);
-					if (!isNaN(date.getTime())) {
-					return {
-						...item,
-						date: date.toISOString().split('T')[0]
-					};
+		let retries = 0;
+		const maxRetries = 3;
+		
+		setIsLoading(true);
+		
+		const attemptLoadStats = async () => {
+			try {
+				console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`)
+				let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt)
+				
+				// Process and validate timeseries data, especially for "all" timeframe
+				if (stats.data && stats.data.timeseries) {
+					// Handle the "all" timeframe date format (monthly data)
+					if (stats.data.timeseries.all && Array.isArray(stats.data.timeseries.all)) {
+						stats.data.timeseries.all = stats.data.timeseries.all.map(item => {
+							// Ensure date is properly formatted
+							if (item.date) {
+								const date = new Date(item.date);
+								if (!isNaN(date.getTime())) {
+									return {
+										...item,
+										date: date.toISOString().split('T')[0] // Format as YYYY-MM-DD
+									};
+								}
+							}
+							return item;
+						});
 					}
+					
+					// Process other timeframes as well for consistency
+					['today', 'd7', 'd30'].forEach(timeKey => {
+						if (stats.data.timeseries[timeKey] && Array.isArray(stats.data.timeseries[timeKey])) {
+							stats.data.timeseries[timeKey] = stats.data.timeseries[timeKey].map(item => {
+								if (item.date) {
+									const date = new Date(item.date);
+									if (!isNaN(date.getTime())) {
+										return {
+											...item,
+											date: date.toISOString().split('T')[0]
+										};
+									}
+								}
+								return item;
+							});
+						}
+					});
 				}
-				return item;
+				
+				console.log('Stats loaded successfully:', stats.data)
+				setStatsData(stats.data)
+				
+				let resp = await ApiService.get(
+					`fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
+					user.jwt
+				)
+				console.log('Campaigns loaded:', resp.data)
+				if (resp.data && resp.data.data) {
+					setLatestCampaigns(resp.data.data)
+				}
+				
+				return true // Success
+			} catch (error) {
+				console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error)
+				retries++;
+				
+				if (retries < maxRetries) {
+					console.log(`Retrying in 1 second... (${retries}/${maxRetries})`)
+					await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second before retry
+					return await attemptLoadStats() // Recursively retry
+				}
+				return false // Failed after max retries
+			}
+		};
+		
+		const success = await attemptLoadStats();
+		
+		if (!success) {
+			console.error('Failed to load dashboard data after multiple attempts')
+			// Could show an error message to the user here
+			if (createNotification) {
+				createNotification({
+					message: 'Could not load dashboard data. Please try refreshing the page.',
+					type: 'warning',
+					autoClose: 5000
 				});
 			}
-			});
 		}
 		
-		console.log('Stats loaded successfully:', stats.data)
-		setStatsData(stats.data)
-		
-		let resp = await ApiService.get(
-			`fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
-			user.jwt
-		)
-		console.log('Campaigns loaded:', resp.data)
-		if (resp.data && resp.data.data) {
-			setLatestCampaigns(resp.data.data)
-		}
-		
-		return true // Success
-		} catch (error) {
-		console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error)
-		retries++;
-		
-		if (retries < maxRetries) {
-			console.log(`Retrying in 1 second... (${retries}/${maxRetries})`)
-			await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second before retry
-			return await attemptLoadStats() // Recursively retry
-		}
-		return false // Failed after max retries
-		}
-	};
-	
-	const success = await attemptLoadStats();
-	
-	if (!success) {
-		console.error('Failed to load dashboard data after multiple attempts')
-		// Could show an error message to the user here
-		if (createNotification) {
-		createNotification({
-			message: 'Could not load dashboard data. Please try refreshing the page.',
-			type: 'warning',
-			autoClose: 5000
-		});
-		}
-	}
-	
-	setIsLoading(false);
+		setIsLoading(false);
 	};
 
 	// Updated to make API call to update setup_complete flag
@@ -201,11 +201,60 @@ const Dashboard = () => {
 			console.log(statsData, key)
 			return
 		}
+		
+		// For subscriber stats, we want to show cumulative totals, not daily additions
 		let data = []
-		data.push({ label: 'Total', defaultValue: false, value: statsData[key].subs_count, percentage: 0 })
-		data.push({ label: 'Unsubscribed', defaultValue: false, value: statsData[key].unsubs, percentage: 0 })
+		
+		// Calculate the proper totals based on the selected timeframe
+		if (key === 'today') {
+			// For "Today", show the current total number of subscribers
+			// This should be the all-time total, not just today's new subscribers
+			data.push({ 
+				label: 'Total Subscribers', 
+				defaultValue: false, 
+				value: statsData.all?.subs_count || 0, 
+				percentage: 0 
+			})
+			// Show only today's unsubscribes
+			data.push({ 
+				label: 'Unsubscribed Today', 
+				defaultValue: false, 
+				value: statsData[key].unsubs || 0, 
+				percentage: 0 
+			})
+		} else if (key === 'd7') {
+			// For "7 Days", show the current total subscribers (all-time)
+			data.push({ 
+				label: 'Total Subscribers', 
+				defaultValue: false, 
+				value: statsData.all?.subs_count || 0, 
+				percentage: 0 
+			})
+			// Show unsubscribes in the last 7 days (sum of daily unsubscribes)
+			data.push({ 
+				label: 'Unsubscribed (7 days)', 
+				defaultValue: false, 
+				value: statsData[key].unsubs || 0, 
+				percentage: 0 
+			})
+		} else if (key === 'all') {
+			// For "All", show all-time stats
+			data.push({ 
+				label: 'Total Subscribers', 
+				defaultValue: false, 
+				value: statsData[key].subs_count || 0, 
+				percentage: 0 
+			})
+			data.push({ 
+				label: 'Total Unsubscribed', 
+				defaultValue: false, 
+				value: statsData[key].unsubs || 0, 
+				percentage: 0 
+			})
+		}
+		
 		setSubsStats(data)
-		console.log(data)
+		console.log('Subscriber stats metrics:', data)
 	}
 	
 	useEffect(() => {
@@ -321,23 +370,23 @@ const Dashboard = () => {
 							</div>
 						</Card>
 						<div className={`dashboard-ctas ${isMobile ? 'mobile-ctas' : ''}`}>
-						<Button type={'secondary'} onClick={() => {
-						if (isMobile) {
-							PopupText.fire({
-							icon: 'info',
-							text: 'You can create a campaign on mobile, but the campaign editor is not available. You will be able to set up campaign details and review, but design editing requires a desktop device.',
-							showCancelButton: false,
-							confirmButtonText: 'Continue',
-							}).then(() => {
-							navigate('/campaigns/new');
-							});
-						} else {
-							navigate('/campaigns/new');
-						}
-						}}>
-						<Icon name="Campaigns" />
-						<span>Create Campaign</span>
-						</Button>
+							<Button type={'secondary'} onClick={() => {
+								if (isMobile) {
+									PopupText.fire({
+										icon: 'info',
+										text: 'You can create a campaign on mobile, but the campaign editor is not available. You will be able to set up campaign details and review, but design editing requires a desktop device.',
+										showCancelButton: false,
+										confirmButtonText: 'Continue',
+									}).then(() => {
+										navigate('/campaigns/new');
+									});
+								} else {
+									navigate('/campaigns/new');
+								}
+							}}>
+								<Icon name="Campaigns" />
+								<span>Create Campaign</span>
+							</Button>
 							<Button type={'secondary'} onClick={()=>{
 								navigate('/subscribers/import')
 							}}>
@@ -346,14 +395,14 @@ const Dashboard = () => {
 							</Button>
 							<Button type={'secondary'} onClick={() => {
 								if (isMobile) {
-								PopupText.fire({
-									icon: 'warning',
-									text: 'Automation editor is not available on mobile devices. Please use a desktop to design your automations.',
-									showCancelButton: false,
-									confirmButtonText: 'OK',
-								});
+									PopupText.fire({
+										icon: 'warning',
+										text: 'Automation editor is not available on mobile devices. Please use a desktop to design your automations.',
+										showCancelButton: false,
+										confirmButtonText: 'OK',
+									});
 								} else {
-								navigate('/automations/new');
+									navigate('/automations/new');
 								}
 							}}>
 								<Icon name="Automations" />
@@ -384,7 +433,7 @@ const Dashboard = () => {
 												<Stat 
 													stats={subsStats} 
 													hasChart={false} 
-													defaultLabel={'Total'} 
+													defaultLabel={'Total Subscribers'} 
 													timeseriesData={statsData.timeseries}
 													timeseriesKey={subsStatsKey}
 													metricKey="subs_count"
@@ -394,7 +443,11 @@ const Dashboard = () => {
 												<Stat 
 													stats={subsStats} 
 													hasChart={false} 
-													defaultLabel={'Unsubscribed'} 
+													defaultLabel={
+														subsStatsKey === 'today' ? 'Unsubscribed Today' : 
+														subsStatsKey === 'd7' ? 'Unsubscribed (7 days)' : 
+														'Total Unsubscribed'
+													} 
 													timeseriesData={statsData.timeseries}
 													timeseriesKey={subsStatsKey}
 													metricKey="unsubs"

@@ -61,7 +61,14 @@ const DashboardChart = ({
 		} else if (timeseriesKey === 'all') {
 			chartLabels = seriesData.map(item => {
 				const date = new Date(item.date);
+				// For monthly data, show month and year
 				return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+			});
+		} else if (timeseriesKey === 'today') {
+			// For today, show hourly labels if available
+			chartLabels = seriesData.map(item => {
+				const date = new Date(item.date);
+				return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 			});
 		}
 		
@@ -79,6 +86,7 @@ const DashboardChart = ({
 		labels: chartLabels,
 		datasets: [
 			{
+				label: metric1 === 'subs_count' ? 'Subscribers' : metric1,
 				data: chartData1,
 				borderColor: isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
 				backgroundColor: function(context) {
@@ -96,6 +104,7 @@ const DashboardChart = ({
 				fill: true,
 			},
 			{
+				label: metric2 === 'unsubs' ? 'Unsubscribed' : metric2,
 				data: chartData2,
 				borderColor: !isPositive ? 'rgba(96, 199, 0, 1)' : 'rgba(255, 166, 0, 1)',
 				backgroundColor: function(context) {
@@ -128,28 +137,65 @@ const DashboardChart = ({
 				intersect: false,
 				callbacks: {
 					title: function(tooltipItems) {
-						if (timeseriesKey === 'all') {
-							if (seriesData.length > 0 && tooltipItems.length > 0) {
-								const index = tooltipItems[0].dataIndex;
-								if (index >= 0 && index < seriesData.length) {
-									const date = new Date(seriesData[index].date);
-									if (!isNaN(date.getTime())) {
-										return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-									}
+						if (!tooltipItems || tooltipItems.length === 0) {
+							return '';
+						}
+						
+						const index = tooltipItems[0].dataIndex;
+						
+						// Use the series data directly to get the date
+						if (seriesData && seriesData[index] && seriesData[index].date) {
+							const dateStr = seriesData[index].date;
+							const date = new Date(dateStr);
+							
+							// Check if date is valid
+							if (!isNaN(date.getTime())) {
+								if (timeseriesKey === 'all') {
+									// For monthly data, show full month and year
+									return date.toLocaleDateString('en-US', { 
+										month: 'long', 
+										year: 'numeric' 
+									});
+								} else if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
+									// For daily data, show full date
+									return date.toLocaleDateString('en-US', { 
+										weekday: 'long',
+										month: 'long', 
+										day: 'numeric',
+										year: 'numeric' 
+									});
+								} else if (timeseriesKey === 'today') {
+									// For today's data, show time
+									return date.toLocaleString('en-US', { 
+										hour: '2-digit',
+										minute: '2-digit',
+										hour12: true
+									});
 								}
 							}
 						}
+						
+						// Fallback to the label if date parsing fails
 						return tooltipItems[0].label || '';
 					},
 					label: function(context) {
 						const datasetIndex = context.datasetIndex;
 						const value = context.parsed.y;
+						const datasetLabel = context.dataset.label;
 						
-						const metricName = datasetIndex === 0 ? 
-							(metric1 === 'subs_count' ? 'Subscribers' : metric1) : 
-							(metric2 === 'unsubs' ? 'Unsubscribed' : metric2);
+						// Determine the proper label based on the timeframe
+						let valueLabel = '';
+						if (timeseriesKey === 'today') {
+							valueLabel = `${datasetLabel}: ${value.toLocaleString()} (hourly)`;
+						} else if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
+							valueLabel = `${datasetLabel}: ${value.toLocaleString()} (daily)`;
+						} else if (timeseriesKey === 'all') {
+							valueLabel = `${datasetLabel}: ${value.toLocaleString()} (monthly)`;
+						} else {
+							valueLabel = `${datasetLabel}: ${value.toLocaleString()}`;
+						}
 						
-						return `${metricName}: ${value.toLocaleString()} (daily value)`;
+						return valueLabel;
 					}
 				}
 			},
