@@ -12,7 +12,6 @@ import {
   Filler
 } from 'chart.js'
 
-// Register all required components including Filler plugin
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
 
 const DashboardChart = ({ 
@@ -22,9 +21,7 @@ const DashboardChart = ({
   metric1 = 'subs_count',
   metric2 = 'unsubs'
 }) => {
-	// Function to create gradients for chart
 	const createGradients = (ctx, area) => {
-		// Create gradient for first dataset
 		const gradient1 = ctx.createLinearGradient(0, 0, 0, area.height);
 		
 		if (isPositive) {
@@ -35,7 +32,6 @@ const DashboardChart = ({
 			gradient1.addColorStop(1, 'rgba(255, 166, 0, 0)');
 		}
 		
-		// Create gradient for second dataset
 		const gradient2 = ctx.createLinearGradient(0, 0, 0, area.height);
 		
 		if (!isPositive) {
@@ -49,34 +45,35 @@ const DashboardChart = ({
 		return [gradient1, gradient2];
 	};
 	
-	// Process actual data if available, otherwise use default data
 	let chartLabels = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
 	let chartData1 = [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4];
 	let chartData2 = [1, 1.5, 2, 1.5, 2, 1.5, 1, 2.7, 2, 3, 3.5, 2, 1.8, 1.5, 1.7, 2.3, 0.5, 2.5, 1, 0.5, 4];
 	
-	// Extract and process data from timeseriesData if available
+	let seriesData = [];
 	if (timeseriesData && timeseriesData[timeseriesKey] && Array.isArray(timeseriesData[timeseriesKey])) {
-		const seriesData = timeseriesData[timeseriesKey];
+		seriesData = timeseriesData[timeseriesKey];
 		
-		// Format date labels based on timeseriesKey
 		if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
-			// For daily data: Format as "Jul 22"
 			chartLabels = seriesData.map(item => {
 				const date = new Date(item.date);
 				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 			});
 		} else if (timeseriesKey === 'all') {
-			// For monthly data: Format as "Jul 2025"
 			chartLabels = seriesData.map(item => {
 				const date = new Date(item.date);
 				return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 			});
 		}
 		
-		// Extract metric data
 		chartData1 = seriesData.map(item => item[metric1] || 0);
 		chartData2 = seriesData.map(item => item[metric2] || 0);
 	}
+
+	// Get total values for context
+	const totalMetric1 = seriesData.length > 0 ? 
+		seriesData.reduce((sum, item) => sum + (item[metric1] || 0), 0) : 0;
+	const totalMetric2 = seriesData.length > 0 ? 
+		seriesData.reduce((sum, item) => sum + (item[metric2] || 0), 0) : 0;
 
 	const data = {
 		labels: chartLabels,
@@ -89,7 +86,6 @@ const DashboardChart = ({
 					const {ctx, chartArea} = chart;
 					
 					if (!chartArea) {
-						// This can happen when the chart is not yet rendered
 						return isPositive ? 'rgba(96, 199, 0, 0.2)' : 'rgba(255, 166, 0, 0.1)';
 					}
 					return createGradients(ctx, chartArea)[0];
@@ -107,7 +103,6 @@ const DashboardChart = ({
 					const {ctx, chartArea} = chart;
 					
 					if (!chartArea) {
-						// This can happen when the chart is not yet rendered
 						return !isPositive ? 'rgba(96, 199, 0, 0.2)' : 'rgba(255, 166, 0, 0.1)';
 					}
 					return createGradients(ctx, chartArea)[1];
@@ -128,29 +123,40 @@ const DashboardChart = ({
 				display: false,
 			},
 			tooltip: {
-				enabled: true, // Enable tooltips to show actual values
+				enabled: true,
 				mode: 'index',
 				intersect: false,
 				callbacks: {
 					title: function(tooltipItems) {
+						if (timeseriesKey === 'all') {
+							if (seriesData.length > 0 && tooltipItems.length > 0) {
+								const index = tooltipItems[0].dataIndex;
+								if (index >= 0 && index < seriesData.length) {
+									const date = new Date(seriesData[index].date);
+									if (!isNaN(date.getTime())) {
+										return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+									}
+								}
+							}
+						}
 						return tooltipItems[0].label || '';
 					},
 					label: function(context) {
-						let label = context.dataset.label || '';
-						if (label) {
-							label += ': ';
-						}
-						if (context.parsed.y !== null) {
-							label += context.parsed.y.toLocaleString();
-						}
-						return label;
+						const datasetIndex = context.datasetIndex;
+						const value = context.parsed.y;
+						
+						const metricName = datasetIndex === 0 ? 
+							(metric1 === 'subs_count' ? 'Subscribers' : metric1) : 
+							(metric2 === 'unsubs' ? 'Unsubscribed' : metric2);
+						
+						return `${metricName}: ${value.toLocaleString()} (daily value)`;
 					}
 				}
 			},
 		},
 		scales: {
 			x: {
-				display: timeseriesData ? true : false, // Show axis labels if we have real data
+				display: timeseriesData ? true : false,
 				ticks: {
 					autoSkip: true,
 					maxRotation: 45,
@@ -164,7 +170,7 @@ const DashboardChart = ({
 		},
 		elements: {
 			line: {
-				tension: 0.4, // Slightly less curved lines for better data representation
+				tension: 0.4,
 			},
 		},
 	}

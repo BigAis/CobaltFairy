@@ -54,54 +54,100 @@ const Dashboard = () => {
 
 	// Improved loadStats function with retry mechanism
 	const loadStats = async () => {
-		if (!user || !user.jwt || !account) {
-		  console.log('User or account data not available, skipping stats load')
-		  return;
-		}
+	if (!user || !user.jwt || !account) {
+		console.log('User or account data not available, skipping stats load')
+		return;
+	}
+	
+	let retries = 0;
+	const maxRetries = 3;
+	
+	setIsLoading(true);
+	
+	const attemptLoadStats = async () => {
+		try {
+		console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`)
+		let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt)
 		
-		let retries = 0;
-		const maxRetries = 3;
-		
-		setIsLoading(true);
-		
-		const attemptLoadStats = async () => {
-		  try {
-			console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`)
-			let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt)
-			console.log('Stats loaded successfully:', stats.data)
-			setStatsData(stats.data)
-			
-			let resp = await ApiService.get(
-			  `fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
-			  user.jwt
-			)
-			console.log('Campaigns loaded:', resp.data)
-			if (resp.data && resp.data.data) {
-			  setLatestCampaigns(resp.data.data)
+		// Process and validate timeseries data, especially for "all" timeframe
+		if (stats.data && stats.data.timeseries) {
+			// Handle the "all" timeframe date format (monthly data)
+			if (stats.data.timeseries.all && Array.isArray(stats.data.timeseries.all)) {
+			stats.data.timeseries.all = stats.data.timeseries.all.map(item => {
+				// Ensure date is properly formatted
+				if (item.date) {
+				const date = new Date(item.date);
+				if (!isNaN(date.getTime())) {
+					return {
+					...item,
+					date: date.toISOString().split('T')[0] // Format as YYYY-MM-DD
+					};
+				}
+				}
+				return item;
+			});
 			}
 			
-			return true // Success
-		  } catch (error) {
-			console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error)
-			retries++;
-			
-			if (retries < maxRetries) {
-			  console.log(`Retrying in 1 second... (${retries}/${maxRetries})`)
-			  await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second before retry
-			  return await attemptLoadStats() // Recursively retry
+			// Process other timeframes as well for consistency
+			['today', 'd7', 'd30'].forEach(timeKey => {
+			if (stats.data.timeseries[timeKey] && Array.isArray(stats.data.timeseries[timeKey])) {
+				stats.data.timeseries[timeKey] = stats.data.timeseries[timeKey].map(item => {
+				if (item.date) {
+					const date = new Date(item.date);
+					if (!isNaN(date.getTime())) {
+					return {
+						...item,
+						date: date.toISOString().split('T')[0]
+					};
+					}
+				}
+				return item;
+				});
 			}
-			return false // Failed after max retries
-		  }
-		};
-		
-		const success = await attemptLoadStats();
-		
-		if (!success) {
-		  console.error('Failed to load dashboard data after multiple attempts')
-		  // You could show an error message to the user here
+			});
 		}
 		
-		setIsLoading(false);
+		console.log('Stats loaded successfully:', stats.data)
+		setStatsData(stats.data)
+		
+		let resp = await ApiService.get(
+			`fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
+			user.jwt
+		)
+		console.log('Campaigns loaded:', resp.data)
+		if (resp.data && resp.data.data) {
+			setLatestCampaigns(resp.data.data)
+		}
+		
+		return true // Success
+		} catch (error) {
+		console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error)
+		retries++;
+		
+		if (retries < maxRetries) {
+			console.log(`Retrying in 1 second... (${retries}/${maxRetries})`)
+			await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second before retry
+			return await attemptLoadStats() // Recursively retry
+		}
+		return false // Failed after max retries
+		}
+	};
+	
+	const success = await attemptLoadStats();
+	
+	if (!success) {
+		console.error('Failed to load dashboard data after multiple attempts')
+		// Could show an error message to the user here
+		if (createNotification) {
+		createNotification({
+			message: 'Could not load dashboard data. Please try refreshing the page.',
+			type: 'warning',
+			autoClose: 5000
+		});
+		}
+	}
+	
+	setIsLoading(false);
 	};
 
 	// Updated to make API call to update setup_complete flag
@@ -358,6 +404,7 @@ const Dashboard = () => {
 									)}
 								</div>
 								<br></br>
+
 								<div style={{ height: isMobile ? '200px' : '350px' }}>
 									<DashboardChart 
 										isPositive={true} 
