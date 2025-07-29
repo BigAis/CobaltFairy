@@ -24,7 +24,7 @@ const SubsCounter = ({ children, currentSubs, subsLimit, onClick, className, ...
 	}
 	
 	const progressValue = () => {
-		return (currentSubs / subsLimit) * 100
+	return currentSubs >= subsLimit ? 100 : (currentSubs / subsLimit) * 100
 	}
 
 	return (
