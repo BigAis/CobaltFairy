@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react'
+import Select from 'react-select' // Add this import if missing
 
 import NodeItem from './NodeItem'
 import { ApiService } from '../../service/api-service'
@@ -67,6 +68,10 @@ const FlowEditor = () => {
 			
 			if (resp.data && resp.data.data && resp.data.data.length > 0) {
 				const loadedNodes = resp.data.data[0].design.map(node => {
+					// Handle special case for condition nodes with link data
+					if(node.type === "condition" && ["cmp_link_clicked"].includes(node.data?.trigger) && node.data?.link){
+						if(!node.data.link.value) node.data.link = {value:node.data.link}
+					}
 					return node;
 				});
 				
@@ -302,36 +307,94 @@ const FlowEditor = () => {
 			PopupText.fire({ 
 				icon: 'error', 
 				text: 'Error updating automation status. Please try again.', 
-				showConfirmButton: false 
+				showCancelButton: false 
 			});
 			return false;
 		}
 	};
 	
 	const exportData = async (showSuccessMessage = true) => {
-		if (!user || !user.jwt || !data) return false;
+		console.log("exportData called with showSuccessMessage:", showSuccessMessage);
 		
-		const isAutomationValid = validateNodes()
+		if (!user || !user.jwt) {
+			console.error("Export failed: Missing user or JWT");
+			PopupText.fire({ 
+				icon: 'error', 
+				text: 'Authentication error. Please try logging in again.', 
+				showCancelButton: false 
+			});
+			return false;
+		}
+		
+		if (!data || !data.id) {
+			console.error("Export failed: Missing automation data", data);
+			PopupText.fire({ 
+				icon: 'error', 
+				text: 'Could not identify the automation to save. Please try reloading the page.', 
+				showCancelButton: false 
+			});
+			return false;
+		}
+		
+		// Log before validation
+		console.log("Starting validation check. Nodes:", nodes);
+		
+		const isAutomationValid = validateNodes();
 		if (!isAutomationValid) {
-			PopupText.fire({ icon: 'error', text: 'You have empty actions in your flow. You need to delete unwanted actions.', showCancelButton: false })
-			return
+			PopupText.fire({ 
+				icon: 'error', 
+				text: 'You have empty or invalid actions in your flow. Please check all nodes and remove any unwanted actions.', 
+				showCancelButton: false 
+			});
+			return false;
 		}
-
-		let newData = { id: data.id, data: { design: nodes, active: data.active } }
-
-		let resp
-		if (data && data.id > 0) {
-			resp = await ApiService.post(`fairymailer/save-automation/`, newData, user.jwt)
-		} else {
-			PopupText.fire({ icon: 'error', text: 'Failed to save your changes :(', showCancelButton: false })
-			return false
-		}
-		if (resp?.data?.data?.id) {
-			if (showSuccessMessage) PopupText.fire({ icon: 'success', text: 'You changes are successfully saved!', showCancelButton: false })
-			return true
-		} else {
-			PopupText.fire({ icon: 'error', text: 'Failed to save your changes. If this problem persists, contact our support team.', showCancelButton: false })
-			return false
+		
+		// Prepare the data to save
+		const newData = { 
+			id: data.id, 
+			data: { 
+				design: nodes,
+				active: data.active,
+				name: data.name || "Unnamed Automation"
+			} 
+		};
+		
+		console.log("Saving automation with data:", newData);
+		
+		try {
+			// Save the automation
+			const resp = await ApiService.post(`fairymailer/save-automation/`, newData, user.jwt);
+			console.log("Save response:", resp);
+			
+			if (resp?.data?.data?.id) {
+				// Success case
+				if (showSuccessMessage) {
+					await PopupText.fire({ 
+						icon: 'success', 
+						text: 'Your changes are successfully saved!', 
+						showCancelButton: false 
+					});
+				}
+				return true;
+			} else {
+				// API returned but without expected data
+				console.error("API returned unexpected response:", resp);
+				PopupText.fire({ 
+					icon: 'error', 
+					text: 'The server returned an unexpected response. Please try again.', 
+					showCancelButton: false 
+				});
+				return false;
+			}
+		} catch (error) {
+			// API call failed
+			console.error("Save automation API error:", error);
+			PopupText.fire({ 
+				icon: 'error', 
+				text: 'Failed to save your changes. Please check your connection and try again.', 
+				showCancelButton: false 
+			});
+			return false;
 		}
 	}
 	
@@ -385,6 +448,166 @@ const FlowEditor = () => {
 	const selectNode = (node) => {
 		setSelectedNode(node)
 	}
+	
+	// Define all necessary options constants
+	const actionOptions = [
+		{ value: 'copy-to-group', label: 'Copy to Group' },
+		{ value: 'move-to-group', label: 'Move to Group' },
+		{ value: 'remove-from-group', label: 'Remove from Group' },
+		{ value: 'unsubscribe', label: 'Unsubscribe' },
+	];
+	
+	// Get workflow campaigns based on email nodes
+	const workflowCampaigns = nodes.filter((node) => node.type === 'email').length > 0
+		? nodes
+			.filter((node) => node.type === 'email')
+			.map((node) => {
+				if (node.data) return { 
+					value: node.id, 
+					label: node.data.emailSubject || node.meta?.label || `Email #${node.id}` 
+				}
+				return null;
+			}).filter(Boolean)
+		: [];
+	
+	// Define workflow condition options
+	const workflowConditionOptions = [
+		{ value: 'cmp_open', label: 'was opened' },
+		{ value: 'cmp_not_open', label: 'was not opened' },
+		{ value: 'cmp_link_clicked', label: 'had a specific link clicked' },
+		{ value: 'cmp_link_not_clicked', label: 'had a specific link not clicked' },
+	];
+	
+	// Handler for additional change (dropdown selection)
+	const handleAdditionalChange = (selectedOptions) => {
+		if (!selectedNode) return;
+		
+		// Check if selectedOptions is an array (isMulti) or a single object
+		if (!Array.isArray(selectedOptions)) {
+			selectedOptions = [selectedOptions];
+		}
+
+		let selectedValue = selectedOptions.length > 0 ? selectedOptions.map((option) => option?.value) : [];
+		let selectedLabel = selectedOptions.length > 0 ? selectedOptions.map((option) => option?.label) : [];
+		let triggerType;
+		
+		if (!selectedNode.name) selectedNode.name = selectedNode.type;
+		
+		switch (selectedNode.name) {
+			case 'when-user-subscribes':
+				triggerType = 'group';
+				setHasTrigger(true);
+				break;
+			case 'when-user-opens-campaign':
+				triggerType = 'cmp';
+				setHasTrigger(true);
+				break;
+			case 'when-user-clicks-link':
+				triggerType = 'link';
+				setHasTrigger(true);
+				break;
+			case 'delay':
+				selectedValue = selectedValue[0];
+				triggerType = 'delay';
+				if (['days', 'hours'].includes(selectedValue)) triggerType = 'delayValue';
+				break;
+			case 'copy-to-group':
+			case 'move-to-group':
+			case 'remove-from-group':
+				triggerType = 'group';
+				break;
+			case 'workflow-activity':
+				triggerType = 'email_node_id';
+				selectedValue = selectedValue[0];
+				break;
+			case 'cmp-activity':
+				triggerType = 'cmp';
+				selectedValue = selectedValue[0];
+				break;
+			default:
+				break;
+		}
+		
+		let newNode = { 
+			...selectedNode, 
+			data: { ...(selectedNode.data || {}), [triggerType]: selectedValue }, 
+			meta: { ...(selectedNode.meta || {}), label: selectedLabel && selectedLabel[0] ? selectedLabel[0] : '' } 
+		};
+		
+		const updatedNodes = nodes.map((node) => (node.id === selectedNode.id ? newNode : node));
+		setNodes(updatedNodes);
+		setSelectedNode(newNode);
+	};
+	
+	// Handler for trigger select change
+	const handleTriggerSelectChange = (ev) => {
+		if (!selectedNode) return;
+		
+		// Update the `name` and reset additional settings in `selectedNode`
+		if (selectedNode.type === 'delay') {
+			ev.value = 'delay';
+		}
+
+		const updatedNode = {
+			...selectedNode,
+			name: ev.value
+		};
+
+		if (selectedNode.type === 'email' && ev.value) {
+			const template = templates.find(item => item.attributes.uuid === ev.value);
+			if (template) {
+				updatedNode.templateName = ev.label;
+				updatedNode.data = { 
+					...updatedNode.data, 
+					tplId: template.id,
+					tplUuid: template.attributes.uuid 
+				};
+			}
+		}
+
+		setNodes(nodes.map(n => n.id === updatedNode.id ? updatedNode : n));
+		setSelectedNode(updatedNode);
+	};
+	
+	// Handle workflow condition change
+	const handleWorkflowCondition = (ev) => {
+		if (!selectedNode || !ev) return;
+		
+		const updatedNode = { 
+			...selectedNode, 
+			data: { ...selectedNode.data, trigger: ev.value },
+			meta: { ...selectedNode.meta, triggerName: ev.label }
+		};
+		
+		setNodes(nodes.map(n => n.id === updatedNode.id ? updatedNode : n));
+		setSelectedNode(updatedNode);
+	};
+	
+	// Handle workflow email link selection
+	const handleWorkflowEmailLink = (ev) => {
+		if (!selectedNode || !ev) return;
+		
+		const updatedNode = { 
+			...selectedNode, 
+			data: { ...selectedNode.data, link: ev.value }
+		};
+		
+		setNodes(nodes.map(n => n.id === updatedNode.id ? updatedNode : n));
+		setSelectedNode(updatedNode);
+	};
+	
+	// Handle campaign email link selection
+	const handleCmpEmailLink = (ev) => {
+		if (!selectedNode || !ev) return;
+		
+		const updatedNode = { 
+			...selectedNode, 
+			data: { ...selectedNode.data, link: ev.value }
+		};
+		
+		setNodes(nodes.map(n => n.id === updatedNode.id ? updatedNode : n));
+		setSelectedNode(updatedNode);
+	};
 	
 	const refreshNodes = () => {
 		let tmp = excludeNodes
@@ -490,125 +713,217 @@ const FlowEditor = () => {
 	}
 	
 	const validateNode = (node) => {
-		let result = true
-		console.log('validateNode', node)
+		let result = true;
+		console.log('Validating node:', node);
+		
+		// Check if node exists
+		if (!node) {
+			console.error('Node is undefined or null');
+			return false;
+		}
+		
+		// Check for required fields
+		if (!node.type) {
+			console.error('Node missing type property');
+			return false;
+		}
+		
+		// Basic safety check for data object
+		if (!node.data) {
+			node.data = {};
+			console.warn('Node data was missing, added empty object');
+		}
+		
 		switch (node.type) {
 			case 'trigger':
 				if (!node.name || !node.name.length > 0) {
-					result = false
+					console.error('Trigger node missing name');
+					result = false;
 				} else {
 					switch (node.name) {
 						case 'when-user-subscribes':
-							if (!node.data.group[0] || !node.data.group.length > 0) {
-								result = false
+							if (!node.data.group || !node.data.group[0] || !node.data.group.length > 0) {
+								console.error('Trigger node missing group data');
+								result = false;
 							}
-							break
+							break;
 						case 'when-user-opens-campaign':
-							if (!node.data.cmp[0] || !node.data.cmp.length > 0) {
-								result = false
+							if (!node.data.cmp || !node.data.cmp[0] || !node.data.cmp.length > 0) {
+								console.error('Trigger node missing campaign data');
+								result = false;
 							}
-							break
+							break;
 						case 'when-user-clicks-link':
-							if (!node.data.link[0] || !node.data.link.length > 0) {
-								result = false
+							if (!node.data.link || !node.data.link[0] || !node.data.link.length > 0) {
+								console.error('Trigger node missing link data');
+								result = false;
 							}
-							break
+							break;
 						default:
-							break
+							break;
 					}
 				}
-				break
+				break;
 			case 'action':
 				if (!node.name || !node.name.length > 0) {
-					result = false
+					console.error('Action node missing name');
+					result = false;
 				} else {
 					switch (node.name) {
 						case 'copy-to-group':
 						case 'move-to-group':
 						case 'remove-from-group':
-							if (!node.data.group[0] || !node.data.group.length > 0) {
-								result = false
+							if (!node.data.group || !node.data.group[0] || !node.data.group.length > 0) {
+								console.error('Action node missing group data');
+								result = false;
 							}
-							break
+							break;
 						default:
-							break
+							break;
 					}
 				}
-				break
+				break;
 			case 'email':
 				if (!node.name || !node.name.length > 0) {
-					result = false
+					console.error('Email node missing name');
+					result = false;
 				} else {
 					if (!node.data.emailSubject || !node.data.emailSubject.length > 0) {
-						result = false
+						console.error('Email node missing subject');
+						result = false;
 					}
-					if (!node.data.tplId || !isNaN(node.data.tplId[0])) {
-						result = false
+					if (!node.data.tplId || (Array.isArray(node.data.tplId) && !isNaN(node.data.tplId[0]))) {
+						console.error('Email node missing or invalid template ID');
+						result = false;
 					}
 				}
-				break
+				break;
 			case 'delay':
 				if (!node.name || !node.name.length > 0) {
-					result = false
+					console.error('Delay node missing name');
+					result = false;
 				} else {
 					if (!node.data.delay || !node.data.delay.length > 0) {
-						result = false
+						console.error('Delay node missing delay value');
+						result = false;
 					}
 					if (!node.data.delayValue || !node.data.delayValue.length > 0) {
-						result = false
+						console.error('Delay node missing delay type');
+						result = false;
 					}
 				}
-				break
+				break;
 			case 'condition':
 				if (!node.name || !node.name.length > 0) {
-					result = false
+					console.error('Condition node missing name');
+					result = false;
 				} else {
 					switch (node.name) {
 						case 'workflow-activity':
 							if (!node.data.email_node_id || !(typeof node.data.email_node_id === 'number')) {
-								result = false
+								console.error('Workflow condition missing email node ID');
+								result = false;
 							}
 
 							if (!node.data.trigger || !node.data.trigger.length > 0) {
-								result = false
+								console.error('Workflow condition missing trigger');
+								result = false;
 							} else {
 								if (node.data.trigger === 'cmp_link_clicked' || node.data.trigger === 'cmp_link_not_clicked') {
-									if (!node.data.link || !node.data.link.value || !node.data.link.value.length > 0) result = false
+									if (!node.data.link || !node.data.link.value || !node.data.link.value.length > 0) {
+										console.error('Workflow condition missing link value');
+										result = false;
+									}
 								}
 							}
-							break
+							break;
 						case 'cmp-activity':
 							if (!node.data.cmp || !node.data.cmp > 0) {
-								result = false
+								console.error('Campaign condition missing campaign ID');
+								result = false;
 							}
 
 							if (!node.data.trigger || !node.data.trigger.length > 0) {
-								result = false
+								console.error('Campaign condition missing trigger');
+								result = false;
 							} else {
 								if (node.data.trigger === 'cmp_link_clicked' || node.data.trigger === 'cmp_link_not_clicked') {
-									if (!node.data.link || !node.data.link.length > 0) result = false
+									if (!node.data.link || !node.data.link.length > 0) {
+										console.error('Campaign condition missing link value');
+										result = false;
+									}
 								}
 							}
-							break
+							break;
 						default:
-							break
+							break;
 					}
 				}
-				break
+				break;
 			default:
-				break
+				console.error('Unknown node type:', node.type);
+				result = false;
+				break;
 		}
-		console.log('Validation of', node, result)
-		return result
+		console.log('Validation result for node', node.id, ':', result);
+		return result;
 	}
 
 	const validateNodes = () => {
-		let result = true
+		console.log('Starting validation of all nodes');
+		
+		// Check if nodes array exists
+		if (!nodes || nodes.length === 0) {
+			console.error('No nodes to validate');
+			return false;
+		}
+		
+		let result = true;
+		let validationErrors = [];
+		
+		// Validate each node
 		nodes.forEach((node) => {
-			if (!validateNode(node)) result = false
-		})
-		console.log('final validation result is ', result)
-		return result
+			const nodeValid = validateNode(node);
+			if (!nodeValid) {
+				validationErrors.push(`Node ${node.id} (${node.type}) failed validation`);
+				result = false;
+			}
+		});
+		
+		if (!result) {
+			console.error('Validation errors found:', validationErrors);
+		}
+		
+		console.log('Final validation result:', result);
+		return result;
+	}
+	
+	// Function to get template links
+	const getTplIdLinks = (nodeId) => {
+		let links = []
+		const tplNode = nodes.filter((node) => node.id === nodeId)[0]
+
+		if (!tplNode) return []
+
+		const tplId = tplNode?.data?.tplId
+
+		let templates = data.templates
+
+		if (templates.length > 0 && tplId) {
+			const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
+			const templateLinks = extractLinksFromCampaignDesign(tplDesign.components ?? tplDesign.blockList)
+			if (templateLinks.length > 0) {
+				templateLinks.forEach((ll) => {
+					if (typeof ll === 'undefined') return
+					if (!links.includes(ll)) links.push(ll)
+				})
+			}
+			links = links.map((link) => ({
+				value: link,
+				label: link,
+			}))
+		}
+		return links
 	}
 	
 	// useEffects
@@ -898,8 +1213,33 @@ const FlowEditor = () => {
 					/>
 					<Button
 						onClick={async () => {
-						await exportData(false)
-						navigate(`/automations/${autId}/edit`)
+							console.log("Done Editing button clicked");
+							try {
+								// First save the automation
+								const saveResult = await exportData(false);
+								console.log("Save result:", saveResult);
+								
+								if (saveResult) {
+									// Only navigate if save was successful
+									console.log("Save successful, navigating to:", `/automations/${autId}/edit`);
+									navigate(`/automations/${autId}/edit`);
+								} else {
+									console.log("Save failed, not navigating");
+									// Show error if save failed but didn't already show a message
+									PopupText.fire({ 
+										icon: 'warning', 
+										text: 'Changes could not be saved. Please try again.', 
+										showCancelButton: false 
+									});
+								}
+							} catch (error) {
+								console.error("Error during Done Editing:", error);
+								PopupText.fire({ 
+									icon: 'error', 
+									text: 'An unexpected error occurred. Please try again.', 
+									showCancelButton: false 
+								});
+							}
 						}}
 					>
 						Done Editing

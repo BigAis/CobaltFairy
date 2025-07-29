@@ -17,6 +17,10 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 	const [nodeAction, setNodeAction] = useState(null)
 	const [showAddPopover, setShowAddPopover] = useState(-1)
 
+	// Safe access to check if node data exists
+	const nodeData = node?.data || {};
+	const nodeMeta = node?.meta || {};
+
 	const handleAdd = (type, position = 0) => {
 		if (type.includes('-')) {
 			let subtype = type.split('-')
@@ -47,6 +51,8 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 		removeNode(node.id)
 	}
 	const extractLinksFromCampaignDesign = (components = [], links = []) => {
+		if (!components || !Array.isArray(components)) return links;
+		
 		components.forEach((component) => {
 			if (component.components && component.components.length > 0) {
 				links = [...extractLinksFromCampaignDesign(component.components, links)]
@@ -63,28 +69,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 		})
 		return links
 	}
-	// const getTplIdLinks = (nodeId) => {
-	// 	let links = []
-	// 	const tplNode = nodes.filter((node) => node.id === nodeId)[0]
-	// 	if(!tplNode) return [];
-	// 	const tplId = tplNode?.data?.tplId
-	// 	let templates = data.templates;
-	// 	if (templates.length > 0 && tplId) {
-	// 		const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
-	// 		console.log('tplId: ',tplDesign)
-	// 		const templateLinks = extractLinksFromCampaignDesign(tplDesign.components ?? tplDesign.blockList)
-	// 		if (templateLinks.length > 0) {
-	// 			templateLinks.forEach((ll) => {
-	// 				if (!links.includes(ll)) links.push(ll)
-	// 			})
-	// 		}
-	// 		links = links.map((link) => ({
-	// 			value: link,
-	// 			label: link,
-	// 		}))
-	// 	}
-	// 	return links
-	// }
+	
 	const getTplIdLinks = (nodeId) => {
 		let links = []
 		const tplNode = nodes.filter((node) => node.id === nodeId)[0]
@@ -93,21 +78,35 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 
 		const tplId = tplNode?.data?.tplId
 
-		let templates = data.templates
+		let templates = data?.templates || []
 
 		if (templates.length > 0 && tplId) {
-			const tplDesign = JSON.parse(templates.filter((template) => template.id === tplId)[0]?.attributes?.design)
-			const templateLinks = extractLinksFromCampaignDesign(tplDesign.components ?? tplDesign.blockList)
-			if (templateLinks.length > 0) {
-				templateLinks.forEach((ll) => {
-					if (typeof ll === 'undefined') return
-					if (!links.includes(ll)) links.push(ll)
-				})
+			// Find the template and check if it exists
+			const template = templates.filter((template) => template.id === tplId)[0];
+			if (!template || !template.attributes || !template.attributes.design) {
+				return [];
 			}
-			links = links.map((link) => ({
-				value: link,
-				label: link,
-			}))
+			
+			try {
+				const tplDesign = JSON.parse(template.attributes.design);
+				const components = tplDesign.components || tplDesign.blockList || [];
+				const templateLinks = extractLinksFromCampaignDesign(components);
+				
+				if (templateLinks && templateLinks.length > 0) {
+					templateLinks.forEach((ll) => {
+						if (typeof ll === 'undefined' || ll === null) return;
+						if (!links.includes(ll)) links.push(ll);
+					});
+				}
+				
+				links = links.map((link) => ({
+					value: link,
+					label: link,
+				}));
+			} catch (error) {
+				console.error("Error parsing template design:", error);
+				return [];
+			}
 		}
 		return links
 	}
@@ -119,24 +118,29 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				if (c && c.id) keymap[c.id] = c
 			})
 		}
-		if (keymap[nodeId] && keymap[nodeId].input && keymap[nodeId].input[0] && keymap[nodeId].input[0].type && keymap[nodeId].input[0].type == 'condition') return keymap[nodeId].input[0].id
-		if (keymap[nodeId] && keymap[nodeId].input && keymap[nodeId].input[0] && keymap[nodeId].input[0].type && keymap[nodeId].input[0].type != 'condition')
-			return closestCondition(keymap[nodeId].input[0].id, keymap)
+		// Check if nodeId exists in keymap
+		if (!keymap[nodeId]) return 0;
+		
+		if (keymap[nodeId] && keymap[nodeId].input && keymap[nodeId].input[0]) {
+			// Check if the input node has a type property and it's a condition
+			if (keymap[nodeId].input[0].type && keymap[nodeId].input[0].type == 'condition') {
+				return keymap[nodeId].input[0].id;
+			}
+			// Check if the input node exists but is not a condition
+			if (keymap[nodeId].input[0].id) {
+				return closestCondition(keymap[nodeId].input[0].id, keymap);
+			}
+		}
 		return 0
 	}
 
 	const countConditions = (children = [], count = 0) => {
-		if (children) {
-			children.map((child) => {
-				if (child && child.type && child.type == 'condition') count++
-				// let children0 = [0, 1].map((index) => {
-				// 	if (child && child.id) return getChildrenOfCondition(nodes, child.id, index)
-				// })
-				// count = countConditions(children0[0],count);
-				// count = countConditions(children0[1],count);
-			})
-		}
-		return count
+		if (!children || !Array.isArray(children)) return count;
+		
+		children.forEach((child) => {
+			if (child && child.type && child.type == 'condition') count++
+		});
+		return count;
 	}
 
 	let content = ''
@@ -147,6 +151,11 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				{ value: 'when-user-opens-campaign', label: 'When Subscriber Opens Campaign' },
 				{ value: 'when-user-clicks-link', label: 'When Subscriber Clicks Link' },
 			]
+
+			// Find the matching trigger option or provide a default
+			const triggerOption = node.name ? 
+				triggerOptions.find((option) => option.value === node.name) : 
+				{ label: 'Select a trigger' };
 
 			content = (
 				<li
@@ -159,23 +168,23 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
 						<Card className="automation-node-content" style={{ padding: '1.5rem 2.5rem' }}>
-							<h4 className="node-type">{triggerOptions.find((option) => option.value === node.name).label}</h4>
+							<h4 className="node-type">{triggerOption?.label || 'Select a trigger'}</h4>
 							<Dropdown
 								icon={'Plus'}
-								options={data.groups}
+								options={data.groups || []}
 								disabled={isReadOnly}
 								onOptionSelect={(value) => {
 									handleAdditionalChange(data.groups.filter((g) => g.value == value.value))
 								}}
 							>
-								{node.meta && node.meta.label ? node.meta.label : 'Select a group'}
+								{nodeMeta.label ? nodeMeta.label : 'Select a group'}
 							</Dropdown>
 						</Card>
 					</div>
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					{!isReadOnly && !node.output || !node.output[0] || !node.output[0].id ? (
+					{!isReadOnly && (!node.output || !node.output[0] || !node.output[0].id) ? (
 						<Card
 							style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
 							onDragOver={(e) => {
@@ -197,8 +206,8 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 			)
 			break
 		case 'email':
-			// const [isImgLoading,setIsImgLoading] = useState(true);
-			const imageUrl = node?.data?.tplUuid ? `https://cdn.cobaltfairy.com/fairymail/template/img/${node.data.tplUuid}` : ''
+			// Use safe access for node data
+			const imageUrl = nodeData.tplUuid ? `https://cdn.cobaltfairy.com/fairymail/template/img/${nodeData.tplUuid}` : ''
 			content = (
 				<li
 					className="d-flex flex-column align-items-center automation-node-item"
@@ -218,45 +227,64 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									className={'delay-dropdown'}
 									style={{ width: '350px' }}
 									disabled={isReadOnly}
-									options={data.templates.map((t) => {
+									options={(data.templates || []).map((t) => {
 										return { label: t.attributes.name, value: t.id, uuid: t.attributes.uuid }
 									})}
 									onOptionSelect={(v) => {
 										console.log('data.templates', data.templates)
-										node = {
+										const updatedNode = {
 											...node,
-											templateName: data.templates.filter((t) => t.id == v.value)[0].attributes.name,
-											data: { ...node.data, tplId: v.value, tplUuid: v.uuid, tplImageLoading: true },
+											templateName: data.templates.filter((t) => t.id == v.value)[0]?.attributes?.name || '',
+											data: { 
+												...nodeData, 
+												tplId: v.value, 
+												tplUuid: v.uuid, 
+												tplImageLoading: true 
+											},
 										}
-										onUpdate(node)
+										onUpdate(updatedNode)
 									}}
 								>
 									{' '}
-									{node.meta && node.meta.label ? node.meta.label : 'Select a template'}
+									{nodeMeta.label ? nodeMeta.label : 'Select a template'}
 								</Dropdown>
 								<InputText
 									type="text"
 									style={{ marginTop: '10px', minWidth: '350px' }}
 									disabled={isReadOnly}
 									label="Subject"
-									value={node?.data?.emailSubject ?? ''}
+									value={nodeData.emailSubject || ''}
 									onChange={(e) => {
-										node = { ...node, name: node.type, data: { ...node.data, emailSubject: e.target.value } }
-										onUpdate(node)
+										const updatedNode = { 
+											...node, 
+											name: node.type, 
+											data: { ...nodeData, emailSubject: e.target.value } 
+										};
+										onUpdate(updatedNode)
 									}}
 								/>
-								{node?.data?.tplUuid && (
+								{nodeData.tplUuid && (
 									<>
 										<img
 											src={imageUrl}
 											alt=""
 											style={{ display: 'none' }}
 											onLoad={() => {
-												node = { ...node, data: { ...node.data, tplImageLoading: false } }
-												onUpdate(node)
+												const updatedNode = { 
+													...node, 
+													data: { ...nodeData, tplImageLoading: false } 
+												};
+												onUpdate(updatedNode)
+											}}
+											onError={() => {
+												const updatedNode = { 
+													...node, 
+													data: { ...nodeData, tplImageLoading: false } 
+												};
+												onUpdate(updatedNode)
 											}}
 										/>
-										{node?.data?.tplImageLoading && (
+										{(nodeData.tplImageLoading === true) && (
 											<div style={{ minHeight: '100px' }}>
 												<div style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, 5%) scale(.5)' }}>
 													<svg
@@ -267,8 +295,8 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 														style={{ shapeRendering: 'auto', display: 'block', background: 'transparent' }}
 													>
 														<g>
-															<circle fill="none" stroke-width="10" stroke="#fff2df" r="30" cy="50" cx="50"></circle>
-															<circle fill="none" stroke-linecap="round" stroke-width="8" stroke="#ff635e" r="30" cy="50" cx="50">
+															<circle fill="none" strokeWidth="10" stroke="#fff2df" r="30" cy="50" cx="50"></circle>
+															<circle fill="none" strokeLinecap="round" strokeWidth="8" stroke="#ff635e" r="30" cy="50" cx="50">
 																<animateTransform
 																	keyTimes="0;0.5;1"
 																	values="0 50 50;180 50 50;720 50 50"
@@ -291,7 +319,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 												</div>
 											</div>
 										)}
-										{!node?.data?.tplImageLoading && (
+										{(!nodeData.tplImageLoading) && (
 											<>
 												<div
 													style={{
@@ -312,7 +340,9 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 																showCancelButton: true,
 																confirmButtonText: 'OK',
 																onConfirm: () => {
-																	window.open(`/templates/edit/${node?.data?.tplUuid}`)
+																	if (nodeData.tplUuid) {
+																		window.open(`/templates/edit/${nodeData.tplUuid}`);
+																	}
 																},
 															})
 														}}
@@ -330,7 +360,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					{!isReadOnly && !node.output || !node.output[0] || !node.output[0].id ? (
+					{!isReadOnly && (!node.output || !node.output[0] || !node.output[0].id) ? (
 						<Card
 							style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
 							onDragOver={(e) => {
@@ -359,6 +389,11 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				{ value: 'unsubscribe', label: 'Unsubscribe' },
 			]
 
+			// Safely find the action option
+			const actionOption = node.name ? 
+				actionOptions.find((option) => option.value === node.name) : 
+				null;
+
 			content = (
 				<li
 					className="d-flex flex-column align-items-center automation-node-item"
@@ -372,42 +407,51 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column automation-node-content-wrapper">
 						{!isReadOnly && <Icon name="Close" className="close" onClick={handleRemove} />}
 						<Card className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
-							<h4 className="node-type">{node?.name ? actionOptions.find((option) => option.value === node.name).label : ''}</h4>
-							{'copy-to-group' == node?.name || 'move-to-group' == node?.name && (
-							<Dropdown
-								style={{ minWidth: '270px' }}
-								disabled={isReadOnly}
-								onOptionSelect={(v, l) => {
-								node = { ...node, data: { group: [v] }, meta: { label: v.label } }
-								onUpdate(node)
-								}}
-								options={
-								// Filter out the trigger group
-								data.groups.filter(group => {
-									// Find trigger node
-									const triggerNode = nodes.find(n => n.type === 'trigger' && n.name === 'when-user-subscribes');
-									// If there's a trigger node with a group, filter it out
-									return !triggerNode || 
-										!triggerNode.data || 
-										!triggerNode.data.group || 
-										triggerNode.data.group[0] !== group.value;
-								})
-								}
-							>
-								{node.meta && node.meta.label ? node.meta.label : 'Choose destination group'}
-							</Dropdown>
-							)}
-							{'remove-from-group' == node?.name && (
+							<h4 className="node-type">{actionOption?.label || 'Select an action'}</h4>
+							{['copy-to-group', 'move-to-group'].includes(node.name) && (
 								<Dropdown
 									style={{ minWidth: '270px' }}
 									disabled={isReadOnly}
 									onOptionSelect={(v, l) => {
-										node = { ...node, data: { group: [v] }, meta: { label: v.label } }
-										onUpdate(node)
+										const updatedNode = { 
+											...node, 
+											data: { group: [v] }, 
+											meta: { label: v.label } 
+										};
+										onUpdate(updatedNode)
 									}}
-									options={data.groups}
+									options={
+										// Filter out the trigger group
+										(data.groups || []).filter(group => {
+											// Find trigger node
+											const triggerNode = nodes.find(n => n.type === 'trigger' && n.name === 'when-user-subscribes');
+											// If there's a trigger node with a group, filter it out
+											return !triggerNode || 
+												!triggerNode.data || 
+												!triggerNode.data.group || 
+												!triggerNode.data.group[0] || 
+												triggerNode.data.group[0] !== group.value;
+										})
+									}
 								>
-									{node.meta && node.meta.label ? node.meta.label : 'Choose group to remove'}
+									{nodeMeta.label ? nodeMeta.label : 'Choose destination group'}
+								</Dropdown>
+							)}
+							{node.name === 'remove-from-group' && (
+								<Dropdown
+									style={{ minWidth: '270px' }}
+									disabled={isReadOnly}
+									onOptionSelect={(v, l) => {
+										const updatedNode = { 
+											...node, 
+											data: { group: [v] }, 
+											meta: { label: v.label } 
+										};
+										onUpdate(updatedNode)
+									}}
+									options={data.groups || []}
+								>
+									{nodeMeta.label ? nodeMeta.label : 'Choose group to remove'}
 								</Dropdown>
 							)}
 						</Card>
@@ -415,7 +459,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					{!isReadOnly && !node.output || !node.output[0] || !node.output[0].id ? (
+					{!isReadOnly && (!node.output || !node.output[0] || !node.output[0].id) ? (
 						<Card
 							style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
 							onDragOver={(e) => {
@@ -460,9 +504,16 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									style={{ marginTop: '10px', width: '140px', marginRight: '10px' }}
 									disabled={isReadOnly}
 									label="Delay"
-									value={node?.data?.delay?.[0] ?? ''}
+									value={nodeData.delay && nodeData.delay[0] ? nodeData.delay[0] : ''}
 									onChange={(e) => {
-										onUpdate({ ...node, data: { ...node.data, delay: [e.target.value] } })
+										const updatedNode = { 
+											...node, 
+											data: { 
+												...nodeData, 
+												delay: [e.target.value] 
+											} 
+										};
+										onUpdate(updatedNode)
 									}}
 								/>
 								<Dropdown
@@ -479,12 +530,25 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 										},
 									]}
 									onOptionSelect={(v, l) => {
-										node = { ...node, name: node.type, data: { ...node.data, delayValue: [v], meta: { label: v.label } } }
-										onUpdate(node)
+										const updatedNode = { 
+											...node, 
+											name: node.type, 
+											data: { 
+												...nodeData, 
+												delayValue: [v], 
+												meta: { 
+													...nodeData.meta, 
+													label: v.label 
+												} 
+											} 
+										};
+										onUpdate(updatedNode)
 									}}
 								>
 									{' '}
-									{node?.meta?.label ?? (node?.data?.delayValue[0]?.label ?? 'Select delay type')}
+									{nodeMeta.label || (nodeData.meta?.label) || 
+									(nodeData.delayValue && nodeData.delayValue[0] && nodeData.delayValue[0].label) || 
+									'Select delay type'}
 								</Dropdown>
 							</div>
 						</Card>
@@ -492,7 +556,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 					<div className="d-flex flex-column align-items-center">
 						<div className="automation-node-vertical-line"></div>
 					</div>
-					{!isReadOnly && !node.output || !node.output[0] || !node.output[0].id ? (
+					{!isReadOnly && (!node.output || !node.output[0] || !node.output[0].id) ? (
 						<Card
 							style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
 							onDragOver={(e) => {
@@ -524,9 +588,18 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				{ value: 'cmp_link_clicked', label: 'had a specific link clicked' },
 				{ value: 'cmp_link_not_clicked', label: 'had a specific link not clicked' },
 			]
-			let howManyConditions = 0
-			howManyConditions += children && children[0] ? countConditions(children[0], 0) : 0
-			const isFirstCondition = nodes.filter((n) => n.type == 'condition')[0].id == node.id
+			
+			// Safely compute condition variables
+			const howManyConditions = (children && children[0]) ? countConditions(children[0], 0) : 0;
+			const nodesWithConditions = nodes.filter((n) => n && n.type === 'condition');
+			const isFirstCondition = nodesWithConditions.length > 0 && 
+				nodesWithConditions[0].id === node.id;
+			
+			// Find matching condition option safely
+			const conditionOption = node.name ? 
+				conditionOptions.find((option) => option.value === node.name) : 
+				null;
+			
 			content = (
 				<li
 					className="d-flex flex-column align-items-center automation-node-item"
@@ -541,58 +614,73 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 						<Card>
 							{!isReadOnly && <Icon name="Close" className="close" onClick={handleRemove} />}
 							<div className="automation-node-content" style={{ padding: '1.5rem 2.5rem', textAlign: 'center' }}>
-								<h4 className="node-type">Condition: {node?.name ? conditionOptions.find((option) => option.value === node.name)?.label : 'Select a condition'}</h4>
+								<h4 className="node-type">Condition: {conditionOption?.label || 'Select a condition'}</h4>
 								<div style={{ display: 'flex', flexDirection: 'column' }}>
 									<Dropdown
 										options={conditionOptions}
 										style={{ width: '350px' }}
 										disabled={isReadOnly}
 										onOptionSelect={(v, l) => {
-											node = { ...node, name: v.value, data: { ...(node.data || {}) }, meta: { label: v.label } }
-											onUpdate(node)
+											const updatedNode = { 
+												...node, 
+												name: v.value, 
+												data: { ...(nodeData || {}) }, 
+												meta: { label: v.label } 
+											};
+											onUpdate(updatedNode)
 										}}
 									>
 										{' '}
-										{node?.meta?.label ?? 'Select a condition'}{' '}
+										{nodeMeta.label || 'Select a condition'}{' '}
 									</Dropdown>
-									{node.name && node.name == 'cmp-activity' && (
+									{node.name === 'cmp-activity' && (
 										<>
 											<Dropdown
-												options={data.avlCampaigns}
+												options={data.avlCampaigns || []}
 												style={{ width: '350px' }}
 												disabled={isReadOnly}
 												onOptionSelect={(v, l) => {
-													node = { ...node, data: { ...node.data, cmp: v }, meta: {} }
-													onUpdate(node)
+													const updatedNode = { 
+														...node, 
+														data: { ...nodeData, cmp: v }, 
+														meta: {} 
+													};
+													onUpdate(updatedNode)
 												}}
 											>
 												{' '}
 												Select a campaign{' '}
 											</Dropdown>
 
-											{node.data?.cmp && (
+											{nodeData.cmp && (
 												<>
 													<Dropdown
 														options={workflowConditionOptions}
 														style={{ width: '350px' }}
 														disabled={isReadOnly}
 														onOptionSelect={(v) => {
-															node = { ...node, data: { ...node.data, trigger: v } }
-															onUpdate(node)
+															const updatedNode = { 
+																...node, 
+																data: { ...nodeData, trigger: v } 
+															};
+															onUpdate(updatedNode)
 														}}
 													>
 														{' '}
 														Select a trigger{' '}
 													</Dropdown>
-													{node.data?.trigger && ['cmp_link_clicked', 'cmp_link_not_clicked'].includes(node.data?.trigger) && (
+													{nodeData.trigger && ['cmp_link_clicked', 'cmp_link_not_clicked'].includes(nodeData.trigger) && (
 														<>
 															<Dropdown
-																options={data.cmpLinks}
+																options={data.cmpLinks || []}
 																style={{ width: '350px', maxWidth: '350px' }}
 																disabled={isReadOnly}
 																onOptionSelect={(v) => {
-																	node = { ...node, data: { ...node.data, link: v } }
-																	onUpdate(node)
+																	const updatedNode = { 
+																		...node, 
+																		data: { ...nodeData, link: v } 
+																	};
+																	onUpdate(updatedNode)
 																}}
 															>
 																{' '}
@@ -604,48 +692,59 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											)}
 										</>
 									)}
-									{node.name && node.name == 'workflow-activity' && (
+									{node.name === 'workflow-activity' && (
 										<>
 											<Dropdown
-												options={data.workflowCampaigns}
+												options={data.workflowCampaigns || []}
 												style={{ width: '350px' }}
 												disabled={isReadOnly}
 												onOptionSelect={(v) => {
-													node = { ...node, data: { ...node.data, cmp: v.value, email_node_id: v.value }, meta: { ...node.meta, cmpname: v.label } }
-													onUpdate(node)
+													const updatedNode = { 
+														...node, 
+														data: { ...nodeData, cmp: v.value, email_node_id: v.value }, 
+														meta: { ...nodeMeta, cmpname: v.label } 
+													};
+													onUpdate(updatedNode)
 												}}
 											>
 												{' '}
-												{node.meta?.cmpname ?? 'Select a campaign'}
+												{nodeMeta.cmpname || 'Select a campaign'}
 											</Dropdown>
 
-											{node.data?.cmp && (
+											{nodeData.cmp && (
 												<>
 													<Dropdown
 														options={workflowConditionOptions}
 														style={{ width: '350px' }}
 														disabled={isReadOnly}
 														onOptionSelect={(v) => {
-															node = { ...node, data: { ...node.data, trigger: v.value }, meta: { ...node.meta, triggerName: v.label } }
-															onUpdate(node)
+															const updatedNode = { 
+																...node, 
+																data: { ...nodeData, trigger: v.value }, 
+																meta: { ...nodeMeta, triggerName: v.label } 
+															};
+															onUpdate(updatedNode)
 														}}
 													>
 														{' '}
-														{node.meta?.triggerName ?? 'Select a trigger'}{' '}
+														{nodeMeta.triggerName || 'Select a trigger'}{' '}
 													</Dropdown>
-													{node.data?.trigger && ['cmp_link_clicked', 'cmp_link_not_clicked'].includes(node.data?.trigger) && (
+													{nodeData.trigger && ['cmp_link_clicked', 'cmp_link_not_clicked'].includes(nodeData.trigger) && (
 														<>
 															<Dropdown
-																options={getTplIdLinks(node?.data?.email_node_id)}
+																options={getTplIdLinks(nodeData.email_node_id) || []}
 																style={{ width: '350px', maxWidth: '350px' }}
 																disabled={isReadOnly}
 																onOptionSelect={(v) => {
-																	node = { ...node, data: { ...node.data, link: v } }
-																	onUpdate(node)
+																	const updatedNode = { 
+																		...node, 
+																		data: { ...nodeData, link: v } 
+																	};
+																	onUpdate(updatedNode)
 																}}
 															>
 																{' '}
-																{node.data?.link?.value ?? 'Select a link'}
+																{nodeData.link?.value || 'Select a link'}
 															</Dropdown>
 														</>
 													)}
@@ -653,15 +752,18 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											)}
 										</>
 									)}
-									{node.name && node.name == 'when-user-opens-campaign' && (
+									{node.name === 'when-user-opens-campaign' && (
 										<>
 											<Dropdown
-												options={data.avlCampaigns}
+												options={data.avlCampaigns || []}
 												style={{ width: '350px' }}
 												disabled={isReadOnly}
 												onOptionSelect={(v) => {
-													node = { ...node, data: { ...node.data, cmp: v } }
-													onUpdate(node)
+													const updatedNode = { 
+														...node, 
+														data: { ...nodeData, cmp: v } 
+													};
+													onUpdate(updatedNode)
 												}}
 											>
 												{' '}
@@ -669,15 +771,18 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 											</Dropdown>
 										</>
 									)}
-									{node.name && node.name == 'when-user-clicks-link' && (
+									{node.name === 'when-user-clicks-link' && (
 										<>
 											<Dropdown
-												options={data.cmpLinks}
+												options={data.cmpLinks || []}
 												style={{ width: '350px' }}
 												disabled={isReadOnly}
 												onOptionSelect={(v) => {
-													node = { ...node, data: { ...node.data, link: v.value } }
-													onUpdate(node)
+													const updatedNode = { 
+														...node, 
+														data: { ...nodeData, link: v.value } 
+													};
+													onUpdate(updatedNode)
 												}}
 											>
 												{' '}
@@ -710,22 +815,30 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								>
 									<Icon name="Check" />
 								</Card>
-								{children && children[0] && children[0].length > 0 && <div className="automation-node-vertical-line"></div>}
+								{children && Array.isArray(children[0]) && children[0].length > 0 && <div className="automation-node-vertical-line"></div>}
 								<ul style={{ listStyleType: 'none', display: 'flex', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: 0, padding: 0 }}>
 									{children &&
-										children[0] &&
+										Array.isArray(children[0]) &&
 										children[0].map((child) => {
-											let children0 = [0, 1].map((index) => {
-												if (child && child.id) return getChildrenOfCondition(nodes, child.id, index)
-											})
-											if (closestCondition(child.id) == node.id)
+											// Safely handle child checking
+											if (!child) return null;
+											
+											// Generate children for this node
+											let children0 = [undefined, undefined];
+											if (child && child.id) {
+												children0 = [0, 1].map((index) => getChildrenOfCondition(nodes, child.id, index));
+											}
+											
+											// Only render if this node is connected to the current condition
+											const nodeCondition = closestCondition(child.id);
+											if (nodeCondition === node.id) {
 												return (
 													<NodeItem
-														key={child ? child.id : 0}
+														key={child.id || Math.random()}
 														node={child}
-														type={child ? child.type : ''}
+														type={child.type || ''}
 														onAdd={onAdd}
-														onSelect={onSelect} // Use onSelect here, not selectNode
+														onSelect={onSelect}
 														nodes={nodes}
 														removeNode={removeNode}
 														children={children0}
@@ -735,7 +848,9 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 														data={data}
 														onUpdate={onUpdate}
 													/>
-												)
+												);
+											}
+											return null;
 										})}
 								</ul>
 							</div>
@@ -757,33 +872,43 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									<Icon name="Close" />
 								</Card>
 
-								{children && children[1] && children[1].length > 0 && <div className="automation-node-vertical-line"></div>}
+								{children && Array.isArray(children[1]) && children[1].length > 0 && <div className="automation-node-vertical-line"></div>}
 
 								<ul style={{ listStyleType: 'none', display: 'flex', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: 0, padding: 0 }}>
 									{children &&
-										children[1] &&
+										Array.isArray(children[1]) &&
 										children[1].map((child) => {
-											let children1 = [0, 1].map((index) => {
-												if (child && child.id) return getChildrenOfCondition(nodes, child.id, index)
-											})
-											if (closestCondition(child.id) == node.id)
-											return (
-												<NodeItem
-													key={child ? child.id : 0}
-													node={child}
-													type={child ? child.type : ''}
-													onAdd={onAdd}
-													onSelect={onSelect} // Use onSelect here, not selectNode
-													nodes={nodes}
-													removeNode={removeNode}
-													children={children1}
-													data={data}
-													setSideBarShown={setSideBarShown}
-													getChildrenOfCondition={getChildrenOfCondition}
-													handleAdditionalChange={handleAdditionalChange}
-													onUpdate={onUpdate}
-												/>
-											)
+											// Safely handle child checking
+											if (!child) return null;
+											
+											// Generate children for this node
+											let children1 = [undefined, undefined];
+											if (child && child.id) {
+												children1 = [0, 1].map((index) => getChildrenOfCondition(nodes, child.id, index));
+											}
+											
+											// Only render if this node is connected to the current condition
+											const nodeCondition = closestCondition(child.id);
+											if (nodeCondition === node.id) {
+												return (
+													<NodeItem
+														key={child.id || Math.random()}
+														node={child}
+														type={child.type || ''}
+														onAdd={onAdd}
+														onSelect={onSelect}
+														nodes={nodes}
+														removeNode={removeNode}
+														children={children1}
+														data={data}
+														setSideBarShown={setSideBarShown}
+														getChildrenOfCondition={getChildrenOfCondition}
+														handleAdditionalChange={handleAdditionalChange}
+														onUpdate={onUpdate}
+													/>
+												);
+											}
+											return null;
 										})}
 								</ul>
 							</div>
