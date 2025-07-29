@@ -135,38 +135,38 @@
 			}
 		}
 		
-		.stats-head {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			flex-wrap: wrap;
-			
-			@media (max-width: 768px) {
-				flex-direction: column;
-				align-items: flex-start;
-				
-				.btn-group {
-					margin-top: 10px;
-					width: 100%;
-					
-					.btn {
-						flex: 1;
-					}
-				}
-			}
+  .stats-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      
+      .btn-group {
+        margin-top: 10px;
+        width: 100%;
+        
+        .btn {
+          flex: 1;
+        }
+      }
+    }
 
-			span.stats-title {
-				font-family: 'Bitter';
-				font-weight: 600;
-				font-size: 24px;
-				line-height: 29px;
-				
-				@media (max-width: 768px) {
-					font-size: 20px;
-					line-height: 24px;
-				}
-			}
-		}
+    span.stats-title {
+      font-family: 'Bitter';
+      font-weight: 600;
+      font-size: 24px;
+      line-height: 29px;
+      
+      @media (max-width: 768px) {
+        font-size: 20px;
+        line-height: 24px;
+      }
+    }
+  }
 		
 		.campaign-charts {
 			display: flex;

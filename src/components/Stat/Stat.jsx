@@ -86,6 +86,8 @@ const Stat = ({
 				return 'click_rate';
 			case 'Total':
 			case 'Total Subscribers':
+			case 'New Subscribers Today':
+			case 'New Subscribers (7 days)':
 				return 'subs_count';
 			case 'Unsubscribed':
 			case 'Unsubscribed Today':
@@ -117,27 +119,59 @@ const Stat = ({
 				const date = new Date(item.date);
 				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 			});
+			
+			// Extract metric data
+			chartData = seriesData.map(item => item[currentMetricKey] || 0);
 		} else if (timeseriesKey === 'all') {
-			// For monthly data: Format as "Jul 2025"
+			// For monthly data, handle 'period' format
 			chartLabels = seriesData.map(item => {
-				const date = new Date(item.date);
-				return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+				if (item.period) {
+					// Format is '2025-07'
+					const parts = item.period.split('-');
+					if (parts.length === 2) {
+						const date = new Date(parts[0], parts[1] - 1); // months are 0-indexed in JS
+						return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+					}
+					return item.period;
+				} else if (item.date) {
+					const date = new Date(item.date);
+					return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+				}
+				return '';
 			});
+			
+			// Extract metric data
+			chartData = seriesData.map(item => item[currentMetricKey] || 0);
 		} else if (timeseriesKey === 'today') {
 			// For hourly data: Format as "13:00"
 			chartLabels = seriesData.map(item => {
 				const date = new Date(item.date);
 				return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 			});
+			
+			// Extract metric data
+			chartData = seriesData.map(item => item[currentMetricKey] || 0);
+		}
+	}
+	
+	// If we still have no data, create some reasonable empty dataset
+	if (chartLabels.length === 0) {
+		if (timeseriesKey === 'today') {
+			chartLabels = ['00:00', '06:00', '12:00', '18:00', '23:59'];
+		} else if (timeseriesKey === 'd7') {
+			const today = new Date();
+			chartLabels = Array.from({length: 7}, (_, i) => {
+				const date = new Date(today);
+				date.setDate(date.getDate() - i);
+				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+			}).reverse();
+		} else if (timeseriesKey === 'd30') {
+			chartLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+		} else {
+			chartLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 		}
 		
-		// Extract metric data
-		chartData = seriesData.map(item => item[currentMetricKey] || 0);
-	} else {
-		// If no data available, create empty arrays with appropriate length
-		// This ensures we show a flat line at zero instead of sample data
-		chartLabels = Array(7).fill('');
-		chartData = Array(7).fill(0);
+		chartData = Array(chartLabels.length).fill(0);
 	}
 
 	const chartData2 = {
@@ -187,7 +221,7 @@ const Stat = ({
 				display: false,
 			},
 			tooltip: {
-				enabled: timeseriesData ? true : false, // Enable tooltips only when using real data
+				enabled: true, // Enable tooltips
 				mode: 'index',
 				intersect: false,
 				callbacks: {
@@ -224,6 +258,17 @@ const Stat = ({
 										});
 									}
 								}
+							} else if (item && item.period) {
+								// Handle 'period' format for 'all' timeframe
+								const parts = item.period.split('-');
+								if (parts.length === 2) {
+									const date = new Date(parts[0], parts[1] - 1); // months are 0-indexed in JS
+									return date.toLocaleDateString('en-US', { 
+										month: 'long', 
+										year: 'numeric' 
+									});
+								}
+								return item.period;
 							}
 						}
 						

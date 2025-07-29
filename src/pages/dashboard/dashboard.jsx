@@ -11,7 +11,7 @@ import PageHeader from '../../components/PageHeader/PageHeader'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService, APP_VERSION } from '../../service/api-service'
 import CampaignsTable from '../../components/DataTable/CampaignsTable'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Ticks } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import PopupText from '../../components/PopupText/PopupText'
@@ -20,6 +20,7 @@ import OnboardingGuide from './OnboardingGuide/OnboardingGuide'
 
 const Dashboard = () => {
 	const navigate = useNavigate()
+	const location = useLocation()
 	const { user, account, loading: accountLoading, dataInitialized, createNotification } = useAccount()
 	const [statsData, setStatsData] = useState({})
 	const [statsKey, setStatsKey] = useState('d7')
@@ -29,8 +30,9 @@ const Dashboard = () => {
 	const [stats, setStats] = useState([])
 	const [isLoading, setIsLoading] = useState(true)
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+	const [chartKey, setChartKey] = useState(0) // Used to force chart re-renders
 	
-	// State to control onboarding visibility - now initialized based on account.setup_complete
+	// State to control onboarding visibility - initialized based on account.setup_complete
 	const [showOnboarding, setShowOnboarding] = useState(false)
   
 	// Handle responsive layout
@@ -52,10 +54,34 @@ const Dashboard = () => {
 		}
 	}, [account]);
 
-	// Improved loadStats function with retry mechanism
+	// Check for refresh flag in URL
+	useEffect(() => {
+		// Check for refresh flag in URL
+		const queryParams = new URLSearchParams(location.search);
+		const shouldRefresh = queryParams.get('refresh') === 'true';
+		
+		if (shouldRefresh && user && account) {
+			// Remove the flag from URL
+			navigate('/dashboard', { replace: true });
+			
+			// Force refresh
+			loadStats();
+			
+			// Show notification
+			if (createNotification) {
+				createNotification({
+					message: 'Dashboard refreshed with latest data',
+					type: 'default',
+					autoClose: 3000
+				});
+			}
+		}
+	}, [location, user, account, navigate, createNotification]);
+
+	// Improved loadStats function with retry mechanism and better data handling
 	const loadStats = async () => {
 		if (!user || !user.jwt || !account) {
-			console.log('User or account data not available, skipping stats load');
+			console.log('User or account data not available, skipping stats load')
 			return;
 		}
 		
@@ -66,86 +92,159 @@ const Dashboard = () => {
 		
 		const attemptLoadStats = async () => {
 			try {
-				console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`);
-				let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt);
+				console.log(`Loading dashboard stats... (attempt ${retries + 1}/${maxRetries})`)
+				let stats = await ApiService.get('fairymailer/dashboard-stats', user.jwt)
 				
-				// Initialize timeseries data if it doesn't exist
+				// Ensure all required data structures exist
+				if (!stats.data) stats.data = {};
+				
+				// Initialize any missing period data
+				const periods = ['today', 'd7', 'd30', 'all'];
+				periods.forEach(period => {
+					if (!stats.data[period]) {
+						stats.data[period] = {
+							opens: 0,
+							clicks: 0,
+							emails: 0,
+							subs_count: 0,
+							unsubs: 0
+						};
+					}
+				});
+				
+				// Initialize timeseries if missing
 				if (!stats.data.timeseries) {
-					stats.data.timeseries = {
-						today: [],
-						d7: [],
-						d30: [],
-						all: []
-					};
-					console.log('No timeseries data found, initialized empty structure');
+					stats.data.timeseries = {};
+					periods.forEach(period => {
+						stats.data.timeseries[period] = [];
+					});
 				}
 				
-				// Ensure all time periods exist in the data
-				['today', 'd7', 'd30', 'all'].forEach(period => {
+				// Initialize any missing timeseries periods
+				periods.forEach(period => {
 					if (!stats.data.timeseries[period]) {
 						stats.data.timeseries[period] = [];
-						console.log(`No data for ${period} time period, initialized empty array`);
 					}
 				});
 				
-				// Validate and normalize each timeseries period
-				Object.keys(stats.data.timeseries).forEach(period => {
-					if (!Array.isArray(stats.data.timeseries[period])) {
-						stats.data.timeseries[period] = [];
-						console.log(`Invalid data format for ${period}, reset to empty array`);
-						return;
+				// Process and validate timeseries data, especially for "all" timeframe
+				if (stats.data && stats.data.timeseries) {
+					// Handle the "all" timeframe date format (monthly data)
+					if (stats.data.timeseries.all && Array.isArray(stats.data.timeseries.all)) {
+						stats.data.timeseries.all = stats.data.timeseries.all.map(item => {
+							// Ensure period is properly formatted for "all" timeframe
+							if (!item.period && item.date) {
+								const date = new Date(item.date);
+								if (!isNaN(date.getTime())) {
+									const year = date.getFullYear();
+									const month = String(date.getMonth() + 1).padStart(2, '0');
+									item.period = `${year}-${month}`;
+								}
+							}
+							return item;
+						});
 					}
 					
-					// Ensure each entry has date and required metrics
-					stats.data.timeseries[period] = stats.data.timeseries[period].map(item => {
-						if (!item) return { date: new Date().toISOString(), subs_count: 0, unsubs: 0, emails: 0, opens: 0, clicks: 0, spam: 0 };
-						
-						// Ensure date is valid
-						let date = item.date;
-						if (!date || new Date(date).toString() === 'Invalid Date') {
-							date = new Date().toISOString();
+					// Process other timeframes as well for consistency
+					['today', 'd7', 'd30'].forEach(timeKey => {
+						if (stats.data.timeseries[timeKey] && Array.isArray(stats.data.timeseries[timeKey])) {
+							stats.data.timeseries[timeKey] = stats.data.timeseries[timeKey].map(item => {
+								if (item.date) {
+									const date = new Date(item.date);
+									if (!isNaN(date.getTime())) {
+										return {
+											...item,
+											date: date.toISOString().split('T')[0]
+										};
+									}
+								}
+								return item;
+							});
 						}
-						
-						// Ensure all metrics exist with default value 0
-						return {
-							date,
-							subs_count: typeof item.subs_count === 'number' ? item.subs_count : 0,
-							unsubs: typeof item.unsubs === 'number' ? item.unsubs : 0,
-							emails: typeof item.emails === 'number' ? item.emails : 0,
-							opens: typeof item.opens === 'number' ? item.opens : 0,
-							clicks: typeof item.clicks === 'number' ? item.clicks : 0,
-							spam: typeof item.spam === 'number' ? item.spam : 0
-						};
 					});
+				}
+				
+				// Create placeholder data for empty periods
+				periods.forEach(period => {
+					if (stats.data.timeseries[period].length === 0) {
+						if (period === 'today') {
+							// Create hourly data points for today
+							const hours = [];
+							for (let i = 0; i < 24; i++) {
+								const now = new Date();
+								now.setHours(i, 0, 0, 0);
+								hours.push({
+									date: now.toISOString(),
+									subs_count: i === new Date().getHours() ? (stats.data.today.subs_count || 0) : 0,
+									unsubs: i === new Date().getHours() ? (stats.data.today.unsubs || 0) : 0,
+									opens: 0,
+									clicks: 0,
+									emails: 0
+								});
+							}
+							stats.data.timeseries[period] = hours;
+						} else if (period === 'd7') {
+							// Create daily data points for last 7 days
+							const days = [];
+							for (let i = 6; i >= 0; i--) {
+								const date = new Date();
+								date.setDate(date.getDate() - i);
+								date.setHours(0, 0, 0, 0);
+								days.push({
+									date: date.toISOString(),
+									subs_count: i === 0 ? (stats.data.today.subs_count || 0) : 0,
+									unsubs: i === 0 ? (stats.data.today.unsubs || 0) : 0,
+									opens: 0,
+									clicks: 0,
+									emails: 0
+								});
+							}
+							stats.data.timeseries[period] = days;
+						} else if (period === 'all') {
+							// Create monthly data points for all time
+							const months = [];
+							const now = new Date();
+							for (let i = 0; i < 6; i++) {
+								const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+								months.push({
+									period: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+									subs_count: i === 0 ? (stats.data.all.subs_count || 0) : 0,
+									unsubs: i === 0 ? (stats.data.all.unsubs || 0) : 0,
+									opens: 0,
+									clicks: 0,
+									emails: 0
+								});
+							}
+							stats.data.timeseries[period] = months.reverse();
+						}
+					}
 				});
 				
-				console.log('Stats loaded and validated successfully:', stats.data);
-				setStatsData(stats.data);
+				console.log('Stats loaded successfully:', stats.data)
+				setStatsData(stats.data)
 				
-				// Load latest campaigns
 				let resp = await ApiService.get(
 					`fairymailer/getCampaigns?filters[name][$contains]=${''}&filters[account]=${account?.id}&filters[status]=sent&pagination[pageSize]=3&pagination[page]=1`,
 					user.jwt
-				);
-				console.log('Campaigns loaded:', resp.data);
+				)
+				console.log('Campaigns loaded:', resp.data)
 				if (resp.data && resp.data.data) {
-					setLatestCampaigns(resp.data.data);
+					setLatestCampaigns(resp.data.data)
 				}
 				
-				return true; // Success
+				return true // Success
 			} catch (error) {
-				console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error);
+				console.error(`Error loading dashboard data (attempt ${retries + 1}/${maxRetries}):`, error)
 				retries++;
 				
 				if (retries < maxRetries) {
-					console.log(`Retrying in 1 second... (${retries}/${maxRetries})`);
-					await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
-					return await attemptLoadStats(); // Recursively retry
+					console.log(`Retrying in 1 second... (${retries}/${maxRetries})`)
+					await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second before retry
+					return await attemptLoadStats() // Recursively retry
 				}
 				
 				// If all retries fail, create empty data structure
-				console.log('All retries failed, initializing empty data structure');
-				setStatsData({
+				const emptyData = {
 					today: { emails: 0, opens: 0, clicks: 0, spam: 0, subs_count: 0, unsubs: 0 },
 					d7: { emails: 0, opens: 0, clicks: 0, spam: 0, subs_count: 0, unsubs: 0 },
 					d30: { emails: 0, opens: 0, clicks: 0, spam: 0, subs_count: 0, unsubs: 0 },
@@ -156,17 +255,18 @@ const Dashboard = () => {
 						d30: [],
 						all: []
 					}
-				});
+				};
+				setStatsData(emptyData);
 				
-				return false; // Failed after max retries
+				return false // Failed after max retries
 			}
 		};
 		
 		const success = await attemptLoadStats();
 		
 		if (!success) {
-			console.error('Failed to load dashboard data after multiple attempts');
-			// Show error notification
+			console.error('Failed to load dashboard data after multiple attempts')
+			// Could show an error message to the user here
 			if (createNotification) {
 				createNotification({
 					message: 'Could not load dashboard data. Please try refreshing the page.',
@@ -177,6 +277,25 @@ const Dashboard = () => {
 		}
 		
 		setIsLoading(false);
+	};
+
+	// Helper function to debug timeseries data
+	const debugTimeseriesData = () => {
+		if (!statsData || !statsData.timeseries) {
+			console.log('No timeseries data available');
+			return;
+		}
+		
+		// Check each time period
+		['today', 'd7', 'd30', 'all'].forEach(period => {
+			const data = statsData.timeseries[period];
+			console.log(`${period} data:`, {
+				available: !!data,
+				isArray: Array.isArray(data),
+				length: Array.isArray(data) ? data.length : 'N/A',
+				sample: Array.isArray(data) && data.length > 0 ? data[0] : 'No data'
+			});
+		});
 	};
 
 	// Updated to make API call to update setup_complete flag
@@ -212,47 +331,49 @@ const Dashboard = () => {
 		}
 	}
 
-	const createStatsMetrics = () => {
-		let key = statsKey;
-		if (!key || !statsData || !statsData[key]) return;
+	// Function to manually refresh dashboard data (kept for future use)
+	const refreshDashboard = async () => {
+		// Show loading indicator
+		setIsLoading(true);
 		
-		// Extract data for the selected period with validation
-		const periodData = statsData[key] || {};
+		// Create notification
+		if (createNotification) {
+			createNotification({
+				message: 'Refreshing dashboard data...',
+				type: 'default',
+				autoClose: 2000
+			});
+		}
 		
-		let data = [
-			{ 
-				label: 'Emails Sent', 
-				defaultValue: false, 
-				value: typeof periodData.emails === 'number' ? periodData.emails : 0, 
-				percentage: 0 
-			},
-			{ 
-				label: 'Total Opens', 
-				defaultValue: false, 
-				value: typeof periodData.opens === 'number' ? periodData.opens : 0, 
-				percentage: 0 
-			},
-			{ 
-				label: 'Total Clicks', 
-				defaultValue: false, 
-				value: typeof periodData.clicks === 'number' ? periodData.clicks : 0, 
-				percentage: 0 
-			},
-			{ 
-				label: 'Spam', 
-				defaultValue: false, 
-				value: typeof periodData.spam === 'number' ? periodData.spam : 0, 
-				percentage: 0 
-			}
-		];
+		// Reload stats data
+		await loadStats();
 		
-		// Calculate percentages for each metric relative to previous period if available
-		// This could be enhanced with real percentage calculations based on previous periods
+		// Force chart update
+		setChartKey(prev => prev + 1);
 		
-		console.log('Stats metrics created:', data);
-		setStats(data);
+		if (createNotification) {
+			createNotification({
+				message: 'Dashboard data refreshed!',
+				type: 'default',
+				autoClose: 3000
+			});
+		}
 	};
+
+	// Enhanced function to create stats metrics
+	const createStatsMetrics = () => {
+		let key = statsKey
+		if (!key || !statsData || !statsData[key]) return
+		let data = []
+		data.push({ label: 'Emails Sent', defaultValue: false, value: statsData[key].emails || 0, percentage: 0 })
+		data.push({ label: 'Total Opens', defaultValue: false, value: statsData[key].opens || 0, percentage: 0 })
+		data.push({ label: 'Total Clicks', defaultValue: false, value: statsData[key].clicks || 0, percentage: 0 })
+		data.push({ label: 'Spam', defaultValue: false, value: statsData[key].spam || 0, percentage: 0 })
+		console.log('Stats metrics created:', data)
+		setStats(data)
+	}
 	
+	// Enhanced function to create subscriber stats metrics with proper period labeling
 	const createSubsStatsMetrics = () => {
 		let key = subsStatsKey;
 		if (!key || !statsData || !statsData[key]) {
@@ -260,71 +381,84 @@ const Dashboard = () => {
 			return;
 		}
 		
-		// For subscriber stats, we want to show cumulative totals, not daily additions
+		// For subscriber stats, we want to show appropriate totals based on selected time period
 		let data = [];
-		
-		// Get all-time subscriber total (most stable value)
-		const allTimeTotal = statsData.all?.subs_count || 0;
 		
 		// Calculate the proper totals based on the selected timeframe
 		if (key === 'today') {
-			// For "Today", show the current total number of subscribers
+			// For "Today", clearly label that we're showing today's new subscribers
 			data.push({ 
-				label: 'Total Subscribers', 
+				label: 'New Subscribers Today', 
 				defaultValue: false, 
-				value: allTimeTotal, 
+				value: statsData[key].subs_count || 0, // Today's NEW subscribers 
 				percentage: 0 
 			});
 			// Show only today's unsubscribes
 			data.push({ 
 				label: 'Unsubscribed Today', 
 				defaultValue: false, 
-				value: statsData[key].unsubs || 0, 
+				value: statsData[key].unsubs || 0, // Today's unsubscribes
 				percentage: 0 
 			});
 		} else if (key === 'd7') {
-			// For "7 Days", show the current total subscribers
+			// For "7 Days", show this week's new subscribers
 			data.push({ 
-				label: 'Total Subscribers', 
+				label: 'New Subscribers (7 days)', 
 				defaultValue: false, 
-				value: allTimeTotal, 
+				value: statsData[key].subs_count || 0, // Last 7 days new subscribers
 				percentage: 0 
 			});
 			// Show unsubscribes in the last 7 days
 			data.push({ 
 				label: 'Unsubscribed (7 days)', 
 				defaultValue: false, 
-				value: statsData[key].unsubs || 0, 
+				value: statsData[key].unsubs || 0, // Last 7 days unsubscribes
 				percentage: 0 
 			});
 		} else if (key === 'all') {
-			// For "All", show all-time stats
+			// For "All", show all-time total subscribers (cumulative)
 			data.push({ 
 				label: 'Total Subscribers', 
 				defaultValue: false, 
-				value: statsData[key].subs_count || 0, 
+				value: statsData[key].subs_count || 0, // All-time total subscribers
 				percentage: 0 
 			});
+			// Show all-time total unsubscribes
 			data.push({ 
 				label: 'Total Unsubscribed', 
 				defaultValue: false, 
-				value: statsData[key].unsubs || 0, 
+				value: statsData[key].unsubs || 0, // All-time total unsubscribes
 				percentage: 0 
 			});
 		}
 		
-		console.log('Subscriber stats metrics created:', data);
+		console.log('Subscriber stats metrics created for period', key, ':', data);
 		setSubsStats(data);
 	};
 	
+	// Update metrics when statsData or period changes
 	useEffect(() => {
-		createStatsMetrics()
-	}, [statsData, statsKey])
+		if (statsKey && statsData) {
+			createStatsMetrics();
+		}
+	}, [statsKey, statsData]);
 	
 	useEffect(() => {
-		createSubsStatsMetrics()
-	}, [statsData, subsStatsKey])
+		if (subsStatsKey && statsData) {
+			createSubsStatsMetrics();
+			// Force chart update when period changes
+			setChartKey(prev => prev + 1);
+		}
+	}, [subsStatsKey, statsData]);
+	
+	// Debug timeseries data structure when it changes
+	useEffect(() => {
+		if (statsData && statsData.timeseries) {
+			debugTimeseriesData();
+		}
+	}, [statsData]);
 
+	// Load stats when account is initialized
 	useEffect(() => {
 		// Only load stats when account is fully initialized and not in loading state
 		if (user && account && dataInitialized && !accountLoading) {
@@ -481,9 +615,14 @@ const Dashboard = () => {
 											{ value: 'all', label: 'All' },
 										]}
 										onChange={(value) => {
-											setSubsStatsKey(value)
+											setSubsStatsKey(value);
+											// Force data refresh when period changes
+											setIsLoading(true);
+											loadStats().then(() => {
+												setIsLoading(false);
+											});
 										}}
-									></ButtonGroup>
+									/>
 								</div>
 								<br></br>
 								<div className={`campaign-charts ${isMobile ? 'mobile-charts' : ''}`}>
@@ -493,7 +632,11 @@ const Dashboard = () => {
 												<Stat 
 													stats={subsStats} 
 													hasChart={false} 
-													defaultLabel={'Total Subscribers'} 
+													defaultLabel={
+														subsStatsKey === 'today' ? 'New Subscribers Today' : 
+														subsStatsKey === 'd7' ? 'New Subscribers (7 days)' : 
+														'Total Subscribers'
+													} 
 													timeseriesData={statsData.timeseries}
 													timeseriesKey={subsStatsKey}
 													metricKey="subs_count"
@@ -520,6 +663,7 @@ const Dashboard = () => {
 
 								<div style={{ height: isMobile ? '200px' : '350px' }}>
 									<DashboardChart 
+										key={`subscribers-chart-${chartKey}-${subsStatsKey}`} // Force re-render when period changes
 										isPositive={true} 
 										timeseriesData={statsData.timeseries} 
 										timeseriesKey={subsStatsKey}
