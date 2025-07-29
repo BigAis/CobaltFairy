@@ -12,15 +12,7 @@ import Checkbox from '../Checkbox'
 import PopupText from '../PopupText/PopupText'
 import { ApiService } from '../../service/api-service'
 
-const SegmentsTable = ({ 
-  segmentSearchValue, 
-  onUpdate, 
-  setView, 
-  applySegmentFilter,
-  segments: propSegments = null, 
-  totalResults: propTotalResults = 0, 
-  loading: propLoading = false 
-}) => {
+const SegmentsTable = ({ segmentSearchValue, onUpdate, setView, applySegmentFilter, segments: propSegments = null, totalResults: propTotalResults = 0, loading: propLoading = false }) => {
 	const navigate = useNavigate()
 	const { user, createNotification } = useAccount()
 
@@ -63,17 +55,15 @@ const SegmentsTable = ({
 		try {
 			setLoading(true)
 			const response = await ApiService.get('fairymailer/getSegments', user.jwt)
-			
+
 			if (response.data && response.data.data) {
 				let filteredSegments = response.data.data
-				
+
 				// Apply search filter if provided
 				if (segmentSearchValue) {
-					filteredSegments = filteredSegments.filter(segment => 
-						segment.name.toLowerCase().includes(segmentSearchValue.toLowerCase())
-					)
+					filteredSegments = filteredSegments.filter((segment) => segment.name.toLowerCase().includes(segmentSearchValue.toLowerCase()))
 				}
-				
+
 				setSegments(filteredSegments)
 				setTotalResults(filteredSegments.length)
 			}
@@ -81,7 +71,7 @@ const SegmentsTable = ({
 			console.error('Error fetching segments:', error)
 			createNotification({
 				message: 'Error loading segments. Please try again.',
-				type: 'warning'
+				type: 'warning',
 			})
 		} finally {
 			setLoading(false)
@@ -139,20 +129,20 @@ const SegmentsTable = ({
 					// Directly call the API with the existing setSegment endpoint
 					// Set active to false to mark it as deleted
 					const deleteResponse = await ApiService.post(
-						'fairymailer/setSegment', 
-						{ 
+						'fairymailer/setSegment',
+						{
 							uuid: rowData.uuid,
 							name: rowData.name,
 							filters: rowData.filters,
-							active: false 
-						}, 
+							active: false,
+						},
 						user.jwt
 					)
-					
+
 					if (deleteResponse) {
 						createNotification({
 							message: `Segment "${rowData.name}" deleted successfully.`,
-							type: 'default'
+							type: 'default',
 						})
 						onUpdate()
 					}
@@ -160,7 +150,7 @@ const SegmentsTable = ({
 					console.error('Error deleting segment:', error)
 					createNotification({
 						message: 'Error deleting segment. Please try again.',
-						type: 'warning'
+						type: 'warning',
 					})
 				}
 			}
@@ -169,19 +159,19 @@ const SegmentsTable = ({
 
 	// Filter description body template
 	const filterDescriptionTemplate = (rowData) => {
-		let description = "No filters"
-		
+		let description = 'No filters'
+
 		if (rowData.filters) {
 			const filterParts = []
-			
+
 			if (rowData.filters.email && rowData.filters.email.$contains) {
 				filterParts.push(`Email contains: ${rowData.filters.email.$contains}`)
 			}
-			
+
 			if (rowData.filters.name && rowData.filters.name.$contains) {
 				filterParts.push(`Name contains: ${rowData.filters.name.$contains}`)
 			}
-			
+
 			if (rowData.filters.createdAt) {
 				if (rowData.filters.createdAt.$gte) {
 					const date = new Date(rowData.filters.createdAt.$gte)
@@ -192,31 +182,27 @@ const SegmentsTable = ({
 					filterParts.push(`To: ${date.toLocaleDateString()}`)
 				}
 			}
-			
+
 			if (rowData.filters.groups && rowData.filters.groups.id && rowData.filters.groups.id.$in) {
 				filterParts.push(`Groups: ${rowData.filters.groups.id.$in.length} selected`)
 			}
-			
+
 			if (filterParts.length > 0) {
 				description = filterParts.join(', ')
 			}
 		}
-		
-		return loading ? <Skeleton /> : (
-			<div className="filter-description">
-				{description}
-			</div>
-		)
+
+		return loading ? <Skeleton /> : <div className="filter-description">{description}</div>
 	}
 
 	return (
 		<>
-			<DataTable 
-				value={segments} 
-				paginator={false} 
-				selection={selectedSegments} 
-				onSelectionChange={(e) => setSelectedSegments(e.value)} 
-				dataKey="uuid" 
+			<DataTable
+				value={segments}
+				paginator={false}
+				selection={selectedSegments}
+				onSelectionChange={(e) => setSelectedSegments(e.value)}
+				dataKey="uuid"
 				rowClassName={() => 'p-table-row'}
 				emptyMessage="No segments found."
 			>
@@ -252,10 +238,8 @@ const SegmentsTable = ({
 					headerStyle={{ width: '80px' }}
 				/>
 				<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
-				<Column field="filters" header="Filters" body={filterDescriptionTemplate} />
-				<Column field="updatedAt" header="Last Updated" body={(rowData) => (
-					loading ? <Skeleton /> : new Date(rowData.updatedAt).toLocaleDateString()
-				)} />
+				{/* <Column field="filters" header="Filters" body={filterDescriptionTemplate} /> */}
+				<Column field="updatedAt" header="Last Updated" body={(rowData) => (loading ? <Skeleton /> : new Date(rowData.updatedAt).toLocaleDateString())} />
 				<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
 			</DataTable>
 			<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
