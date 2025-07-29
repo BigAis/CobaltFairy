@@ -21,15 +21,11 @@ const DashboardChart = ({
   metric1 = 'subs_count',
   metric2 = 'unsubs'
 }) => {
+	// State for chart data and options
 	const [chartData, setChartData] = useState(null);
 	const [chartOptions, setChartOptions] = useState(null);
 	
-	// Create new chart data whenever the props change
-	useEffect(() => {
-		console.log(`Building chart for period ${timeseriesKey} with metrics ${metric1}/${metric2}`);
-		buildChartData();
-	}, [timeseriesData, timeseriesKey, metric1, metric2, isPositive]);
-
+	// Create gradients for chart coloring
 	const createGradients = (ctx, area) => {
 		const gradient1 = ctx.createLinearGradient(0, 0, 0, area.height);
 		
@@ -54,15 +50,20 @@ const DashboardChart = ({
 		return [gradient1, gradient2];
 	};
 	
+	// Build chart data when props change
+	useEffect(() => {
+		buildChartData();
+	}, [timeseriesData, timeseriesKey, metric1, metric2, isPositive]);
+	
+	// Main function to build chart data from timeseries data
 	const buildChartData = () => {
-		// Initialize with empty arrays
+		// Initialize arrays for chart data
 		let chartLabels = [];
 		let chartData1 = [];
 		let chartData2 = [];
-		
 		let seriesData = [];
 		
-		// Check if we have the required data
+		// Check if we have timeseries data
 		if (!timeseriesData) {
 			console.log('No timeseries data available');
 			createEmptyChart();
@@ -78,12 +79,15 @@ const DashboardChart = ({
 		
 		// We have data, process it
 		seriesData = timeseriesData[timeseriesKey];
-		console.log(`Processing ${seriesData.length} data points for ${timeseriesKey}`);
 		
 		if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
-			// Daily data
+			// Daily data with 'date' field
 			chartLabels = seriesData.map(item => {
+				if (!item.date) return '';
+				
 				const date = new Date(item.date);
+				if (isNaN(date.getTime())) return '';
+				
 				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 			});
 			
@@ -96,13 +100,18 @@ const DashboardChart = ({
 					// Format is '2025-07'
 					const parts = item.period.split('-');
 					if (parts.length === 2) {
-						const date = new Date(parts[0], parts[1] - 1); // months are 0-indexed
-						return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+						// Create date from year and month (month is 0-indexed in JS)
+						const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1);
+						if (!isNaN(date.getTime())) {
+							return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+						}
 					}
 					return item.period;
 				} else if (item.date) {
 					const date = new Date(item.date);
-					return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+					if (!isNaN(date.getTime())) {
+						return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+					}
 				}
 				return '';
 			});
@@ -110,32 +119,22 @@ const DashboardChart = ({
 			chartData1 = seriesData.map(item => item[metric1] || 0);
 			chartData2 = seriesData.map(item => item[metric2] || 0);
 		} else if (timeseriesKey === 'today') {
-			// Hourly data for today
+			// Today's data with hourly values
 			if (seriesData.length === 0) {
 				// Create hourly placeholders if no data
 				const hours = Array.from({length: 24}, (_, i) => i);
-				chartLabels = hours.map(hour => `${hour}:00`);
+				chartLabels = hours.map(hour => `${hour.toString().padStart(2, '0')}:00`);
 				
-				// Get total daily values from top-level stats if available
-				const todayStats = timeseriesData.today || {};
-				const todayTotal1 = todayStats[metric1] || 0;
-				const todayTotal2 = todayStats[metric2] || 0;
-				
-				// Distribute values randomly but with peak at current hour
-				const currentHour = new Date().getHours();
-				chartData1 = hours.map((hour) => {
-					if (hour === currentHour) return todayTotal1;
-					return 0;
-				});
-				
-				chartData2 = hours.map((hour) => {
-					if (hour === currentHour) return todayTotal2;
-					return 0;
-				});
+				chartData1 = Array(24).fill(0);
+				chartData2 = Array(24).fill(0);
 			} else {
 				// We have actual hourly data
 				chartLabels = seriesData.map(item => {
+					if (!item.date) return '';
+					
 					const date = new Date(item.date);
+					if (isNaN(date.getTime())) return '';
+					
 					return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 				});
 				
@@ -213,22 +212,19 @@ const DashboardChart = ({
 							
 							const index = tooltipItems[0].dataIndex;
 							
-							// Use the series data directly to get the date
+							// Try to get date from series data
 							if (seriesData && seriesData[index]) {
 								const item = seriesData[index];
 								if (item.date) {
 									const date = new Date(item.date);
 									
-									// Check if date is valid
 									if (!isNaN(date.getTime())) {
 										if (timeseriesKey === 'all') {
-											// For monthly data, show full month and year
 											return date.toLocaleDateString('en-US', { 
 												month: 'long', 
 												year: 'numeric' 
 											});
 										} else if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
-											// For daily data, show full date
 											return date.toLocaleDateString('en-US', { 
 												weekday: 'long',
 												month: 'long', 
@@ -236,7 +232,6 @@ const DashboardChart = ({
 												year: 'numeric' 
 											});
 										} else if (timeseriesKey === 'today') {
-											// For today's data, show time
 											return date.toLocaleString('en-US', { 
 												hour: '2-digit',
 												minute: '2-digit',
@@ -248,11 +243,14 @@ const DashboardChart = ({
 									// Handle 'period' format for 'all' timeframe
 									const parts = item.period.split('-');
 									if (parts.length === 2) {
-										const date = new Date(parts[0], parts[1] - 1);
-										return date.toLocaleDateString('en-US', { 
-											month: 'long', 
-											year: 'numeric' 
-										});
+										const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1);
+										if (!isNaN(date.getTime())) {
+											return date.toLocaleDateString('en-US', { 
+												month: 'long', 
+												year: 'numeric' 
+											});
+										}
+										return item.period;
 									}
 								}
 							}
@@ -265,7 +263,7 @@ const DashboardChart = ({
 							const value = context.parsed.y;
 							const datasetLabel = context.dataset.label;
 							
-							// Determine the proper label based on the timeframe
+							// Format label based on timeframe
 							let valueLabel = '';
 							if (timeseriesKey === 'today') {
 								valueLabel = `${datasetLabel}: ${value.toLocaleString()} (hourly)`;
@@ -309,6 +307,7 @@ const DashboardChart = ({
 		setChartOptions(options);
 	}
 	
+	// Create empty chart when no data is available
 	const createEmptyChart = () => {
 		// Create appropriate empty chart based on timeframe
 		let chartLabels = [];
@@ -396,7 +395,7 @@ const DashboardChart = ({
 		setChartOptions(options);
 	}
 
-	// If data is not ready yet, show loading state or empty chart
+	// If data is not ready yet, show loading state
 	if (!chartData || !chartOptions) {
 		return (
 			<div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
