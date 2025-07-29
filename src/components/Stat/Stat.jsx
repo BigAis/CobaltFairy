@@ -85,8 +85,12 @@ const Stat = ({
 			case 'Click Rate':
 				return 'click_rate';
 			case 'Total':
+			case 'Total Subscribers':
 				return 'subs_count';
 			case 'Unsubscribed':
+			case 'Unsubscribed Today':
+			case 'Unsubscribed (7 days)':
+			case 'Total Unsubscribed':
 				return 'unsubs';
 			case 'Spam':
 				return 'spam';
@@ -97,8 +101,9 @@ const Stat = ({
 	}
 	
 	// Extract chart data from timeseries if available
-	let chartLabels = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
-	let chartData = [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4];
+	// Initialize with empty arrays instead of hardcoded sample data
+	let chartLabels = [];
+	let chartData = [];
 	
 	const currentMetricKey = getMetricKeyForChart();
 	
@@ -118,10 +123,21 @@ const Stat = ({
 				const date = new Date(item.date);
 				return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 			});
+		} else if (timeseriesKey === 'today') {
+			// For hourly data: Format as "13:00"
+			chartLabels = seriesData.map(item => {
+				const date = new Date(item.date);
+				return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+			});
 		}
 		
 		// Extract metric data
 		chartData = seriesData.map(item => item[currentMetricKey] || 0);
+	} else {
+		// If no data available, create empty arrays with appropriate length
+		// This ensures we show a flat line at zero instead of sample data
+		chartLabels = Array(7).fill('');
+		chartData = Array(7).fill(0);
 	}
 
 	const chartData2 = {
@@ -176,6 +192,41 @@ const Stat = ({
 				intersect: false,
 				callbacks: {
 					title: function(tooltipItems) {
+						if (!tooltipItems || tooltipItems.length === 0) {
+							return '';
+						}
+						
+						// Get the date from timeseries data if available
+						if (timeseriesData && timeseriesData[timeseriesKey] && 
+							Array.isArray(timeseriesData[timeseriesKey]) && 
+							tooltipItems[0].dataIndex < timeseriesData[timeseriesKey].length) {
+							
+							const item = timeseriesData[timeseriesKey][tooltipItems[0].dataIndex];
+							if (item && item.date) {
+								const date = new Date(item.date);
+								if (!isNaN(date.getTime())) {
+									if (timeseriesKey === 'all') {
+										return date.toLocaleDateString('en-US', { 
+											month: 'long', 
+											year: 'numeric' 
+										});
+									} else if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
+										return date.toLocaleDateString('en-US', { 
+											weekday: 'long',
+											month: 'long', 
+											day: 'numeric'
+										});
+									} else if (timeseriesKey === 'today') {
+										return date.toLocaleTimeString('en-US', { 
+											hour: '2-digit',
+											minute: '2-digit',
+											hour12: true
+										});
+									}
+								}
+							}
+						}
+						
 						return tooltipItems[0].label || '';
 					},
 					label: function(context) {
@@ -198,6 +249,8 @@ const Stat = ({
 			y: {
 				display: false,
 				min: 0,
+				// Add a small buffer above the maximum value for better visualization
+				suggestedMax: Math.max(...chartData) * 1.1 || 5,
 			},
 		},
 		elements: {

@@ -45,9 +45,10 @@ const DashboardChart = ({
 		return [gradient1, gradient2];
 	};
 	
-	let chartLabels = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
-	let chartData1 = [2, 2.5, 3, 3.5, 4, 3.5, 4, 3.7, 5, 5, 4.5, 4, 3.8, 3.5, 3.7, 3.3, 2.5, 3.5, 3, 3.5, 4];
-	let chartData2 = [1, 1.5, 2, 1.5, 2, 1.5, 1, 2.7, 2, 3, 3.5, 2, 1.8, 1.5, 1.7, 2.3, 0.5, 2.5, 1, 0.5, 4];
+	// Initialize with empty arrays instead of hardcoded data
+	let chartLabels = [];
+	let chartData1 = [];
+	let chartData2 = [];
 	
 	let seriesData = [];
 	if (timeseriesData && timeseriesData[timeseriesKey] && Array.isArray(timeseriesData[timeseriesKey])) {
@@ -72,8 +73,15 @@ const DashboardChart = ({
 			});
 		}
 		
+		// Extract actual data from the API response
 		chartData1 = seriesData.map(item => item[metric1] || 0);
 		chartData2 = seriesData.map(item => item[metric2] || 0);
+	} else {
+		// If no data available, create empty arrays with appropriate length
+		// This ensures we show a flat line at zero instead of sample data
+		chartLabels = Array(7).fill('');
+		chartData1 = Array(7).fill(0);
+		chartData2 = Array(7).fill(0);
 	}
 
 	// Get total values for context
@@ -212,6 +220,8 @@ const DashboardChart = ({
 			y: {
 				display: false,
 				min: 0,
+				// Add a small buffer above the maximum value for better visualization
+				suggestedMax: Math.max(...chartData1, ...chartData2) * 1.1 || 5,
 			},
 		},
 		elements: {
