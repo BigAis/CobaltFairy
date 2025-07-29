@@ -136,6 +136,8 @@ const PopupText = ({
 	inputLabel = '',
 	inputIcon = null,
 	inputEmojiPicker = false,
+	hasError = false,
+	errorMessage = '',
 	onConfirm = () => {},
 	onDeny = () => {},
 	onCancel = () => {},
@@ -150,11 +152,11 @@ const PopupText = ({
 		}
 	}, [focusCancel])
 
-	useEffect(()=>{
-		if(initialInputValue && initialInputValue.length>0){
+	useEffect(() => {
+		if (initialInputValue && initialInputValue.length > 0) {
 			setInputValue(initialInputValue)
 		}
-	},[initialInputValue])
+	}, [initialInputValue])
 
 	return (
 		<div className="popup-overlay">
@@ -164,7 +166,16 @@ const PopupText = ({
 
 				{/* Custom Input Field */}
 				{inputField && (
-					<InputText value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder={inputPlaceholder} label={inputLabel} icon={inputIcon} emojiPicker={inputEmojiPicker} />
+					<InputText
+						value={inputValue}
+						onChange={(e) => setInputValue(e.target.value)}
+						placeholder={inputPlaceholder}
+						label={inputLabel}
+						icon={inputIcon}
+						emojiPicker={inputEmojiPicker}
+						hasError={hasError}
+						errorMessage={errorMessage}
+					/>
 				)}
 
 				<div className="popup-buttons">
@@ -202,9 +213,12 @@ PopupText.propTypes = {
 	cancelButtonText: PropTypes.string,
 	inputField: PropTypes.bool,
 	inputPlaceholder: PropTypes.string,
+	initialInputValue: PropTypes.string,
 	inputLabel: PropTypes.string,
 	inputIcon: PropTypes.string,
 	inputEmojiPicker: PropTypes.bool,
+	hasError: PropTypes.bool,
+	errorMessage: PropTypes.string,
 	onConfirm: PropTypes.func,
 	onDeny: PropTypes.func,
 	onCancel: PropTypes.func,

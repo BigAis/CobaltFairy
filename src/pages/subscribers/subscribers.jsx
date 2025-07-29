@@ -2,6 +2,7 @@ import SubscribersTable from '../../components/DataTable/SubscribersTable'
 import GroupsTable from '../../components/DataTable/GroupsTable'
 import SegmentsTable from '../../components/DataTable/SegmentsTable'
 import CustomFieldsTable from '../../components/DataTable/CustomFieldsTable'
+import HistoryTable from '../../components/DataTable/HistoryTable'
 import '../dashboard/dashboard.scss'
 import '../../fullpage.scss'
 
@@ -24,11 +25,11 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import ImportCSV from './ImportCSV'
-import SubscribersCleanup from './SubscribersCleanup';
-import './SubscribersCleanup.scss';
+import SubscribersCleanup from './SubscribersCleanup'
+import './SubscribersCleanup.scss'
 import AddSubscriber from './AddSubscriber'
 import PopupText from '../../components/PopupText/PopupText'
-import SearchBar from '../../components/SearchBar/SearchBar';
+import SearchBar from '../../components/SearchBar/SearchBar'
 import GoBackButton from '../../components/GoBackButton'
 
 dayjs.extend(utc)
@@ -45,16 +46,21 @@ const Subscribers = ({ initialView }) => {
 	const { user, account } = useAccount()
 	const [subscribers, setSubscribers] = useState([])
 	const [totalSubs, setTotalSubs] = useState(0)
-	
+
 	const [groups, setGroups] = useState([])
 	const [totalGroups, setTotalGroups] = useState(0)
 	const [groupsLoading, setGroupsLoading] = useState(false)
-	
+
 	// New state for segments
 	const [segments, setSegments] = useState([])
 	const [totalSegments, setTotalSegments] = useState(0)
 	const [segmentsLoading, setSegmentsLoading] = useState(false)
 	const [segmentSearchValue, setSegmentSearchValue] = useState('')
+
+	// State for history
+	const [historyData, setHistoryData] = useState([])
+	const [totalHistory, setTotalHistory] = useState(0)
+	const [historyLoading, setHistoryLoading] = useState(false)
 
 	// State to track selected subscribers
 	const [selectedSubscribers, setSelectedSubscribers] = useState([])
@@ -137,21 +143,17 @@ const Subscribers = ({ initialView }) => {
 			text: `Do you really want to remove ${selectedSubscribers.length} subscriber(s)? This action will unsubscribe them from all groups until they subscribe again manually.`,
 			confirmButtonText: 'Yes, delete.',
 			showCancelButton: true,
-			cancelButtonText: 'No, abort'
+			cancelButtonText: 'No, abort',
 		}).then(async (result) => {
 			if (result.isConfirmed) {
-				let successCount = 0;
-				
+				let successCount = 0
+
 				// Process each subscriber sequentially
 				for (const subscriber of selectedSubscribers) {
 					try {
-						const deleteResponse = await ApiService.post(
-							`fairymailer/removeSubscriber`, 
-							{ data: subscriber }, 
-							user.jwt
-						)
+						const deleteResponse = await ApiService.post(`fairymailer/removeSubscriber`, { data: subscriber }, user.jwt)
 						if (deleteResponse) {
-							successCount++;
+							successCount++
 						}
 					} catch (error) {
 						console.error(`Error deleting subscriber ${subscriber.email}:`, error)
@@ -161,7 +163,7 @@ const Subscribers = ({ initialView }) => {
 				// Clear selection and refresh the list
 				setSelectedSubscribers([])
 				onUpdate()
-				
+
 				// Only show success message if at least one deletion was successful
 				if (successCount > 0) {
 					PopupText.fire({
@@ -185,16 +187,16 @@ const Subscribers = ({ initialView }) => {
 			console.error('Error fetching subscribers:', error)
 			PopupText.fire({
 				text: 'Error fetching subscribers. Please try again later.',
-				icon: 'error'
+				icon: 'error',
 			})
 		}
 	}
 
 	const getGroups = async (page = 1, searchTerm = '') => {
 		// Prevent duplicate calls
-		if (groupsLoading) return;
-		
-		setGroupsLoading(true);
+		if (groupsLoading) return
+
+		setGroupsLoading(true)
 		const query = {
 			pagination: {
 				pageSize: 1000,
@@ -203,10 +205,10 @@ const Subscribers = ({ initialView }) => {
 			...(searchTerm && {
 				filters: {
 					name: {
-						$contains: searchTerm
-					}
-				}
-			})
+						$contains: searchTerm,
+					},
+				},
+			}),
 		}
 		const queryString = qs.stringify(query, { encode: false })
 
@@ -221,57 +223,55 @@ const Subscribers = ({ initialView }) => {
 			console.error('Error fetching groups:', error)
 			PopupText.fire({
 				text: 'Error fetching groups. Please try again later.',
-				icon: 'error'
+				icon: 'error',
 			})
 		} finally {
-			setGroupsLoading(false);
+			setGroupsLoading(false)
 		}
 	}
 
 	// Get segments
 	const getSegments = async (searchTerm = '') => {
-		if (segmentsLoading) return;
-		
-		setSegmentsLoading(true);
+		if (segmentsLoading) return
+
+		setSegmentsLoading(true)
 		try {
 			const response = await ApiService.get('fairymailer/getSegments', user.jwt)
-			
-			console.log('Segments API response:', response.data); // Debug log
-			
+
+			console.log('Segments API response:', response.data) // Debug log
+
 			if (response.data && response.data.data) {
 				// Filter by search term if provided
-				let filteredSegments = response.data.data;
-				
+				let filteredSegments = response.data.data
+
 				// Log all segments to see what we're getting
-				console.log('All segments before filtering:', filteredSegments);
-				
+				console.log('All segments before filtering:', filteredSegments)
+
 				if (searchTerm) {
-					filteredSegments = filteredSegments.filter(segment => 
-						segment.name.toLowerCase().includes(searchTerm.toLowerCase())
-					);
+					filteredSegments = filteredSegments.filter((segment) => segment.name.toLowerCase().includes(searchTerm.toLowerCase()))
 				}
-				
+
 				// Only show segments that are not explicitly marked as inactive
 				// Changed from "active !== false" to be more inclusive
-				filteredSegments = filteredSegments.filter(segment => segment.active !== false);
-				
-				console.log('Filtered segments to display:', filteredSegments);
-				
+				filteredSegments = filteredSegments.filter((segment) => segment.active !== false)
+
+				console.log('Filtered segments to display:', filteredSegments)
+
 				setSegments(filteredSegments)
 				setTotalSegments(filteredSegments.length)
 			} else {
-				console.log('No segments data found in response');
-				setSegments([]);
-				setTotalSegments(0);
+				console.log('No segments data found in response')
+				setSegments([])
+				setTotalSegments(0)
 			}
 		} catch (error) {
 			console.error('Error fetching segments:', error)
 			PopupText.fire({
 				text: 'Error fetching segments. Please try again later.',
-				icon: 'error'
+				icon: 'error',
 			})
-			setSegments([]);
-			setTotalSegments(0);
+			setSegments([])
+			setTotalSegments(0)
 		} finally {
 			setSegmentsLoading(false)
 		}
@@ -279,97 +279,132 @@ const Subscribers = ({ initialView }) => {
 
 	// Search segments
 	const searchSegments = (searchTerm) => {
-		setSegmentSearchValue(searchTerm);
-		getSegments(searchTerm);
+		setSegmentSearchValue(searchTerm)
+		getSegments(searchTerm)
+	}
+
+	// Get history data
+	const getHistory = async () => {
+		if (historyLoading) return
+
+		setHistoryLoading(true)
+		try {
+			const response = await ApiService.get('fairymailer/subscribers-history', user.jwt)
+
+			if (response.data && response.data.data) {
+				setHistoryData(response.data.data)
+				setTotalHistory(response.data.data.length)
+			} else {
+				setHistoryData([])
+				setTotalHistory(0)
+			}
+		} catch (error) {
+			console.error('Error fetching history:', error)
+			PopupText.fire({
+				text: 'Error fetching history. Please try again later.',
+				icon: 'error',
+			})
+			setHistoryData([])
+			setTotalHistory(0)
+		} finally {
+			setHistoryLoading(false)
+		}
 	}
 
 	// Apply segment filter
 	const applySegmentFilter = (segment) => {
-		setShowFilters(true);
-		
+		setShowFilters(true)
+
 		// Apply the filters from the segment
-		const newFilters = { ...subscribersFilters };
-		
+		const newFilters = { ...subscribersFilters }
+
 		// Reset filters first
-		newFilters.email = '';
-		newFilters.name = '';
-		newFilters.groups = [];
-		newFilters.dateFrom = '';
-		newFilters.dateTo = '';
-		
+		newFilters.email = ''
+		newFilters.name = ''
+		newFilters.groups = []
+		newFilters.dateFrom = ''
+		newFilters.dateTo = ''
+
 		// Apply email filter
 		if (segment.filters?.email?.$contains) {
-			newFilters.email = segment.filters.email.$contains;
+			newFilters.email = segment.filters.email.$contains
 		}
-		
+
 		// Apply name filter
 		if (segment.filters?.name?.$contains) {
-			newFilters.name = segment.filters.name.$contains;
+			newFilters.name = segment.filters.name.$contains
 		}
-		
+
 		// Apply date filters
 		if (segment.filters?.createdAt?.$gte) {
-			newFilters.dateFrom = new Date(segment.filters.createdAt.$gte);
+			newFilters.dateFrom = new Date(segment.filters.createdAt.$gte)
 		}
-		
+
 		if (segment.filters?.createdAt?.$lte) {
-			newFilters.dateTo = new Date(segment.filters.createdAt.$lte);
+			newFilters.dateTo = new Date(segment.filters.createdAt.$lte)
 		}
-		
+
 		// Apply group filters
 		if (segment.filters?.groups?.id?.$in && segment.filters.groups.id.$in.length > 0) {
-			const groupIds = segment.filters.groups.id.$in;
-			
+			const groupIds = segment.filters.groups.id.$in
+
 			// Find the matching groups
 			const selectedGroups = groups
-				.filter(group => groupIds.includes(group.id))
-				.map(group => ({
+				.filter((group) => groupIds.includes(group.id))
+				.map((group) => ({
 					value: group.udid,
-					label: group.name
-				}));
-			
-			newFilters.groups = selectedGroups;
+					label: group.name,
+				}))
+
+			newFilters.groups = selectedGroups
 		}
-		
-		setSubscribersFilters(newFilters);
-		
+
+		setSubscribersFilters(newFilters)
+
 		// Apply the filters
-		setAutoAppliedFilters(true);
-		filterSubscribersAction();
-		
+		setAutoAppliedFilters(true)
+		filterSubscribersAction()
+
 		// Show a notification
 		PopupText.fire({
 			text: `Applied segment "${segment.name}" as filter`,
 			icon: 'success',
 			timer: 2000,
-			showConfirmButton: false
-		});
+			showConfirmButton: false,
+		})
 	}
 
 	// Initial load of groups when user is available
 	useEffect(() => {
 		if (user && groups.length === 0 && !groupsLoading) {
-			getGroups(1, '');
+			getGroups(1, '')
 		}
 	}, [user])
 
 	// Load segments when the view is set to segments
 	useEffect(() => {
 		if (user && view === 'segments' && segments.length === 0 && !segmentsLoading) {
-			getSegments('');
+			getSegments('')
+		}
+	}, [user, view])
+
+	// Load history when the view is set to history
+	useEffect(() => {
+		if (user && view === 'history' && historyData.length === 0 && !historyLoading) {
+			getHistory()
 		}
 	}, [user, view])
 
 	// Handle search term changes for groups
 	useEffect(() => {
-		if (!user || view !== 'groups') return;
-		
+		if (!user || view !== 'groups') return
+
 		// Use a small debounce to prevent too many API calls
 		const timeoutId = setTimeout(() => {
-			getGroups(1, groupSearchValue);
-		}, 300);
-		
-		return () => clearTimeout(timeoutId);
+			getGroups(1, groupSearchValue)
+		}, 300)
+
+		return () => clearTimeout(timeoutId)
 	}, [groupSearchValue, view, user])
 
 	// Update the URL when view changes for better navigation
@@ -377,44 +412,44 @@ const Subscribers = ({ initialView }) => {
 		if (view && view !== 'subs') {
 			// Don't update URL if we're already there
 			if (!location.pathname.includes(`/subscribers/${view}`)) {
-				navigate(`/subscribers/${view}`, { replace: true });
+				navigate(`/subscribers/${view}`, { replace: true })
 			}
 		} else if (view === 'subs' && location.pathname !== '/subscribers') {
-			navigate('/subscribers', { replace: true });
+			navigate('/subscribers', { replace: true })
 		}
-	}, [view, navigate, location]);
+	}, [view, navigate, location])
 
 	const handleAddSubscribersClick = () => {
 		// Reset to manual mode when opening the add subscribers view
 		setImportMode('manual')
 		setView('import')
 	}
-	
+
 	const searchSubscribers = async (searchTerm) => {
 		try {
 			const resp = await ApiService.get(
-			`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[active]=true&filters[email][$contains]=${searchTerm}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
-			user.jwt
-			);
-			
+				`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[active]=true&filters[email][$contains]=${searchTerm}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
+				user.jwt
+			)
+
 			if (resp.data && resp.data.data) {
-			setSubscribers(resp.data.data);
-			if (resp.data.meta) setTotalSubs(resp.data.meta.pagination.total);
+				setSubscribers(resp.data.data)
+				if (resp.data.meta) setTotalSubs(resp.data.meta.pagination.total)
 			}
 		} catch (error) {
-			console.error('Error searching subscribers:', error);
+			console.error('Error searching subscribers:', error)
 			PopupText.fire({
-			text: 'Error searching subscribers. Please try again.',
-			icon: 'error'
-			});
+				text: 'Error searching subscribers. Please try again.',
+				icon: 'error',
+			})
 		}
-	};
+	}
 
 	const searchGroups = (searchTerm) => {
 		// Just update the search term state
 		// The useEffect will handle the API call
-		setGroupSearchValue(searchTerm);
-	};
+		setGroupSearchValue(searchTerm)
+	}
 
 	const renderAddButton = () => {
 		switch (view) {
@@ -422,11 +457,7 @@ const Subscribers = ({ initialView }) => {
 				return (
 					<div className="action-buttons">
 						{selectedSubscribers.length > 0 && (
-							<Button 
-								type="secondary" 
-								onClick={deleteSelectedSubscribers}
-								style={{ marginRight: '10px' }}
-							>
+							<Button type="secondary" onClick={deleteSelectedSubscribers} style={{ marginRight: '10px' }}>
 								Delete Selected ({selectedSubscribers.length})
 							</Button>
 						)}
@@ -454,7 +485,7 @@ const Subscribers = ({ initialView }) => {
 					</Button>
 				)
 			case 'import':
-				return null; // No button in import view - we'll use the GoBackButton instead
+				return null // No button in import view - we'll use the GoBackButton instead
 			default:
 				return <></>
 		}
@@ -463,11 +494,13 @@ const Subscribers = ({ initialView }) => {
 	const onUpdate = async () => {
 		// Reload data based on current view
 		if (view === 'groups') {
-			await getGroups(1, groupSearchValue);
+			await getGroups(1, groupSearchValue)
 		} else if (view === 'segments') {
-			await getSegments(segmentSearchValue);
+			await getSegments(segmentSearchValue)
+		} else if (view === 'history') {
+			await getHistory()
 		} else {
-			autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers();
+			autoAppliedFilters === true ? filterSubscribersAction() : getSubscribers()
 		}
 	}
 
@@ -502,38 +535,34 @@ const Subscribers = ({ initialView }) => {
 		}
 	}, [filterString, groups])
 
-	useEffect(()=>{
-		if(account){
-			
+	useEffect(() => {
+		if (account) {
 		}
-	},[account])
-	
+	}, [account])
+
 	const renderImportOptions = () => {
 		// Only render this section if we're in the import view
-		if (view !== 'import') return null;
-		
+		if (view !== 'import') return null
+
 		// Make sure we have a valid user and account before rendering
 		if (!user) {
-			return <Card>Please log in to continue</Card>;
+			return <Card>Please log in to continue</Card>
 		}
-		
+
 		// Check if groups array is available to prevent errors
 		if (!groups || groups.length === 0) {
 			return (
 				<Card>
 					<div className="text-center p-4">
 						<p>You need to create a group before adding subscribers.</p>
-						<Button 
-							onClick={() => navigate('/subscribers/group/new')} 
-							style={{ marginTop: '15px' }}
-						>
+						<Button onClick={() => navigate('/subscribers/group/new')} style={{ marginTop: '15px' }}>
 							Create Group
 						</Button>
 					</div>
 				</Card>
-			);
+			)
 		}
-		
+
 		// Render the import options with proper checks
 		return (
 			<div className="import-options">
@@ -541,135 +570,117 @@ const Subscribers = ({ initialView }) => {
 					<ButtonGroup
 						options={[
 							{ value: 'manual', label: 'Add Single Subscriber' },
-							{ value: 'bulk', label: 'Bulk Import from CSV' }
+							{ value: 'bulk', label: 'Bulk Import from CSV' },
 						]}
 						onChange={(value) => setImportMode(value)}
 						value={importMode}
 					/>
 				</div>
-				
+
 				{importMode === 'manual' ? (
-					<AddSubscriber 
-						groups={groups} 
+					<AddSubscriber
+						groups={groups}
 						customFields={account?.fields || []}
 						onSubscriberAdded={() => {
-							onUpdate();
+							onUpdate()
 							// Optionally return to the subscribers list after adding
 							// setView('subs');
 						}}
 					/>
 				) : (
-					<ImportCSV 
-						groups={groups} 
+					<ImportCSV
+						groups={groups}
 						onImportComplete={() => {
-							setView('subs');
-							onUpdate();
-						}} 
+							setView('subs')
+							onUpdate()
+						}}
 					/>
 				)}
 			</div>
-		);
-	};
-	
+		)
+	}
+
 	return (
 		<>
 			<div className="fm-page-wrapper">
 				<Sidemenu />
 				<div className="fm-page-container">
 					<PageHeader user={user} account={account} />
-					
-					{view === 'import' && (
-						<GoBackButton onClick={() => setView('subs')} destination="/subscribers" />
-					)}
-					
+
+					{view === 'import' && <GoBackButton onClick={() => setView('subs')} destination="/subscribers" />}
+
 					<div className="page-name-container">
 						{view === 'subs' && <div className="page-name">Subscribers</div>}
 						{view === 'groups' && <div className="page-name">Groups</div>}
 						{view === 'fields' && <div className="page-name">Fields</div>}
 						{view === 'segments' && <div className="page-name">Segments</div>}
-						{view === 'import' && (
-							<div className="page-name">
-								{importMode === 'manual' ? 'Add Subscriber' : 'Import Subscribers'}
-							</div>
-						)}
+						{view === 'import' && <div className="page-name">{importMode === 'manual' ? 'Add Subscriber' : 'Import Subscribers'}</div>}
 						{view === 'cleanup' && <div className="page-name">Cleanup Subscribers</div>}
 						{view === 'history' && <div className="page-name">History</div>}
 						{view === 'stats' && <div className="page-name">Stats</div>}
 						{renderAddButton()}
 					</div>
-					
+
 					{view !== 'import' && (
 						<div className="filters-container">
 							<div className="button-group-wrapper">
 								<ButtonGroup
-								options={[
-									{ value: 'subs', label: `All Subscribers (${totalSubs})` },
-									{ value: 'segments', label: `Segments (${totalSegments})` },
-									{ value: 'groups', label: `Groups (${totalGroups})` },
-									{ value: 'fields', label: `Fields` },
-									{ value: 'history', label: `History` },
-									{ value: 'stats', label: `Stats` },
-									{ value: 'cleanup', label: `Clean up` },
-								]}
-								onChange={(value) => {
-									setView(value)
-									setShowFilters(false)
-								}}
-								value={view}
+									options={[
+										{ value: 'subs', label: `All Subscribers (${totalSubs})` },
+										{ value: 'segments', label: `Segments (${totalSegments})` },
+										{ value: 'groups', label: `Groups (${totalGroups})` },
+										{ value: 'fields', label: `Fields` },
+										{ value: 'history', label: `History` },
+										{ value: 'stats', label: `Stats` },
+										{ value: 'cleanup', label: `Clean up` },
+									]}
+									onChange={(value) => {
+										setView(value)
+										setShowFilters(false)
+									}}
+									value={view}
 								></ButtonGroup>
 							</div>
 
 							{view === 'subs' && (
-							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-								<SearchBar
-								placeholder="Search Subscribers"
-								label="Search Subscribers"
-								initialValue={subscriberSearchValue}
-								onSearch={(value) => {
-									setSubscriberSearchValue(value);
-									searchSubscribers(value);
-								}}
-								style={{ width: '100%', marginRight: '20px' }}
-								/>
-								<Button
-								type="secondary"
-								icon={'Filters'}
-								className="button-filters"
-								onClick={() => {
-									setShowFilters((prev) => !prev);
-								}}
-								>
-								Filters
-								</Button>
-							</div>
+								<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+									<SearchBar
+										placeholder="Search Subscribers"
+										label="Search Subscribers"
+										initialValue={subscriberSearchValue}
+										onSearch={(value) => {
+											setSubscriberSearchValue(value)
+											searchSubscribers(value)
+										}}
+										style={{ width: '100%', marginRight: '20px' }}
+									/>
+									<Button
+										type="secondary"
+										icon={'Filters'}
+										className="button-filters"
+										onClick={() => {
+											setShowFilters((prev) => !prev)
+										}}
+									>
+										Filters
+									</Button>
+								</div>
 							)}
 
 							{view === 'groups' && (
-							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-								<SearchBar
-								placeholder="Search Groups"
-								label="Search Groups"
-								initialValue={groupSearchValue}
-								onSearch={searchGroups}
-								style={{ width: '100%' }}
-								/>
-							</div>
+								<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+									<SearchBar placeholder="Search Groups" label="Search Groups" initialValue={groupSearchValue} onSearch={searchGroups} style={{ width: '100%' }} />
+								</div>
 							)}
-							
+
 							{view === 'segments' && (
-							<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-								<SearchBar
-								placeholder="Search Segments"
-								label="Search Segments"
-								initialValue={segmentSearchValue}
-								onSearch={searchSegments}
-								style={{ width: '100%' }}
-								/>
-							</div>
+								<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+									<SearchBar placeholder="Search Segments" label="Search Segments" initialValue={segmentSearchValue} onSearch={searchSegments} style={{ width: '100%' }} />
+								</div>
 							)}
 						</div>
 					)}
-					
+
 					<Card style={{ display: showFilters ? 'flex' : 'none' }} className={'d-flex flex-column subscriber-filters-card gap-20 mt20'}>
 						<div className="d-flex gap-20 ">
 							<InputText value={subscribersFilters.email} onChange={(e) => handleFilterChange('email', e.target.value)} label={'Email Contains'}></InputText>
@@ -714,10 +725,10 @@ const Subscribers = ({ initialView }) => {
 
 					{view === 'subs' && (
 						<div className="subscribers">
-							<SubscribersTable 
-								subscriberSearchValue={subscriberSearchValue} 
-								subscribersQueryFilter={subscribersQueryFilter} 
-								onUpdate={onUpdate} 
+							<SubscribersTable
+								subscriberSearchValue={subscriberSearchValue}
+								subscribersQueryFilter={subscribersQueryFilter}
+								onUpdate={onUpdate}
 								setView={setView}
 								selectedSubscribers={selectedSubscribers}
 								setSelectedSubscribers={setSelectedSubscribers}
@@ -727,22 +738,15 @@ const Subscribers = ({ initialView }) => {
 
 					{view === 'groups' && (
 						<div className="groups">
-							<GroupsTable 
-								groupSearchValue={groupSearchValue} 
-								onUpdate={onUpdate} 
-								setView={setView}
-								groups={groups}
-								totalResults={totalGroups}
-								loading={groupsLoading}
-							/>
+							<GroupsTable groupSearchValue={groupSearchValue} onUpdate={onUpdate} setView={setView} groups={groups} totalResults={totalGroups} loading={groupsLoading} />
 						</div>
 					)}
 
 					{view === 'segments' && (
 						<div className="segments">
-							<SegmentsTable 
-								segmentSearchValue={segmentSearchValue} 
-								onUpdate={() => getSegments(segmentSearchValue)} 
+							<SegmentsTable
+								segmentSearchValue={segmentSearchValue}
+								onUpdate={() => getSegments(segmentSearchValue)}
 								setView={setView}
 								segments={segments}
 								totalResults={totalSegments}
@@ -759,38 +763,26 @@ const Subscribers = ({ initialView }) => {
 					)}
 
 					{view === 'cleanup' && (
-					<div className="subscribers-cleanup-container">
-						<SubscribersCleanup 
-						user={user} 
-						account={account} 
-						groups={groups}
-						onUpdate={onUpdate}
-						/>
-					</div>
-					)}
-					
-					{view === 'history' && (
-					  <Card>
-						<div style={{ textAlign: 'center', padding: '40px 20px' }}>
-						  <h3 style={{ marginBottom: '15px', fontFamily: 'Bitter, serif', fontWeight: 600 }}>
-							History Under Construction
-						  </h3>
-						  <p>This feature is coming soon. Stay tuned!</p>
+						<div className="subscribers-cleanup-container">
+							<SubscribersCleanup user={user} account={account} groups={groups} onUpdate={onUpdate} />
 						</div>
-					  </Card>
+					)}
+
+					{view === 'history' && (
+						<div className="history">
+							<HistoryTable historyData={historyData} totalResults={totalHistory} loading={historyLoading} />
+						</div>
 					)}
 
 					{view === 'stats' && (
-					  <Card>
-						<div style={{ textAlign: 'center', padding: '40px 20px' }}>
-						  <h3 style={{ marginBottom: '15px', fontFamily: 'Bitter, serif', fontWeight: 600 }}>
-							Stats Under Construction
-						  </h3>
-						  <p>This feature is coming soon. Stay tuned!</p>
-						</div>
-					  </Card>
+						<Card>
+							<div style={{ textAlign: 'center', padding: '40px 20px' }}>
+								<h3 style={{ marginBottom: '15px', fontFamily: 'Bitter, serif', fontWeight: 600 }}>Stats Under Construction</h3>
+								<p>This feature is coming soon. Stay tuned!</p>
+							</div>
+						</Card>
 					)}
-					
+
 					{/* Import options section with proper rendering */}
 					{renderImportOptions()}
 				</div>

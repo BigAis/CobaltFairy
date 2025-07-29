@@ -861,7 +861,6 @@ const Campaigns = () => {
 			// For scheduled/outbox campaigns, show reschedule dialog on mobile
 			if (isMobile) {
 				// Show reschedule dialog since edit is not available on mobile
-				const currentDate = new Date(campaign.date)
 
 				PopupText.fire({
 					title: 'Campaign Options',
