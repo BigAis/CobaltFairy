@@ -111,7 +111,8 @@ const Stat = ({
 	
 	const currentMetricKey = getMetricKeyForChart();
 	
-	if (timeseriesData && timeseriesData[timeseriesKey] && Array.isArray(timeseriesData[timeseriesKey]) && currentMetricKey) {
+    // Only process chart data if hasChart is true and relevant props are provided
+	if (hasChart && timeseriesData && timeseriesData[timeseriesKey] && Array.isArray(timeseriesData[timeseriesKey]) && currentMetricKey) {
 		const seriesData = timeseriesData[timeseriesKey];
 		
 		// Format date labels based on timeseriesKey
@@ -200,8 +201,8 @@ const Stat = ({
 		}
 	}
 	
-	// If we still have no data, create some reasonable empty dataset
-	if (chartLabels.length === 0) {
+	// If hasChart is true but we still have no data, create some reasonable empty dataset
+	if (hasChart && chartLabels.length === 0) {
 		if (timeseriesKey === 'today') {
 			chartLabels = ['00:00', '06:00', '12:00', '18:00', '23:59'];
 		} else if (timeseriesKey === 'd7') {
@@ -424,9 +425,10 @@ Stat.propTypes = {
 	hasChart: PropTypes.bool,
 	defaultLabel: PropTypes.string,
 	className: PropTypes.string,
-	timeseriesData: PropTypes.object, // New prop for timeseries data
-	timeseriesKey: PropTypes.string, // Which time period to use
-	metricKey: PropTypes.string, // Optional explicit metric key
+	// Make these props optional if hasChart is false
+	timeseriesData: PropTypes.object,
+	timeseriesKey: PropTypes.string,
+	metricKey: PropTypes.string,
 }
 
 export default Stat

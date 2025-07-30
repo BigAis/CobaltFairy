@@ -634,29 +634,25 @@ const Dashboard = () => {
 											<div>
 												<Stat 
 													stats={subsStats} 
-													hasChart={false} 
+													hasChart={false} /* This stat is a counter, no internal chart needed */
 													defaultLabel={
 														subsStatsKey === 'today' ? 'New Subscribers Today' : 
 														subsStatsKey === 'd7' ? 'New Subscribers (7 days)' : 
 														'Total Subscribers'
 													} 
-													timeseriesData={statsData.timeseries}
-													timeseriesKey={subsStatsKey}
-													metricKey="subs_count"
+													// Removed timeseriesData, timeseriesKey, metricKey as per boss's feedback for counters
 												/>
 											</div>
 											<div>
 												<Stat 
 													stats={subsStats} 
-													hasChart={false} 
+													hasChart={false} /* This stat is a counter, no internal chart needed */
 													defaultLabel={
 														subsStatsKey === 'today' ? 'Unsubscribed Today' : 
 														subsStatsKey === 'd7' ? 'Unsubscribed (7 days)' : 
 														'Total Unsubscribed'
 													} 
-													timeseriesData={statsData.timeseries}
-													timeseriesKey={subsStatsKey}
-													metricKey="unsubs"
+													// Removed timeseriesData, timeseriesKey, metricKey as per boss's feedback for counters
 												/>
 											</div>
 										</>
@@ -668,7 +664,7 @@ const Dashboard = () => {
 									<DashboardChart 
 										key={`subscribers-chart-${chartKey}-${subsStatsKey}`}
 										isPositive={true} 
-										timeseriesData={statsData.timeseries} 
+										timeseriesData={statsData.timeseries} /* Correctly uses timeseries for chart */
 										timeseriesKey={subsStatsKey}
 										metric1="subs_count"
 										metric2="unsubs"
