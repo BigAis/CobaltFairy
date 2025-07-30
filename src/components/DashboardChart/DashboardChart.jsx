@@ -91,8 +91,15 @@ const DashboardChart = ({
 				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 			});
 			
-			chartData1 = seriesData.map(item => item[metric1] || 0);
-			chartData2 = seriesData.map(item => item[metric2] || 0);
+			// Ensure data is defined or default to 0
+			chartData1 = seriesData.map(item => {
+				const value = item[metric1];
+				return value !== undefined ? value : 0;
+			});
+			chartData2 = seriesData.map(item => {
+				const value = item[metric2];
+				return value !== undefined ? value : 0;
+			});
 		} else if (timeseriesKey === 'all') {
 			// Monthly data with 'period' field
 			chartLabels = seriesData.map(item => {
@@ -116,8 +123,15 @@ const DashboardChart = ({
 				return '';
 			});
 			
-			chartData1 = seriesData.map(item => item[metric1] || 0);
-			chartData2 = seriesData.map(item => item[metric2] || 0);
+			// Ensure data is defined or default to 0
+			chartData1 = seriesData.map(item => {
+				const value = item[metric1];
+				return value !== undefined ? value : 0;
+			});
+			chartData2 = seriesData.map(item => {
+				const value = item[metric2];
+				return value !== undefined ? value : 0;
+			});
 		} else if (timeseriesKey === 'today') {
 			// Today's data with hourly values
 			if (seriesData.length === 0) {
@@ -138,8 +152,55 @@ const DashboardChart = ({
 					return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 				});
 				
-				chartData1 = seriesData.map(item => item[metric1] || 0);
-				chartData2 = seriesData.map(item => item[metric2] || 0);
+				// Ειδική διαχείριση για το metric2 (unsubs) στο today
+				// Αν είναι κενό, εισάγουμε 0 για όλες τις ώρες
+				// εκτός από την τελευταία εγγραφή που βάζουμε το συνολικό
+				
+				// Extract metric data
+				chartData1 = seriesData.map(item => {
+					const value = item[metric1];
+					return value !== undefined ? value : 0;
+				});
+				
+				// Για το unsubs, εάν χρειάζεται
+				if (metric2 === 'unsubs') {
+					// Ψάχνουμε στο d7 για τη σημερινή ημερομηνία
+					const today = new Date();
+					const todayString = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+					
+					let todayUnsubs = 0;
+					
+					// Έλεγχος αν υπάρχει d7 timeseries
+					if (timeseriesData.d7 && Array.isArray(timeseriesData.d7)) {
+						const todayData = timeseriesData.d7.find(item => {
+							if (!item.date) return false;
+							const itemDate = new Date(item.date).toISOString().split('T')[0];
+							return itemDate === todayString;
+						});
+						
+						if (todayData) {
+							todayUnsubs = todayData.unsubs || 0;
+						}
+					}
+					
+					// Βάζουμε 0 για όλες τις ώρες εκτός από την τρέχουσα
+					chartData2 = seriesData.map((item, index) => {
+						const date = new Date(item.date);
+						const currentHour = new Date().getHours();
+						
+						// Αν είναι η τρέχουσα ώρα, επιστρέφουμε το todayUnsubs
+						if (date.getHours() === currentHour) {
+							return todayUnsubs;
+						}
+						return 0;
+					});
+				} else {
+					// Για άλλα metrics, χρησιμοποιούμε κανονικά την τιμή
+					chartData2 = seriesData.map(item => {
+						const value = item[metric2];
+						return value !== undefined ? value : 0;
+					});
+				}
 			}
 		}
 		

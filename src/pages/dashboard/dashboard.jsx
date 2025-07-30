@@ -181,6 +181,11 @@ const Dashboard = () => {
 					subs_count: 0,
 					unsubs: 0
 				};
+			} else {
+				// Εάν το period υπάρχει αλλά το unsubs λείπει, προσθέτουμε με τιμή 0
+				if (stats[period].unsubs === undefined) {
+					stats[period].unsubs = 0;
+				}
 			}
 		});
 		
@@ -232,6 +237,22 @@ const Dashboard = () => {
 						});
 					}
 					stats.timeseries[period] = days;
+				} else if (period === 'd30') {
+					// Create weekly data points for last 30 days
+					const weeks = [];
+					for (let i = 0; i < 4; i++) {
+						const date = new Date();
+						date.setDate(date.getDate() - (i * 7));
+						weeks.push({
+							date: date.toISOString(),
+							subs_count: i === 0 ? (stats.d7.subs_count || 0) : 0,
+							unsubs: i === 0 ? (stats.d7.unsubs || 0) : 0,
+							opens: 0,
+							clicks: 0,
+							emails: 0
+						});
+					}
+					stats.timeseries[period] = weeks;
 				} else if (period === 'all') {
 					// Create monthly data points for all time
 					const months = [];
@@ -249,6 +270,13 @@ const Dashboard = () => {
 					}
 					stats.timeseries[period] = months.reverse();
 				}
+			} else {
+				// Βεβαιωνόμαστε ότι κάθε καταχώρηση στο timeseries έχει το πεδίο unsubs
+				stats.timeseries[period].forEach(entry => {
+					if (entry.unsubs === undefined) {
+						entry.unsubs = 0;
+					}
+				});
 			}
 		});
 	};
@@ -274,6 +302,51 @@ const Dashboard = () => {
 			return;
 		}
 		
+		// Ειδική διαχείριση για το "today" - αναζητάμε στο d7 τη σημερινή ημερομηνία
+		let actualUnsubs = 0;
+		
+		if (key === 'today') {
+			// Ελέγχουμε αν υπάρχει η σημερινή ημερομηνία στο d7
+			const today = new Date();
+			const todayString = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+			
+			console.log('Looking for today:', todayString);
+			
+			// Ψάχνουμε στο d7 για την εγγραφή που αντιστοιχεί στη σημερινή ημερομηνία
+			if (data.timeseries && data.timeseries.d7 && Array.isArray(data.timeseries.d7)) {
+				const todayData = data.timeseries.d7.find(item => {
+					if (!item.date) return false;
+					
+					// Μετατρέπουμε το date σε YYYY-MM-DD για να συγκρίνουμε με το todayString
+					const itemDate = new Date(item.date).toISOString().split('T')[0];
+					return itemDate === todayString;
+				});
+				
+				if (todayData) {
+					console.log('Found today data in d7:', todayData);
+					actualUnsubs = todayData.unsubs || 0;
+				} else {
+					console.log('Today not found in d7 timeseries, using summary value:', data.today.unsubs);
+					actualUnsubs = data.today.unsubs || 0;
+				}
+			} else {
+				console.log('No d7 timeseries available, using summary value:', data.today.unsubs);
+				actualUnsubs = data.today.unsubs || 0;
+			}
+		} else if (key === 'd7') {
+			// Για το d7, υπολογίζουμε το άθροισμα από τα timeseries
+			if (data.timeseries && data.timeseries.d7 && Array.isArray(data.timeseries.d7)) {
+				actualUnsubs = data.timeseries.d7.reduce((sum, item) => sum + (item.unsubs || 0), 0);
+				console.log('Calculated d7 unsubs from timeseries:', actualUnsubs);
+			} else {
+				actualUnsubs = data[key].unsubs || 0;
+				console.log('Using summary d7 unsubs:', actualUnsubs);
+			}
+		} else {
+			// Για όλες τις άλλες περιπτώσεις, χρησιμοποιούμε την τιμή από τα συγκεντρωτικά
+			actualUnsubs = data[key].unsubs || 0;
+		}
+		
 		// For subscriber stats, show appropriate metrics based on selected period
 		let metrics = [];
 		
@@ -290,7 +363,7 @@ const Dashboard = () => {
 			metrics.push({ 
 				label: 'Unsubscribed Today', 
 				defaultValue: false, 
-				value: data[key].unsubs || 0, // Today's unsubscribes
+				value: actualUnsubs, // Χρησιμοποιούμε την υπολογισμένη τιμή
 				percentage: 0 
 			});
 		} else if (key === 'd7') {
@@ -305,7 +378,22 @@ const Dashboard = () => {
 			metrics.push({ 
 				label: 'Unsubscribed (7 days)', 
 				defaultValue: false, 
-				value: data[key].unsubs || 0, // Last 7 days unsubscribes
+				value: actualUnsubs, // Χρησιμοποιούμε την υπολογισμένη τιμή
+				percentage: 0 
+			});
+		} else if (key === 'd30') {
+			// For "30 Days", show last month's new subscribers
+			metrics.push({ 
+				label: 'New Subscribers (30 days)', 
+				defaultValue: false, 
+				value: data[key].subs_count || 0, 
+				percentage: 0 
+			});
+			// Show unsubscribes in the last 30 days
+			metrics.push({ 
+				label: 'Unsubscribed (30 days)', 
+				defaultValue: false, 
+				value: data[key].unsubs || 0, 
 				percentage: 0 
 			});
 		} else if (key === 'all') {

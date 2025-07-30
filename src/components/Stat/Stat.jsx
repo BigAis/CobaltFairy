@@ -88,10 +88,12 @@ const Stat = ({
 			case 'Total Subscribers':
 			case 'New Subscribers Today':
 			case 'New Subscribers (7 days)':
+			case 'New Subscribers (30 days)':
 				return 'subs_count';
 			case 'Unsubscribed':
 			case 'Unsubscribed Today':
 			case 'Unsubscribed (7 days)':
+			case 'Unsubscribed (30 days)':
 			case 'Total Unsubscribed':
 				return 'unsubs';
 			case 'Spam':
@@ -116,7 +118,11 @@ const Stat = ({
 		if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
 			// For daily data: Format as "Jul 22"
 			chartLabels = seriesData.map(item => {
+				if (!item.date) return '';
+				
 				const date = new Date(item.date);
+				if (isNaN(date.getTime())) return '';
+				
 				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 			});
 			
@@ -145,12 +151,50 @@ const Stat = ({
 		} else if (timeseriesKey === 'today') {
 			// For hourly data: Format as "13:00"
 			chartLabels = seriesData.map(item => {
+				if (!item.date) return '';
+				
 				const date = new Date(item.date);
+				if (isNaN(date.getTime())) return '';
+				
 				return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 			});
 			
-			// Extract metric data
-			chartData = seriesData.map(item => item[currentMetricKey] || 0);
+			// Ειδική διαχείριση για το unsubs στο today
+			if (currentMetricKey === 'unsubs') {
+				// Ψάχνουμε στο d7 για τη σημερινή ημερομηνία
+				const today = new Date();
+				const todayString = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+				
+				let todayUnsubs = 0;
+				
+				// Έλεγχος αν υπάρχει d7 timeseries
+				if (timeseriesData.d7 && Array.isArray(timeseriesData.d7)) {
+					const todayData = timeseriesData.d7.find(item => {
+						if (!item.date) return false;
+						const itemDate = new Date(item.date).toISOString().split('T')[0];
+						return itemDate === todayString;
+					});
+					
+					if (todayData) {
+						todayUnsubs = todayData.unsubs || 0;
+					}
+				}
+				
+				// Βάζουμε την τιμή από το d7 για το today
+				chartData = seriesData.map((item, index) => {
+					const date = new Date(item.date);
+					const currentHour = new Date().getHours();
+					
+					// Αν είναι η τρέχουσα ώρα, επιστρέφουμε το todayUnsubs
+					if (date.getHours() === currentHour) {
+						return todayUnsubs;
+					}
+					return 0;
+				});
+			} else {
+				// Για άλλα metrics, χρησιμοποιούμε κανονικά την τιμή
+				chartData = seriesData.map(item => item[currentMetricKey] || 0);
+			}
 		}
 	}
 	
