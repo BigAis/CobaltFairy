@@ -88,10 +88,12 @@ const Stat = ({
 			case 'Total Subscribers':
 			case 'New Subscribers Today':
 			case 'New Subscribers (7 days)':
+			case 'New Subscribers (30 days)':
 				return 'subs_count';
 			case 'Unsubscribed':
 			case 'Unsubscribed Today':
 			case 'Unsubscribed (7 days)':
+			case 'Unsubscribed (30 days)':
 			case 'Total Unsubscribed':
 				return 'unsubs';
 			case 'Spam':
@@ -109,14 +111,19 @@ const Stat = ({
 	
 	const currentMetricKey = getMetricKeyForChart();
 	
-	if (timeseriesData && timeseriesData[timeseriesKey] && Array.isArray(timeseriesData[timeseriesKey]) && currentMetricKey) {
+    // Only process chart data if hasChart is true and relevant props are provided
+	if (hasChart && timeseriesData && timeseriesData[timeseriesKey] && Array.isArray(timeseriesData[timeseriesKey]) && currentMetricKey) {
 		const seriesData = timeseriesData[timeseriesKey];
 		
 		// Format date labels based on timeseriesKey
 		if (timeseriesKey === 'd7' || timeseriesKey === 'd30') {
 			// For daily data: Format as "Jul 22"
 			chartLabels = seriesData.map(item => {
+				if (!item.date) return '';
+				
 				const date = new Date(item.date);
+				if (isNaN(date.getTime())) return '';
+				
 				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 			});
 			
@@ -143,19 +150,59 @@ const Stat = ({
 			// Extract metric data
 			chartData = seriesData.map(item => item[currentMetricKey] || 0);
 		} else if (timeseriesKey === 'today') {
-			// For hourly data: Format as "13:00"
-			chartLabels = seriesData.map(item => {
-				const date = new Date(item.date);
-				return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+		// For hourly data: Format as "13:00"
+		chartLabels = seriesData.map(item => {
+			if (!item.date) return '';
+			
+			const date = new Date(item.date);
+			if (isNaN(date.getTime())) return '';
+			
+			return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+		});
+		
+		// Ειδική διαχείριση για το unsubs στο today
+		if (currentMetricKey === 'unsubs') {
+			// Βρίσκουμε τη σημερινή ημερομηνία
+			const today = new Date();
+			const todayString = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+			
+			// Ψάχνουμε στο timeseries.d7 για τη σημερινή ημερομηνία
+			let todayUnsubs = 0;
+			
+			if (timeseriesData.d7 && Array.isArray(timeseriesData.d7)) {
+			const todayEntry = timeseriesData.d7.find(item => {
+				if (!item.date) return false;
+				const itemDate = new Date(item.date).toISOString().split('T')[0];
+				return itemDate === todayString;
 			});
 			
-			// Extract metric data
+			// Αν βρήκαμε τη σημερινή εγγραφή, χρησιμοποιούμε την τιμή unsubs από εκεί
+			if (todayEntry && todayEntry.unsubs !== undefined) {
+				todayUnsubs = todayEntry.unsubs;
+			}
+			}
+			
+			// Για το γράφημα του today, δείχνουμε την τιμή unsubs μόνο στην τρέχουσα ώρα
+			const currentHour = new Date().getHours();
+			
+			chartData = seriesData.map((item, index) => {
+			if (!item.date) return 0;
+			
+			const date = new Date(item.date);
+			if (isNaN(date.getTime())) return 0;
+			
+			// Αν είναι η τρέχουσα ώρα, επιστρέφουμε το unsubs, αλλιώς 0
+			return date.getHours() === currentHour ? todayUnsubs : 0;
+			});
+		} else {
+			// Για άλλα metrics, χρησιμοποιούμε κανονικά την τιμή
 			chartData = seriesData.map(item => item[currentMetricKey] || 0);
+		}
 		}
 	}
 	
-	// If we still have no data, create some reasonable empty dataset
-	if (chartLabels.length === 0) {
+	// If hasChart is true but we still have no data, create some reasonable empty dataset
+	if (hasChart && chartLabels.length === 0) {
 		if (timeseriesKey === 'today') {
 			chartLabels = ['00:00', '06:00', '12:00', '18:00', '23:59'];
 		} else if (timeseriesKey === 'd7') {
@@ -378,9 +425,10 @@ Stat.propTypes = {
 	hasChart: PropTypes.bool,
 	defaultLabel: PropTypes.string,
 	className: PropTypes.string,
-	timeseriesData: PropTypes.object, // New prop for timeseries data
-	timeseriesKey: PropTypes.string, // Which time period to use
-	metricKey: PropTypes.string, // Optional explicit metric key
+	// Make these props optional if hasChart is false
+	timeseriesData: PropTypes.object,
+	timeseriesKey: PropTypes.string,
+	metricKey: PropTypes.string,
 }
 
 export default Stat

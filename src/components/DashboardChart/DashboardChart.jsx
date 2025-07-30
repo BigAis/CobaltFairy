@@ -91,8 +91,15 @@ const DashboardChart = ({
 				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 			});
 			
-			chartData1 = seriesData.map(item => item[metric1] || 0);
-			chartData2 = seriesData.map(item => item[metric2] || 0);
+			// Ensure data is defined or default to 0
+			chartData1 = seriesData.map(item => {
+				const value = item[metric1];
+				return value !== undefined ? value : 0;
+			});
+			chartData2 = seriesData.map(item => {
+				const value = item[metric2];
+				return value !== undefined ? value : 0;
+			});
 		} else if (timeseriesKey === 'all') {
 			// Monthly data with 'period' field
 			chartLabels = seriesData.map(item => {
@@ -116,31 +123,83 @@ const DashboardChart = ({
 				return '';
 			});
 			
-			chartData1 = seriesData.map(item => item[metric1] || 0);
-			chartData2 = seriesData.map(item => item[metric2] || 0);
+			// Ensure data is defined or default to 0
+			chartData1 = seriesData.map(item => {
+				const value = item[metric1];
+				return value !== undefined ? value : 0;
+			});
+			chartData2 = seriesData.map(item => {
+				const value = item[metric2];
+				return value !== undefined ? value : 0;
+			});
 		} else if (timeseriesKey === 'today') {
-			// Today's data with hourly values
-			if (seriesData.length === 0) {
-				// Create hourly placeholders if no data
-				const hours = Array.from({length: 24}, (_, i) => i);
-				chartLabels = hours.map(hour => `${hour.toString().padStart(2, '0')}:00`);
-				
-				chartData1 = Array(24).fill(0);
-				chartData2 = Array(24).fill(0);
-			} else {
-				// We have actual hourly data
-				chartLabels = seriesData.map(item => {
-					if (!item.date) return '';
-					
-					const date = new Date(item.date);
-					if (isNaN(date.getTime())) return '';
-					
-					return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+		// Today's data with hourly values
+		if (seriesData.length === 0) {
+			// Create hourly placeholders if no data
+			const hours = Array.from({length: 24}, (_, i) => i);
+			chartLabels = hours.map(hour => `${hour.toString().padStart(2, '0')}:00`);
+			
+			chartData1 = Array(24).fill(0);
+			chartData2 = Array(24).fill(0);
+		} else {
+			// We have actual hourly data
+			chartLabels = seriesData.map(item => {
+			if (!item.date) return '';
+			
+			const date = new Date(item.date);
+			if (isNaN(date.getTime())) return '';
+			
+			return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+			});
+			
+			// Extract metric1 data normally
+			chartData1 = seriesData.map(item => {
+			const value = item[metric1];
+			return value !== undefined ? value : 0;
+			});
+			
+			// Ειδική διαχείριση για το unsubs (metric2) στο today
+			if (metric2 === 'unsubs') {
+			// Βρίσκουμε τη σημερινή ημερομηνία
+			const today = new Date();
+			const todayString = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+			
+			// Ψάχνουμε στο timeseries.d7 για τη σημερινή ημερομηνία
+			let todayUnsubs = 0;
+			
+			if (timeseriesData.d7 && Array.isArray(timeseriesData.d7)) {
+				const todayEntry = timeseriesData.d7.find(item => {
+				if (!item.date) return false;
+				const itemDate = new Date(item.date).toISOString().split('T')[0];
+				return itemDate === todayString;
 				});
 				
-				chartData1 = seriesData.map(item => item[metric1] || 0);
-				chartData2 = seriesData.map(item => item[metric2] || 0);
+				// Αν βρήκαμε τη σημερινή εγγραφή, χρησιμοποιούμε την τιμή unsubs από εκεί
+				if (todayEntry && todayEntry.unsubs !== undefined) {
+				todayUnsubs = todayEntry.unsubs;
+				}
 			}
+			
+			// Για το γράφημα του today, δείχνουμε την τιμή unsubs μόνο στην τρέχουσα ώρα
+			const currentHour = new Date().getHours();
+			
+			chartData2 = seriesData.map((item, index) => {
+				if (!item.date) return 0;
+				
+				const date = new Date(item.date);
+				if (isNaN(date.getTime())) return 0;
+				
+				// Αν είναι η τρέχουσα ώρα, επιστρέφουμε το unsubs, αλλιώς 0
+				return date.getHours() === currentHour ? todayUnsubs : 0;
+			});
+			} else {
+			// Για άλλα metrics, χρησιμοποιούμε κανονικά την τιμή
+			chartData2 = seriesData.map(item => {
+				const value = item[metric2];
+				return value !== undefined ? value : 0;
+			});
+			}
+		}
 		}
 		
 		// If we still have no data, create default empty chart
