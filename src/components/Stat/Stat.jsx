@@ -149,52 +149,54 @@ const Stat = ({
 			// Extract metric data
 			chartData = seriesData.map(item => item[currentMetricKey] || 0);
 		} else if (timeseriesKey === 'today') {
-			// For hourly data: Format as "13:00"
-			chartLabels = seriesData.map(item => {
-				if (!item.date) return '';
-				
-				const date = new Date(item.date);
-				if (isNaN(date.getTime())) return '';
-				
-				return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+		// For hourly data: Format as "13:00"
+		chartLabels = seriesData.map(item => {
+			if (!item.date) return '';
+			
+			const date = new Date(item.date);
+			if (isNaN(date.getTime())) return '';
+			
+			return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+		});
+		
+		// Ειδική διαχείριση για το unsubs στο today
+		if (currentMetricKey === 'unsubs') {
+			// Βρίσκουμε τη σημερινή ημερομηνία
+			const today = new Date();
+			const todayString = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+			
+			// Ψάχνουμε στο timeseries.d7 για τη σημερινή ημερομηνία
+			let todayUnsubs = 0;
+			
+			if (timeseriesData.d7 && Array.isArray(timeseriesData.d7)) {
+			const todayEntry = timeseriesData.d7.find(item => {
+				if (!item.date) return false;
+				const itemDate = new Date(item.date).toISOString().split('T')[0];
+				return itemDate === todayString;
 			});
 			
-			// Ειδική διαχείριση για το unsubs στο today
-			if (currentMetricKey === 'unsubs') {
-				// Ψάχνουμε στο d7 για τη σημερινή ημερομηνία
-				const today = new Date();
-				const todayString = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
-				
-				let todayUnsubs = 0;
-				
-				// Έλεγχος αν υπάρχει d7 timeseries
-				if (timeseriesData.d7 && Array.isArray(timeseriesData.d7)) {
-					const todayData = timeseriesData.d7.find(item => {
-						if (!item.date) return false;
-						const itemDate = new Date(item.date).toISOString().split('T')[0];
-						return itemDate === todayString;
-					});
-					
-					if (todayData) {
-						todayUnsubs = todayData.unsubs || 0;
-					}
-				}
-				
-				// Βάζουμε την τιμή από το d7 για το today
-				chartData = seriesData.map((item, index) => {
-					const date = new Date(item.date);
-					const currentHour = new Date().getHours();
-					
-					// Αν είναι η τρέχουσα ώρα, επιστρέφουμε το todayUnsubs
-					if (date.getHours() === currentHour) {
-						return todayUnsubs;
-					}
-					return 0;
-				});
-			} else {
-				// Για άλλα metrics, χρησιμοποιούμε κανονικά την τιμή
-				chartData = seriesData.map(item => item[currentMetricKey] || 0);
+			// Αν βρήκαμε τη σημερινή εγγραφή, χρησιμοποιούμε την τιμή unsubs από εκεί
+			if (todayEntry && todayEntry.unsubs !== undefined) {
+				todayUnsubs = todayEntry.unsubs;
 			}
+			}
+			
+			// Για το γράφημα του today, δείχνουμε την τιμή unsubs μόνο στην τρέχουσα ώρα
+			const currentHour = new Date().getHours();
+			
+			chartData = seriesData.map((item, index) => {
+			if (!item.date) return 0;
+			
+			const date = new Date(item.date);
+			if (isNaN(date.getTime())) return 0;
+			
+			// Αν είναι η τρέχουσα ώρα, επιστρέφουμε το unsubs, αλλιώς 0
+			return date.getHours() === currentHour ? todayUnsubs : 0;
+			});
+		} else {
+			// Για άλλα metrics, χρησιμοποιούμε κανονικά την τιμή
+			chartData = seriesData.map(item => item[currentMetricKey] || 0);
+		}
 		}
 	}
 	
