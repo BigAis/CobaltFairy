@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { jwtDecode } from 'jwt-decode'
-const APP_VERSION = '0.6.2'
+const APP_VERSION = '0.7.0'
 // const BASE_URL = 'https://fairymail.cobaltfairy.com/api'
 const BASE_URL = 'http://localhost:1337/api'
 
@@ -185,6 +185,7 @@ export const getPaymentPlans = async () => {
 		throw error
 	}
 }
+
 
 export const isJwtTokenExpired = (jwtToken) => {
 	if (!jwtToken) return true

@@ -7,19 +7,26 @@ import Card from "../../components/Card";
 import ButtonGroup from "../../components/ButtonGroup";
 import Button from "../../components/Button";
 import Icon from "../../components/Icon/Icon";
+import { ApiService } from "../../service/api-service";
+import { useAccount } from "../../context/AccountContext";
 
 const PaymentPlan = () => {
     const [sliderValue, setSliderValue] = useState(500);
     const [paymentPlans, setPaymentPlans] = useState([]);
     const [allowedValues, setAllowedValues] = useState([]);
     const [billingCycle, setBillingCycle] = useState("yearly");
+    const { user, createNotification } = useAccount();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await getPaymentPlans();
-                const plans = response.data.map(plan => plan.attributes);
+                const plans = response.data.map(plan => {
+                    plan.attributes.id = plan.id
+                    return plan.attributes
+                });
                 setPaymentPlans(plans);
+                console.log(plans)
 
                 const uniqueLimits = [
                     ...new Set(plans.flatMap(plan => plan.pricing.map(price => price.subs_limit)))
@@ -36,6 +43,29 @@ const PaymentPlan = () => {
     
     console.log("Rendering payment plans:", paymentPlans);
     
+
+    const stripeCheckout = async(plan_id)=>{
+        console.log('stripeCheckout',plan_id,sliderValue,billingCycle)
+        //TODO: checks!
+        createNotification({
+            type: 'info',
+            message: 'You are being redirected...',
+        })
+        const response = await ApiService.post(`fairymailer/billing-checkout`,{
+            plan_id:plan_id,
+            billing_cycle:billingCycle,
+            subscriber_limit:sliderValue
+        },user.jwt)
+        if(response.data?.code==200){
+            window.location.href = response.data.data.checkout_url
+        }else{
+            createNotification({
+                type: 'error',
+                message: response.data.error,
+                autoClose: 3000
+            })
+        }
+    }
     return ( 
         <div className="payment-plan-component">
             <Logo/>
@@ -46,7 +76,10 @@ const PaymentPlan = () => {
                 min={500} 
                 max={20000} 
                 defaultValue={sliderValue} 
-                onChange={setSliderValue} 
+                onChange={(v)=>{
+                    setSliderValue(v)
+                    console.log(v)
+                }} 
                 staticTooltip={true}
                 allowedValues={allowedValues} 
 />
@@ -76,7 +109,7 @@ const PaymentPlan = () => {
                                             return price === 0 ? price : `${price}/${billingCycle === "yearly" ? "year" : "month"}`;
                                         })()}
                                     </h1>
-                                    <Button>Sign Up for Free</Button>
+                                    <Button onClick={()=>{stripeCheckout(plan.id)}}>Select Plan</Button>
                                     <p className="free-try-text">Try pro features for 30-days!</p>
                                     <div className="perk-buttons">
                                         <Button type="secondary" icon="Envelope">{plan.max_emails === -1 ? '∞' : plan.max_emails} Emails</Button> <br/>

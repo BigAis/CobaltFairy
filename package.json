@@ -19,6 +19,7 @@
     "@fullcalendar/react": "^6.1.17",
     "@fullcalendar/timegrid": "^6.1.17",
     "@react-oauth/google": "^0.12.1",
+    "@stripe/react-stripe-js": "^3.8.1",
     "@stripe/stripe-js": "^7.7.0",
     "antd": "^5.24.1",
     "axios": "^1.7.9",
