@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAccount } from '../../context/AccountContext'
+import { ApiService } from '../../service/api-service'
+import { getRoleLabel } from './userRoles'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import PageHeader from '../../components/PageHeader/PageHeader'
 import Button from '../../components/Button'
@@ -16,175 +18,232 @@ import 'primereact/resources/themes/lara-light-indigo/theme.css'
 import './Team.scss'
 
 const Team = () => {
-  const navigate = useNavigate()
-  const { user, account, createNotification } = useAccount()
-  
-  const [loading, setLoading] = useState(false)
-  const [users, setUsers] = useState([
-    { id: 1, name: 'Alice', username: 'alice89', role: 'Admin' },
-    { id: 2, name: 'Bob', username: 'bob123', role: 'Author' },
-    { id: 3, name: 'Charlie', username: 'charlie456', role: 'Manager' },
-    { id: 4, name: 'Diana', username: 'diana789', role: 'Viewer' },
-    { id: 5, name: 'Evan', username: 'evan101', role: 'Author' }
-  ])
-  const [totalResults, setTotalResults] = useState(5)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedUsers, setSelectedUsers] = useState([])
-  const resultsPerPage = 10
+	const navigate = useNavigate()
+	const { user, account, createNotification } = useAccount()
 
-  useEffect(() => {
-    // Fetch users data
-    // This would be replaced with an actual API call
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-    }, 1000)
-  }, [])
+	const [loading, setLoading] = useState(false)
+	const [users, setUsers] = useState([])
+	const [allUsers, setAllUsers] = useState([]) // Store original data for search
+	const [totalResults, setTotalResults] = useState(0)
+	const [currentPage, setCurrentPage] = useState(1)
+	const [searchTerm, setSearchTerm] = useState('')
+	const [selectedUsers, setSelectedUsers] = useState([])
+	const [error, setError] = useState(null)
+	const resultsPerPage = 10
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page)
-    // In a real implementation, this would trigger a new API call
-  }
+	const fetchTeamMembers = async () => {
+		try {
+			setLoading(true)
+			setError(null)
 
-  const handleSearch = (term) => {
-    setSearchTerm(term)
-    setCurrentPage(1)
-    // In a real implementation, this would trigger a filtered API call
-  }
+			if (!user || !user.jwt) {
+				throw new Error('No valid session found')
+			}
 
-  const handleAddUser = () => {
-    navigate('/team/new')
-  }
+			const response = await ApiService.get('fairymailer/team-members', user.jwt)
 
-  const dropdownOptions = [
-    { value: 'edit_user', label: 'Edit' },
-    { value: 'delete_user', label: 'Delete' }
-  ]
+			if (response.data.code === 200) {
+				// Map the API response to match the expected format
+				const mappedUsers = response.data.data.map((member) => ({
+					id: member.uuid,
+					name: member.fullName,
+					username: member.username,
+					role: member.role, // Keep role in lowercase
+					email: member.email,
+					confirmed: member.confirmed,
+					blocked: member.blocked,
+				}))
 
-  const handleActionSelect = (selectedValue, rowData) => {
-    switch (selectedValue.value) {
-      case 'edit_user':
-        navigate(`/team/${rowData.id}`)
-        break
-      case 'delete_user':
-        // Show confirmation dialog
-        createNotification({
-          message: `User ${rowData.name} has been deleted successfully.`,
-          type: 'default',
-          autoClose: 3000
-        })
-        break
-      default:
-        console.log('No action found for:', selectedValue)
-    }
-  }
+				setUsers(mappedUsers)
+				setAllUsers(mappedUsers) // Store original data for search
+				setTotalResults(mappedUsers.length)
+			} else {
+				throw new Error('Failed to fetch team members')
+			}
+		} catch (error) {
+			console.error('Error fetching team members:', error)
+			setError('Failed to load team members. Please try again.')
+			createNotification({
+				message: 'Failed to load team members. Please try again.',
+				type: 'error',
+				autoClose: 5000,
+			})
+		} finally {
+			setLoading(false)
+		}
+	}
 
-  const actionsBodyTemplate = (rowData) => {
-    return (
-      <div>
-        <Dropdown
-          withDivider={true}
-          icon={'Plus'}
-          options={dropdownOptions}
-          onLeftClick={() => navigate(`/team/${rowData.id}`)}
-          onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, rowData)}
-        >
-          Edit
-        </Dropdown>
-      </div>
-    )
-  }
+	useEffect(() => {
+		fetchTeamMembers()
+	}, [])
 
-  return (
-    <div className="fm-page-wrapper">
-      <Sidemenu />
-      <div className="fm-page-container">
-        <PageHeader user={user} account={account} />
-        <div className="page-name-container">
-          <div className="page-name">Users</div>
-          <Button icon={'Plus'} type="action" onClick={handleAddUser}>
-            New User
-          </Button>
-        </div>
+	const handlePageChange = (page) => {
+		setCurrentPage(page)
+	}
 
-        <div className="filters-container" style={{ display: 'none' }}>
-          <div className="row" style={{ marginBottom: '1rem' }}></div>
-          <div className="row d-flex content-space-between">
-            <SearchBar
-              placeholder="Search Team Members"
-              label="Search Team Members"
-              initialValue={searchTerm}
-              onSearch={handleSearch}
-              style={{ width: '100%' }}
-            />
-          </div>
-        </div>
+	// Calculate which users to display on current page
+	const getCurrentPageUsers = () => {
+		const startIndex = (currentPage - 1) * resultsPerPage
+		const endIndex = startIndex + resultsPerPage
+		return users.slice(startIndex, endIndex)
+	}
 
-        {loading ? (
-          <Card>
-            <div style={{ padding: '20px', textAlign: 'center' }}>
-              Loading team members...
-            </div>
-          </Card>
-        ) : (
-          <>
-            <DataTable
-              value={users}
-              paginator={false}
-              selection={selectedUsers}
-              onSelectionChange={(e) => setSelectedUsers(e.value)}
-              dataKey="id"
-              rowClassName={() => 'p-table-row'}
-              emptyMessage="No team members found"
-            >
-              <Column
-                body={(rowData) => (
-                  <div style={{ position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
-                      <Checkbox
-                        checked={selectedUsers.some((user) => user.id === rowData.id)}
-                        onChange={(e) => {
-                          if (e) {
-                            setSelectedUsers((prev) => [...prev, rowData])
-                          } else {
-                            setSelectedUsers((prev) => prev.filter((user) => user.id !== rowData.id))
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-                header={() => (
-                  <Checkbox
-                    checked={selectedUsers.length === users.length && selectedUsers.length > 0}
-                    onChange={(e) => {
-                      if (e) {
-                        setSelectedUsers([...users])
-                      } else {
-                        setSelectedUsers([])
-                      }
-                    }}
-                  />
-                )}
-                headerStyle={{ width: '80px' }}
-              />
-              <Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
-              <Column field="username" header="Username" body={(rowData) => (loading ? <Skeleton /> : rowData.username)} />
-              <Column field="role" header="Role" body={(rowData) => (loading ? <Skeleton /> : rowData.role)} />
-              <Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
-            </DataTable>
-            <Pagination
-              currentPage={currentPage}
-              totalResults={totalResults}
-              resultsPerPage={resultsPerPage}
-              onChange={handlePageChange}
-            />
-          </>
-        )}
-      </div>
-    </div>
-  )
+	const handleSearch = (term) => {
+		setSearchTerm(term)
+		setCurrentPage(1)
+		// Filter users based on search term
+		if (term.trim() === '') {
+			setUsers(allUsers)
+			setTotalResults(allUsers.length)
+		} else {
+			const filteredUsers = allUsers.filter(
+				(user) => user.name.toLowerCase().includes(term.toLowerCase()) || user.username.toLowerCase().includes(term.toLowerCase()) || user.email.toLowerCase().includes(term.toLowerCase())
+			)
+			setUsers(filteredUsers)
+			setTotalResults(filteredUsers.length)
+		}
+	}
+
+	const handleAddUser = () => {
+		navigate('/team/new')
+	}
+
+	const dropdownOptions = [
+		{ value: 'edit_user', label: 'Edit' },
+		{ value: 'delete_user', label: 'Delete' },
+	]
+
+	const handleActionSelect = (selectedValue, rowData) => {
+		switch (selectedValue.value) {
+			case 'edit_user':
+				navigate(`/team/${rowData.id}`)
+				break
+			case 'delete_user':
+				// Show confirmation dialog
+				createNotification({
+					message: `User ${rowData.name} has been deleted successfully.`,
+					type: 'default',
+					autoClose: 3000,
+				})
+				break
+			default:
+				console.log('No action found for:', selectedValue)
+		}
+	}
+
+	const actionsBodyTemplate = (rowData) => {
+		return (
+			<div>
+				<Dropdown
+					withDivider={true}
+					icon={'Plus'}
+					options={dropdownOptions}
+					onLeftClick={() => navigate(`/team/${rowData.id}`)}
+					onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, rowData)}
+				>
+					Edit
+				</Dropdown>
+			</div>
+		)
+	}
+
+	return (
+		<div className="fm-page-wrapper">
+			<Sidemenu />
+			<div className="fm-page-container">
+				<PageHeader user={user} account={account} />
+				<div className="page-name-container">
+					<div className="page-name">Users</div>
+					<Button icon={'Plus'} type="action" onClick={handleAddUser}>
+						New User
+					</Button>
+				</div>
+
+				<div className="filters-container">
+					<div className="row" style={{ marginBottom: '1rem' }}></div>
+					<div className="row d-flex content-space-between">
+						<SearchBar placeholder="Search Team Members" label="Search Team Members" initialValue={searchTerm} onSearch={handleSearch} style={{ width: '100%' }} />
+					</div>
+				</div>
+
+				{loading ? (
+					<Card>
+						<div style={{ padding: '20px', textAlign: 'center' }}>Loading team members...</div>
+					</Card>
+				) : error ? (
+					<Card>
+						<div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
+							{error}
+							<br />
+							<Button type="action" onClick={fetchTeamMembers} style={{ marginTop: '10px' }}>
+								Retry
+							</Button>
+						</div>
+					</Card>
+				) : (
+					<>
+						<DataTable
+							value={getCurrentPageUsers()}
+							paginator={false}
+							selection={selectedUsers}
+							onSelectionChange={(e) => setSelectedUsers(e.value)}
+							dataKey="id"
+							rowClassName={() => 'p-table-row'}
+							emptyMessage="No team members found"
+						>
+							<Column
+								body={(rowData) => (
+									<div style={{ position: 'relative' }}>
+										<div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
+											<Checkbox
+												checked={selectedUsers.some((user) => user.id === rowData.id)}
+												onChange={(e) => {
+													if (e) {
+														setSelectedUsers((prev) => [...prev, rowData])
+													} else {
+														setSelectedUsers((prev) => prev.filter((user) => user.id !== rowData.id))
+													}
+												}}
+											/>
+										</div>
+									</div>
+								)}
+								header={() => {
+									const currentPageUsers = getCurrentPageUsers()
+									return (
+										<Checkbox
+											checked={currentPageUsers.length > 0 && currentPageUsers.every((user) => selectedUsers.some((selected) => selected.id === user.id))}
+											onChange={(e) => {
+												if (e) {
+													// Add all current page users to selection
+													const newSelections = [...selectedUsers]
+													currentPageUsers.forEach((user) => {
+														if (!newSelections.some((selected) => selected.id === user.id)) {
+															newSelections.push(user)
+														}
+													})
+													setSelectedUsers(newSelections)
+												} else {
+													// Remove all current page users from selection
+													setSelectedUsers(selectedUsers.filter((selected) => !currentPageUsers.some((user) => user.id === selected.id)))
+												}
+											}}
+										/>
+									)
+								}}
+								headerStyle={{ width: '80px' }}
+							/>
+							<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
+							<Column field="username" header="Username" body={(rowData) => (loading ? <Skeleton /> : rowData.username)} />
+							<Column field="role" header="Role" body={(rowData) => (loading ? <Skeleton /> : getRoleLabel(rowData.role))} />
+							<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
+						</DataTable>
+						<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
+					</>
+				)}
+			</div>
+		</div>
+	)
 }
 
 export default Team

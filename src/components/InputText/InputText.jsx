@@ -5,8 +5,26 @@ import Icon from '../Icon/Icon'
 import './InputText.scss'
 import EmojiPicker from 'emoji-picker-react'
 
-const InputText = ({ value, onChange, placeholder, label, hasError = false, errorMessage = '', disabled, isRequired, icon, name, style = {}, emojiPicker = false, className, ...props }) => {
+const InputText = ({
+	value,
+	onChange,
+	placeholder,
+	label,
+	hasError = false,
+	errorMessage = '',
+	disabled,
+	isRequired,
+	icon,
+	name,
+	style = {},
+	emojiPicker = false,
+	className,
+	type = 'text',
+	passwordToggle = false,
+	...props
+}) => {
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+	const [showPassword, setShowPassword] = useState(false)
 
 	const handleInputChange = (e) => {
 		if (onChange) {
@@ -21,13 +39,28 @@ const InputText = ({ value, onChange, placeholder, label, hasError = false, erro
 		setShowEmojiPicker(false) // Close emoji picker after selection
 	}
 
+	const handlePasswordToggle = () => {
+		setShowPassword(!showPassword)
+	}
+
+	const getInputType = () => {
+		if (passwordToggle) {
+			return showPassword ? 'text' : 'password'
+		}
+		return type
+	}
+
+	const getPasswordIcon = () => {
+		return showPassword ? 'EyeOff' : 'Eye'
+	}
+
 	const computedClassName = classNames('input-text', className, { hasError, disabled })
 
 	return (
 		<>
 			<div className="input-text-wrapper" style={style}>
 				<div className="input-container">
-					{icon && !emojiPicker && (
+					{icon && !emojiPicker && !passwordToggle && (
 						<Icon
 							name={icon}
 							className="input-icon"
@@ -41,9 +74,30 @@ const InputText = ({ value, onChange, placeholder, label, hasError = false, erro
 							<Icon name={icon} className="input-icon" />
 						</div>
 					)}
+					{passwordToggle && (
+						<div
+							className="password-toggle-icon"
+							onClick={handlePasswordToggle}
+							style={{
+								position: 'absolute',
+								right: '16px',
+								top: '50%',
+								transform: 'translateY(-50%)',
+								cursor: 'pointer',
+								zIndex: 10,
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								width: '20px',
+								height: '20px',
+							}}
+						>
+							<Icon name={getPasswordIcon()} size={16} />
+						</div>
+					)}
 					<input
-						style={{ paddingRight: emojiPicker ? '40px' : '' }}
-						type="text"
+						style={{ paddingRight: emojiPicker || passwordToggle ? '40px' : '' }}
+						type={getInputType()}
 						placeholder={label ? '' : placeholder}
 						value={value}
 						onChange={handleInputChange}
@@ -90,6 +144,9 @@ InputText.propTypes = {
 	icon: PropTypes.string,
 	emojiPicker: PropTypes.bool,
 	style: PropTypes.object,
+	className: PropTypes.string,
+	type: PropTypes.string,
+	passwordToggle: PropTypes.bool,
 }
 
 export default InputText
