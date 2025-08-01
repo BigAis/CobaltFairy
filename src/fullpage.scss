@@ -177,3 +177,13 @@
 		}
 	}
 }
+
+.integration-breadcrumb {
+	color: #000000 !important;
+	// text-decoration: none;
+	cursor: pointer;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}

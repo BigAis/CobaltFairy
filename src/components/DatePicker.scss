@@ -42,7 +42,7 @@
 	.react-datepicker__navigation-icon::before {
 		border-color: #dad1c5;
 	}
-	.date-input {
+	.date-input:not(.date-range-input) {
 		width: 100%;
 		display: flex;
 		align-items: center;

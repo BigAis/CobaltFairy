@@ -3,10 +3,13 @@ import GroupsTable from '../../components/DataTable/GroupsTable'
 import SegmentsTable from '../../components/DataTable/SegmentsTable'
 import CustomFieldsTable from '../../components/DataTable/CustomFieldsTable'
 import HistoryTable from '../../components/DataTable/HistoryTable'
+import AreaChart from '../../components/AreaChart/AreaChart'
+import DoughnutChart from '../../components/DoughtnutChart/DoughtnutChart'
+import Pagination from '../../components/Pagination'
 import '../dashboard/dashboard.scss'
 import '../../fullpage.scss'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import Sidemenu from '../../components/Sidemenu/Sidemenu'
 import Card from '../../components/Card'
@@ -77,6 +80,89 @@ const Subscribers = ({ initialView }) => {
 	})
 	const [autoAppliedFilters, setAutoAppliedFilters] = useState(false)
 	const [subscribersQueryFilter, setSubscribersQueryFilter] = useState('')
+
+	// Stats chart state
+	const [statsTimePeriod, setStatsTimePeriod] = useState('7 Days')
+	const [emailClientsPage, setEmailClientsPage] = useState(1)
+	const emailClientsPerPage = 2
+
+	// Real API data state
+	const [statsData, setStatsData] = useState(null)
+	const [statsLoading, setStatsLoading] = useState(false)
+	const [statsError, setStatsError] = useState(null)
+
+	// Get timeseries data based on selected time period
+	const getTimeseriesData = () => {
+		if (!statsData?.timeseries) return []
+
+		switch (statsTimePeriod) {
+			case 'Today':
+				// For today, show the last day from d7 data
+				return statsData.timeseries.d7.slice(-1) || []
+			case '7 Days':
+				return statsData.timeseries.d7 || []
+			case '30 Days':
+				return statsData.timeseries.d30 || []
+			case 'All':
+				return statsData.timeseries.all || []
+			default:
+				return statsData.timeseries.d7 || []
+		}
+	}
+
+	// Get device type data for chart
+	const getDeviceTypeData = () => {
+		if (!statsData?.deviceAnalytics?.deviceType) return { metadata: { deviceType: {} } }
+
+		const deviceCounts = statsData.deviceAnalytics.deviceType.counts || {}
+		// Convert counts to percentages if needed
+		return {
+			metadata: {
+				deviceType: deviceCounts,
+			},
+		}
+	}
+
+	// Get email clients data with pagination
+	const getEmailClientsData = () => {
+		if (!statsData?.deviceAnalytics?.emailClient?.percentages) return []
+
+		const emailClients = statsData.deviceAnalytics.emailClient.percentages
+		// Convert to array and format percentages
+		return Object.entries(emailClients)
+			.filter(([key]) => key !== 'undefined' && key !== 'Unknown') // Filter out undefined/unknown
+			.map(([key, value]) => [key, `${value.toFixed(1)}%`])
+			.sort((a, b) => parseFloat(b[1]) - parseFloat(a[1])) // Sort by percentage desc
+	}
+
+	// Email clients pagination logic
+	const emailClientsEntries = getEmailClientsData()
+	const totalEmailClients = emailClientsEntries.length
+	const totalEmailClientsPages = Math.ceil(totalEmailClients / emailClientsPerPage)
+	const paginatedEmailClients = emailClientsEntries.slice((emailClientsPage - 1) * emailClientsPerPage, emailClientsPage * emailClientsPerPage)
+
+	// Fetch subscriber stats from API
+	const fetchSubscriberStats = useCallback(async () => {
+		if (!user?.jwt) return
+
+		setStatsLoading(true)
+		setStatsError(null)
+
+		try {
+			const response = await ApiService.get('fairymailer/subscriber-stats', user.jwt)
+
+			if (response?.data?.code === 200) {
+				setStatsData(response.data.data)
+			} else {
+				throw new Error(response?.data?.message || 'Failed to fetch stats')
+			}
+		} catch (error) {
+			console.error('Error fetching subscriber stats:', error)
+			setStatsError(error.message || 'Failed to load stats data')
+		} finally {
+			setStatsLoading(false)
+		}
+	}, [user?.jwt])
 
 	const base64string = btoa(JSON.stringify({}))
 
@@ -392,6 +478,13 @@ const Subscribers = ({ initialView }) => {
 			getHistory()
 		}
 	}, [user, view])
+
+	// Load subscriber stats when the view is set to stats
+	useEffect(() => {
+		if (user && view === 'stats' && !statsData && !statsLoading) {
+			fetchSubscriberStats()
+		}
+	}, [user, view, statsData, statsLoading, fetchSubscriberStats])
 
 	// Handle search term changes for groups
 	useEffect(() => {
@@ -773,12 +866,131 @@ const Subscribers = ({ initialView }) => {
 					)}
 
 					{view === 'stats' && (
-						<Card>
-							<div style={{ textAlign: 'center', padding: '40px 20px' }}>
-								<h3 style={{ marginBottom: '15px', fontFamily: 'Bitter, serif', fontWeight: 600 }}>Stats Under Construction</h3>
-								<p>This feature is coming soon. Stay tuned!</p>
-							</div>
-						</Card>
+						<div className="subscribers-stats">
+							{statsLoading ? (
+								<div style={{ textAlign: 'center', padding: '40px 20px' }}>
+									<p>Loading stats data...</p>
+								</div>
+							) : statsError ? (
+								<div style={{ textAlign: 'center', padding: '40px 20px' }}>
+									<p style={{ color: '#ff635d' }}>Error: {statsError}</p>
+									<Button type="primary" onClick={fetchSubscriberStats} style={{ marginTop: '10px' }}>
+										Retry
+									</Button>
+								</div>
+							) : (
+								<>
+									{/* Top Stats Cards */}
+									<div className="figma-top-stats">
+										<Card className="figma-stat-card">
+											<div className="figma-stat-title">Avg open rate</div>
+											<div className="figma-stat-value">{statsData?.campaignMetrics?.avgOpenRate ? `${statsData.campaignMetrics.avgOpenRate.toFixed(2)}%` : '0.00%'}</div>
+										</Card>
+										<Card className="figma-stat-card">
+											<div className="figma-stat-title">Avg click rate</div>
+											<div className="figma-stat-value">{statsData?.campaignMetrics?.avgClickRate ? `${statsData.campaignMetrics.avgClickRate.toFixed(2)}%` : '0.00%'}</div>
+										</Card>
+										<Card className="figma-stat-card">
+											<div className="figma-stat-title">New subscribers (30d)</div>
+											<div className="figma-stat-value">{statsData?.subscriberMetrics?.last30Days || 0}</div>
+										</Card>
+										<Card className="figma-stat-card">
+											<div className="figma-stat-title">Total Subscribers</div>
+											<div className="figma-stat-value">{statsData?.subscriberMetrics?.total || 0}</div>
+										</Card>
+									</div>
+								</>
+							)}
+
+							{!statsLoading && !statsError && (
+								<>
+									{/* Subscribers Chart Card */}
+									<Card className="figma-stats-card">
+										<div className="figma-card-header">
+											<h2 className="figma-card-title">Subscribers</h2>
+											<div className="figma-chart-time-selector">
+												<ButtonGroup
+													options={[
+														{ value: 'Today', label: 'Today' },
+														{ value: '7 Days', label: '7 Days' },
+														{ value: '30 Days', label: '30 Days' },
+														{ value: 'All', label: 'All' },
+													]}
+													onChange={(value) => setStatsTimePeriod(value)}
+													value={statsTimePeriod}
+												/>
+											</div>
+										</div>
+
+										<div className="figma-chart-area">
+											<AreaChart
+												timeseriesData={getTimeseriesData()}
+												dataset1Key="subs_added"
+												dataset2Key="subs_removed"
+												dataset1Label="Subscribers Added"
+												dataset2Label="Subscribers Removed"
+												dataset1Color="#2FBF2F"
+												dataset2Color="#FF635D"
+											/>
+										</div>
+									</Card>
+
+									{/* Device Type and Email Clients Cards */}
+									<div className="figma-two-columns">
+										<Card className="figma-stats-card">
+											<div className="figma-card-header">
+												<h2 className="figma-card-title">Device Type</h2>
+											</div>
+											<div className="figma-donut-wrapper">
+												{statsData?.deviceAnalytics?.deviceType?.counts ? (
+													<DoughnutChart stats={getDeviceTypeData()} />
+												) : (
+													<div style={{ textAlign: 'center', padding: '40px' }}>
+														<p>No device data available</p>
+													</div>
+												)}
+											</div>
+										</Card>
+
+										<Card className="figma-stats-card">
+											<div className="figma-card-header">
+												<h2 className="figma-card-title">Email Clients</h2>
+											</div>
+											<div className="figma-email-clients-content">
+												{emailClientsEntries.length > 0 ? (
+													<>
+														<div className="d-flex content-space-between" style={{ borderBottom: '2px solid rgba(218, 209, 197, 1)' }}>
+															<p className="stat-table-heading">Clients</p>
+															<p className="stat-table-heading">Subscribers</p>
+														</div>
+														{paginatedEmailClients.map(([key, value]) => (
+															<div
+																className="d-flex content-space-between mt20"
+																style={{ textAlign: 'left', border: '2px solid rgba(218, 209, 197, 1)', padding: '12px', borderRadius: '8px' }}
+																key={key}
+															>
+																<p>{key}</p>
+																<p>{value}</p>
+															</div>
+														))}
+
+														{totalEmailClientsPages > 1 && (
+															<div className="figma-pagination-wrapper">
+																<Pagination currentPage={emailClientsPage} totalPages={totalEmailClientsPages} onPageChange={(page) => setEmailClientsPage(page)} />
+															</div>
+														)}
+													</>
+												) : (
+													<div style={{ textAlign: 'center', padding: '40px' }}>
+														<p>No email client data available</p>
+													</div>
+												)}
+											</div>
+										</Card>
+									</div>
+								</>
+							)}
+						</div>
 					)}
 
 					{/* Import options section with proper rendering */}

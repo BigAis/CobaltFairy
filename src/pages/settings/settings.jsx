@@ -153,6 +153,23 @@ const Settings = () => {
 		return user?.user?.email ? user.user.email[0].toUpperCase() : 'U'
 	}
 
+	// Get avatar URL helper function
+	const getAvatarUrl = () => {
+		// Priority 1: Use locally uploaded photo (for immediate preview)
+		if (profilePhoto) {
+			return profilePhoto
+		}
+
+		// Priority 2: Use account avatar from server
+		if (account?.avatar?.url) {
+			const avatarBaseUrl = BASE_URL.replace('/api', '')
+			return avatarBaseUrl + account.avatar.url
+		}
+
+		// Priority 3: No avatar available
+		return null
+	}
+
 	// Timezone options
 	const timezoneOptions = [
 		{ value: 'Dateline Standard Time', label: '(UTC-12:00) International Date Line West', offset: -12 },
@@ -250,7 +267,7 @@ const Settings = () => {
 			// Populate with actual user data from context
 			setPersonalSettings({
 				accountName: account?.name || 'Account Name',
-				email: user?.user?.email || '',
+				email: account?.from_email || '',
 				timezone: timezoneOptions.find((tz) => tz.label === '(UTC+02:00) Athens, Bucharest') || timezoneOptions[0],
 				timeformat: dateFormatOptions[1], // Default to dd/mm/yyyy
 			})
@@ -550,9 +567,9 @@ const Settings = () => {
 
 						<div className="profile-photo-section">
 							<div className="profile-initials">
-								{profilePhoto ? (
+								{getAvatarUrl() ? (
 									<img
-										src={profilePhoto}
+										src={getAvatarUrl()}
 										alt="Profile"
 										style={{
 											width: '100%',

@@ -53,6 +53,7 @@ const NewUser = () => {
 		role: '',
 		newPassword: '',
 		confirmPassword: '',
+		emailInvites: '',
 	})
 
 	const steps = [{ label: 'Users' }, { label: 'Add New' }, { label: 'Permissions' }]
@@ -190,6 +191,42 @@ const NewUser = () => {
 
 	const handleEmailInvitesChange = (e) => {
 		setEmailInvites(e.target.value)
+		// Clear error when user starts typing
+		if (errors.emailInvites) {
+			setErrors({
+				...errors,
+				emailInvites: '',
+			})
+		}
+	}
+
+	const validateEmailInvites = () => {
+		if (!emailInvites.trim()) {
+			return 'Please enter at least one email address'
+		}
+
+		// Split by comma and validate each email
+		const emails = emailInvites
+			.split(',')
+			.map((email) => email.trim())
+			.filter((email) => email.length > 0)
+
+		if (emails.length === 0) {
+			return 'Please enter at least one email address'
+		}
+
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		const invalidEmails = emails.filter((email) => !emailRegex.test(email))
+
+		if (invalidEmails.length > 0) {
+			if (invalidEmails.length === 1) {
+				return `Invalid email address: ${invalidEmails[0]}`
+			} else {
+				return `Invalid email addresses: ${invalidEmails.join(', ')}`
+			}
+		}
+
+		return ''
 	}
 
 	const handleRoleChange = (selectedRole) => {
@@ -318,7 +355,7 @@ const NewUser = () => {
 			}
 
 			try {
-				// Step 1: Create the user via API
+				// Step 1: Create the user via API with accounts included
 				const createData = {
 					name: userData.name,
 					surname: userData.surname,
@@ -328,6 +365,11 @@ const NewUser = () => {
 					role: userData.role,
 				}
 
+				// Add accounts array if accounts are selected
+				if (selectedAccounts && selectedAccounts.length > 0) {
+					createData.accounts = selectedAccounts.map((account) => parseInt(account.value))
+				}
+
 				console.log('Creating user with data:', createData)
 
 				// Get JWT token from AccountContext
@@ -335,7 +377,7 @@ const NewUser = () => {
 					throw new Error('Authentication required. Please log in again.')
 				}
 
-				// Make API call to create user
+				// Make API call to create user with accounts
 				const userResponse = (await ApiService.post('fairymailer/add-team-member', createData, user.jwt)).data
 				console.log('User creation response:', userResponse)
 
@@ -346,24 +388,6 @@ const NewUser = () => {
 
 				// Store the user UUID for step 3
 				setCreatedUserUuid(userResponse.data.uuid)
-
-				// Step 2: Add user to selected accounts
-				if (selectedAccounts && selectedAccounts.length > 0) {
-					console.log('Adding user to selected accounts:', selectedAccounts)
-
-					// Make separate API call for each account (endpoint accepts only one account at a time)
-					for (const account of selectedAccounts) {
-						const accountAssignmentData = {
-							uuid: userResponse.data.uuid,
-							accountId: parseInt(account.value), // Convert string to number
-						}
-
-						console.log('Adding user to account:', accountAssignmentData)
-
-						const accountResponse = await ApiService.post('fairymailer/add-user-to-account', accountAssignmentData, user.jwt)
-						console.log(`User added to account ${account.label}:`, accountResponse)
-					}
-				}
 
 				createNotification({
 					message: 'User created successfully with account access!',
@@ -401,24 +425,66 @@ const NewUser = () => {
 			}
 		} else {
 			// Handle invite users mode
-			if (!emailInvites.trim()) {
-				createNotification({
-					message: 'Please enter at least one email address.',
-					type: 'error',
-					autoClose: 3000,
+			const emailValidationError = validateEmailInvites()
+			if (emailValidationError) {
+				setErrors({
+					...errors,
+					emailInvites: emailValidationError,
 				})
 				return
 			}
 
-			console.log('Emails to invite:', emailInvites) // For debugging, replace with actual API call later
+			try {
+				// Prepare the payload for sending invitations
+				const inviteData = {
+					emails: emailInvites.trim(), // Send as comma-separated string
+				}
 
-			createNotification({
-				message: 'Invitations sent successfully!',
-				type: 'default',
-				autoClose: 3000,
-			})
+				console.log('Sending invitations with data:', inviteData)
 
-			navigate('/team')
+				// Get JWT token from AccountContext
+				if (!user || !user.jwt) {
+					throw new Error('Authentication required. Please log in again.')
+				}
+
+				// Make API call to send invitations
+				const inviteResponse = await ApiService.post('fairymailer/send-invitations', inviteData, user.jwt)
+				console.log('Invite response:', inviteResponse)
+
+				// Check if the response contains an error code (even with HTTP 200)
+				if (inviteResponse.data.code && inviteResponse.data.code !== 200) {
+					throw new Error(inviteResponse.data.message || 'Failed to send invitations')
+				}
+
+				createNotification({
+					message: 'Invitations sent successfully!',
+					type: 'default',
+					autoClose: 3000,
+				})
+
+				navigate('/team')
+			} catch (error) {
+				console.error('Error sending invitations:', error)
+
+				let errorMessage = 'Failed to send invitations. Please try again.'
+
+				if (error.message === 'Authentication required. Please log in again.') {
+					errorMessage = 'Authentication required. Please log in again.'
+				} else if (error.response?.status === 401) {
+					errorMessage = 'Authentication failed. Please log in again.'
+				} else if (error.response?.data?.message) {
+					errorMessage = error.response.data.message
+				} else if (error.message && error.message !== 'Authentication required. Please log in again.') {
+					// Handle manually thrown errors (like API response errors)
+					errorMessage = error.message
+				}
+
+				createNotification({
+					message: errorMessage,
+					type: 'error',
+					autoClose: 5000,
+				})
+			}
 		}
 	}
 
@@ -456,6 +522,7 @@ const NewUser = () => {
 								role: '',
 								newPassword: '',
 								confirmPassword: '',
+								emailInvites: '',
 							})
 						}}
 						style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
@@ -478,6 +545,7 @@ const NewUser = () => {
 								role: '',
 								newPassword: '',
 								confirmPassword: '',
+								emailInvites: '',
 							})
 						}}
 						style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
@@ -548,8 +616,16 @@ const NewUser = () => {
 						/>
 					</div>
 				) : (
+					//here is the invite section
 					<div className="form-container">
-						<InputText label="Emails (separated by commas)" value={emailInvites} onChange={handleEmailInvitesChange} placeholder="Email addresses separated by commas" />
+						<InputText
+							label="Emails (separated by commas)"
+							value={emailInvites}
+							onChange={handleEmailInvitesChange}
+							placeholder="Email addresses separated by commas"
+							hasError={!!errors.emailInvites}
+							errorMessage={errors.emailInvites}
+						/>
 					</div>
 				)}
 
@@ -558,7 +634,7 @@ const NewUser = () => {
 						Back
 					</Button>
 					<Button type="primary" onClick={handleCreateUser}>
-						Save & Go to Permissions
+						{createMode ? 'Save & Go to Permissions' : 'Send Invite'}
 					</Button>
 				</div>
 			</div>

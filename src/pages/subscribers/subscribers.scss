@@ -56,4 +56,197 @@ div.subscriber-filters-card > div > div {
 			}
 		}
 	}
+
+	// Mobile responsive for subscribers stats cards
+	.subscribers-stats {
+		.figma-top-stats {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+			margin-bottom: 20px;
+
+			.figma-stat-card {
+				padding: 16px;
+
+				.figma-stat-title {
+					font-size: 13px;
+					margin-bottom: 8px;
+				}
+
+				.figma-stat-value {
+					font-size: 26px;
+					line-height: 32px;
+				}
+			}
+		}
+
+		.figma-stats-card {
+			padding: 16px;
+
+			.figma-card-header {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 16px;
+				margin-bottom: 16px;
+
+				.figma-card-title {
+					font-size: 20px;
+				}
+
+				.figma-chart-time-selector {
+					.btn-group {
+						.btn {
+							font-size: 12px;
+							padding: 6px 12px;
+						}
+					}
+				}
+			}
+
+			.figma-chart-area {
+				height: 200px;
+			}
+		}
+
+		// Mobile responsive for two columns
+		.figma-two-columns {
+			grid-template-columns: 1fr;
+			gap: 16px;
+
+			.figma-donut-wrapper {
+				height: 250px;
+			}
+
+			.figma-email-clients-content {
+				.stat-table-heading {
+					font-size: 13px;
+				}
+			}
+		}
+	}
+}
+
+// Subscribers Stats Cards - reusing styles from stats page
+.subscribers-stats {
+	.figma-top-stats {
+		display: flex;
+		gap: 24px;
+		margin-bottom: 30px;
+
+		.figma-stat-card {
+			flex: 1;
+			background: rgba(255, 255, 255, 0.5);
+			border: 2px solid rgba(218, 209, 197, 1);
+			border-radius: 8px;
+			padding: 24px;
+			text-align: left;
+
+			.figma-stat-title {
+				font-family: 'Inter', sans-serif;
+				font-size: 14px;
+				font-weight: 400;
+				color: #887d76;
+				margin-bottom: 12px;
+				line-height: 1.2;
+			}
+
+			.figma-stat-value {
+				font-family: 'Inter', sans-serif;
+				font-size: 32px;
+				font-weight: 600;
+				color: #100f1c;
+				line-height: 38.73px;
+				margin: 0;
+			}
+		}
+	}
+
+	// Chart card styles - reusing from stats page
+	.figma-stats-card {
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid rgba(218, 209, 197, 1);
+		border-radius: 8px;
+		padding: 24px;
+		margin-bottom: 24px;
+
+		.figma-card-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 24px;
+
+			.figma-card-title {
+				font-family: 'Bitter', serif;
+				font-weight: 600;
+				font-size: 24px;
+				color: #343037;
+				margin: 0;
+			}
+
+			.figma-chart-time-selector {
+				.btn-group {
+					.btn {
+						font-size: 14px;
+						font-weight: 500;
+						padding: 8px 16px;
+						min-width: auto;
+					}
+				}
+			}
+		}
+
+		// Chart area
+		.figma-chart-area {
+			height: 300px;
+			width: 100%;
+
+			canvas {
+				max-width: 100% !important;
+				height: 100% !important;
+			}
+		}
+	}
+
+	// Two column layout for Device Type and Email Clients
+	.figma-two-columns {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 24px;
+		margin-bottom: 24px;
+
+		.figma-donut-wrapper {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 300px;
+			position: relative;
+
+			canvas {
+				max-width: 100% !important;
+			}
+		}
+
+		.figma-email-clients-content {
+			padding-top: 16px;
+
+			.stat-table-heading {
+				font-family: 'Inter', sans-serif;
+				font-size: 14px;
+				font-weight: 600;
+				color: #887d76;
+				margin: 0 0 12px 0;
+			}
+
+			.content-space-between {
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.figma-pagination-wrapper {
+				display: flex;
+				justify-content: center;
+				margin-top: 24px;
+			}
+		}
+	}
 }

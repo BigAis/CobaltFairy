@@ -113,6 +113,9 @@ export const AccountProvider = ({ children }) => {
 					const account = resp.data.user.account
 					account.active_subs = resp.data.account.active_subs
 					account.payment_plan = resp.data.account.payment_plan
+					//TODO add avatar to user
+					user.avatar = resp.data.user.avatar
+					account.avatar = resp.data.user.avatar
 					setAccount(account)
 					setDataInitialized(true) // Mark data as initialized
 					return true // Success

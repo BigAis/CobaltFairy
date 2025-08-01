@@ -15,6 +15,7 @@ export const UserProvider = ({ children }) => {
 			setLoading(true) // Ensure loading is true
 			try {
 				const userData = User.get()
+
 				setUser(userData)
 			} catch (error) {
 				console.error('Error loading user data:', error)

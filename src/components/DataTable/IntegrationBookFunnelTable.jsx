@@ -75,6 +75,7 @@ const BookFunnelIntegrationsTable = () => {
 		return (
 			<div>
 				<Button
+					type="secondary"
 					onClick={() => {
 						deleteMap(rowData)
 					}}
@@ -164,6 +165,7 @@ const BookFunnelIntegrationsTable = () => {
 				onSelectionChange={(e) => setSelectedIntegrations(e.value)}
 				dataKey="name"
 				rowClassName={() => 'p-table-row'}
+				className="integrations-table"
 			>
 				<Column
 					body={(rowData) => (

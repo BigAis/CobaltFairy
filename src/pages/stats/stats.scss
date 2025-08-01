@@ -1,393 +1,387 @@
 // Stats page styles refined to match Figma design
 .fm-page-container {
-  // Loading state
-  .loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 300px;
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    color: #887D76;
-  }
+	// Loading state
+	.loading-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 300px;
+		font-family: 'Inter', sans-serif;
+		font-size: 16px;
+		color: #887d76;
+	}
 
-  // HEADER LAYOUT - Matches Figma exactly
-  .figma-stats-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding: 0;
+	// HEADER LAYOUT - Matches Figma exactly
+	.figma-stats-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 30px;
+		padding: 0;
 
-    .figma-header-left {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+		.figma-header-left {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
 
-      .figma-stats-title {
-        font-family: 'Bitter', serif;
-        font-weight: 600;
-        font-size: 32px;
-        color: #343037;
-        margin: 0;
-        line-height: 1.2;
-      }
+			.figma-stats-title {
+				font-family: 'Bitter', serif;
+				font-weight: 600;
+				font-size: 32px;
+				color: #343037;
+				margin: 0;
+				line-height: 1.2;
+			}
 
-      .figma-stats-date {
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        color: #887D76;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin: 0;
-        
-        .icon {
-          margin-right: 0;
-        }
-        
-        svg path {
-          fill: #887D76 !important;
-        }
-      }
-    }
+			.figma-stats-date {
+				font-family: 'Inter', sans-serif;
+				font-size: 14px;
+				color: #887d76;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin: 0;
 
-    .figma-header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+				.icon {
+					margin-right: 0;
+				}
 
-      .figma-timeframe-group {
-        .btn {
-          font-size: 14px;
-          font-weight: 500;
-          padding: 7px 12px;
-          background: rgba(255, 255, 255, 0.25);
-          margin-right: 3px;
+				svg path {
+					fill: #887d76 !important;
+				}
+			}
+		}
 
-          &.active {
-            background-color: rgba(255, 255, 255, 0.7);
-            border-color: #FF635D;
-          }
-        }
-      }
+		.figma-header-right {
+			display: flex;
+			align-items: center;
+			gap: 16px;
 
-      .figma-export-btn {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        white-space: nowrap;
-        
-        .icon {
-          margin-right: 0;
-        }
-        
-        svg path {
-          fill: #000 !important;
-        }
-      }
-    }
-  }
+			.figma-date-range-picker {
+				// .date-range-input {
+				// 	font-size: 14px;
+				// 	font-weight: 500;
+				// 	padding: 7px 12px;
+				// 	background: rgba(255, 255, 255, 0.25);
+				// 	min-width: 200px;
 
-  // STATS CARDS - Matches Figma exactly
-  .figma-stats-card {
-    background: rgba(255, 255, 255, 0.5);
-    border: 2px solid rgba(218, 209, 197, 1);
-    border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 24px;
+				// 	&:hover {
+				// 		background-color: rgba(255, 255, 255, 0.7);
+				// 	}
+				// }
+			}
 
-    .figma-card-header {
-      margin-bottom: 24px;
+			.figma-export-btn {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 14px;
+				font-weight: 500;
+				white-space: nowrap;
 
-      .figma-card-title {
-        font-family: 'Bitter', serif;
-        font-weight: 600;
-        font-size: 24px;
-        color: #343037;
-        margin: 0;
-      }
-    }
+				.icon {
+					margin-right: 0;
+				}
 
-    // Stats row with 4 columns
-    .figma-stats-row {
-      display: flex;
-      gap: 24px;
-      margin-bottom: 32px;
+				svg path {
+					fill: #000 !important;
+				}
+			}
+		}
+	}
 
-      .figma-stat-item {
-        flex: 1;
-        min-width: 0;
+	// STATS CARDS - Matches Figma exactly
+	.figma-stats-card {
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid rgba(218, 209, 197, 1);
+		border-radius: 8px;
+		padding: 24px;
+		margin-bottom: 24px;
 
-        // Override existing Stat component styles to match Figma
-        .stat-wrapper {
-          max-width: none !important;
-          
-          .stat-select {
-            color: #887D76 !important;
-            margin-bottom: 10px !important;
-            
-            .stat-selected-option {
-              font-weight: 500 !important;
-              font-size: 14px !important;
-            }
-            
-            .arrow svg {
-              width: 24px !important;
-              height: 24px !important;
-            }
-          }
-          
-          .stat-value {
-            font-size: 32px !important;
-            font-weight: 600 !important;
-            color: #100F1C !important;
-            margin: 5px 0 !important;
-            line-height: 38.73px !important;
-          }
-          
-          .stat-percentage {
-            font-size: 16px !important;
-            font-weight: 500 !important;
-            
-            &.positive {
-              color: #60C700 !important;
-            }
-            
-            &.negative {
-              color: #FFA600 !important;
-            }
-          }
-          
-          .stat-chart {
-            margin-top: 10px !important;
-          }
-        }
-      }
-      
-      // Mobile responsive layout
-      &.mobile-stats-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        
-        .figma-stat-item {
-          margin-bottom: 16px;
-          
-          .stat-wrapper {
-            .stat-value {
-              font-size: 26px !important;
-              line-height: 32px !important;
-            }
-          }
-        }
-      }
-    }
+		.figma-card-header {
+			margin-bottom: 24px;
 
-    // Chart area
-    .figma-chart-area {
-      height: 300px;
-      width: 100%;
+			.figma-card-title {
+				font-family: 'Bitter', serif;
+				font-weight: 600;
+				font-size: 24px;
+				color: #343037;
+				margin: 0;
+			}
+		}
 
-      canvas {
-        max-width: 100% !important;
-        height: 100% !important;
-      }
-    }
-  }
+		// Stats row with 4 columns
+		.figma-stats-row {
+			display: flex;
+			gap: 24px;
+			margin-bottom: 32px;
 
-  // TWO COLUMN LAYOUT - Matches Figma exactly
-  .figma-two-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-bottom: 24px;
-    
-    &.mobile-columns {
-      grid-template-columns: 1fr;
-    }
+			.figma-stat-item {
+				flex: 1;
+				min-width: 0;
 
-    .figma-device-card,
-    .figma-engagement-card {
-      background: rgba(255, 255, 255, 0.5);
-      border: 2px solid rgba(218, 209, 197, 1);
-      border-radius: 8px;
-      padding: 24px;
+				// Override existing Stat component styles to match Figma
+				.stat-wrapper {
+					max-width: none !important;
 
-      .figma-card-header {
-        margin-bottom: 24px;
+					.stat-select {
+						color: #887d76 !important;
+						margin-bottom: 10px !important;
 
-        .figma-card-title {
-          font-family: 'Bitter', serif;
-          font-weight: 600;
-          font-size: 24px;
-          color: #343037;
-          margin: 0;
-        }
-      }
-    }
+						.stat-selected-option {
+							font-weight: 500 !important;
+							font-size: 14px !important;
+						}
 
-    .figma-donut-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 300px;
-      position: relative;
+						.arrow svg {
+							width: 24px !important;
+							height: 24px !important;
+						}
+					}
 
-      canvas {
-        max-width: 100% !important;
-      }
-    }
+					.stat-value {
+						font-size: 32px !important;
+						font-weight: 600 !important;
+						color: #100f1c !important;
+						margin: 5px 0 !important;
+						line-height: 38.73px !important;
+					}
 
-    .figma-engagement-metrics {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-      padding: 24px 0;
+					.stat-percentage {
+						font-size: 16px !important;
+						font-weight: 500 !important;
 
-      .figma-metric {
-        text-align: center;
+						&.positive {
+							color: #60c700 !important;
+						}
 
-        .figma-metric-value {
-          font-family: 'Inter', sans-serif;
-          font-size: 28px;
-          font-weight: 600;
-          color: #343037;
-          margin-bottom: 8px;
-          line-height: 1.2;
-        }
+						&.negative {
+							color: #ffa600 !important;
+						}
+					}
 
-        .figma-metric-label {
-          font-family: 'Inter', sans-serif;
-          font-size: 16px;
-          font-weight: 400;
-          color: #887D76;
-          line-height: 1.2;
-        }
-      }
-    }
-  }
+					.stat-chart {
+						margin-top: 10px !important;
+					}
+				}
+			}
 
-  // LOCATION CARD - Matches Figma exactly
-  .figma-location-card {
-    background: rgba(255, 255, 255, 0.5);
-    border: 2px solid rgba(218, 209, 197, 1);
-    border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 32px;
+			// Mobile responsive layout
+			&.mobile-stats-row {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 16px;
 
-    .figma-card-header {
-      margin-bottom: 24px;
+				.figma-stat-item {
+					margin-bottom: 16px;
 
-      .figma-card-title {
-        font-family: 'Bitter', serif;
-        font-weight: 600;
-        font-size: 24px;
-        color: #343037;
-        margin: 0;
-      }
-    }
-  }
+					.stat-wrapper {
+						.stat-value {
+							font-size: 26px !important;
+							line-height: 32px !important;
+						}
+					}
+				}
+			}
+		}
+
+		// Chart area
+		.figma-chart-area {
+			height: 300px;
+			width: 100%;
+
+			canvas {
+				max-width: 100% !important;
+				height: 100% !important;
+			}
+		}
+	}
+
+	// TWO COLUMN LAYOUT - Matches Figma exactly
+	.figma-two-columns {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 24px;
+		margin-bottom: 24px;
+
+		&.mobile-columns {
+			grid-template-columns: 1fr;
+		}
+
+		.figma-device-card,
+		.figma-engagement-card {
+			background: rgba(255, 255, 255, 0.5);
+			border: 2px solid rgba(218, 209, 197, 1);
+			border-radius: 8px;
+			padding: 24px;
+
+			.figma-card-header {
+				margin-bottom: 24px;
+
+				.figma-card-title {
+					font-family: 'Bitter', serif;
+					font-weight: 600;
+					font-size: 24px;
+					color: #343037;
+					margin: 0;
+				}
+			}
+		}
+
+		.figma-donut-wrapper {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 300px;
+			position: relative;
+
+			canvas {
+				max-width: 100% !important;
+			}
+		}
+
+		.figma-engagement-metrics {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 32px;
+			padding: 24px 0;
+
+			.figma-metric {
+				text-align: center;
+
+				.figma-metric-value {
+					font-family: 'Inter', sans-serif;
+					font-size: 28px;
+					font-weight: 600;
+					color: #343037;
+					margin-bottom: 8px;
+					line-height: 1.2;
+				}
+
+				.figma-metric-label {
+					font-family: 'Inter', sans-serif;
+					font-size: 16px;
+					font-weight: 400;
+					color: #887d76;
+					line-height: 1.2;
+				}
+			}
+		}
+	}
+
+	// LOCATION CARD - Matches Figma exactly
+	.figma-location-card {
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid rgba(218, 209, 197, 1);
+		border-radius: 8px;
+		padding: 24px;
+		margin-bottom: 32px;
+
+		.figma-card-header {
+			margin-bottom: 24px;
+
+			.figma-card-title {
+				font-family: 'Bitter', serif;
+				font-weight: 600;
+				font-size: 24px;
+				color: #343037;
+				margin: 0;
+			}
+		}
+	}
 }
 
 // RESPONSIVE DESIGN - For mobile devices
 @media (max-width: 768px) {
-  .fm-page-container {
-    .figma-stats-header {
-      flex-direction: column;
-      gap: 16px;
-      align-items: flex-start;
-      margin-bottom: 20px;
+	.fm-page-container {
+		.figma-stats-header {
+			flex-direction: column;
+			gap: 16px;
+			align-items: flex-start;
+			margin-bottom: 20px;
 
-      .figma-header-left {
-        .figma-stats-title {
-          font-size: 24px;
-        }
-      }
+			.figma-header-left {
+				.figma-stats-title {
+					font-size: 24px;
+				}
+			}
 
-      .figma-header-right {
-        width: 100%;
-        justify-content: space-between;
-        
-        .figma-timeframe-group {
-          width: 100%;
-          overflow-x: auto;
-          
-          .btn-group {
-            width: 100%;
-            
-            .btn {
-              flex: 1;
-              white-space: nowrap;
-              font-size: 12px;
-              padding: 6px 10px;
-            }
-          }
-        }
-      }
-    }
+			.figma-header-right {
+				width: 100%;
+				justify-content: space-between;
 
-    .figma-stats-card {
-      padding: 16px;
+				.figma-date-range-picker {
+					width: 100%;
 
-      .figma-card-header {
-        margin-bottom: 16px;
+					.date-range-input {
+						width: 100%;
+						font-size: 12px;
+						padding: 6px 10px;
+						min-width: 180px;
+					}
+				}
+			}
+		}
 
-        .figma-card-title {
-          font-size: 20px;
-        }
-      }
+		.figma-stats-card {
+			padding: 16px;
 
-      .figma-chart-area {
-        height: 200px;
-      }
-    }
+			.figma-card-header {
+				margin-bottom: 16px;
 
-    .figma-two-columns {
-      .figma-device-card,
-      .figma-engagement-card {
-        padding: 16px;
+				.figma-card-title {
+					font-size: 20px;
+				}
+			}
 
-        .figma-card-header {
-          margin-bottom: 16px;
+			.figma-chart-area {
+				height: 200px;
+			}
+		}
 
-          .figma-card-title {
-            font-size: 20px;
-          }
-        }
-      }
+		.figma-two-columns {
+			.figma-device-card,
+			.figma-engagement-card {
+				padding: 16px;
 
-      .figma-donut-wrapper {
-        height: 250px;
-      }
+				.figma-card-header {
+					margin-bottom: 16px;
 
-      .figma-engagement-metrics {
-        gap: 16px;
+					.figma-card-title {
+						font-size: 20px;
+					}
+				}
+			}
 
-        .figma-metric {
-          .figma-metric-value {
-            font-size: 22px;
-          }
+			.figma-donut-wrapper {
+				height: 250px;
+			}
 
-          .figma-metric-label {
-            font-size: 14px;
-          }
-        }
-      }
-    }
+			.figma-engagement-metrics {
+				gap: 16px;
 
-    .figma-location-card {
-      padding: 16px;
+				.figma-metric {
+					.figma-metric-value {
+						font-size: 22px;
+					}
 
-      .figma-card-header {
-        margin-bottom: 16px;
+					.figma-metric-label {
+						font-size: 14px;
+					}
+				}
+			}
+		}
 
-        .figma-card-title {
-          font-size: 20px;
-        }
-      }
-    }
-  }
+		.figma-location-card {
+			padding: 16px;
+
+			.figma-card-header {
+				margin-bottom: 16px;
+
+				.figma-card-title {
+					font-size: 20px;
+				}
+			}
+		}
+	}
 }

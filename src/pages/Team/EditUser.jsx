@@ -25,6 +25,7 @@ const EditUser = () => {
 	const [userData, setUserData] = useState({
 		id: '',
 		name: '',
+		surname: '',
 		username: '',
 		email: '',
 		role: '',
@@ -122,10 +123,16 @@ const EditUser = () => {
 					throw new Error('Team member not found')
 				}
 
+				// Split fullName into name and surname
+				const fullNameParts = teamMember.fullName ? teamMember.fullName.split(' ') : ['', '']
+				const firstName = fullNameParts[0] || ''
+				const lastName = fullNameParts.slice(1).join(' ') || ''
+
 				// Map the API response to the userData format
 				const mappedUserData = {
 					id: teamMember.uuid,
-					name: teamMember.fullName,
+					name: firstName,
+					surname: lastName,
 					username: teamMember.username,
 					email: teamMember.email,
 					role: teamMember.role, // Keep role in lowercase to match USER_ROLES
@@ -226,44 +233,61 @@ const EditUser = () => {
 				return
 			}
 
-			// Update account assignments before proceeding to permissions step
+			// Update team member data before proceeding to permissions step
+			if (!userData.id) {
+				createNotification({
+					message: 'User ID not found. Please try again.',
+					type: 'error',
+					autoClose: 5000,
+				})
+				return
+			}
+
 			try {
-				if (selectedAccounts && selectedAccounts.length > 0) {
-					console.log('Updating user account assignments:', selectedAccounts)
-
-					// Get JWT token from AccountContext
-					if (!user || !user.jwt) {
-						throw new Error('Authentication required. Please log in again.')
-					}
-
-					// Make separate API call for each account (endpoint accepts only one account at a time)
-					for (const account of selectedAccounts) {
-						const accountAssignmentData = {
-							uuid: userData.id,
-							accountId: parseInt(account.value), // Convert string to number
-						}
-
-						console.log('Adding user to account:', accountAssignmentData)
-
-						const accountResponse = await ApiService.post('fairymailer/add-user-to-account', accountAssignmentData, user.jwt)
-						console.log(`User added to account ${account.label}:`, accountResponse)
-
-						// Check if the response contains an error code (even with HTTP 200)
-						if (accountResponse.data.code && accountResponse.data.code !== 200) {
-							throw new Error(accountResponse.data.message || `Failed to add user to account ${account.label}`)
-						}
-					}
-
-					createNotification({
-						message: 'Account assignments updated successfully!',
-						type: 'default',
-						autoClose: 3000,
-					})
+				// Build the payload for the update-team-member endpoint
+				const updatePayload = {
+					uuid: userData.id,
+					name: userData.name,
+					surname: userData.surname,
+					email: userData.email,
+					role: selectedRole,
 				}
-			} catch (error) {
-				console.error('Error updating account assignments:', error)
 
-				let errorMessage = 'Failed to update account assignments. Please try again.'
+				// Add password if provided
+				if (newPassword && newPassword.trim()) {
+					updatePayload.password = newPassword
+				}
+
+				// Add accounts array if selected
+				if (selectedAccounts && selectedAccounts.length > 0) {
+					updatePayload.accounts = selectedAccounts.map((account) => parseInt(account.value))
+				}
+
+				console.log('Updating team member with payload:', updatePayload)
+
+				// Get JWT token from AccountContext
+				if (!user || !user.jwt) {
+					throw new Error('Authentication required. Please log in again.')
+				}
+
+				// Make API call to update team member
+				const updateResponse = await ApiService.post('fairymailer/update-team-member', updatePayload, user.jwt)
+				console.log('Team member update response:', updateResponse)
+
+				// Check if the response contains an error code (even with HTTP 200)
+				if (updateResponse.data.code && updateResponse.data.code !== 200) {
+					throw new Error(updateResponse.data.message || 'Failed to update team member')
+				}
+
+				createNotification({
+					message: 'Team member updated successfully!',
+					type: 'default',
+					autoClose: 3000,
+				})
+			} catch (error) {
+				console.error('Error updating team member:', error)
+
+				let errorMessage = 'Failed to update team member. Please try again.'
 
 				if (error.message === 'Authentication required. Please log in again.') {
 					errorMessage = 'Authentication required. Please log in again.'
@@ -281,7 +305,7 @@ const EditUser = () => {
 					type: 'error',
 					autoClose: 5000,
 				})
-				return // Don't proceed to next step if account assignment fails
+				return // Don't proceed to next step if update fails
 			}
 		}
 
@@ -299,11 +323,6 @@ const EditUser = () => {
 	}
 
 	const handleSave = async () => {
-		// Validate passwords one final time before saving
-		if (!validatePasswords()) {
-			return
-		}
-
 		if (!userData.id) {
 			createNotification({
 				message: 'User ID not found. Please try again.',
@@ -314,52 +333,49 @@ const EditUser = () => {
 		}
 
 		try {
-			// Step 1: Update user role if changed
-			const rolePayload = {
-				uuid: userData.id,
-				role: selectedRole,
-			}
-
-			// Add custom permissions if role is custom
+			// Update custom permissions if role is custom
 			if (selectedRole === 'custom') {
-				rolePayload.custom_permissions = customPermissions
+				const permissionsPayload = {
+					uuid: userData.id,
+					role: selectedRole,
+					custom_permissions: customPermissions,
+				}
+
+				console.log('Updating custom permissions with payload:', permissionsPayload)
+
+				// Get JWT token from AccountContext
+				if (!user || !user.jwt) {
+					throw new Error('Authentication required. Please log in again.')
+				}
+
+				// Make API call to update custom permissions
+				const permissionsResponse = await ApiService.post('fairymailer/update-team-member', permissionsPayload, user.jwt)
+				console.log('Permissions update response:', permissionsResponse)
+
+				// Check if the response contains an error code (even with HTTP 200)
+				if (permissionsResponse.data.code && permissionsResponse.data.code !== 200) {
+					throw new Error(permissionsResponse.data.message || 'Failed to update permissions')
+				}
+
+				createNotification({
+					message: 'Custom permissions updated successfully!',
+					type: 'default',
+					autoClose: 3000,
+				})
+			} else {
+				createNotification({
+					message: 'Permissions updated successfully!',
+					type: 'default',
+					autoClose: 3000,
+				})
 			}
-
-			console.log('Updating user role with payload:', rolePayload)
-
-			// Get JWT token from AccountContext
-			if (!user || !user.jwt) {
-				throw new Error('Authentication required. Please log in again.')
-			}
-
-			// Make API call to update user role
-			const roleResponse = await ApiService.post('fairymailer/update-user-role', rolePayload, user.jwt)
-			console.log('Role update response:', roleResponse)
-
-			// Check if the response contains an error code (even with HTTP 200)
-			if (roleResponse.data.code && roleResponse.data.code !== 200) {
-				throw new Error(roleResponse.data.message || 'Failed to update user role')
-			}
-
-			// Step 2: Update password if provided
-			if (newPassword) {
-				console.log('Password update requested but not implemented yet')
-				// Note: You may need to implement a separate endpoint for password updates
-				// For now, we'll assume the role update endpoint can handle password updates too
-			}
-
-			createNotification({
-				message: 'User role updated successfully!',
-				type: 'default',
-				autoClose: 3000,
-			})
 
 			// Navigate back to team page
 			navigate('/team')
 		} catch (error) {
-			console.error('Error updating user:', error)
+			console.error('Error updating permissions:', error)
 
-			let errorMessage = 'Failed to update user role. Please try again.'
+			let errorMessage = 'Failed to update permissions. Please try again.'
 
 			if (error.message === 'Authentication required. Please log in again.') {
 				errorMessage = 'Authentication required. Please log in again.'
@@ -400,7 +416,9 @@ const EditUser = () => {
 				<div className="form-container">
 					<InputText label="Email" name="email" value={userData.email} onChange={handleInputChange} placeholder="Email address" />
 
-					<InputText label="Name" name="name" value={userData.name} onChange={handleInputChange} placeholder="Full name" />
+					<InputText label="Name" name="name" value={userData.name} onChange={handleInputChange} placeholder="First name" />
+
+					<InputText label="Surname" name="surname" value={userData.surname} onChange={handleInputChange} placeholder="Last name" />
 
 					<InputText label="Username" name="username" value={userData.username} onChange={handleInputChange} placeholder="Username" />
 
@@ -432,7 +450,7 @@ const EditUser = () => {
 						Back
 					</Button>
 					<Button type="primary" onClick={goToNextStep}>
-						Continue to Permissions
+						Save & Go to Permissions
 					</Button>
 				</div>
 			</div>

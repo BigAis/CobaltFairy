@@ -5,6 +5,16 @@
 		justify-content: space-between;
 	}
 
+	.integration-breadcrumb {
+		color: #000000 !important;
+		text-decoration: none;
+		cursor: pointer;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
 	.integrations-container {
 		text-align: center;
 		// background-color: #fdf4e6;

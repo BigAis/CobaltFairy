@@ -1,0 +1,165 @@
+// Import base DatePicker styles
+@import './DatePicker.scss';
+
+// Additional styles for DateRangePicker using Button component patterns
+.date-range-picker {
+	.date-range-input {
+		// Base styling matching Button component
+		color: rgba(0, 0, 0, 1);
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 17px;
+		padding: 10px 18px;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: box-shadow 0.15s ease-in-out;
+		min-width: 200px; // Ensure enough space for range display
+		justify-content: flex-start;
+		text-align: left;
+		display: flex;
+		align-items: center;
+		width: 100%;
+
+		// SVG icon styling
+		svg {
+			transform: scale(1.4);
+			margin-right: 10px;
+		}
+
+		// Primary type styling
+		&.date-range-input-primary {
+			border: 2px solid #ff635d;
+			background-color: rgba(255, 195, 173, 0.5);
+
+			&.hovered:not(.inactive):not(.disabled) {
+				background-color: rgba(255, 195, 173, 0.75);
+				box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+			}
+
+			&.active {
+				background-color: rgba(255, 195, 173, 0.75);
+			}
+
+			&.inactive {
+				background: rgba(255, 195, 173, 0.25);
+				border: 2px solid rgba(255, 99, 93, 0.5);
+			}
+
+			&.disabled {
+				background: rgba(255, 195, 173, 0.25);
+				border: 2px solid rgba(255, 99, 93, 0.5);
+			}
+		}
+
+		// Secondary type styling (default)
+		&.date-range-input-secondary {
+			border: 2px solid rgba(218, 209, 197, 1);
+			background: rgba(255, 255, 255, 0.5);
+
+			&.hovered:not(.inactive):not(.disabled) {
+				background-color: rgba(255, 255, 255, 0.7);
+				box-shadow: 0px 4px 7px 0px #0000001a;
+			}
+
+			&.active {
+				background-color: rgba(255, 255, 255, 0.7);
+			}
+
+			&.inactive {
+				background: rgba(255, 255, 255, 0.15);
+				border: 2px solid rgba(218, 209, 197, 0.5);
+			}
+
+			&.disabled {
+				background: rgba(255, 255, 255, 0.15);
+				border: 2px solid rgba(218, 209, 197, 0.5);
+			}
+		}
+
+		// Action type styling
+		&.date-range-input-action {
+			padding: 14px 18px;
+			background: rgba(255, 255, 255, 0.5);
+			border: 2px solid rgba(218, 209, 197, 1);
+			font-family: 'Bitter', serif;
+			font-weight: 600;
+			font-size: 16px;
+			line-height: 19.2px;
+			font-optical-sizing: auto;
+
+			&.hovered:not(.inactive):not(.disabled) {
+				background-color: rgba(255, 255, 255, 0.7);
+				box-shadow: 0px 4px 7px 0px #0000001a;
+			}
+
+			&.active {
+				background-color: rgba(255, 255, 255, 0.7);
+			}
+
+			&.inactive {
+				background: rgba(255, 255, 255, 0.15);
+				border: 2px solid rgba(218, 209, 197, 0.5);
+			}
+
+			&.disabled {
+				background: rgba(255, 255, 255, 0.15);
+				border: 2px solid rgba(218, 209, 197, 0.5);
+			}
+		}
+
+		// Disabled state cursor
+		&.disabled,
+		&.inactive {
+			cursor: not-allowed;
+		}
+
+		// Remove default focus outline
+		&:focus {
+			outline: none;
+			border-color: #ff635d;
+			box-shadow: 0 0 0 2px rgba(255, 99, 93, 0.2);
+		}
+	}
+
+	// Custom styles for date range selection in calendar
+	.react-datepicker {
+		.react-datepicker__day--in-selecting-range,
+		.react-datepicker__day--in-range {
+			background-color: rgba(255, 219, 198, 0.5);
+			border: 1px solid #ffa99a;
+			border-radius: 0;
+			color: #000000;
+		}
+
+		.react-datepicker__day--range-start {
+			background-color: #ffdbc6;
+			border: 2px solid #ff635d;
+			border-radius: 4px 0 0 4px;
+			color: #000000;
+		}
+
+		.react-datepicker__day--range-end {
+			background-color: #ffdbc6;
+			border: 2px solid #ff635d;
+			border-radius: 0 4px 4px 0;
+			color: #000000;
+		}
+
+		.react-datepicker__day--selecting-range-start {
+			background-color: #ffdbc6;
+			border: 2px solid #ffa99a;
+			border-radius: 4px;
+			color: #000000;
+		}
+	}
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+	.date-range-picker {
+		.date-range-input {
+			min-width: 180px;
+			font-size: 14px;
+		}
+	}
+}
