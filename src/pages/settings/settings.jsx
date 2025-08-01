@@ -47,12 +47,11 @@ const Settings = () => {
 
 	// Notification settings state
 	const [notificationSettings, setNotificationSettings] = useState({
-		monthlyActivity: true,
+		monthlyActivity: false,
 		monthlyActivityEmail: '',
 		campaignNotifications: false,
 		campaignNotificationsEmail: '',
 	})
-
 	// Profile state
 	const [profileSettings, setProfileSettings] = useState({
 		email: '',
@@ -264,6 +263,14 @@ const Settings = () => {
 		// Load initial settings
 		if (user && account) {
 			loadSettings()
+			if(account.notifications){
+				setNotificationSettings({
+					monthlyActivity: account.notifications.monthly.active,
+					monthlyActivityEmail: account.notifications.monthly.email,
+					campaignNotifications: account.notifications.campaign.active,
+					campaignNotificationsEmail: account.notifications.campaign.email,
+				})
+			}
 		}
 	}, [user, account])
 
@@ -436,6 +443,29 @@ const Settings = () => {
 
 					createNotification({
 						message: errorMessage,
+						type: 'warning',
+					})
+				}
+			} else if (activeSection === 'notifications') {
+				const notifsResponse = await ApiService.post('fairymailer/account-settings-set', {notifications:{
+					"monthly": {
+						"active": notificationSettings.monthlyActivity,
+						"email": notificationSettings.monthlyActivityEmail
+					},
+					"campaign": {
+						"active": notificationSettings.campaignNotifications,
+						"email": notificationSettings.campaignNotificationsEmail
+					}
+				}}, user.jwt)
+				if(notifsResponse.data && notifsResponse.data.code === 200){
+					createNotification({
+						message: 'Notifications settings saved successfully',
+						type: 'default',
+						autoClose: 3000,
+					})
+				}else{
+					createNotification({
+						message: 'Failed to save notifications settings',
 						type: 'warning',
 					})
 				}

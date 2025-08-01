@@ -130,7 +130,6 @@ div#PaymentForm {
   // Ensure floating label behavior matches exactly
   .stripe-input:focus-within + .floating-label,
   .floating-label.filled {
-    top: 14px;
     left: 18px;
     font-size: 12px;
     color: rgba(136, 125, 118, 1);

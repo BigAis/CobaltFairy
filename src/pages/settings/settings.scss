@@ -313,7 +313,7 @@
     }
     // Notification styles - Two column layout
     .notification-section {
-        width: 100%;
+        max-width:520px;
         margin-bottom: 30px;
         text-align: left;
     }
