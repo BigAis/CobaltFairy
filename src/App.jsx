@@ -36,149 +36,509 @@ import EditSegment from './pages/subscribers/EditSegment'
 
 // A wrapper component to handle authentication check
 const ProtectedRoute = ({ children }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+	const navigate = useNavigate()
+	const location = useLocation()
+	const [isAuthenticated, setIsAuthenticated] = useState(false)
+	const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
-  useEffect(() => {
-    const checkAuthentication = () => {
-      const fairymail_session = localStorage.getItem('fairymail_session');
-      
-      // Don't redirect if we're on login or 2FA pages
-      if (location.pathname === '/login' || location.pathname === '/login/2FA' || location.pathname === '/register') {
-        setIsCheckingAuth(false);
-        return;
-      }
-      
-      if (!fairymail_session) {
-        console.log('No session found, redirecting to login');
-        navigate('/login', { replace: true });
-        setIsCheckingAuth(false);
-        return;
-      }
-      
-      try {
-        const userData = JSON.parse(decodeURIComponent(fairymail_session));
-        if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
-          console.log('JWT token expired or invalid, redirecting to login');
-          localStorage.removeItem('fairymail_session');
-          navigate('/login', { replace: true });
-        } else {
-          console.log('Valid session found');
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        console.error("Error parsing session data:", error);
-        localStorage.removeItem('fairymail_session');
-        navigate('/login', { replace: true });
-      }
-      
-      setIsCheckingAuth(false);
-    };
+	useEffect(() => {
+		const checkAuthentication = () => {
+			const fairymail_session = localStorage.getItem('fairymail_session')
 
-    checkAuthentication();
-  }, [navigate, location.pathname]);
+			// Don't redirect if we're on login or 2FA pages
+			if (location.pathname === '/login' || location.pathname === '/login/2FA' || location.pathname === '/register') {
+				setIsCheckingAuth(false)
+				return
+			}
 
-  if (isCheckingAuth) {
-    // Show loading state while checking authentication
-    return <div>Checking authentication...</div>;
-  }
+			if (!fairymail_session) {
+				console.log('No session found, redirecting to login')
+				navigate('/login', { replace: true })
+				setIsCheckingAuth(false)
+				return
+			}
 
-  return isAuthenticated ? children : null;
-};
+			try {
+				const userData = JSON.parse(decodeURIComponent(fairymail_session))
+				if (!userData.jwt || isJwtTokenExpired(userData.jwt)) {
+					console.log('JWT token expired or invalid, redirecting to login')
+					localStorage.removeItem('fairymail_session')
+					navigate('/login', { replace: true })
+				} else {
+					console.log('Valid session found')
+					setIsAuthenticated(true)
+				}
+			} catch (error) {
+				console.error('Error parsing session data:', error)
+				localStorage.removeItem('fairymail_session')
+				navigate('/login', { replace: true })
+			}
 
-function App() {
-  return (
-    <div className="App">
-      {/* Global notification container */}
-      <NotificationContainer />
-      
-      <Routes>
-        {/* Public routes that don't require authentication */}
-        <Route path="/login" element={<LogIn />} />
-        <Route path="/login/2FA" element={<TwoFactorLogin />} />
-        <Route path="/register" element={<User />} />
-        <Route path="/reset-password/:id" element={<ResetPassword />} />
-        <Route path="/redirection/:url" element={<Redirection />} />
-        <Route path="/redirection/:url/:redirect" element={<Redirection />} />
-        
-        {/* Default route - redirect based on auth status */}
-        <Route 
-          path="/" 
-          element={
-            localStorage.getItem('fairymail_session') 
-              ? <Navigate to='/dashboard' replace /> 
-              : <Navigate to='/login' replace />
-          } 
-        />
-        
-        {/* Protected routes */}
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/design" element={<ProtectedRoute><Desing /></ProtectedRoute>} />
-        <Route path="/payment-plan" element={<ProtectedRoute><PaymentPlan /></ProtectedRoute>} />
-        
-        {/* Campaign routes */}
-        <Route path="/campaigns" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
-        <Route path="/campaigns/sent" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
-        <Route path="/campaigns/draft" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
-        <Route path="/campaigns/outbox" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
-        <Route path="/campaigns/templates" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
-        <Route path="/campaigns/new" element={<ProtectedRoute><NewCampaign /></ProtectedRoute>} />
-        <Route path="/campaigns/edit/:uuid" element={<ProtectedRoute><NewCampaign /></ProtectedRoute>} />
-        <Route path="/templates/edit/:uuid" element={<ProtectedRoute><EditTemplate /></ProtectedRoute>} />
-        <Route path="/campaigns/overview/:uuid" element={<ProtectedRoute><EditCampaign /></ProtectedRoute>} />
-        
-        {/* Subscribers routes */}
-// Replace the existing subscribers routes in App.jsx with these routes:
+			setIsCheckingAuth(false)
+		}
 
-        {/* Subscribers routes */}
-        <Route path="/subscribers" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
-        <Route path="/subscribers/list" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
-        <Route path="/subscribers/groups" element={<ProtectedRoute><Subscribers initialView="groups" /></ProtectedRoute>} />
-        <Route path="/subscribers/segments" element={<ProtectedRoute><Subscribers initialView="segments" /></ProtectedRoute>} />
-        <Route path="/subscribers/segment/new" element={<ProtectedRoute><EditSegment /></ProtectedRoute>} />
-        <Route path="/subscribers/segment/:uuid" element={<ProtectedRoute><EditSegment /></ProtectedRoute>} />
-        <Route path="/subscribers/history" element={<ProtectedRoute><Subscribers initialView="history" /></ProtectedRoute>} />
-        <Route path="/subscribers/stats" element={<ProtectedRoute><Subscribers initialView="stats" /></ProtectedRoute>} />
-        <Route path="/subscribers/fields" element={<ProtectedRoute><Subscribers initialView="fields" /></ProtectedRoute>} />
-        <Route path="/subscribers/cleanup" element={<ProtectedRoute><Subscribers initialView="cleanup" /></ProtectedRoute>} />
-        <Route path="/subscribers/import" element={<ProtectedRoute><Subscribers initialView="import" /></ProtectedRoute>} />
-        <Route path="/subscribers/:uuid" element={<ProtectedRoute><EditSubscriber /></ProtectedRoute>} />
-        <Route path="/subscribers/field/edit" element={<ProtectedRoute><EditCustomField /></ProtectedRoute>} />
-        <Route path="/subscribers/field/new" element={<ProtectedRoute><NewCustomField /></ProtectedRoute>} />
-        <Route path="/subscribers/filters/:filterString" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
-        <Route path="/subscribers/group/new" element={<ProtectedRoute><EditGroup /></ProtectedRoute>} />
-        <Route path="/subscribers/group/:uuid" element={<ProtectedRoute><EditGroup /></ProtectedRoute>} />
-        <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
-        <Route path="/integrations/bookfunnel/:mode?" element={<ProtectedRoute><BookFunnel /></ProtectedRoute>} />
-        <Route path="/automations" element={<ProtectedRoute><Automations /></ProtectedRoute>} />
-        <Route path="/automations/new" element={<ProtectedRoute><EditAutomation /></ProtectedRoute>} />
-        <Route path="/automations/:autId/edit" element={<ProtectedRoute><EditAutomation /></ProtectedRoute>} />
-        <Route path="/automations/:autId" element={<ProtectedRoute><AutomationDetail /></ProtectedRoute>} />
-        <Route path="/automations/:autId/subscribers" element={<ProtectedRoute><AutomationDetail /></ProtectedRoute>} />
-        <Route path="/automations/:autId/history" element={<ProtectedRoute><AutomationDetail /></ProtectedRoute>} />
-        <Route path="/automations/editor/:autId" element={<ProtectedRoute><FlowEditor /></ProtectedRoute>} />
-        <Route path="/choose-account" element={<ProtectedRoute><AccountPicker /></ProtectedRoute>} />
-        <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="/settings/:section" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
-        <Route path="/billing/:tab" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
-        <Route path="/billing/overview" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
-        <Route path="/billing/invoice-details" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
-        <Route path="/billing/payment-methods" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        {/* Team routes */}
-        <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
-        <Route path="/team/new" element={<ProtectedRoute><NewUser /></ProtectedRoute>} />
-        <Route path="/team/:id" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
-        <Route path="/team/:id/role" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
-        {/* Stats routes */}
-        <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
-      </Routes>
-    </div>
-  );
+		checkAuthentication()
+	}, [navigate, location.pathname])
+
+	if (isCheckingAuth) {
+		// Show loading state while checking authentication
+		return <div>Checking authentication...</div>
+	}
+
+	return isAuthenticated ? children : null
 }
 
-export default App;
+function App() {
+	return (
+		<div className="App">
+			{/* Global notification container */}
+			<NotificationContainer />
+
+			<Routes>
+				{/* Public routes that don't require authentication */}
+				<Route path="/login" element={<LogIn />} />
+				<Route path="/login/2FA" element={<TwoFactorLogin />} />
+				<Route path="/register" element={<User />} />
+				<Route path="/register/:token" element={<User />} />
+				<Route path="/reset-password/:id" element={<ResetPassword />} />
+				<Route path="/redirection/:url" element={<Redirection />} />
+				<Route path="/redirection/:url/:redirect" element={<Redirection />} />
+				{/* Default route - redirect based on auth status */}
+				<Route path="/" element={localStorage.getItem('fairymail_session') ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
+				{/* Protected routes */}
+				<Route
+					path="/dashboard"
+					element={
+						<ProtectedRoute>
+							<Dashboard />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/design"
+					element={
+						<ProtectedRoute>
+							<Desing />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/payment-plan"
+					element={
+						<ProtectedRoute>
+							<PaymentPlan />
+						</ProtectedRoute>
+					}
+				/>
+				{/* Campaign routes */}
+				<Route
+					path="/campaigns"
+					element={
+						<ProtectedRoute>
+							<Campaigns />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/campaigns/sent"
+					element={
+						<ProtectedRoute>
+							<Campaigns />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/campaigns/draft"
+					element={
+						<ProtectedRoute>
+							<Campaigns />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/campaigns/outbox"
+					element={
+						<ProtectedRoute>
+							<Campaigns />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/campaigns/templates"
+					element={
+						<ProtectedRoute>
+							<Campaigns />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/campaigns/new"
+					element={
+						<ProtectedRoute>
+							<NewCampaign />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/campaigns/edit/:uuid"
+					element={
+						<ProtectedRoute>
+							<NewCampaign />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/templates/edit/:uuid"
+					element={
+						<ProtectedRoute>
+							<EditTemplate />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/campaigns/overview/:uuid"
+					element={
+						<ProtectedRoute>
+							<EditCampaign />
+						</ProtectedRoute>
+					}
+				/>
+				{/* Subscribers routes */}
+				// Replace the existing subscribers routes in App.jsx with these routes:
+				{/* Subscribers routes */}
+				<Route
+					path="/subscribers"
+					element={
+						<ProtectedRoute>
+							<Subscribers />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/list"
+					element={
+						<ProtectedRoute>
+							<Subscribers />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/groups"
+					element={
+						<ProtectedRoute>
+							<Subscribers initialView="groups" />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/segments"
+					element={
+						<ProtectedRoute>
+							<Subscribers initialView="segments" />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/segment/new"
+					element={
+						<ProtectedRoute>
+							<EditSegment />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/segment/:uuid"
+					element={
+						<ProtectedRoute>
+							<EditSegment />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/history"
+					element={
+						<ProtectedRoute>
+							<Subscribers initialView="history" />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/stats"
+					element={
+						<ProtectedRoute>
+							<Subscribers initialView="stats" />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/fields"
+					element={
+						<ProtectedRoute>
+							<Subscribers initialView="fields" />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/cleanup"
+					element={
+						<ProtectedRoute>
+							<Subscribers initialView="cleanup" />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/import"
+					element={
+						<ProtectedRoute>
+							<Subscribers initialView="import" />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/:uuid"
+					element={
+						<ProtectedRoute>
+							<EditSubscriber />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/field/edit"
+					element={
+						<ProtectedRoute>
+							<EditCustomField />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/field/new"
+					element={
+						<ProtectedRoute>
+							<NewCustomField />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/filters/:filterString"
+					element={
+						<ProtectedRoute>
+							<Subscribers />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/group/new"
+					element={
+						<ProtectedRoute>
+							<EditGroup />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subscribers/group/:uuid"
+					element={
+						<ProtectedRoute>
+							<EditGroup />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/integrations"
+					element={
+						<ProtectedRoute>
+							<Integrations />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/integrations/bookfunnel/:mode?"
+					element={
+						<ProtectedRoute>
+							<BookFunnel />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/automations"
+					element={
+						<ProtectedRoute>
+							<Automations />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/automations/new"
+					element={
+						<ProtectedRoute>
+							<EditAutomation />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/automations/:autId/edit"
+					element={
+						<ProtectedRoute>
+							<EditAutomation />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/automations/:autId"
+					element={
+						<ProtectedRoute>
+							<AutomationDetail />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/automations/:autId/subscribers"
+					element={
+						<ProtectedRoute>
+							<AutomationDetail />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/automations/:autId/history"
+					element={
+						<ProtectedRoute>
+							<AutomationDetail />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/automations/editor/:autId"
+					element={
+						<ProtectedRoute>
+							<FlowEditor />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/choose-account"
+					element={
+						<ProtectedRoute>
+							<AccountPicker />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/stats"
+					element={
+						<ProtectedRoute>
+							<Stats />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/settings"
+					element={
+						<ProtectedRoute>
+							<Settings />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/settings/:section"
+					element={
+						<ProtectedRoute>
+							<Settings />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/billing"
+					element={
+						<ProtectedRoute>
+							<Billing />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/billing/:tab"
+					element={
+						<ProtectedRoute>
+							<Billing />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/billing/overview"
+					element={
+						<ProtectedRoute>
+							<Billing />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/billing/invoice-details"
+					element={
+						<ProtectedRoute>
+							<Billing />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/billing/payment-methods"
+					element={
+						<ProtectedRoute>
+							<Billing />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/profile"
+					element={
+						<ProtectedRoute>
+							<Settings />
+						</ProtectedRoute>
+					}
+				/>
+				{/* Team routes */}
+				<Route
+					path="/team"
+					element={
+						<ProtectedRoute>
+							<Team />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/team/new"
+					element={
+						<ProtectedRoute>
+							<NewUser />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/team/:id"
+					element={
+						<ProtectedRoute>
+							<EditUser />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/team/:id/role"
+					element={
+						<ProtectedRoute>
+							<EditUser />
+						</ProtectedRoute>
+					}
+				/>
+				{/* Stats routes */}
+				<Route
+					path="/stats"
+					element={
+						<ProtectedRoute>
+							<Stats />
+						</ProtectedRoute>
+					}
+				/>
+			</Routes>
+		</div>
+	)
+}
+
+export default App

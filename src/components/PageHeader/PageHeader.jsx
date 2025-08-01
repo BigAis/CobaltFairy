@@ -16,9 +16,15 @@ const getNameInitials = (name) => {
 }
 
 const getAvatarUrl = (account) => {
-	if (account?.avatar?.url) {
-		const avatarBaseUrl = BASE_URL.replace('/api', '')
-		return avatarBaseUrl + account.avatar.url
+	if (account?.avatar) {
+		console.log('account.avatar', account.avatar)
+		// Check if avatar is already a full URL or needs base URL prepended
+		if (account.avatar.startsWith('http')) {
+			return account.avatar
+		} else {
+			const avatarBaseUrl = BASE_URL.replace('/api', '')
+			return avatarBaseUrl + account.avatar
+		}
 	}
 	return null
 }
@@ -123,22 +129,25 @@ const PageHeader = () => {
 			{!isMobile && (
 				<div className="user-info" ref={userMenuRef}>
 					{/* Make initials card clickable and go directly to profile */}
-					<Card style={{ marginRight: '20px', cursor: 'pointer' }} onClick={goToProfile}>
-						{getAvatarUrl(account) ? (
+
+					{getAvatarUrl(account) ? (
+						<Card style={{ marginRight: '20px', cursor: 'pointer', width: '80px', height: '80px', padding: '0' }} onClick={goToProfile}>
 							<img
 								src={getAvatarUrl(account)}
 								alt="Profile"
 								style={{
-									width: '40px',
-									height: '40px',
+									width: '100%',
+									height: '100%',
 									objectFit: 'cover',
-									borderRadius: '50%',
+									borderRadius: 'inherit',
 								}}
 							/>
-						) : (
-							getNameInitials(user?.user?.name)
-						)}
-					</Card>
+						</Card>
+					) : (
+						<Card style={{ marginRight: '20px', cursor: 'pointer' }} onClick={goToProfile}>
+							{getNameInitials(user?.user?.name)}
+						</Card>
+					)}
 
 					<div className="user">
 						{/* User info section - name and email always visible */}

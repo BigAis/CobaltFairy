@@ -161,9 +161,15 @@ const Settings = () => {
 		}
 
 		// Priority 2: Use account avatar from server
-		if (account?.avatar?.url) {
-			const avatarBaseUrl = BASE_URL.replace('/api', '')
-			return avatarBaseUrl + account.avatar.url
+		if (account?.avatar) {
+			console.log('account.avatar', account.avatar)
+			// Check if avatar is already a full URL or needs base URL prepended
+			if (account.avatar.startsWith('http')) {
+				return account.avatar
+			} else {
+				const avatarBaseUrl = BASE_URL.replace('/api', '')
+				return avatarBaseUrl + account.avatar
+			}
 		}
 
 		// Priority 3: No avatar available

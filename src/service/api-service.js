@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { jwtDecode } from 'jwt-decode'
 const APP_VERSION = '0.6.1'
-// const BASE_URL = 'https://fairymail.cobaltfairy.com/api'
-const BASE_URL = 'http://192.168.3.77:1337/api'
+const BASE_URL = 'https://fairymail.cobaltfairy.com/api'
+// const BASE_URL = 'http://192.168.3.77:1337/api'
 // const BASE_URL = 'http://localhost:1337/api'
 
 export const checkUserExists = async (useremail) => {
@@ -31,7 +31,23 @@ export const checkUserCrendentials = async (useremail, password, reCaptchaToken)
 	}
 }
 
-export const registerUser = async (user, reCaptchaToken, googleSignInToken) => {
+export const validateInvitation = async (token) => {
+	try {
+		const response = await axios.get(`${BASE_URL}/fairymailer/validate-invitation/${token}`)
+		return {
+			success: true,
+			data: response.data,
+		}
+	} catch (error) {
+		console.error('Error validating invitation:', error)
+		return {
+			success: false,
+			error: error.response?.data?.message || 'Invalid invitation token',
+		}
+	}
+}
+
+export const registerUser = async (user, reCaptchaToken, googleSignInToken, invitationToken) => {
 	const requestBody = {
 		email: user.email,
 		accountName: user.accountName,
@@ -45,6 +61,11 @@ export const registerUser = async (user, reCaptchaToken, googleSignInToken) => {
 		requestBody.access_token = googleSignInToken
 	} else {
 		requestBody.password = user.password
+	}
+
+	// Add invitation token if provided
+	if (invitationToken) {
+		requestBody.invitation_token = invitationToken
 	}
 
 	try {
@@ -152,7 +173,7 @@ export const verify2FA = async (code_2FA) => {
 
 export const forgotPassword = async (email) => {
 	try {
-		const response = await axios.post(`${BASE_URL}/forgot-password`, {
+		await axios.post(`${BASE_URL}/forgot-password`, {
 			identifier: email,
 		})
 		return true
