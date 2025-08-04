@@ -2,10 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { scaleLinear } from 'd3-scale';
 import WorldMapComponent from '../WorldMapComponent/WorldMapComponent';
+import Card from '../Card';
+import Pagination from '../Pagination';
 
 const LocationData = ({ campaign }) => {
   const [countryData, setCountryData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const resultsPerPage = 5;
 
   // In a real implementation, this would fetch data from the campaign stats
   useEffect(() => {
@@ -92,6 +96,26 @@ const LocationData = ({ campaign }) => {
   // Define color ranges for the map
   const colorRanges = ['#FFE8DC', '#FFC3AD', '#FF9A8A', '#FF635D'];
 
+  // Prepare sorted country data for pagination
+  const sortedCountries = Object.entries(countryData)
+    .sort((a, b) => b[1] - a[1])
+    .map(([code, clicks]) => ({
+      code,
+      name: countryNames[code] || code,
+      clicks,
+      percentage: Math.round((clicks / maxClicks) * 100)
+    }));
+
+  // Calculate pagination
+  const totalResults = sortedCountries.length;
+  const startIndex = (currentPage - 1) * resultsPerPage;
+  const endIndex = startIndex + resultsPerPage;
+  const paginatedCountries = sortedCountries.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div>
       {isLoading ? (
@@ -158,38 +182,45 @@ const LocationData = ({ campaign }) => {
                 </tr>
               </thead>
               <tbody>
-                {Object.entries(countryData)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([code, clicks], index) => {
-                    const percentage = Math.round((clicks / maxClicks) * 100);
-                    return (
-                      <tr key={code} style={{ backgroundColor: index % 2 === 0 ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 248, 239, 0.5)', borderRadius: '8px' }}>
-                        <td style={{ padding: '12px 16px', borderRadius: '8px 0 0 8px' }}>{countryNames[code] || code}</td>
-                        <td style={{ padding: '12px 16px', textAlign: 'right' }}>{clicks.toLocaleString()}</td>
-                        <td style={{ padding: '12px 16px', borderRadius: '0 8px 8px 0' }}>
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <div style={{ flex: 1, height: '6px', backgroundColor: '#DAD1C5', borderRadius: '3px', marginRight: '10px', overflow: 'hidden' }}>
-                              <div
-                                style={{
-                                  width: `${percentage}%`,
-                                  height: '100%',
-                                  backgroundColor: colorRanges[
-                                    percentage <= 33 ? 0 : 
-                                    percentage <= 66 ? 1 : 
-                                    percentage <= 99 ? 2 : 3
-                                  ],
-                                  borderRadius: '3px',
-                                }}
-                              ></div>
+                {paginatedCountries.map((country, index) => {
+                  return (
+                    <tr key={country.code}>
+                      <td colSpan="3" style={{ padding: '0', border: 'none' }}>
+                        <Card style={{ margin: '6px 0', padding: '12px 16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>{country.name}</span>
+                            <span>{country.clicks.toLocaleString()}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', minWidth: '120px' }}>
+                              <div style={{ flex: 1, height: '6px', backgroundColor: '#DAD1C5', borderRadius: '3px', marginRight: '10px', overflow: 'hidden' }}>
+                                <div
+                                  style={{
+                                    width: `${country.percentage}%`,
+                                    height: '100%',
+                                    backgroundColor: colorRanges[
+                                      country.percentage <= 33 ? 0 : 
+                                      country.percentage <= 66 ? 1 : 
+                                      country.percentage <= 99 ? 2 : 3
+                                    ],
+                                    borderRadius: '3px',
+                                  }}
+                                ></div>
+                              </div>
+                              <span style={{ whiteSpace: 'nowrap', width: '40px', fontSize: '14px' }}>{country.percentage}%</span>
                             </div>
-                            <span style={{ whiteSpace: 'nowrap', width: '40px', fontSize: '14px' }}>{percentage}%</span>
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                        </Card>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+            <Pagination
+              currentPage={currentPage}
+              totalResults={totalResults}
+              resultsPerPage={resultsPerPage}
+              onChange={handlePageChange}
+            />
           </div>
         </div>
       )}
