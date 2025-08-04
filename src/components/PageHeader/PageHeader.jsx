@@ -108,6 +108,12 @@ const PageHeader = () => {
 		navigate('/settings/profile')
 	}
 
+	// Handle dropdown toggle for the entire user info area
+	const handleUserInfoClick = (e) => {
+		e.stopPropagation()
+		setUserMenuOpen(!userMenuOpen)
+	}
+
 	return (
 		<div className="fm-page-head">
 			<Card className="account-info-card">
@@ -149,22 +155,27 @@ const PageHeader = () => {
 						</Card>
 					)}
 
-					<div className="user">
-						{/* User info section - name and email always visible */}
-						<h4>{user?.user?.name}</h4>
-						<span>{user?.user?.email}</span>
-					</div>
-
-					{/* Separate clickable area for dropdown toggle */}
+					{/* Make the entire user name and arrow area clickable for dropdown */}
 					<div
-						className="dropdown-toggle"
-						onClick={(e) => {
-							e.stopPropagation()
-							setUserMenuOpen(!userMenuOpen)
+						className="user-dropdown-area"
+						onClick={handleUserInfoClick}
+						style={{ 
+							cursor: 'pointer', 
+							display: 'flex', 
+							alignItems: 'center',
+							padding: '0 8px'
 						}}
-						style={{ cursor: 'pointer', padding: '0 8px' }}
 					>
-						<Icon name="Caret" size={24} />
+						<div className="user">
+							{/* User info section - name and email always visible */}
+							<h4>{user?.user?.name}</h4>
+							<span>{user?.user?.email}</span>
+						</div>
+
+						{/* Arrow icon */}
+						<div style={{ marginLeft: '8px' }}>
+							<Icon name="Caret" size={24} />
+						</div>
 					</div>
 
 					{userMenuOpen && (
