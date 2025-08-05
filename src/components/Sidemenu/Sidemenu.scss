@@ -109,6 +109,78 @@
             padding: 0 1em;
             width: 90%;
             margin-bottom: 3em;
+            
+            // Create button wrapper styles
+            .create-button-wrapper {
+                position: relative;
+                
+                .btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    
+                    &.active {
+                        background-color: rgba(255, 195, 173, 0.75);
+                    }
+                }
+                
+                // Create dropdown menu styles matching Figma specs
+                .create-dropdown-menu {
+                    position: fixed;
+                    left: 265px; // Position to the right of the sidemenu
+                    bottom: 60px; // Position above the create button
+                    width: 240px; // Increased width for proper content fitting
+                    background: #FFFFFF;
+                    border: 2px solid #DAD1C5;
+                    border-radius: 8px;
+                    box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+                    z-index: 1000;
+                    overflow: hidden;
+                    
+                    .create-dropdown-item {
+                        padding: 12px 18px; // Slightly increased padding for better spacing
+                        font-size: 18px;
+                        font-family: 'Bitter', serif;
+                        font-weight: 600;
+                        line-height: 22px;
+                        cursor: pointer;
+                        color: #343037;
+                        white-space: nowrap;
+                        transition: color 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        min-height: 44px; // Ensure consistent height for all items
+                        
+                        svg {
+                            width: 20px;
+                            height: 20px;
+                            flex-shrink: 0;
+                            
+                            path {
+                                fill: #343037;
+                                transition: fill 0.2s ease;
+                            }
+                        }
+                        
+                        span {
+                            flex: 1;
+                        }
+                        
+                        &:hover {
+                            color: #FF4C49;
+                            
+                            svg path {
+                                fill: #FF4C49;
+                            }
+                        }
+                        
+                        &:not(:last-child) {
+                            border-bottom: 1px solid rgba(218, 209, 197, 0.3);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -285,6 +357,18 @@
                     margin-top: auto;
                     margin-bottom: 20px;
                     width: 80%;
+                    
+                    // Mobile dropdown adjustments
+                    .create-button-wrapper {
+                        .create-dropdown-menu {
+                            // On mobile, adjust positioning
+                            position: absolute;
+                            left: 100%;
+                            bottom: 0;
+                            margin-left: 10px;
+                            width: 240px; // Updated width for mobile too
+                        }
+                    }
                 }
             }
         }

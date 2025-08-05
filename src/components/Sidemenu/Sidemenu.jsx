@@ -24,6 +24,26 @@ const menu_items_lower = [
 	{ label: 'Refer a Friend', path: '/refer-a-friend', icon: 'ReferAFriend', disabled: true },
 ]
 
+// Create dropdown options
+const createDropdownOptions = [
+	{ 
+		label: 'Create Campaign', 
+		path: '/campaigns/new',
+		icon: 'Campaigns'
+	},
+	{ 
+		label: 'Import Contacts', 
+		path: '/subscribers/import',
+		icon: 'Contacts'
+	},
+	{ 
+		label: 'Create Automation', 
+		path: '/automations/new',
+		icon: 'Automations',
+		requiresDesktop: true
+	},
+]
+
 const Sidemenu = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
@@ -31,7 +51,9 @@ const Sidemenu = () => {
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 	const [menuOpen, setMenuOpen] = useState(false)
 	const [userMenuOpen, setUserMenuOpen] = useState(false)
+	const [createDropdownOpen, setCreateDropdownOpen] = useState(false)
 	const userMenuRef = useRef(null)
+	const createDropdownRef = useRef(null)
 
 	// Determine active menu item
 	const getActiveItem = () => {
@@ -87,6 +109,7 @@ const Sidemenu = () => {
 			if (window.innerWidth > 768) {
 				setMenuOpen(false)
 				setUserMenuOpen(false)
+				setCreateDropdownOpen(false)
 			}
 		}
 
@@ -97,6 +120,11 @@ const Sidemenu = () => {
 	// Updated click handler to close dropdowns when clicking outside
 	useEffect(() => {
 		const handleClickOutside = (e) => {
+			// Close create dropdown when clicking outside
+			if (createDropdownRef.current && !createDropdownRef.current.contains(e.target)) {
+				setCreateDropdownOpen(false)
+			}
+			
 			// Close menu when clicking outside on mobile
 			if (isMobile && menuOpen && !e.target.closest('.sidemenu')) {
 				setMenuOpen(false)
@@ -131,6 +159,33 @@ const Sidemenu = () => {
 		} else {
 			// If user is over the limit, take them to payment plan page
 			navigate('/payment-plan');
+		}
+	}
+
+	// Handle create dropdown option click
+	const handleCreateOptionClick = (option) => {
+		if (option.requiresDesktop && isMobile) {
+			PopupText.fire({
+				icon: 'warning',
+				text: 'Automation editor is not available on mobile devices. Please use a desktop to design your automations.',
+				showCancelButton: false,
+				confirmButtonText: 'OK',
+			})
+		} else if (option.path === '/campaigns/new' && isMobile) {
+			PopupText.fire({
+				icon: 'info',
+				text: 'You can create a campaign on mobile, but the campaign editor is not available. You will be able to set up campaign details and review, but design editing requires a desktop device.',
+				showCancelButton: false,
+				confirmButtonText: 'Continue',
+			}).then(() => {
+				navigate(option.path)
+				setCreateDropdownOpen(false)
+				if (isMobile) setMenuOpen(false)
+			})
+		} else {
+			navigate(option.path)
+			setCreateDropdownOpen(false)
+			if (isMobile) setMenuOpen(false)
 		}
 	}
 
@@ -246,15 +301,38 @@ const Sidemenu = () => {
 									subsLimit={account?.subscriber_limit || 1000}
 									onClick={handleSubsCounterClick}
 								/>
-								<Button 
-									style={{ width: '100%', marginTop: '15px' }} 
-									onClick={() => {
-										navigate('/campaigns/new');
-										if(isMobile) setMenuOpen(false);
-									}}
-								>
-									+ Create
-								</Button>
+								
+								{/* Create Button with Dropdown */}
+								<div className="create-button-wrapper" ref={createDropdownRef}>
+									<Button 
+										style={{ width: '100%', marginTop: '15px' }} 
+										onClick={(e) => {
+											e.stopPropagation();
+											setCreateDropdownOpen(!createDropdownOpen);
+										}}
+										className={createDropdownOpen ? 'active' : ''}
+									>
+										+ Create
+									</Button>
+									
+									{/* Create Dropdown Menu */}
+									{createDropdownOpen && (
+										<div className="create-dropdown-menu">
+											{createDropdownOptions.map((option, index) => (
+												<div 
+													key={index}
+													className="create-dropdown-item"
+													onClick={() => {
+														handleCreateOptionClick(option)
+													}}
+												>
+													<Icon name={option.icon} size={20} />
+													<span>{option.label}</span>
+												</div>
+											))}
+										</div>
+									)}
+								</div>
 							</div>
 						</>
 					)}
