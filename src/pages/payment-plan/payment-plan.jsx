@@ -9,8 +9,10 @@ import Button from "../../components/Button";
 import Icon from "../../components/Icon/Icon";
 import { ApiService } from "../../service/api-service";
 import { useAccount } from "../../context/AccountContext";
+import { useNavigate } from "react-router-dom";
 
 const PaymentPlan = () => {
+    const navigate = useNavigate();
     const [sliderValue, setSliderValue] = useState(500);
     const [paymentPlans, setPaymentPlans] = useState([]);
     const [allowedValues, setAllowedValues] = useState([]);
@@ -40,9 +42,11 @@ const PaymentPlan = () => {
         fetchData();
     }, []);
     
-    
     console.log("Rendering payment plans:", paymentPlans);
     
+    const handleGoBack = () => {
+        navigate('/billing');
+    };
 
     const stripeCheckout = async(plan_id)=>{
         console.log('stripeCheckout',plan_id,sliderValue,billingCycle)
@@ -66,23 +70,30 @@ const PaymentPlan = () => {
             })
         }
     }
+    
     return ( 
         <div className="payment-plan-component">
+            {/* Back Button */}
+            <div className="payment-plan-back-button" onClick={handleGoBack}>
+                <Icon name="Caret" />
+                Back to Billing
+            </div>
+            
             <Logo/>
             <div className="text-slider-button">
                 <h1 className="choose-plan-text">Choose your Plan</h1>
                 <h2 className="subscibers-text">How many subscribers do you have?</h2>
                 <SubscriberSlider 
-                min={500} 
-                max={20000} 
-                defaultValue={sliderValue} 
-                onChange={(v)=>{
-                    setSliderValue(v)
-                    console.log(v)
-                }} 
-                staticTooltip={true}
-                allowedValues={allowedValues} 
-/>
+                    min={500} 
+                    max={20000} 
+                    defaultValue={sliderValue} 
+                    onChange={(v)=>{
+                        setSliderValue(v)
+                        console.log(v)
+                    }} 
+                    staticTooltip={true}
+                    allowedValues={allowedValues} 
+                />
                 <div className="button-group-container">
                     <ButtonGroup
                         value={billingCycle}
@@ -90,7 +101,8 @@ const PaymentPlan = () => {
                             { value: 'monthly', label: 'Billed Monthly' },
                             { value: 'yearly', label: 'Billed Yearly' }
                         ]}
-                        onChange={(value) => setBillingCycle(value)}                    />
+                        onChange={(value) => setBillingCycle(value)}                    
+                    />
                     <p className="discount-text">Save 20% by paying Yearly</p>
                 </div>
                 {/* className="full-width-card" */}
@@ -158,7 +170,8 @@ const PaymentPlan = () => {
                     ))}
                 </div>        
             </div>
-        </div>);
+        </div>
+    );
 }
  
 export default PaymentPlan;

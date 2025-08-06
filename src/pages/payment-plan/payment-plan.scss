@@ -16,6 +16,45 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   min-height: 80vh;
   background-color: $bg-color;
   padding: 2em 1em;
+  position: relative;
+
+  // Back Button Styling
+  .payment-plan-back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-family: $secondary-font;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: #887D76;
+    z-index: 10;
+    
+    svg {
+      transform: rotate(180deg);
+      margin-right: 5px;
+    }
+    
+    &:hover {
+      color: $accent-color;
+    }
+    
+    @media (max-width: $breakpoint-md) {
+      top: 10px;
+      left: 10px;
+      font-size: 12px;
+    }
+  }
+
+  // Force tooltip visibility for SubscriberSlider component
+  .slider-container-component {
+    .tooltip {
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: block !important;
+    }
+  }
 
   .text-slider-button {
     width: 100%;
@@ -26,6 +65,10 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     gap: 1.5em;
     padding-top: 100px;
 
+    @media (max-width: $breakpoint-md) {
+      padding-top: 60px;
+    }
+
     .choose-plan-text {
       font-family: $primary-font;
       font-weight: 800;
@@ -33,6 +76,12 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       line-height: 1.2;
       color: $primary-color;
       text-align: left;
+      
+      @media (max-width: $breakpoint-md) {
+        font-size: 1.5rem;
+        text-align: center;
+        width: 100%;
+      }
     }
 
     .subscibers-text {
@@ -42,6 +91,12 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       line-height: 1.2;
       color: $primary-color;
       text-align: left;
+      
+      @media (max-width: $breakpoint-md) {
+        font-size: 1rem;
+        text-align: center;
+        width: 100%;
+      }
     }
 
     .button-group-container {
@@ -67,6 +122,10 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         font-family: $secondary-font;
         font-weight: 500;
         color: $secondary-color;
+        
+        @media (max-width: $breakpoint-md) {
+          text-align: center;
+        }
       }
     }
 
@@ -81,6 +140,11 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       gap: 1.5em;
       width: 100%;
       margin-top: 2em;
+
+      @media (max-width: $breakpoint-md) {
+        flex-direction: column;
+        gap: 1em;
+      }
 
       .card {
         background-color: #fff;
@@ -101,6 +165,11 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             max-width: 200px;
             min-width: 200px;
             margin: 3px;
+            
+            @media (max-width: $breakpoint-md) {
+              max-width: 100%;
+              min-width: auto;
+            }
           }
         }
       }
@@ -126,6 +195,10 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         .custom-contact-us {
           margin: 0 1em;
           text-align: center;
+          
+          @media (max-width: $breakpoint-md) {
+            margin: 0 0.5em;
+          }
         }
 
         .custom-plan-card {
@@ -153,6 +226,10 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           p {
             font-size: 1rem;
             margin: 0.5em 0;
+            
+            @media (max-width: $breakpoint-md) {
+              font-size: 0.9rem;
+            }
           }
         }
 
@@ -167,6 +244,10 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
             font-family: $primary-font;
             font-weight: 700;
+            
+            @media (max-width: $breakpoint-md) {
+              font-size: 1.5rem;
+            }
           }
 
           button {
@@ -200,12 +281,23 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         font-weight: 500;
         font-size: 1rem;
         color: $primary-color;
+        
+        @media (max-width: $breakpoint-md) {
+          margin-left: 16px;
+          font-size: 0.9rem;
+          line-height: 1.8;
+        }
       }
 
       h3 {
         text-align: left;
         font-family: $secondary-font;
         margin-left: 16px;
+        
+        @media (max-width: $breakpoint-md) {
+          font-size: 1rem;
+          margin-left: 8px;
+        }
       }
 
       .free-try-text {
@@ -216,11 +308,20 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         font-weight: 700;
         color: $secondary-color;
         padding: 15px 0 25px;
+        
+        @media (max-width: $breakpoint-md) {
+          font-size: 0.9rem;
+          padding: 10px 0 20px;
+        }
       }
 
       .price-text {
         font-family: $primary-font;
         padding: 10px 0;
+        
+        @media (max-width: $breakpoint-md) {
+          font-size: 1.5rem;
+        }
       }
 
       .tag-text {
@@ -230,6 +331,10 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         font-family: $primary-font;
         font-weight: 700;
         color: $secondary-color;
+        
+        @media (max-width: $breakpoint-md) {
+          font-size: 0.9rem;
+        }
       }
 
       .plan-text {
@@ -239,6 +344,10 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         font-family: $primary-font;
         font-weight: 700;
         color: $primary-color;
+        
+        @media (max-width: $breakpoint-md) {
+          font-size: 1.25rem;
+        }
       }
     }
 
