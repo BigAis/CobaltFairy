@@ -101,7 +101,7 @@ const WorkflowEmailsTable = ({
 
   return (
     <Card className="workflow-emails-wrapper" style={{ marginBottom: '30px' }}>
-      <h3 style={{ fontFamily: 'Bitter', fontSize: '18px', fontWeight: 600, margin: '0 0 15px 0' }}>Workflow Emails</h3>
+      <h3 style={{ fontFamily: 'Bitter', fontSize: '18px', fontWeight: 600,textAlign: 'left', margin: '0 0 15px 0' }}>Workflow Emails</h3>
       
       <div className="table-container" style={{ borderRadius: '8px', overflow: 'hidden' }}>
         <DataTable 
