@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import Card from '../../components/Card'
 import Stat from '../../components/Stat/Stat'
 import DoughnutChart from '../../components/DoughtnutChart/DoughtnutChart'
-import Pagination from '../../components/Pagination'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import Skeleton from 'react-loading-skeleton'
@@ -21,10 +20,8 @@ const AutomationOverview = ({ automation }) => {
   const [selectedStats, setSelectedStats] = useState([])
   const [selectedEmails, setSelectedEmails] = useState([])
   const [statsTimeFilter, setStatsTimeFilter] = useState('3months')
-  const [currentEmailClientsPage, setCurrentEmailClientsPage] = useState(1)
   const statsPerPage = 5
   const emailsPerPage = 5
-  const emailClientsPerPage = 2
 
   useEffect(() => {
     const loadAutomationStats = async () => {
@@ -48,16 +45,11 @@ const AutomationOverview = ({ automation }) => {
               Mobile: 30,
               Tablet: 10
             },
-            emailClients: [
-              { client: 'Gmail', percentage: 41 },
-              { client: 'Yahoo', percentage: 41 },
-              { client: 'Outlook', percentage: 18 },
-              { client: 'Apple Mail', percentage: 25 },
-              { client: 'Thunderbird', percentage: 12 },
-              { client: 'Hotmail', percentage: 8 },
-              { client: 'ProtonMail', percentage: 5 },
-              { client: 'Other', percentage: 15 }
-            ]
+            emailClients: {
+              Gmail: 41,
+              Yahoo: 41,
+              Outlook: 18
+            }
           }
         }
 
@@ -111,11 +103,6 @@ const AutomationOverview = ({ automation }) => {
     (currentEmailsPage - 1) * emailsPerPage,
     currentEmailsPage * emailsPerPage
   )
-
-  const paginatedEmailClients = stats?.metadata?.emailClients?.slice(
-    (currentEmailClientsPage - 1) * emailClientsPerPage,
-    currentEmailClientsPage * emailClientsPerPage
-  ) || []
 
   // Format stats for the Stat component
   const getStatsData = () => {
@@ -210,43 +197,40 @@ const AutomationOverview = ({ automation }) => {
               <div className="chart-container">
                 <DoughnutChart stats={stats} />
               </div>
-              <div className="legend">
-                <div className="legend-item">
-                  <span className="legend-color desktop"></span>
-                  <span className="legend-label">Desktop</span>
-                </div>
-                <div className="legend-item">
-                  <span className="legend-color mobile"></span>
-                  <span className="legend-label">Mobile</span>
-                </div>
-                <div className="legend-item">
-                  <span className="legend-color tablet"></span>
-                  <span className="legend-label">Tablet</span>
-                </div>
-              </div>
             </Card>
 
-            <Card className="chart-card">
+            <Card className="chart-card email-clients-card">
               <h3 className="card-title">Email Clients</h3>
-              <div className="email-clients-header">
-                <div className="client-column">Clients</div>
-                <div className="percentage-column">Subscribers</div>
-              </div>
-              {paginatedEmailClients.map((emailClient, index) => (
-                <Card key={index} className="email-client-card">
-                  <div className="email-client-row">
-                    <div className="client-name">{emailClient.client}</div>
-                    <div className="client-percentage">{emailClient.percentage}%</div>
+              <div className="email-clients">
+                <div className="email-clients-header">
+                  <div className="client-column">Clients</div>
+                  <div className="percentage-column">Subscribers</div>
+                </div>
+                {Object.entries(stats.metadata.emailClients).map(([client, percentage], index) => (
+                  <div className="email-client-row" key={index}>
+                    <div className="client-name">{client}</div>
+                    <div className="client-percentage">{percentage}%</div>
                   </div>
-                </Card>
-              ))}
-              <div className="pagination-container">
-                <Pagination 
-                  currentPage={currentEmailClientsPage}
-                  totalResults={stats?.metadata?.emailClients?.length || 0}
-                  resultsPerPage={emailClientsPerPage}
-                  onChange={setCurrentEmailClientsPage}
-                />
+                ))}
+              </div>
+              
+              {/* Pagination for Email Clients */}
+              <div className="email-clients-pagination">
+                <button className="pagination-btn">
+                  <svg width="9" height="12" viewBox="0 0 9 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.15991 1.41L3.57991 6L8.15991 10.59L6.74991 12L0.749912 6L6.74991 0L8.15991 1.41Z" fill="#100F1C" />
+                  </svg>
+                </button>
+                <span className="pagination-number active">1</span>
+                <span className="pagination-number">2</span>
+                <span className="pagination-dots">...</span>
+                <span className="pagination-number">9</span>
+                <span className="pagination-number">10</span>
+                <button className="pagination-btn">
+                  <svg width="9" height="12" viewBox="0 0 9 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0.839966 1.41L5.41997 6L0.839966 10.59L2.24997 12L8.24997 6L2.24997 0L0.839966 1.41Z" fill="#100F1C" />
+                  </svg>
+                </button>
               </div>
             </Card>
           </div>
@@ -364,40 +348,13 @@ const AutomationOverview = ({ automation }) => {
           height: 250px;
         }
         
-        .legend {
+        .email-clients-card {
           display: flex;
-          justify-content: center;
-          gap: 20px;
-          margin-top: 20px;
+          flex-direction: column;
         }
         
-        .legend-item {
-          display: flex;
-          align-items: center;
-        }
-        
-        .legend-color {
-          display: inline-block;
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          margin-right: 6px;
-        }
-        
-        .legend-color.desktop {
-          background-color: #3F51B5;
-        }
-        
-        .legend-color.mobile {
-          background-color: #03A9F4;
-        }
-        
-        .legend-color.tablet {
-          background-color: #4CDBAF;
-        }
-        
-        .legend-label {
-          font-size: 14px;
+        .email-clients {
+          flex: 1;
         }
         
         .email-clients-header {
@@ -407,35 +364,85 @@ const AutomationOverview = ({ automation }) => {
           font-weight: 500;
           color: #887D76;
           border-bottom: 1px solid rgba(218, 209, 197, 0.5);
-          margin-bottom: 10px;
-        }
-        
-        .email-client-card {
-          margin-bottom: 10px;
-          padding: 15px;
         }
         
         .email-client-row {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          padding: 15px 0;
+          border-bottom: 1px solid rgba(218, 209, 197, 0.3);
+        }
+        
+        .email-client-row:last-child {
+          border-bottom: none;
         }
         
         .client-name {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 500;
         }
         
         .client-percentage {
-          font-size: 16px;
-          font-weight: 600;
-          color: #333;
+          font-size: 14px;
+          font-weight: 500;
         }
         
-        .pagination-container {
+        .email-clients-pagination {
           display: flex;
           justify-content: center;
+          align-items: center;
+          gap: 8px;
           margin-top: 20px;
+          padding-top: 15px;
+        }
+        
+        .pagination-btn {
+          background: rgba(255, 255, 255, 0.5);
+          border: 2px solid rgba(218, 209, 197, 1);
+          border-radius: 8px;
+          padding: 7px 12px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 35px;
+          min-width: 35px;
+        }
+        
+        .pagination-btn:hover {
+          background-color: rgba(255, 255, 255, 0.7);
+          box-shadow: 0px 4px 7px 0px #0000001a;
+        }
+        
+        .pagination-number {
+          background: rgba(255, 255, 255, 0.25);
+          border: 2px solid rgba(218, 209, 197, 1);
+          border-radius: 8px;
+          padding: 7px 12px;
+          cursor: pointer;
+          min-height: 35px;
+          min-width: 35px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        
+        .pagination-number.active {
+          background-color: rgba(255, 195, 173, 0.75);
+          border: 2px solid #ff635d;
+        }
+        
+        .pagination-number:hover:not(.active) {
+          background-color: rgba(255, 255, 255, 0.7);
+          box-shadow: 0px 4px 7px 0px #0000001a;
+        }
+        
+        .pagination-dots {
+          padding: 0 8px;
+          font-size: 14px;
+          font-weight: 500;
         }
       `}</style>
     </div>
