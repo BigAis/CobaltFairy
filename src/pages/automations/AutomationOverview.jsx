@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Card from '../../components/Card'
 import Stat from '../../components/Stat/Stat'
 import DoughnutChart from '../../components/DoughtnutChart/DoughtnutChart'
+import Pagination from '../../components/Pagination'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import Skeleton from 'react-loading-skeleton'
@@ -20,8 +21,10 @@ const AutomationOverview = ({ automation }) => {
   const [selectedStats, setSelectedStats] = useState([])
   const [selectedEmails, setSelectedEmails] = useState([])
   const [statsTimeFilter, setStatsTimeFilter] = useState('3months')
+  const [currentEmailClientsPage, setCurrentEmailClientsPage] = useState(1)
   const statsPerPage = 5
   const emailsPerPage = 5
+  const emailClientsPerPage = 2
 
   useEffect(() => {
     const loadAutomationStats = async () => {
@@ -45,11 +48,16 @@ const AutomationOverview = ({ automation }) => {
               Mobile: 30,
               Tablet: 10
             },
-            emailClients: {
-              Gmail: 41,
-              Yahoo: 41,
-              Outlook: 18
-            }
+            emailClients: [
+              { client: 'Gmail', percentage: 41 },
+              { client: 'Yahoo', percentage: 41 },
+              { client: 'Outlook', percentage: 18 },
+              { client: 'Apple Mail', percentage: 25 },
+              { client: 'Thunderbird', percentage: 12 },
+              { client: 'Hotmail', percentage: 8 },
+              { client: 'ProtonMail', percentage: 5 },
+              { client: 'Other', percentage: 15 }
+            ]
           }
         }
 
@@ -104,6 +112,11 @@ const AutomationOverview = ({ automation }) => {
     currentEmailsPage * emailsPerPage
   )
 
+  const paginatedEmailClients = stats?.metadata?.emailClients?.slice(
+    (currentEmailClientsPage - 1) * emailClientsPerPage,
+    currentEmailClientsPage * emailClientsPerPage
+  ) || []
+
   // Format stats for the Stat component
   const getStatsData = () => {
     if (!stats) return [];
@@ -141,8 +154,15 @@ const AutomationOverview = ({ automation }) => {
     <div className="automation-overview">
       {loading ? (
         <>
-          <div className="stats-grid">
-            {[1, 2, 3, 4, 5, 6].map(i => (
+          <div className="stats-grid-top">
+            {[1, 2].map(i => (
+              <Card key={i} className="stat-card">
+                <Skeleton height={80} />
+              </Card>
+            ))}
+          </div>
+          <div className="stats-grid-middle">
+            {[1, 2, 3, 4].map(i => (
               <Card key={i} className="stat-card">
                 <Skeleton height={80} />
               </Card>
@@ -151,8 +171,8 @@ const AutomationOverview = ({ automation }) => {
         </>
       ) : (
         <>
-          {/* Stats Grid - 2x3 layout */}
-          <div className="stats-grid">
+          {/* Stats Grid - First row: 2 cards */}
+          <div className="stats-grid-top">
             <Card className="stat-card">
               <div className="stat-label">Completed subscribers</div>
               <div className="stat-value">{stats.subscriberStats.completed}</div>
@@ -161,6 +181,10 @@ const AutomationOverview = ({ automation }) => {
               <div className="stat-label">Subscribers in the queue</div>
               <div className="stat-value">{stats.subscriberStats.queued}</div>
             </Card>
+          </div>
+
+          {/* Stats Grid - Second row: 4 cards */}
+          <div className="stats-grid-middle">
             <Card className="stat-card">
               <div className="stat-label">Avg open rate</div>
               <div className="stat-value">{stats.subscriberStats.openRate}%</div>
@@ -204,17 +228,25 @@ const AutomationOverview = ({ automation }) => {
 
             <Card className="chart-card">
               <h3 className="card-title">Email Clients</h3>
-              <div className="email-clients">
-                <div className="email-clients-header">
-                  <div className="client-column">Clients</div>
-                  <div className="percentage-column">Subscribers</div>
-                </div>
-                {Object.entries(stats.metadata.emailClients).map(([client, percentage], index) => (
-                  <div className="email-client-row" key={index}>
-                    <div className="client-name">{client}</div>
-                    <div className="client-percentage">{percentage}%</div>
+              <div className="email-clients-header">
+                <div className="client-column">Clients</div>
+                <div className="percentage-column">Subscribers</div>
+              </div>
+              {paginatedEmailClients.map((emailClient, index) => (
+                <Card key={index} className="email-client-card">
+                  <div className="email-client-row">
+                    <div className="client-name">{emailClient.client}</div>
+                    <div className="client-percentage">{emailClient.percentage}%</div>
                   </div>
-                ))}
+                </Card>
+              ))}
+              <div className="pagination-container">
+                <Pagination 
+                  currentPage={currentEmailClientsPage}
+                  totalResults={stats?.metadata?.emailClients?.length || 0}
+                  resultsPerPage={emailClientsPerPage}
+                  onChange={setCurrentEmailClientsPage}
+                />
               </div>
             </Card>
           </div>
@@ -252,10 +284,16 @@ const AutomationOverview = ({ automation }) => {
           width: 100%;
         }
         
-        .stats-grid {
+        .stats-grid-top {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          grid-template-rows: repeat(3, auto);
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+        
+        .stats-grid-middle {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
           gap: 20px;
           margin-bottom: 30px;
         }
@@ -277,7 +315,17 @@ const AutomationOverview = ({ automation }) => {
         }
         
         @media (max-width: 768px) {
-          .stats-grid {
+          .stats-grid-top {
+            grid-template-columns: 1fr;
+          }
+          
+          .stats-grid-middle {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .stats-grid-middle {
             grid-template-columns: 1fr;
           }
         }
@@ -359,17 +407,35 @@ const AutomationOverview = ({ automation }) => {
           font-weight: 500;
           color: #887D76;
           border-bottom: 1px solid rgba(218, 209, 197, 0.5);
+          margin-bottom: 10px;
+        }
+        
+        .email-client-card {
+          margin-bottom: 10px;
+          padding: 15px;
         }
         
         .email-client-row {
           display: flex;
           justify-content: space-between;
-          padding: 10px 0;
-          border-bottom: 1px solid rgba(218, 209, 197, 0.3);
+          align-items: center;
         }
         
-        .email-client-row:last-child {
-          border-bottom: none;
+        .client-name {
+          font-size: 16px;
+          font-weight: 500;
+        }
+        
+        .client-percentage {
+          font-size: 16px;
+          font-weight: 600;
+          color: #333;
+        }
+        
+        .pagination-container {
+          display: flex;
+          justify-content: center;
+          margin-top: 20px;
         }
       `}</style>
     </div>
