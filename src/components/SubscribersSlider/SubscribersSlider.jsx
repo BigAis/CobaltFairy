@@ -44,7 +44,7 @@ const SubscriberSlider = ({ min, max, step, onChange, defaultValue, staticToolti
             const left = ((value - min) / (max - min)) * (range.clientWidth - thumbWidth) + thumbWidth / 2;
             setTooltipLeft(left);
         }
-    }, [value]);
+    }, [value, min, max]);
 
     return (
         <div className="slider-container-component">
@@ -69,6 +69,8 @@ const SubscriberSlider = ({ min, max, step, onChange, defaultValue, staticToolti
                     style={{
                         display: showTooltip || staticTooltip ? 'block' : 'none',
                         left: `${tooltipLeft}px`,
+                        visibility: 'visible', // Ensure tooltip is always visible
+                        opacity: 1 // Ensure tooltip is always opaque
                     }}
                 >
                     {formatNum(value)}
@@ -85,6 +87,7 @@ SubscriberSlider.propTypes = {
     defaultValue: PropTypes.number,
     staticTooltip: PropTypes.bool,
     allowedValues: PropTypes.arrayOf(PropTypes.number).isRequired,
+    onChange: PropTypes.func.isRequired,
 };
 
 SubscriberSlider.defaultProps = {

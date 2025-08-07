@@ -47,14 +47,7 @@ $card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
   }
 
-  // Force tooltip visibility for SubscriberSlider component
-  .slider-container-component {
-    .tooltip {
-      visibility: visible !important;
-      opacity: 1 !important;
-      display: block !important;
-    }
-  }
+  // Removed tooltip override - fixed directly in component
 
   .text-slider-button {
     width: 100%;
