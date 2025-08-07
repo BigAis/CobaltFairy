@@ -210,20 +210,7 @@ const AutomationOverview = ({ automation }) => {
               <div className="chart-container">
                 <DoughnutChart stats={stats} />
               </div>
-              <div className="legend">
-                <div className="legend-item">
-                  <span className="legend-color desktop"></span>
-                  <span className="legend-label">Desktop</span>
-                </div>
-                <div className="legend-item">
-                  <span className="legend-color mobile"></span>
-                  <span className="legend-label">Mobile</span>
-                </div>
-                <div className="legend-item">
-                  <span className="legend-color tablet"></span>
-                  <span className="legend-label">Tablet</span>
-                </div>
-              </div>
+              <div className="legend"></div>
             </Card>
 
             <Card className="chart-card">
