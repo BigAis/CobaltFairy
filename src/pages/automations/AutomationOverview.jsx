@@ -293,6 +293,7 @@ const AutomationOverview = ({ automation }) => {
           color: #887D76;
           font-size: 14px;
           margin-bottom: 10px;
+          text-align: left;
         }
         
         .stat-value {
@@ -342,6 +343,7 @@ const AutomationOverview = ({ automation }) => {
           font-weight: 600;
           margin-bottom: 20px;
           color: #333;
+          text-align: left;
         }
         
         .chart-container {
