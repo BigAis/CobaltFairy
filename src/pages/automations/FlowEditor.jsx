@@ -183,12 +183,43 @@ const FlowEditor = () => {
 		}
 	}
 
+	// Update the loadTemplates function in FlowEditor.jsx
 	const loadTemplates = async () => {
 		if (!user || !user.jwt || !account) return;
 		
 		try {
-			let resp = await ApiService.get(`templates?polulate=*&filters[account]=${account.id}`, user.jwt)
-			setTemplates(resp.data.data)
+			let allTemplates = [];
+			let currentPage = 1;
+			let hasMore = true;
+			const pageSize = 50; // Φέρνουμε 50 templates ανά request
+			
+			// Φέρνουμε όλα τα templates με pagination
+			while (hasMore) {
+				console.log(`Loading templates page ${currentPage}...`);
+				
+				let resp = await ApiService.get(
+					`templates?populate=*&filters[account]=${account.id}&pagination[pageSize]=${pageSize}&pagination[page]=${currentPage}&sort[createdAt]=desc`,
+					user.jwt
+				);
+				
+				if (resp.data && resp.data.data && resp.data.data.length > 0) {
+					allTemplates = [...allTemplates, ...resp.data.data];
+					
+					// Ελέγχουμε αν υπάρχουν άλλες σελίδες
+					const pagination = resp.data.meta?.pagination;
+					if (pagination && currentPage >= pagination.pageCount) {
+						hasMore = false;
+					} else {
+						currentPage++;
+					}
+				} else {
+					hasMore = false;
+				}
+			}
+			
+			console.log(`Loaded ${allTemplates.length} templates total`);
+			setTemplates(allTemplates);
+			
 		} catch (error) {
 			console.error("Error loading templates:", error);
 		}

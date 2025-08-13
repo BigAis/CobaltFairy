@@ -205,7 +205,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				</li>
 			)
 			break
-		case 'email':
+	case 'email':
 			// Use safe access for node data
 			const imageUrl = nodeData.tplUuid ? `https://cdn.cobaltfairy.com/fairymail/template/img/${nodeData.tplUuid}` : ''
 			content = (
@@ -227,9 +227,17 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									className={'delay-dropdown'}
 									style={{ width: '350px' }}
 									disabled={isReadOnly}
+									searchable={true}
 									options={(data.templates || []).map((t) => {
 										return { label: t.attributes.name, value: t.id, uuid: t.attributes.uuid }
 									})}
+									selectedValue={
+										nodeData.tplId ? 
+										(data.templates || [])
+											.filter(t => t.id === nodeData.tplId)
+											.map(t => ({ label: t.attributes.name, value: t.id, uuid: t.attributes.uuid }))[0] || null
+										: null
+									}
 									onOptionSelect={(v) => {
 										console.log('data.templates', data.templates)
 										const updatedNode = {

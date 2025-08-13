@@ -118,6 +118,7 @@
 		z-index: 1;
 	}
 
+	// Update Dropdown.scss to handle larger lists better
 	.dropdown-menu {
 		position: absolute;
 		top: 100%;
@@ -128,11 +129,30 @@
 		box-shadow: 0px 4px 7px 0px #0000001a;
 		width: 100%;
 		z-index: 10;
-		max-height: 200px;
+		max-height: 300px; // Αυξάνουμε το max-height από 200px σε 300px
 		min-width: 150px;
 		overflow-y: auto;
 		margin-top: 10px;
 		text-align: left;
+
+		// Βελτιώνουμε το scrolling για μεγάλες λίστες
+		&::-webkit-scrollbar {
+			width: 8px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: 4px;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(218, 209, 197, 0.6);
+			border-radius: 4px;
+			
+			&:hover {
+				background: rgba(218, 209, 197, 0.8);
+			}
+		}
 
 		.dropdown-item {
 			padding: 10px 18px;
@@ -144,6 +164,9 @@
 			white-space: nowrap;
 			max-width: 100% !important;
 			overflow: hidden;
+			
+			// Καλύτερη εμφάνιση για πολλά items
+			border-bottom: 1px solid rgba(218, 209, 197, 0.1);
 
 			&:hover {
 				background-color: rgba(255, 255, 255, 0.7);
@@ -153,6 +176,36 @@
 				font-weight: 700;
 				background-color: rgba(218, 209, 197, 0.2);
 			}
+
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+	}
+
+	.dropdown-search-input {
+		width: calc(100% - 20px);
+		margin: 8px auto;
+		padding: 8px 10px;
+		display: block;
+		border: 1px solid rgba(218, 209, 197, 1);
+		border-radius: 6px;
+		font-size: 14px;
+		font-family: 'Inter', sans-serif;
+		box-sizing: border-box;
+		outline: none;
+		background: #fff;
+		position: sticky; // Κάνουμε το search field sticky στο top
+		top: 0;
+		z-index: 1;
+
+		&::placeholder {
+			color: #999;
+		}
+
+		&:focus {
+			border-color: #ff635d;
+			box-shadow: 0 0 0 2px rgba(255, 99, 93, 0.1);
 		}
 	}
 
