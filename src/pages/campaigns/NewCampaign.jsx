@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
@@ -55,6 +55,9 @@ const NewCampaign = () => {
 	// const [campaignName, setCampaignName] = useState('')
 	// const [subject, setSubject] = useState('')
 	// const [subjectB, setSubjectB] = useState('')
+	const subjectInputRef = useRef(null)
+	const subjectBInputRef = useRef(null)
+	
 	const [step, setStep] = useState(location.state ? location.state.step : 2)
 	const [groups, setGroups] = useState([])
 	const [selectedGroups, setSelectedGroups] = useState([])
@@ -63,6 +66,111 @@ const NewCampaign = () => {
 	const [selectedFilterTrigger, setSelectedFilterTrigger] = useState(null)
 	const [scheduleCampaign, setScheduleCampaign] = useState(false)
 	const [errors, setErrors] = useState({})
+
+	// Helper to insert placeholder at cursor
+	const insertAtCursor = (inputRef, textToInsert) => {
+		if (!inputRef.current) return
+
+		const input = inputRef.current
+		const start = input.selectionStart
+		const end = input.selectionEnd
+		const currentValue = input.value
+
+		const newValue = currentValue.slice(0, start) + textToInsert + currentValue.slice(end)
+		input.value = newValue
+
+		const newCursorPosition = start + textToInsert.length
+		setTimeout(() => {
+			input.setSelectionRange(newCursorPosition, newCursorPosition)
+			input.focus()
+		}, 0)
+
+		return newValue
+	}
+
+	// Popup for selecting personalization
+	const showPersonalizationPopup = (isSubjectB = false) => {
+		const inputRef = isSubjectB ? subjectBInputRef : subjectInputRef
+
+		PopupText.fire({
+			icon: 'info',
+			text: '',
+			html: (
+				<div style={{ textAlign: 'center' }}>
+					<p style={{ marginBottom: '16px', color: '#887D76', fontSize: '14px' }}>Choose the personalization placeholder you'd like:</p>
+					<div style={{ display: 'flex', gap: '16px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+						<span
+							className="chip-placeholder"
+							style={{
+								border: '2px solid #ff635d',
+								backgroundColor: '#ffc3ad80',
+								padding: '.6em 1em',
+								borderRadius: '50px',
+								fontSize: '12px',
+								cursor: 'pointer',
+								display: 'inline-block',
+								transition: 'all 0.2s ease',
+							}}
+							onMouseOver={(e) => {
+								e.target.style.backgroundColor = '#ffc3ad'
+								e.target.style.transform = 'scale(1.05)'
+							}}
+							onMouseOut={(e) => {
+								e.target.style.backgroundColor = '#ffc3ad80'
+								e.target.style.transform = 'scale(1)'
+							}}
+							onClick={() => {
+								const newValue = insertAtCursor(inputRef, '{{name}}')
+								if (isSubjectB) {
+									setCurrentCampaign((prevState) => ({ ...prevState, subject_b: newValue }))
+								} else {
+									setCurrentCampaign((prevState) => ({ ...prevState, subject: newValue }))
+								}
+								PopupText.close()
+							}}
+						>
+							{'{{name}}'}
+						</span>
+						<span
+							className="chip-placeholder"
+							style={{
+								border: '2px solid #ff635d',
+								backgroundColor: '#ffc3ad80',
+								padding: '.6em 1em',
+								borderRadius: '50px',
+								fontSize: '12px',
+								cursor: 'pointer',
+								display: 'inline-block',
+								transition: 'all 0.2s ease',
+							}}
+							onMouseOver={(e) => {
+								e.target.style.backgroundColor = '#ffc3ad'
+								e.target.style.transform = 'scale(1.05)'
+							}}
+							onMouseOut={(e) => {
+								e.target.style.backgroundColor = '#ffc3ad80'
+								e.target.style.transform = 'scale(1)'
+							}}
+							onClick={() => {
+								const newValue = insertAtCursor(inputRef, '{{email}}')
+								if (isSubjectB) {
+									setCurrentCampaign((prevState) => ({ ...prevState, subject_b: newValue }))
+								} else {
+									setCurrentCampaign((prevState) => ({ ...prevState, subject: newValue }))
+								}
+								PopupText.close()
+							}}
+						>
+							{'{{email}}'}
+						</span>
+					</div>
+				</div>
+			),
+			showConfirmButton: false,
+			showCancelButton: true,
+			cancelButtonText: 'Close',
+		})
+	}
 
 	const [abSplit, setAbSplit] = useState((currentCampaign?.type === 'absplit' ? true : false) || false)
 
@@ -557,52 +665,23 @@ const NewCampaign = () => {
 									<div className="new-campaign-left flex-1 d-flex flex-column gap-20">
 										<h1 className="campaign-title">Campaign Details</h1>
 										<InputText value={currentCampaign?.name} label={'Campaign Title'} onChange={(e) => setCurrentCampaign({ ...currentCampaign, name: e.target.value })} />
-										<InputText
-											label="Subject"
-											icon="Emoji"
-											value={currentCampaign?.subject}
-											onChange={(e) => setCurrentCampaign({ ...currentCampaign, subject: e.target.value })}
-											emojiPicker={true}
-											hasError={!!errors.subject}
-											errorMessage={errors.subject}
-										/>
+																<InputText
+							ref={subjectInputRef}
+							label="Subject"
+							icon="Emoji"
+							value={currentCampaign?.subject}
+							onChange={(e) => setCurrentCampaign({ ...currentCampaign, subject: e.target.value })}
+							emojiPicker={true}
+							hasError={!!errors.subject}
+							errorMessage={errors.subject}
+						/>
 
 										<div className="d-flex align-items-center gap-5" style={{ marginTop: '-20px' }}>
 											<Icon name={'Plus'} />
 											<p
 												style={{ cursor: 'pointer' }}
 												onClick={() => {
-													PopupText.fire({
-														icon: 'info',
-														html: (
-															<div>
-																<span
-																	style={{ cursor: 'pointer' }}
-																	onClick={() => {
-																		setCurrentCampaign((prevState) => ({
-																			...prevState,
-																			subject: `${prevState.subject} {{name}}`,
-																		}))
-																		PopupText.close()
-																	}}
-																>
-																	{'{{name}}'}
-																</span>
-																<span
-																	style={{ cursor: 'pointer' }}
-																	onClick={() => {
-																		setCurrentCampaign((prevState) => ({
-																			...prevState,
-																			subject: `${prevState.subject} {{email}}`,
-																		}))
-																		PopupText.close()
-																	}}
-																>
-																	{' {{email}}'}
-																</span>
-															</div>
-														),
-													})
+													showPersonalizationPopup()
 												}}
 											>
 												Add Personalization
@@ -610,51 +689,22 @@ const NewCampaign = () => {
 										</div>
 										{abSplit && (
 											<>
-												<InputText
-													value={currentCampaign?.subject_b}
-													label={'Subject B'}
-													icon={'Emoji'}
-													emojiPicker={true}
-													onChange={(e) => setCurrentCampaign({ ...currentCampaign, subject_b: e.target.value })}
-													hasError={!!errors.subjectB}
-													errorMessage={errors.subjectB}
-												/>
+																					<InputText
+										ref={subjectBInputRef}
+										value={currentCampaign?.subject_b}
+										label={'Subject B'}
+										icon={'Emoji'}
+										emojiPicker={true}
+										onChange={(e) => setCurrentCampaign({ ...currentCampaign, subject_b: e.target.value })}
+										hasError={!!errors.subjectB}
+										errorMessage={errors.subjectB}
+									/>
 												<div className="d-flex align-items-center" style={{ marginTop: '-20px' }}>
 													<Icon name={'Plus'} />
 													<p
 														style={{ cursor: 'pointer' }}
 														onClick={() => {
-															PopupText.fire({
-																icon: 'info',
-																html: (
-																	<div>
-																		<span
-																			style={{ cursor: 'pointer' }}
-																			onClick={() => {
-																				setCurrentCampaign((prevState) => ({
-																					...prevState,
-																					subject_b: `${prevState.subject_b} {{name}}`,
-																				}))
-																				PopupText.close()
-																			}}
-																		>
-																			{'{{name}}'}
-																		</span>
-																		<span
-																			style={{ cursor: 'pointer' }}
-																			onClick={() => {
-																				setCurrentCampaign((prevState) => ({
-																					...prevState,
-																					subject_b: `${prevState.subject_b} {{email}}`,
-																				}))
-																				PopupText.close()
-																			}}
-																		>
-																			{' {{email}}'}
-																		</span>
-																	</div>
-																),
-															})
+															showPersonalizationPopup(true)
 														}}
 													>
 														Add Personalization

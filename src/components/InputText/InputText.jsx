@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, forwardRef } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import Icon from '../Icon/Icon'
 import './InputText.scss'
 import EmojiPicker from 'emoji-picker-react'
 
-const InputText = ({
+const InputText = forwardRef(({
 	value,
 	onChange,
 	placeholder,
@@ -22,7 +22,7 @@ const InputText = ({
 	type = 'text',
 	passwordToggle = false,
 	...props
-}) => {
+}, ref) => {
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 	const [showPassword, setShowPassword] = useState(false)
 
@@ -96,6 +96,7 @@ const InputText = ({
 						</div>
 					)}
 					<input
+						ref={ref}
 						style={{ paddingRight: emojiPicker || passwordToggle ? '40px' : '' }}
 						type={getInputType()}
 						placeholder={label ? '' : placeholder}
@@ -129,7 +130,7 @@ const InputText = ({
 			)}
 		</>
 	)
-}
+})
 
 InputText.propTypes = {
 	value: PropTypes.string.isRequired,
