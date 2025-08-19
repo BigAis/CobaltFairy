@@ -526,65 +526,69 @@ const FlowEditor = () => {
 	];
 	
 	// Handler for additional change (dropdown selection)
-	const handleAdditionalChange = (selectedOptions) => {
-		if (!selectedNode) return;
-		
-		// Check if selectedOptions is an array (isMulti) or a single object
-		if (!Array.isArray(selectedOptions)) {
-			selectedOptions = [selectedOptions];
-		}
+			const handleAdditionalChange = (selectedOptions) => {
+			if (!selectedNode) return;
+			
+			// Check if selectedOptions is an array (isMulti) or a single object
+			if (!Array.isArray(selectedOptions)) {
+				selectedOptions = [selectedOptions];
+			}
 
-		let selectedValue = selectedOptions.length > 0 ? selectedOptions.map((option) => option?.value) : [];
-		let selectedLabel = selectedOptions.length > 0 ? selectedOptions.map((option) => option?.label) : [];
-		let triggerType;
-		
-		if (!selectedNode.name) selectedNode.name = selectedNode.type;
-		
-		switch (selectedNode.name) {
-			case 'when-user-subscribes':
-				triggerType = 'group';
-				setHasTrigger(true);
-				break;
-			case 'when-user-opens-campaign':
-				triggerType = 'cmp';
-				setHasTrigger(true);
-				break;
-			case 'when-user-clicks-link':
-				triggerType = 'link';
-				setHasTrigger(true);
-				break;
-			case 'delay':
-				selectedValue = selectedValue[0];
-				triggerType = 'delay';
-				if (['days', 'hours'].includes(selectedValue)) triggerType = 'delayValue';
-				break;
-			case 'copy-to-group':
-			case 'move-to-group':
-			case 'remove-from-group':
-				triggerType = 'group';
-				break;
-			case 'workflow-activity':
-				triggerType = 'email_node_id';
-				selectedValue = selectedValue[0];
-				break;
-			case 'cmp-activity':
-				triggerType = 'cmp';
-				selectedValue = selectedValue[0];
-				break;
-			default:
-				break;
-		}
-		
-		let newNode = { 
-			...selectedNode, 
-			data: { ...(selectedNode.data || {}), [triggerType]: selectedValue }, 
-			meta: { ...(selectedNode.meta || {}), label: selectedLabel && selectedLabel[0] ? selectedLabel[0] : '' } 
+			let selectedValue = selectedOptions.length > 0 ? selectedOptions.map((option) => option?.value) : [];
+			let selectedLabel = selectedOptions.length > 0 ? selectedOptions.map((option) => option?.label) : [];
+			let triggerType;
+			
+			if (!selectedNode.name) selectedNode.name = selectedNode.type;
+			
+			switch (selectedNode.name) {
+				case 'when-user-subscribes':
+					triggerType = 'group';
+					setHasTrigger(true);
+					break;
+				case 'when-user-opens-campaign':
+					triggerType = 'cmp';
+					selectedValue = selectedValue[0];
+					selectedLabel = selectedLabel[0];
+					setHasTrigger(true);
+					break;
+				case 'when-user-clicks-link':
+					triggerType = 'link';
+					selectedValue = selectedValue[0];
+					selectedLabel = selectedLabel[0];
+					setHasTrigger(true);
+					break;
+				case 'delay':
+					selectedValue = selectedValue[0];
+					triggerType = 'delay';
+					if (['days', 'hours'].includes(selectedValue)) triggerType = 'delayValue';
+					break;
+				case 'copy-to-group':
+				case 'move-to-group':
+				case 'remove-from-group':
+					triggerType = 'group';
+					break;
+				case 'workflow-activity':
+					triggerType = 'email_node_id';
+					selectedValue = selectedValue[0];
+					break;
+				case 'cmp-activity':
+					triggerType = 'cmp';
+					selectedValue = selectedValue[0];
+					break;
+				default:
+					break;
+			}
+			
+			let newNode = { 
+				...selectedNode, 
+				data: { ...(selectedNode.data || {}), [triggerType]: selectedValue }, 
+				meta: { ...(selectedNode.meta || {}), label: selectedLabel } 
+			};
+			
+			const updatedNodes = nodes.map((node) => (node.id === selectedNode.id ? newNode : node));
+			setNodes(updatedNodes);
+			setSelectedNode(newNode);
 		};
-		
-		const updatedNodes = nodes.map((node) => (node.id === selectedNode.id ? newNode : node));
-		setNodes(updatedNodes);
-		setSelectedNode(newNode);
-	};
 	
 	// Handler for trigger select change
 	const handleTriggerSelectChange = (ev) => {
@@ -801,35 +805,36 @@ const FlowEditor = () => {
 		}
 		
 		switch (node.type) {
-			case 'trigger':
-				if (!node.name || !node.name.length > 0) {
-					console.error('Trigger node missing name');
-					result = false;
-				} else {
-					switch (node.name) {
-						case 'when-user-subscribes':
-							if (!node.data.group || !node.data.group[0] || !node.data.group.length > 0) {
-								console.error('Trigger node missing group data');
-								result = false;
+								case 'trigger':
+						if (!node.name || !node.name.length > 0) {
+							console.error('Trigger node missing name');
+							result = false;
+						} else {
+							switch (node.name) {
+								case 'when-user-subscribes':
+									if (!node.data.group || !Array.isArray(node.data.group) || node.data.group.length === 0) {
+										console.error('Trigger node missing group data');
+										result = false;
+									}
+									break;
+								case 'when-user-opens-campaign':
+									if (!node.data.cmp) {
+										console.error('Trigger node missing campaign data');
+										result = false;
+									}
+									break;
+								case 'when-user-clicks-link':
+									if (!node.data.link) {
+										console.error('Trigger node missing link data');
+										result = false;
+									}
+									break;
+								default:
+									console.error('Unknown trigger type:', node.name);
+									result = false;
 							}
-							break;
-						case 'when-user-opens-campaign':
-							if (!node.data.cmp || !node.data.cmp[0] || !node.data.cmp.length > 0) {
-								console.error('Trigger node missing campaign data');
-								result = false;
-							}
-							break;
-						case 'when-user-clicks-link':
-							if (!node.data.link || !node.data.link[0] || !node.data.link.length > 0) {
-								console.error('Trigger node missing link data');
-								result = false;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-				break;
+						}
+						break;
 			case 'action':
 				if (!node.name || !node.name.length > 0) {
 					console.error('Action node missing name');
@@ -1454,62 +1459,14 @@ const FlowEditor = () => {
 									<br></br>
 								</div>
 							)}
-							{selectedNode && selectedNode.type === 'trigger' && (
-								<div style={{ flexGrow: '1' }}>
-									{/* Render the additional select based on the trigger option */}
-									{selectedNode.name === 'when-user-subscribes' && (
-										<>{/* <h4 style={{fontFamily:'Inter',fontSize:'16px', textAlign:'left', marginBottom:'10px'}}>Select a group</h4> */}</>
-									)}
-									{selectedNode.name === 'when-user-opens-campaign' && (
-										<Select
-											onChange={handleAdditionalChange}
-											value={avlCampaigns.filter((cmp) => selectedNode.data?.cmp?.includes(cmp.value))}
-											options={avlCampaigns}
-											styles={{
-												option: (provided) => ({
-													...provided,
-													color: 'black',
-												}),
-												control: (provided) => ({
-													...provided,
-													color: 'black',
-												}),
-												singleValue: (provided) => ({
-													...provided,
-													color: 'black',
-												}),
-											}}
-											className="form-control form-control-lg"
-											placeholder="Select a campaign" // Default placeholder for additional select
-										/>
-									)}
-
-									{selectedNode.name === 'when-user-clicks-link' && (
-										<Select
-											onChange={handleAdditionalChange}
-											value={cmpLinks.filter((cmp) => selectedNode.data?.link?.includes(cmp.value))}
-											options={cmpLinks}
-											isSearchable
-											styles={{
-												option: (provided) => ({
-													...provided,
-													color: 'black',
-												}),
-												control: (provided) => ({
-													...provided,
-													color: 'black',
-												}),
-												singleValue: (provided) => ({
-													...provided,
-													color: 'black',
-												}),
-											}}
-											className="form-control form-control-lg"
-											placeholder="Select a link" // Default placeholder for additional select
-										/>
-									)}
-								</div>
-							)}
+															{selectedNode && selectedNode.type === 'trigger' && (
+									<div style={{ flexGrow: '1' }}>
+										{/* NO DROPDOWNS HERE - triggers configure themselves in their nodes */}
+										<p style={{ textAlign: 'center', color: '#887D76', fontStyle: 'italic' }}>
+											Configure this trigger using the dropdown in the trigger node above.
+										</p>
+									</div>
+								)}
 
 							{selectedNode && selectedNode.type === 'action' && (
 								<div style={{ flexGrow: '1' }}>

@@ -175,8 +175,17 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									icon={'Plus'}
 									options={data.groups || []}
 									disabled={isReadOnly}
+									selectedValue={
+										nodeData.group && data.groups ? 
+											(data.groups.find((g) => Array.isArray(nodeData.group) ? nodeData.group.includes(g.value) : nodeData.group === g.value) || null) : null
+									}
 									onOptionSelect={(value) => {
-										handleAdditionalChange(data.groups.filter((g) => g.value == value.value))
+										const updatedNode = { 
+											...node, 
+											data: { ...nodeData, group: [value.value] }, 
+											meta: { ...nodeMeta, label: value.label } 
+										};
+										onUpdate(updatedNode);
 									}}
 								>
 									{nodeMeta.label ? nodeMeta.label : 'Select a group'}
@@ -187,8 +196,17 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									icon={'Plus'}
 									options={data.avlCampaigns || []}
 									disabled={isReadOnly}
+									selectedValue={
+										nodeData.cmp && data.avlCampaigns ? 
+											(data.avlCampaigns.find((c) => c.value === nodeData.cmp) || null) : null
+									}
 									onOptionSelect={(value) => {
-										handleAdditionalChange([value])
+										const updatedNode = { 
+											...node, 
+											data: { ...nodeData, cmp: value.value }, 
+											meta: { ...nodeMeta, label: value.label } 
+										};
+										onUpdate(updatedNode);
 									}}
 								>
 									{nodeMeta.label ? nodeMeta.label : 'Select a campaign'}
@@ -199,25 +217,24 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 									icon={'Plus'}
 									options={data.cmpLinks || []}
 									disabled={isReadOnly}
+									searchable={true}
+									selectedValue={
+										nodeData.link && data.cmpLinks ? 
+											(data.cmpLinks.find((l) => l.value === nodeData.link) || null) : null
+									}
 									onOptionSelect={(value) => {
-										handleAdditionalChange([value])
+										const updatedNode = { 
+											...node, 
+											data: { ...nodeData, link: value.value }, 
+											meta: { ...nodeMeta, label: value.label } 
+										};
+										onUpdate(updatedNode);
 									}}
 								>
 									{nodeMeta.label ? nodeMeta.label : 'Select a link'}
 								</Dropdown>
 							)}
-							{!node.name && (
-								<Dropdown
-									icon={'Plus'}
-									options={data.groups || []}
-									disabled={isReadOnly}
-									onOptionSelect={(value) => {
-										handleAdditionalChange(data.groups.filter((g) => g.value == value.value))
-									}}
-								>
-									Select a group
-								</Dropdown>
-							)}
+
 						</Card>
 					</div>
 					<div className="d-flex flex-column align-items-center">
