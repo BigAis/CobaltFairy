@@ -167,18 +167,57 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 				>
 					<div className="automation-node-vertical-line"></div>
 					<div className="d-flex flex-column automation-node-content-wrapper">
+						{!isReadOnly && <Icon name="Close" className="close" onClick={handleRemove} />}
 						<Card className="automation-node-content" style={{ padding: '1.5rem 2.5rem' }}>
 							<h4 className="node-type">{triggerOption?.label || 'Select a trigger'}</h4>
-							<Dropdown
-								icon={'Plus'}
-								options={data.groups || []}
-								disabled={isReadOnly}
-								onOptionSelect={(value) => {
-									handleAdditionalChange(data.groups.filter((g) => g.value == value.value))
-								}}
-							>
-								{nodeMeta.label ? nodeMeta.label : 'Select a group'}
-							</Dropdown>
+							{node.name === 'when-user-subscribes' && (
+								<Dropdown
+									icon={'Plus'}
+									options={data.groups || []}
+									disabled={isReadOnly}
+									onOptionSelect={(value) => {
+										handleAdditionalChange(data.groups.filter((g) => g.value == value.value))
+									}}
+								>
+									{nodeMeta.label ? nodeMeta.label : 'Select a group'}
+								</Dropdown>
+							)}
+							{node.name === 'when-user-opens-campaign' && (
+								<Dropdown
+									icon={'Plus'}
+									options={data.avlCampaigns || []}
+									disabled={isReadOnly}
+									onOptionSelect={(value) => {
+										handleAdditionalChange([value])
+									}}
+								>
+									{nodeMeta.label ? nodeMeta.label : 'Select a campaign'}
+								</Dropdown>
+							)}
+							{node.name === 'when-user-clicks-link' && (
+								<Dropdown
+									icon={'Plus'}
+									options={data.cmpLinks || []}
+									disabled={isReadOnly}
+									onOptionSelect={(value) => {
+										handleAdditionalChange([value])
+									}}
+								>
+									{nodeMeta.label ? nodeMeta.label : 'Select a link'}
+								</Dropdown>
+							)}
+							{!node.name && (
+								<Dropdown
+									icon={'Plus'}
+									options={data.groups || []}
+									disabled={isReadOnly}
+									onOptionSelect={(value) => {
+										handleAdditionalChange(data.groups.filter((g) => g.value == value.value))
+									}}
+								>
+									Select a group
+								</Dropdown>
+							)}
 						</Card>
 					</div>
 					<div className="d-flex flex-column align-items-center">
@@ -810,19 +849,25 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 							{/* START OF LEFT LEG (true) */}
 							<div style={{ alignItems: 'center', display: 'flex', flexDirection: 'column', marginLeft: '-40px' }}>
 								<div className="automation-node-vertical-line"></div>
-								<Card
-									style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
-									onDrop={(e) => {
-										e.preventDefault()
-										const type = e.dataTransfer.getData('text/plain')
-										handleAdd(type)
-									}}
-									onDragOver={(e) => {
-										e.preventDefault()
-									}}
-								>
-									<Icon name="Check" />
-								</Card>
+								{!isReadOnly ? (
+									<Card
+										style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
+										onDrop={(e) => {
+											e.preventDefault()
+											const type = e.dataTransfer.getData('text/plain')
+											handleAdd(type)
+										}}
+										onDragOver={(e) => {
+											e.preventDefault()
+										}}
+									>
+										<Icon name="Check" />
+									</Card>
+								) : (
+									<div style={{ padding: '1em', minHeight: 0, minWidth: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+										<Icon name="Check" />
+									</div>
+								)}
 								{children && Array.isArray(children[0]) && children[0].length > 0 && <div className="automation-node-vertical-line"></div>}
 								<ul style={{ listStyleType: 'none', display: 'flex', color: 'black', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: 0, padding: 0 }}>
 									{children &&
@@ -855,6 +900,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 														setSideBarShown={setSideBarShown}
 														data={data}
 														onUpdate={onUpdate}
+														isReadOnly={isReadOnly}
 													/>
 												);
 											}
@@ -866,19 +912,25 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 							{/* START OF RIGHT LEG (true) */}
 							<div className="d-flex flex-column align-items-end" style={{ alignItems: 'center', marginRight: '-40px' }}>
 								<div className="automation-node-vertical-line"></div>
-								<Card
-									style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
-									onDrop={(e) => {
-										e.preventDefault()
-										const type = e.dataTransfer.getData('text/plain')
-										handleAdd(type, 1)
-									}}
-									onDragOver={(e) => {
-										e.preventDefault()
-									}}
-								>
-									<Icon name="Close" />
-								</Card>
+								{!isReadOnly ? (
+									<Card
+										style={{ padding: '1em', minHeight: 0, border: '2px dashed #dad1c5', minWidth: '80px' }}
+										onDrop={(e) => {
+											e.preventDefault()
+											const type = e.dataTransfer.getData('text/plain')
+											handleAdd(type, 1)
+										}}
+										onDragOver={(e) => {
+											e.preventDefault()
+										}}
+									>
+										<Icon name="Close" />
+									</Card>
+								) : (
+									<div style={{ padding: '1em', minHeight: 0, minWidth: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+										<Icon name="Close" />
+									</div>
+								)}
 
 								{children && Array.isArray(children[1]) && children[1].length > 0 && <div className="automation-node-vertical-line"></div>}
 
@@ -913,6 +965,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 														getChildrenOfCondition={getChildrenOfCondition}
 														handleAdditionalChange={handleAdditionalChange}
 														onUpdate={onUpdate}
+														isReadOnly={isReadOnly}
 													/>
 												);
 											}

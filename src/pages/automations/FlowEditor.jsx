@@ -367,6 +367,16 @@ const FlowEditor = () => {
 			return false;
 		}
 		
+		// Check if we have a trigger
+		if (!hasTrigger || nodes.length === 0) {
+			PopupText.fire({ 
+				icon: 'warning', 
+				text: 'Your automation must start with a trigger. Please add a trigger first.', 
+				showCancelButton: false 
+			});
+			return false;
+		}
+		
 		// Log before validation
 		console.log("Starting validation check. Nodes:", nodes);
 		
@@ -460,6 +470,12 @@ const FlowEditor = () => {
 		const newNode = { id: maxid + 1, type, input: [{ id: input }], output: [] }
 		if (name && name.length > 0) {
 			newNode.name = name
+		}
+		// Special handling for triggers
+		if (type === 'trigger') {
+			setHasTrigger(true)
+			// Trigger nodes start with input 0 (no parent)
+			newNode.input = [{ id: 0 }]
 		}
 		let tmp = nodes
 		tmp.forEach((n, i) => {
@@ -700,9 +716,28 @@ const FlowEditor = () => {
 	}
 	
 	const removeNode = async (node) => {
-		let res = await PopupText.fire({ icon: 'question', text: 'Are you sure you want to remove this node?', showCancelButton: true, focusCancel: true })
+		let res = await PopupText.fire({ 
+			icon: 'question', 
+			text: 'Are you sure you want to remove this node?', 
+			showCancelButton: true, 
+			focusCancel: true 
+		})
+		
 		if (res.isConfirmed) {
-			getNodesToRemove(node, nodes)
+			// Check if this is a trigger node
+			const nodeToRemove = typeof node === 'object' ? node : nodes.find(n => n.id === node);
+			
+			if (nodeToRemove && nodeToRemove.type === 'trigger') {
+				// If removing a trigger, reset hasTrigger to false
+				setHasTrigger(false);
+				// Clear all nodes since trigger is the root
+				setNodes([]);
+				setSelectedNode(null);
+				console.log('Trigger node removed - automation reset');
+			} else {
+				// For non-trigger nodes, use the existing removal logic
+				getNodesToRemove(typeof node === 'object' ? node.id : node, nodes);
+			}
 		}
 	}
 	
@@ -905,7 +940,19 @@ const FlowEditor = () => {
 		
 		// Check if nodes array exists
 		if (!nodes || nodes.length === 0) {
-			console.error('No nodes to validate');
+			console.error('No nodes to validate - automation must have at least a trigger');
+			return false;
+		}
+		
+		// Check if there's a trigger node
+		const triggerNodes = nodes.filter(node => node.type === 'trigger');
+		if (triggerNodes.length === 0) {
+			console.error('No trigger node found - automation must start with a trigger');
+			return false;
+		}
+		
+		if (triggerNodes.length > 1) {
+			console.error('Multiple trigger nodes found - automation can only have one trigger');
 			return false;
 		}
 		
@@ -1360,7 +1407,7 @@ const FlowEditor = () => {
 									<Card
 										onClick={() => {
 											addNode('trigger', 0, 0, 'when-user-subscribes')
-											selectNode(nodes[0])
+											// Don't automatically select the node here - let user configure it first
 										}}
 										style={{ cursor: 'pointer' }}
 									>
@@ -1376,7 +1423,7 @@ const FlowEditor = () => {
 									<Card
 										onClick={() => {
 											addNode('trigger', 0, 0, 'when-user-opens-campaign')
-											selectNode(nodes[0])
+											// Don't automatically select the node here - let user configure it first
 										}}
 										style={{ cursor: 'pointer' }}
 									>
@@ -1392,7 +1439,7 @@ const FlowEditor = () => {
 									<Card
 										onClick={() => {
 											addNode('trigger', 0, 0, 'when-user-clicks-link')
-											selectNode(nodes[0])
+											// Don't automatically select the node here - let user configure it first
 										}}
 										style={{ cursor: 'pointer' }}
 									>
