@@ -5,7 +5,7 @@ import { useContext } from 'react';
 import { GlobalContext } from '../../reducers';
 import { deepClone } from '../../utils/helpers';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faChevronDown, faUser } from '@fortawesome/free-solid-svg-icons';
 
 const ContextMenu = ({ children }) => {
   const { blockList, setBlockList, currentItem, setCurrentItem } = useContext(GlobalContext);
@@ -13,6 +13,7 @@ const ContextMenu = ({ children }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [expandedSections, setExpandedSections] = useState({
     text: false,
+    personalization: false,
     block: false
   });
   // Store the selection range when right-clicking
@@ -80,6 +81,7 @@ const ContextMenu = ({ children }) => {
       // Reset expanded sections
       setExpandedSections({
         text: false,
+        personalization: false,
         block: false
       });
     }
@@ -222,6 +224,32 @@ const ContextMenu = ({ children }) => {
       } catch (fallbackErr) {
         console.error('Plain text fallback failed:', fallbackErr);
       }
+    }
+    setVisible(false);
+  };
+
+  // Personalization operations
+  const handleInsertPersonalization = (placeholder) => {
+    try {
+      if (restoreSelection()) {
+        // Focus the element containing the selection
+        const selection = window.getSelection();
+        if (selection.focusNode) {
+          let editableParent = selection.focusNode;
+          while (editableParent && !editableParent.isContentEditable) {
+            editableParent = editableParent.parentNode;
+          }
+          
+          if (editableParent && editableParent.focus) {
+            editableParent.focus();
+          }
+        }
+        
+        // Insert the personalization placeholder
+        document.execCommand('insertText', false, placeholder);
+      }
+    } catch (err) {
+      console.error('Failed to insert personalization:', err);
     }
     setVisible(false);
   };
@@ -403,6 +431,29 @@ const ContextMenu = ({ children }) => {
                 <li className="menu-item menu-subitem" onClick={handlePastePlainText}>
                   <Icon name="Import" size={16} />
                   <span>Paste as plain text</span>
+                </li>
+              </>
+            )}
+
+            {/* Personalization Section */}
+            <li className="menu-section" onClick={() => toggleSection('personalization')}>
+              <div className="section-header">
+                <FontAwesomeIcon 
+                  icon={expandedSections.personalization ? faChevronDown : faChevronRight} 
+                  className="section-icon" 
+                />
+                <span>Personalization</span>
+              </div>
+            </li>
+            {expandedSections.personalization && (
+              <>
+                <li className="menu-item menu-subitem" onClick={() => handleInsertPersonalization('{{name}}')}>
+                  <FontAwesomeIcon icon={faUser} size={16} />
+                  <span>Insert {{name}}</span>
+                </li>
+                <li className="menu-item menu-subitem" onClick={() => handleInsertPersonalization('{{email}}')}>
+                  <FontAwesomeIcon icon={faUser} size={16} />
+                  <span>Insert {{email}}</span>
                 </li>
               </>
             )}

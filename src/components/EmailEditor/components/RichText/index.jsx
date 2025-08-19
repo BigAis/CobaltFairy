@@ -1,11 +1,12 @@
 import { useEffect, useRef, useContext, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown, faExpandAlt, faCompressAlt, faSmile } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faExpandAlt, faCompressAlt, faSmile, faUser } from "@fortawesome/free-solid-svg-icons";
 import { GlobalContext } from "../../reducers";
 import { deepClone } from "../../utils/helpers";
 import { motion } from "framer-motion";
 import useDataSource from "../../configs/useDataSource"
 import EmojiPicker from 'emoji-picker-react';
+import PersonalizationPicker from "./PersonalizationPicker";
 
 import Bold from "./Bold";
 import Italic from "./Italic";
@@ -23,6 +24,7 @@ const RichText = ({ index, textBlock, styles }) => {
   const richTextRef = useRef(null);
   const [isHidden, setIsHidden] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showPersonalizationPicker, setShowPersonalizationPicker] = useState(false);
   
   // Store cursor position data
   const cursorPositionRef = useRef({
@@ -123,12 +125,34 @@ const RichText = ({ index, textBlock, styles }) => {
   const toggleEmojiPicker = () => {
     if (!showEmojiPicker) {
       saveCursorPosition();
+      setShowPersonalizationPicker(false); // Close personalization picker
     }
     setShowEmojiPicker(!showEmojiPicker);
   };
 
+  // Toggle personalization picker and save cursor position
+  const togglePersonalizationPicker = () => {
+    if (!showPersonalizationPicker) {
+      saveCursorPosition();
+      setShowEmojiPicker(false); // Close emoji picker
+    }
+    setShowPersonalizationPicker(!showPersonalizationPicker);
+  };
+
   // Handle emoji selection
   const handleEmojiClick = (emojiData) => {
+    insertAtCursor(emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+
+  // Handle personalization selection
+  const handlePersonalizationClick = (placeholder) => {
+    insertAtCursor(placeholder);
+    setShowPersonalizationPicker(false);
+  };
+
+  // Generic function to insert text at cursor
+  const insertAtCursor = (textToInsert) => {
     if (textBlock && textBlock.current) {
       // Focus the editable area first
       textBlock.current.focus();
@@ -150,8 +174,8 @@ const RichText = ({ index, textBlock, styles }) => {
           selection.removeAllRanges();
           selection.addRange(range);
           
-          // Insert emoji at cursor position
-          document.execCommand('insertText', false, emojiData.emoji);
+          // Insert text at cursor position
+          document.execCommand('insertText', false, textToInsert);
           
           // Update the content
           setTextContent();
@@ -162,19 +186,16 @@ const RichText = ({ index, textBlock, styles }) => {
           range.collapse(false);
           selection.removeAllRanges();
           selection.addRange(range);
-          document.execCommand('insertText', false, emojiData.emoji);
+          document.execCommand('insertText', false, textToInsert);
           setTextContent();
         }
       } catch (error) {
-        console.error("Error inserting emoji:", error);
+        console.error("Error inserting text:", error);
         // Last resort fallback - try direct insertion
-        document.execCommand('insertText', false, emojiData.emoji);
+        document.execCommand('insertText', false, textToInsert);
         setTextContent();
       }
     }
-    
-    // Close the emoji picker
-    setShowEmojiPicker(false);
   };
 
   const setTextContent = () => {
@@ -406,6 +427,20 @@ const RichText = ({ index, textBlock, styles }) => {
               <Link modifyText={modifyText} setTextContent={setTextContent} />
               {/* Text align buttons are hidden from the toolbar 
                   BUT we keep the component imported so we can restore it later if needed */}
+              
+              {/* Personalization Picker Button */}
+              <button
+                className="rich-text-tools-button"
+                title="Insert Personalization"
+                onClick={togglePersonalizationPicker}
+              >
+                <FontAwesomeIcon icon={faUser} className="rich-text-tools-button-icon" />
+              </button>
+              
+              {/* Personalization Picker Dropdown */}
+              {showPersonalizationPicker && (
+                <PersonalizationPicker onPersonalizationClick={handlePersonalizationClick} />
+              )}
               
               {/* Emoji Picker Button */}
               <button
