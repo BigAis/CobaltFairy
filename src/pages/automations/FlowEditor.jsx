@@ -661,19 +661,19 @@ const FlowEditor = () => {
 	};
 	
 	const refreshNodes = () => {
-		let tmp = excludeNodes
+		let tmp = []
 		nodes.forEach((n) => {
 			if (n.type == 'condition') {
-				n.output.forEach((o) => {
+				(n.output || []).forEach((o) => {
 					if (o && o.id) {
-						if (!excludeNodes.includes(o.id)) tmp.push(o.id)
+						if (!tmp.includes(o.id)) tmp.push(o.id)
 						let children0 = getChildrenOfCondition(nodes, o.id, 0).map((t) => t && t.id)
 						let children1 = getChildrenOfCondition(nodes, o.id, 1).map((t) => t && t.id)
 						children0.forEach((c) => {
-							if (!excludeNodes.includes(c)) tmp.push(c)
+							if (c && !tmp.includes(c)) tmp.push(c)
 						})
 						children1.forEach((c) => {
-							if (!excludeNodes.includes(c)) tmp.push(c)
+							if (c && !tmp.includes(c)) tmp.push(c)
 						})
 					} else {
 						console.log('No o.id', o)
@@ -720,55 +720,221 @@ const FlowEditor = () => {
 	}
 	
 	const removeNode = async (node) => {
+		const nodeToRemove = typeof node === 'object' ? node : nodes.find(n => n.id === node);
+		
+		if (!nodeToRemove) {
+			console.error('Node not found for removal');
+			return;
+		}
+
+		// Special handling for trigger nodes
+		if (nodeToRemove.type === 'trigger') {
+			let res = await PopupText.fire({ 
+				icon: 'question', 
+				text: 'Are you sure you want to remove this trigger? This will reset the entire automation.', 
+				showCancelButton: true, 
+				focusCancel: true 
+			});
+			
+			if (res.isConfirmed) {
+				setHasTrigger(false);
+				setNodes([]);
+				setSelectedNode(null);
+				console.log('Trigger node removed - automation reset');
+			}
+			return;
+		}
+
+		// Special handling for condition nodes
+		if (nodeToRemove.type === 'condition') {
+			// Updated: use confirm/deny/cancel buttons
+			let res = await PopupText.fire({
+				icon: 'question',
+				title: 'Remove Condition Node',
+				text: 'You are removing a condition node. Which branch would you like to keep?',
+				showConfirmButton: true,
+				showDenyButton: true,
+				showCancelButton: true,
+				confirmButtonText: 'Keep TRUE branch (✓)',
+				denyButtonText: 'Keep FALSE branch (✗)',
+				cancelButtonText: 'Cancel',
+				confirmButtonColor: '#28a745',
+				denyButtonColor: '#dc3545',
+				cancelButtonColor: '#6c757d',
+				focusCancel: true
+			});
+			
+			if (res.isConfirmed) {
+				removeConditionNode(nodeToRemove, 0); // Keep true branch (index 0)
+			} else if (res.isDenied) {
+				removeConditionNode(nodeToRemove, 1); // Keep false branch (index 1)
+			}
+			// If cancelled, do nothing
+			return;
+		}
+
+		// For all other nodes, confirm deletion
 		let res = await PopupText.fire({ 
 			icon: 'question', 
 			text: 'Are you sure you want to remove this node?', 
 			showCancelButton: true, 
 			focusCancel: true 
-		})
+		});
 		
 		if (res.isConfirmed) {
-			// Check if this is a trigger node
-			const nodeToRemove = typeof node === 'object' ? node : nodes.find(n => n.id === node);
-			
-			if (nodeToRemove && nodeToRemove.type === 'trigger') {
-				// If removing a trigger, reset hasTrigger to false
-				setHasTrigger(false);
-				// Clear all nodes since trigger is the root
-				setNodes([]);
-				setSelectedNode(null);
-				console.log('Trigger node removed - automation reset');
-			} else {
-				// For non-trigger nodes, use the existing removal logic
-				getNodesToRemove(typeof node === 'object' ? node.id : node, nodes);
-			}
+			removeSingleNode(nodeToRemove);
 		}
-	}
+	};
 	
-	const getNodesToRemove = (nodeId, nodes) => {
+	const removeSingleNode = (nodeToRemove) => {
+		console.log('Removing single node:', nodeToRemove);
+		
+		// Find the parent node (node that points to this node)
+		const parentNode = nodes.find(n => 
+			n.output && n.output.some(output => output && output.id === nodeToRemove.id)
+		);
+		
+		// Get the children of the node being removed
+		const children = nodeToRemove.output || [];
+		
+		// Update nodes
+		const updatedNodes = nodes
+			.filter(n => n.id !== nodeToRemove.id) // Remove the target node
+			.map(node => {
+				// If this is the parent node, update its output to point to the first child
+				if (parentNode && node.id === parentNode.id) {
+					const newOutput = [...node.output];
+					
+					// Find the index of the output that pointed to the removed node
+					const outputIndex = newOutput.findIndex(output => output && output.id === nodeToRemove.id);
+					
+					if (outputIndex !== -1) {
+						// Replace with the first child of the removed node, or empty if no children
+						newOutput[outputIndex] = children.length > 0 ? children[0] : {};
+						
+						// If there are additional children, we need to chain them
+						if (children.length > 1) {
+							console.warn('Node has multiple children - only first child will be connected');
+						}
+					}
+					
+					return { ...node, output: newOutput };
+				}
+				
+				// If this is a child of the removed node, update its input to point to the parent
+				if (children.some(child => child.id === node.id)) {
+					const newInput = parentNode 
+						? [{ id: parentNode.id }] 
+						: [{ id: 0 }]; // If no parent, connect to root
+					
+					return { ...node, input: newInput };
+				}
+				
+				return node;
+			});
+		
+		console.log('Updated nodes after single removal:', updatedNodes);
+		setNodes(updatedNodes);
+		setSelectedNode(null);
+		refreshNodes();
+	};
+	
+	const getAllDescendantsOfNode = (nodeId, allNodes) => {
+		const node = allNodes.find(n => n.id === nodeId);
+		if (!node) return [];
+		
+		let descendants = [node];
+		
+		if (node.output && node.output.length > 0) {
+			node.output.forEach(output => {
+				if (output && output.id) {
+					const childDescendants = getAllDescendantsOfNode(output.id, allNodes);
+					descendants = descendants.concat(childDescendants);
+				}
+			});
+		}
+		
+		return descendants;
+	};
+	
+	const removeConditionNode = (conditionNode, branchToKeep) => {
+		console.log('Removing condition node, keeping branch:', branchToKeep);
+		
+		// Find the parent node that points to this condition
+		const parentNode = nodes.find(n => 
+			n.output && n.output.some(output => output && output.id === conditionNode.id)
+		);
+		
+		// Determine first node of kept branch via condition's direct outputs
+		const branchOutput = conditionNode.output && conditionNode.output[branchToKeep];
+		const firstNodeOfKeptBranch = branchOutput && branchOutput.id ? 
+			nodes.find(n => n.id === branchOutput.id) : null;
+		
+		// Collect all nodes from the branch we're NOT keeping
+		const branchToRemove = branchToKeep === 0 ? 1 : 0;
+		const unwantedBranchOutput = conditionNode.output && conditionNode.output[branchToRemove];
+		const unwantedBranchChildren = unwantedBranchOutput && unwantedBranchOutput.id ? 
+			getAllDescendantsOfNode(unwantedBranchOutput.id, nodes) : [];
+		
+		// IDs to remove: condition + all nodes from unwanted branch
+		const nodeIdsToRemove = [
+			conditionNode.id,
+			...unwantedBranchChildren.map(child => child.id)
+		];
+		
+		console.log('Removing nodes:', nodeIdsToRemove);
+		console.log('Keeping first node of branch:', firstNodeOfKeptBranch);
+		
+		// Update nodes
+		const updatedNodes = nodes
+			.filter(n => !nodeIdsToRemove.includes(n.id)) // Remove condition node and unwanted branch
+			.map(node => {
+				// If this is the parent node, update its output to point to the first child of kept branch
+				if (parentNode && node.id === parentNode.id) {
+					const newOutput = [...node.output];
+					const outputIndex = newOutput.findIndex(output => output && output.id === conditionNode.id);
+					if (outputIndex !== -1) {
+						newOutput[outputIndex] = firstNodeOfKeptBranch ? { id: firstNodeOfKeptBranch.id } : {};
+					}
+					return { ...node, output: newOutput };
+				}
+				
+				// If this is the first child of the kept branch, update its input to point to the parent
+				if (firstNodeOfKeptBranch && node.id === firstNodeOfKeptBranch.id) {
+					const newInput = parentNode 
+						? [{ id: parentNode.id }] 
+						: [{ id: 0 }]; // If no parent, connect to root
+					return { ...node, input: newInput };
+				}
+				
+				return node;
+			});
+		
+		console.log('Updated nodes after condition removal:', updatedNodes);
+		setNodes(updatedNodes);
+		setSelectedNode(null);
+		refreshNodes();
+	};
+	
+	const removeNodeAndAllChildren = (nodeId, nodes) => {
 		const nodesToBeRemoved = []
 		function traverse(nodeId) {
 			const node = nodes.find((n) => n.id === nodeId)
 			if (node) {
 				nodesToBeRemoved.push(node.id)
-				for (let output of node.output) {
+				for (let output of node.output || []) {
 					if (output && output.id) traverse(output.id)
 				}
 			}
 		}
 		traverse(nodeId)
 
-		console.log(nodesToBeRemoved)
-		console.log(
-			'final nodes are : ',
-			nodes.filter((node) => {
-				return !nodesToBeRemoved.includes(node.id)
-			})
-		)
-
+		console.log('Removing all children:', nodesToBeRemoved)
+		
 		const finalNodes = nodes.filter((node) => {
 			return !nodesToBeRemoved.includes(node.id)
 		})
+		
 		for (let i = 0; i < finalNodes.length; i++) {
 			if (finalNodes[i] && finalNodes[i].output && finalNodes[i].output.length > 0) {
 				finalNodes[i].output = finalNodes[i].output.map((ni) => {

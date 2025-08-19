@@ -48,7 +48,7 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 	}
 
 	const handleRemove = () => {
-		removeNode(node.id)
+		removeNode(node)
 	}
 	const extractLinksFromCampaignDesign = (components = [], links = []) => {
 		if (!components || !Array.isArray(components)) return links;
