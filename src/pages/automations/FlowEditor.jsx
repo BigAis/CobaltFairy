@@ -463,34 +463,52 @@ const FlowEditor = () => {
 	}
 	
 	const addNode = (type, input = 0, position = 0, name = '') => {
-		let maxid = 0
-		nodes.map((n) => {
-			if (n && n.id && n.id > maxid) maxid = n.id
-		})
-		const newNode = { id: maxid + 1, type, input: [{ id: input }], output: [] }
-		if (name && name.length > 0) {
-			newNode.name = name
-		}
-		// Special handling for triggers
-		if (type === 'trigger') {
-			setHasTrigger(true)
-			// Trigger nodes start with input 0 (no parent)
-			newNode.input = [{ id: 0 }]
-		}
-		let tmp = nodes
-		tmp.forEach((n, i) => {
-			if (n.id == input) {
-				tmp[i].output[position] = { id: newNode.id }
+		// Use functional updates with setNodes to ensure we're working with the latest state
+		setNodes(prevNodes => {
+			// Find the highest existing ID to safely create a new unique ID
+			const maxid = prevNodes.length > 0 ? Math.max(...prevNodes.map(n => n.id)) : 0;
+			
+			const newNode = { 
+				id: maxid + 1, 
+				type, 
+				input: [{ id: input }], 
+				output: [] 
+			};
+
+			if (name && name.length > 0) {
+				newNode.name = name;
 			}
-		})
-		tmp.push(newNode)
-		setNodes(tmp)
-		refreshNodes()
-		setTimeout(() => {
-			setExcludeNodes([...excludeNodes])
-			setSelectedNode(nodes[nodes.length - 1])
-		}, 100) //refresh state, re-render
-	}
+			
+			// Special handling for the first node (trigger)
+			if (type === 'trigger') {
+				setHasTrigger(true);
+				newNode.input = [{ id: 0 }];
+			}
+
+			// Create a new array by mapping over the previous nodes
+			const updatedNodes = prevNodes.map(n => {
+				// Find the parent node that the new node connects to
+				if (n.id === input) {
+					// Create a new copy of the parent's output array
+					const newOutput = [...(n.output || [])];
+					newOutput[position] = { id: newNode.id };
+					// Return a new object for the parent node with the updated output
+					return { ...n, output: newOutput };
+				}
+				// Return all other nodes unchanged
+				return n;
+			});
+			
+			// Set the selected node for the sidebar to update
+			setSelectedNode(newNode);
+			
+			// Return the final, new state array including the new node
+			return [...updatedNodes, newNode];
+		});
+		
+		// The refreshNodes() call is handled by the useEffect hook watching [nodes],
+		// so it's no longer needed here.
+	};
 
 	const selectNode = (node) => {
 		setSelectedNode(node)
