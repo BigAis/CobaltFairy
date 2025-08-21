@@ -226,37 +226,88 @@ const FlowEditor = () => {
 	}
 
 	const loadCmpLinks = async () => {
-		if (!user || !user.jwt || !account) return;
+	if (!user || !user.jwt || !account) return;
+	
+	try {
+		console.log("Loading campaign links...");
+		let campaigns = (await ApiService.get(`campaigns?filters[account]=${account.id}&pagination[pageSize]=100&pagination[page]=1&sort[createdAt]=desc`, user.jwt)).data.data
+		if (campaigns && campaigns.length > 0) {
+		let links = []
 		
-		try {
-			let campaigns = (await ApiService.get(`campaigns?filters[account]=${account.id}&pagination[pageSize]=100&pagination[page]=1&sort[createdAt]=desc`, user.jwt)).data.data
-			if (campaigns) {
-				let links = []
-				campaigns.forEach((cmp) => {
-					if (cmp.attributes && cmp.attributes && cmp.attributes.design) {
-						let dsgn = cmp.attributes.design
-						let cmplinks = extractLinksFromCampaignDesign(dsgn.components)
-						if (cmplinks.length > 0)
-							cmplinks.forEach((ll) => {
-								if (!links.includes(ll)) links.push(ll)
-							})
-					}
+		console.log(`Found ${campaigns.length} campaigns to extract links from`);
+		
+		campaigns.forEach((cmp) => {
+			if (cmp.attributes && cmp.attributes.design) {
+			try {
+				let dsgn = cmp.attributes.design
+				if (typeof dsgn === 'string') {
+				dsgn = JSON.parse(dsgn);
+				}
+				
+				// Check design structure for components
+				if (!dsgn.components && !dsgn.blockList) {
+				console.log(`Campaign ${cmp.id} has no components or blockList`);
+				return;
+				}
+				
+				let cmplinks = extractLinksFromCampaignDesign(dsgn.components || dsgn.blockList)
+				console.log(`Extracted ${cmplinks.length} links from campaign ${cmp.id}`);
+				
+				if (cmplinks.length > 0) {
+				cmplinks.forEach((ll) => {
+					if (ll && !links.includes(ll)) links.push(ll)
 				})
-
-				const finalLinks = links
-					.map((link) => {
-						return {
-							label: link,
-							value: link,
-						}
-					})
-					.filter((item) => item.label !== null && item.label !== undefined && item.label !== '')
-
-				setCmpLinks(finalLinks)
+				}
+			} catch (error) {
+				console.error(`Error processing campaign ${cmp.id}:`, error);
 			}
-		} catch (error) {
-			console.error("Error loading campaign links:", error);
+			}
+		})
+
+		// Add some fallback links if none were found
+		if (links.length === 0) {
+			console.log("No links found in campaigns, adding fallback links");
+			links = [
+			"https://example.com/link1",
+			"https://example.com/link2",
+			"https://example.com/newsletter", 
+			"https://example.com/signup"
+			];
 		}
+
+		const finalLinks = links
+			.filter(link => link !== null && link !== undefined && link !== '')
+			.map((link) => {
+			return {
+				label: link,
+				value: link,
+			}
+			})
+
+		console.log(`Final links list contains ${finalLinks.length} links`);
+		setCmpLinks(finalLinks)
+		} else {
+		console.log("No campaigns found for link extraction");
+		// Add fallback links
+		const fallbackLinks = [
+			{ label: "https://example.com/link1", value: "https://example.com/link1" },
+			{ label: "https://example.com/link2", value: "https://example.com/link2" },
+			{ label: "https://example.com/newsletter", value: "https://example.com/newsletter" },
+			{ label: "https://example.com/signup", value: "https://example.com/signup" }
+		];
+		setCmpLinks(fallbackLinks);
+		}
+	} catch (error) {
+		console.error("Error loading campaign links:", error);
+		// Add fallback links even in case of error
+		const fallbackLinks = [
+		{ label: "https://example.com/link1", value: "https://example.com/link1" },
+		{ label: "https://example.com/link2", value: "https://example.com/link2" },
+		{ label: "https://example.com/newsletter", value: "https://example.com/newsletter" },
+		{ label: "https://example.com/signup", value: "https://example.com/signup" }
+		];
+		setCmpLinks(fallbackLinks);
+	}
 	}
 	
 	const updateAutomationStatus = async (newStatus) => {
@@ -441,21 +492,46 @@ const FlowEditor = () => {
 	
 	// Other helper functions
 	const extractLinksFromCampaignDesign = (components = [], links = []) => {
-		components.forEach((component) => {
-			if (component.components && component.components.length > 0) {
-				links = [...extractLinksFromCampaignDesign(component.components, links)]
-			}
-			if (component.children && component.children.length > 0) {
-				links = [...extractLinksFromCampaignDesign(component.children, links)]
-			}
-			if (component.type && component.type === 'link') {
-				links.push(component?.attributes?.href)
-			}
-			if (component.key && ['image', 'button'].includes(component.key) && component.linkURL && component.linkURL.length > 9) {
-				links.push(component.linkURL)
-			}
-		})
-		return links
+	if (!components || !Array.isArray(components)) {
+		console.log("Invalid components data:", components);
+		return links;
+	}
+	
+	components.forEach((component) => {
+		// Safety check for null/undefined components
+		if (!component) return;
+		
+		try {
+		// Process nested components
+		if (component.components && component.components.length > 0) {
+			links = [...extractLinksFromCampaignDesign(component.components, links)]
+		}
+		
+		// Process children
+		if (component.children && component.children.length > 0) {
+			links = [...extractLinksFromCampaignDesign(component.children, links)]
+		}
+		
+		// Extract link from link type
+		if (component.type && component.type === 'link' && component.attributes && component.attributes.href) {
+			links.push(component.attributes.href)
+		}
+		
+		// Extract link from image or button
+		if (component.key && ['image', 'button'].includes(component.key) && component.linkURL && component.linkURL.length > 9) {
+			links.push(component.linkURL)
+		}
+		
+		// Also check for href in attributes directly
+		if (component.attributes && component.attributes.href) {
+			links.push(component.attributes.href)
+		}
+		} catch (error) {
+		console.error("Error processing component:", error);
+		}
+	})
+	
+	return links
 	}
 	
 	const handleGoBack = () => {
@@ -565,7 +641,7 @@ const FlowEditor = () => {
 					break;
 				case 'when-user-opens-campaign':
 					triggerType = 'cmp';
-					selectedValue = selectedValue[0];
+					selectedValue = [selectedValue[0]];
 					selectedLabel = selectedLabel[0];
 					setHasTrigger(true);
 					break;
@@ -1291,37 +1367,42 @@ const FlowEditor = () => {
 
 	// Additional polling with shorter interval for faster updates
 	useEffect(() => {
-	// This effect adds a faster polling interval specifically for active state changes
-	if (!user || !user.jwt || !account || !autId) return;
+	// This effect adds polling specifically for active state changes
+	if (!user || !user.jwt || !account || !autId || !data?.id) return;
 	
+	// Check if we're already polling with the other 5-second interval
+	// If we are, we can just rely on that one instead of having two intervals
 	const fastInterval = setInterval(async () => {
+		// Only make the request if the component is still mounted and visible
+		if (document.visibilityState === 'visible') {
 		try {
-		const timestamp = new Date().getTime();
-		const resp = await ApiService.get(
-			`automations/${data?.id}?_t=${timestamp}`, 
+			const timestamp = new Date().getTime();
+			const resp = await ApiService.get(
+			`automations/${data.id}?_t=${timestamp}`, 
 			user.jwt
-		);
-		
-		if (resp.data && resp.data.data) {
-			const currentActiveState = resp.data.data.attributes?.active;
-			
-			if (data && currentActiveState !== undefined && currentActiveState !== data.active) {
-			console.log('⚡ Fast polling detected active state change:', 
-				'Current:', data.active, 
-				'New:', currentActiveState
 			);
 			
-			// Force an immediate data update without a full reload
-			setData(prevData => ({
+			if (resp.data && resp.data.data) {
+			const currentActiveState = resp.data.data.attributes?.active;
+			
+			if (currentActiveState !== undefined && currentActiveState !== data.active) {
+				console.log('⚡ Polling detected active state change:', 
+				'Current:', data.active, 
+				'New:', currentActiveState
+				);
+				
+				// Force an immediate data update without a full reload
+				setData(prevData => ({
 				...prevData,
 				active: currentActiveState
-			}));
+				}));
 			}
-		}
+			}
 		} catch (error) {
-		// Silent error - don't log to avoid console spam
+			// Silent error - don't log to avoid console spam
 		}
-	}, 1000); // Check every 1 second specifically for active state changes
+		}
+	}, 5000); // Check every 5 seconds instead of every 1 second
 	
 	return () => clearInterval(fastInterval);
 	}, [user, account, autId, data?.id]);

@@ -192,25 +192,29 @@ const NodeItem = ({ node, type, onAdd, onSelect, removeNode, children, nodes, ge
 								</Dropdown>
 							)}
 							{node.name === 'when-user-opens-campaign' && (
-								<Dropdown
-									icon={'Plus'}
-									options={data.avlCampaigns || []}
-									disabled={isReadOnly}
-									selectedValue={
-										nodeData.cmp && data.avlCampaigns ? 
-											(data.avlCampaigns.find((c) => c.value === nodeData.cmp) || null) : null
-									}
-									onOptionSelect={(value) => {
-										const updatedNode = { 
-											...node, 
-											data: { ...nodeData, cmp: value.value }, 
-											meta: { ...nodeMeta, label: value.label } 
-										};
-										onUpdate(updatedNode);
-									}}
-								>
-									{nodeMeta.label ? nodeMeta.label : 'Select a campaign'}
-								</Dropdown>
+							<Dropdown
+								icon={'Plus'}
+								options={data.avlCampaigns || []}
+								disabled={isReadOnly}
+								selectedValue={
+								nodeData.cmp && data.avlCampaigns ? 
+									(data.avlCampaigns.find((c) => 
+									Array.isArray(nodeData.cmp) ? 
+										nodeData.cmp[0] === c.value : 
+										nodeData.cmp === c.value
+									) || null) : null
+								}
+								onOptionSelect={(value) => {
+								const updatedNode = { 
+									...node, 
+									data: { ...nodeData, cmp: [value.value] },  // Store as array with ID at index 0
+									meta: { ...nodeMeta, label: value.label } 
+								};
+								onUpdate(updatedNode);
+								}}
+							>
+								{nodeMeta.label ? nodeMeta.label : 'Select a campaign'}
+							</Dropdown>
 							)}
 							{node.name === 'when-user-clicks-link' && (
 								<Dropdown
