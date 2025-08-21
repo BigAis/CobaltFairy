@@ -763,33 +763,50 @@ const FlowEditor = () => {
 			return;
 		}
 
-		// Special handling for condition nodes
-		if (nodeToRemove.type === 'condition') {
-			// Updated: use confirm/deny/cancel buttons
-			let res = await PopupText.fire({
-				icon: 'question',
-				title: 'Remove Condition Node',
-				text: 'You are removing a condition node. Which branch would you like to keep?',
+	// Special handling for condition nodes
+	if (nodeToRemove.type === 'condition') {
+		// Updated: use confirm/deny/cancel buttons with a more descriptive approach
+		let res = await PopupText.fire({
+			icon: 'question',
+			title: 'Remove Condition Node',
+			text: 'You are removing a condition node. What would you like to do?',
+			showConfirmButton: true,
+			showDenyButton: true,
+			showCancelButton: true,
+			confirmButtonText: 'Keep TRUE branch (✓)',
+			denyButtonText: 'Keep FALSE branch (✗)',
+			cancelButtonText: 'More options...',
+			confirmButtonColor: '#28a745',
+			denyButtonColor: '#dc3545',
+			cancelButtonColor: '#6c757d',
+			focusCancel: false
+		});
+		
+		if (res.isConfirmed) {
+			removeConditionNode(nodeToRemove, 0); // Keep true branch (index 0)
+		} else if (res.isDenied) {
+			removeConditionNode(nodeToRemove, 1); // Keep false branch (index 1)
+		} else if (!res.isConfirmed && !res.isDenied) {
+			// Show delete all option
+			let deleteAllRes = await PopupText.fire({
+				icon: 'warning',
+				title: 'Delete All Branches',
+				text: 'Would you like to delete the condition node AND all nodes below it in both branches?',
 				showConfirmButton: true,
-				showDenyButton: true,
 				showCancelButton: true,
-				confirmButtonText: 'Keep TRUE branch (✓)',
-				denyButtonText: 'Keep FALSE branch (✗)',
-				cancelButtonText: 'Cancel',
-				confirmButtonColor: '#28a745',
-				denyButtonColor: '#dc3545',
-				cancelButtonColor: '#6c757d',
+				confirmButtonText: 'Yes, delete ALL',
+				cancelButtonText: 'No, cancel',
+				confirmButtonColor: '#dc3545',
 				focusCancel: true
 			});
 			
-			if (res.isConfirmed) {
-				removeConditionNode(nodeToRemove, 0); // Keep true branch (index 0)
-			} else if (res.isDenied) {
-				removeConditionNode(nodeToRemove, 1); // Keep false branch (index 1)
+			if (deleteAllRes.isConfirmed) {
+				removeNodeAndAllChildren(nodeToRemove.id, nodes);
 			}
-			// If cancelled, do nothing
-			return;
 		}
+		
+		return;
+	}
 
 		// For all other nodes, confirm deletion
 		let res = await PopupText.fire({ 
