@@ -66,6 +66,11 @@ const Subscribers = ({ initialView }) => {
 	// State to track selected subscribers
 	const [selectedSubscribers, setSelectedSubscribers] = useState([])
 
+	// Export state
+	const [filteredCount, setFilteredCount] = useState(0)
+	const [hasAppliedFilters, setHasAppliedFilters] = useState(false)
+	const [isExporting, setIsExporting] = useState(false)
+
 	const [view, setView] = useState(initialView || 'subs')
 	const [importMode, setImportMode] = useState('manual') // 'manual' or 'bulk'
 	const [subscriberSearchValue, setSubscriberSearchValue] = useState('')
@@ -187,6 +192,120 @@ const Subscribers = ({ initialView }) => {
 		}))
 	}
 
+	// Build export filters based on current state
+	const buildExportFilters = () => {
+		const filters = {}
+
+		// Add email filter if exists
+		if (subscribersFilters.email) {
+			filters.email = { $contains: subscribersFilters.email }
+		}
+
+		// Add name filter if exists
+		if (subscribersFilters.name) {
+			filters.name = { $contains: subscribersFilters.name }
+		}
+
+		// Add groups filter if exists
+		if (subscribersFilters.groups && subscribersFilters.groups.length > 0) {
+			filters.groups = {
+				udid: {
+					$in: subscribersFilters.groups.map((group) => group.value),
+				},
+			}
+		}
+
+		// Add date filters if they exist
+		const dateFilter = {}
+		if (subscribersFilters.dateFrom) {
+			dateFilter.$gte = dayjs(subscribersFilters.dateFrom).tz('Europe/Athens').startOf('day').format('YYYY-MM-DD')
+		}
+		if (subscribersFilters.dateTo) {
+			dateFilter.$lte = dayjs(subscribersFilters.dateTo).tz('Europe/Athens').endOf('day').format('YYYY-MM-DD')
+		}
+		if (Object.keys(dateFilter).length > 0) {
+			filters.createdAt = dateFilter
+		}
+
+		// Add search filter if exists
+		if (subscriberSearchValue) {
+			filters.email = {
+				...filters.email,
+				$contains: subscriberSearchValue,
+			}
+		}
+
+		return filters
+	}
+
+	// Count filtered subscribers
+	const countFilteredSubscribers = async () => {
+		if (!user?.jwt) return
+
+		try {
+			const filters = buildExportFilters()
+
+			// Use the same query structure as your filtering
+			const query = {
+				filters,
+				pagination: {
+					pageSize: 1,
+					page: 1,
+				},
+			}
+
+			const queryString = qs.stringify(query, { encode: false })
+			const response = await ApiService.get(`fairymailer/getSubscribers?${queryString}`, user.jwt)
+
+			if (response?.data?.meta?.pagination?.total) {
+				setFilteredCount(response.data.meta.pagination.total)
+			}
+		} catch (error) {
+			console.error('Error counting filtered subscribers:', error)
+		}
+	}
+
+	// Export subscribers function
+	const exportSubscribers = async () => {
+		if (!user?.jwt) return
+
+		setIsExporting(true)
+
+		try {
+			const filters = buildExportFilters()
+
+			console.log('Exporting subscribers with filters:', filters)
+
+			const response = await ApiService.post('fairymailer/export-subs', { filters }, user.jwt)
+
+			if (response.data && response.data.success && response.data.downloadUrl) {
+				// Create download link
+				const link = document.createElement('a')
+				link.href = response.data.downloadUrl
+				link.setAttribute('download', response.data.filename || `subscribers_export_${new Date().toISOString().slice(0, 10)}.csv`)
+				document.body.appendChild(link)
+				link.click()
+				document.body.removeChild(link)
+
+				// Show success message
+				PopupText.fire({
+					text: `Successfully exported ${response.data.count} subscribers.`,
+					icon: 'success',
+				})
+			} else {
+				throw new Error('Invalid response format or missing download URL')
+			}
+		} catch (error) {
+			console.error('Error exporting subscribers:', error)
+			PopupText.fire({
+				text: 'Error exporting subscribers. Please try again.',
+				icon: 'error',
+			})
+		} finally {
+			setIsExporting(false)
+		}
+	}
+
 	const filterSubscribersAction = async () => {
 		const groupIds = subscribersFilters.groups
 			.map((selected) => {
@@ -217,6 +336,10 @@ const Subscribers = ({ initialView }) => {
 		})
 
 		setSubscribersQueryFilter(query)
+		setHasAppliedFilters(true)
+
+		// Count the filtered subscribers for export
+		await countFilteredSubscribers()
 	}
 
 	// Delete selected subscribers function - using the same logic as single delete
@@ -552,6 +675,11 @@ const Subscribers = ({ initialView }) => {
 								Delete Selected ({selectedSubscribers.length})
 							</Button>
 						)}
+						{hasAppliedFilters && filteredCount > 0 && (
+							<Button type="secondary" onClick={exportSubscribers} loading={isExporting} style={{ marginRight: '10px' }} icon="Download">
+								{isExporting ? 'Exporting...' : `Export (${filteredCount})`}
+							</Button>
+						)}
 						<Button icon={'Plus'} type="action" onClick={handleAddSubscribersClick}>
 							Add Subscribers
 						</Button>
@@ -728,6 +856,8 @@ const Subscribers = ({ initialView }) => {
 									onChange={(value) => {
 										setView(value)
 										setShowFilters(false)
+										setHasAppliedFilters(false)
+										setFilteredCount(0)
 									}}
 									value={view}
 								></ButtonGroup>
@@ -742,6 +872,9 @@ const Subscribers = ({ initialView }) => {
 										onSearch={(value) => {
 											setSubscriberSearchValue(value)
 											searchSubscribers(value)
+											// Reset filter state when searching
+											setHasAppliedFilters(false)
+											setFilteredCount(0)
 										}}
 										style={{ width: '100%', marginRight: '20px' }}
 									/>
@@ -755,6 +888,30 @@ const Subscribers = ({ initialView }) => {
 									>
 										Filters
 									</Button>
+								</div>
+							)}
+
+							{/* Show filtered count info */}
+							{view === 'subs' && hasAppliedFilters && (
+								<div
+									className="filtered-info"
+									style={{
+										marginTop: '10px',
+										padding: '10px',
+										backgroundColor: 'rgba(255, 195, 173, 0.3)',
+										border: '1px solid rgba(255, 99, 93, 0.5)',
+										borderRadius: '8px',
+										display: 'flex',
+										justifyContent: 'space-between',
+										alignItems: 'center',
+									}}
+								>
+									<span>{filteredCount > 0 ? `Found ${filteredCount} subscriber(s) matching your filters` : 'No subscribers match your current filters'}</span>
+									{filteredCount > 0 && (
+										<Button type="primary" onClick={exportSubscribers} loading={isExporting} icon="Download" style={{ marginLeft: '10px' }}>
+											{isExporting ? 'Exporting...' : `Export ${filteredCount} subscribers`}
+										</Button>
+									)}
 								</div>
 							)}
 
