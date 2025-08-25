@@ -82,6 +82,7 @@ const Subscribers = ({ initialView }) => {
 		groups: [],
 		dateFrom: '',
 		dateTo: '',
+		active: true,
 	})
 	const [autoAppliedFilters, setAutoAppliedFilters] = useState(false)
 	const [subscribersQueryFilter, setSubscribersQueryFilter] = useState('')
@@ -195,6 +196,9 @@ const Subscribers = ({ initialView }) => {
 	// Build export filters based on current state
 	const buildExportFilters = () => {
 		const filters = {}
+
+		// Add active filter - always include this
+		filters.active = subscribersFilters.active
 
 		// Add email filter if exists
 		if (subscribersFilters.email) {
@@ -321,6 +325,7 @@ const Subscribers = ({ initialView }) => {
 				page: 1,
 			},
 			filters: {
+				active: subscribersFilters.active,
 				email: subscribersFilters.email ? { $contains: subscribersFilters.email } : undefined,
 				name: subscribersFilters.name ? { $contains: subscribersFilters.name } : undefined,
 				groups: groupIds.length > 0 ? { id: { $in: groupIds } } : undefined,
@@ -965,6 +970,12 @@ const Subscribers = ({ initialView }) => {
 								}}
 								value={subscribersFilters.dateTo}
 							></DatePicker>
+							<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '24px' }}>
+								<input type="checkbox" id="activeOnly" checked={subscribersFilters.active} onChange={(e) => handleFilterChange('active', e.target.checked)} />
+								<label htmlFor="activeOnly" style={{ fontSize: '14px', fontWeight: '500' }}>
+									Only Active Subscribers
+								</label>
+							</div>
 						</div>
 						<div>
 							<Button onClick={filterSubscribersAction}>Apply Filters</Button>
