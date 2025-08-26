@@ -182,6 +182,43 @@
         .mobile-view {
             display: block;
         }
+        
+        /* Fix for mobile dropdown issue */
+        .subscriber-card {
+            /* Change overflow from hidden to visible to prevent dropdown clipping */
+            overflow: visible;
+            position: relative;
+            
+            /* Apply correct z-index to ensure proper layering */
+            z-index: 1;
+            
+            /* When in expanded state, increase z-index to ensure dropdown appears above other cards */
+            &.expanded {
+                z-index: 10;
+            }
+            
+            .subscriber-details {
+                .edit-button-wrapper {
+                    position: relative;
+                    
+                    .mobile-edit-dropdown {
+                        .dropdown-wrapper {
+                            position: relative;
+                            
+                            /* Ensure the dropdown menu displays above other elements */
+                            .dropdown-menu {
+                                z-index: 100;
+                                /* Ensure proper width and position */
+                                width: 100%;
+                                /* Fix position to appear below the button */
+                                left: 0;
+                                right: 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     /* Search bar mobile styles */
