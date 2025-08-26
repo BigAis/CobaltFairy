@@ -23,6 +23,8 @@ const SegmentsTable = ({ segmentSearchValue, onUpdate, setView, applySegmentFilt
 	const resultsPerPage = 10
 
 	const [selectedSegments, setSelectedSegments] = useState([])
+	// State to track expanded segment cards in mobile view
+	const [expandedSegments, setExpandedSegments] = useState({})
 
 	const rowsPerPage = resultsPerPage
 
@@ -100,6 +102,14 @@ const SegmentsTable = ({ segmentSearchValue, onUpdate, setView, applySegmentFilt
 
 	const handleLeftClick = (uuid) => {
 		navigate(`/subscribers/segment/${uuid}`)
+	}
+
+	// Toggle expanded/collapsed state of a segment card in mobile view
+	const toggleExpand = (segmentId) => {
+		setExpandedSegments(prev => ({
+			...prev,
+			[segmentId]: !prev[segmentId]
+		}))
 	}
 
 	const actionsBodyTemplate = (rowData) => {
@@ -195,53 +205,131 @@ const SegmentsTable = ({ segmentSearchValue, onUpdate, setView, applySegmentFilt
 		return loading ? <Skeleton /> : <div className="filter-description">{description}</div>
 	}
 
+	// Helper to get subscriber count for mobile view
+	const getSubscriberCount = (segment) => {
+		// This is a placeholder - you should adapt based on your actual data structure
+		return segment.subscribers_count || 0
+	}
+
+	// Helper to get open rate for mobile view
+	const getOpenRate = (segment) => {
+		// This is a placeholder - adapt based on your actual data
+		return {
+			rate: segment.open_rate || 0,
+			count: segment.opens_count || 0
+		}
+	}
+
+	// Helper to get click rate for mobile view
+	const getClickRate = (segment) => {
+		// This is a placeholder - adapt based on your actual data
+		return {
+			rate: segment.click_rate || 0,
+			count: segment.clicks_count || 0
+		}
+	}
+
 	return (
 		<>
-			<DataTable
-				value={segments}
-				paginator={false}
-				selection={selectedSegments}
-				onSelectionChange={(e) => setSelectedSegments(e.value)}
-				dataKey="uuid"
-				rowClassName={() => 'p-table-row'}
-				emptyMessage="No segments found."
-			>
-				<Column
-					body={(rowData) => (
-						<div style={{ position: 'relative' }}>
-							<div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
-								<Checkbox
-									checked={selectedSegments.some((seg) => seg.uuid === rowData.uuid)}
-									onChange={(e) => {
-										if (e) {
-											setSelectedSegments((prev) => [...prev, rowData])
-										} else {
-											setSelectedSegments((prev) => prev.filter((seg) => seg.uuid !== rowData.uuid))
-										}
-									}}
-								/>
+			{/* Desktop Table View */}
+			<div className="desktop-view">
+				<DataTable
+					value={segments}
+					paginator={false}
+					selection={selectedSegments}
+					onSelectionChange={(e) => setSelectedSegments(e.value)}
+					dataKey="uuid"
+					rowClassName={() => 'p-table-row'}
+					emptyMessage="No segments found."
+				>
+					<Column
+						body={(rowData) => (
+							<div style={{ position: 'relative' }}>
+								<div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
+									<Checkbox
+										checked={selectedSegments.some((seg) => seg.uuid === rowData.uuid)}
+										onChange={(e) => {
+											if (e) {
+												setSelectedSegments((prev) => [...prev, rowData])
+											} else {
+												setSelectedSegments((prev) => prev.filter((seg) => seg.uuid !== rowData.uuid))
+											}
+										}}
+									/>
+								</div>
+							</div>
+						)}
+						header={() => (
+							<Checkbox
+								checked={selectedSegments.length === paginatedData.length && selectedSegments.length > 0}
+								onChange={(e) => {
+									if (e) {
+										setSelectedSegments([...paginatedData])
+									} else {
+										setSelectedSegments([])
+									}
+								}}
+							/>
+						)}
+						headerStyle={{ width: '80px' }}
+					/>
+					<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
+					<Column field="updatedAt" header="Last Updated" body={(rowData) => (loading ? <Skeleton /> : new Date(rowData.updatedAt).toLocaleDateString())} />
+					<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
+				</DataTable>
+			</div>
+
+			{/* Mobile View */}
+			<div className="mobile-view">
+				{segments.map((segment) => (
+					<div 
+						key={segment.uuid} 
+						className={`segment-card ${expandedSegments[segment.uuid] ? 'expanded' : 'collapsed'}`}
+					>
+						{/* Collapsed View */}
+						<div className="segment-header" onClick={() => toggleExpand(segment.uuid)}>
+							<div className="segment-info">
+								<h3 className="segment-name">{segment.name}</h3>
+							</div>
+							<div className="dropdown-arrow">
+								{expandedSegments[segment.uuid] ? "▲" : "▼"}
 							</div>
 						</div>
-					)}
-					header={() => (
-						<Checkbox
-							checked={selectedSegments.length === paginatedData.length && selectedSegments.length > 0}
-							onChange={(e) => {
-								if (e) {
-									setSelectedSegments([...paginatedData])
-								} else {
-									setSelectedSegments([])
-								}
-							}}
-						/>
-					)}
-					headerStyle={{ width: '80px' }}
-				/>
-				<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
-				{/* <Column field="filters" header="Filters" body={filterDescriptionTemplate} /> */}
-				<Column field="updatedAt" header="Last Updated" body={(rowData) => (loading ? <Skeleton /> : new Date(rowData.updatedAt).toLocaleDateString())} />
-				<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
-			</DataTable>
+						
+						{/* Expanded View */}
+						{expandedSegments[segment.uuid] && (
+							<div className="segment-details">
+								<div className="stat-row">
+									<div className="stat-label">Subscribers</div>
+									<div className="stat-value">{getSubscriberCount(segment)}</div>
+								</div>
+								<div className="stat-row">
+									<div className="stat-label">Opens</div>
+									<div className="stat-value">{getOpenRate(segment).rate}% - {getOpenRate(segment).count}</div>
+								</div>
+								<div className="stat-row">
+									<div className="stat-label">Clicks</div>
+									<div className="stat-value">{getClickRate(segment).rate}% - {getClickRate(segment).count}</div>
+								</div>
+								
+								<div className="edit-button-wrapper">
+									<Dropdown
+										withDivider={true}
+										icon={'Plus'}
+										options={dropdownOptions}
+										onLeftClick={() => handleLeftClick(segment.uuid)}
+										onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, segment)}
+										className="mobile-edit-dropdown"
+									>
+										View
+									</Dropdown>
+								</div>
+							</div>
+						)}
+					</div>
+				))}
+			</div>
+
 			<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
 		</>
 	)

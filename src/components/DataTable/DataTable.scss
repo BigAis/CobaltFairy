@@ -1,240 +1,313 @@
+// Main DataTable styles
 .p-datatable {
-	.p-paginator-page {
-		border-radius: 4px;
-		min-width: 32px;
-		height: 32px;
-		border: 2px solid rgba(218, 209, 197, 0.5);
-		color: rgba(16, 15, 28, 1);
-		font-size: 14px;
-		font-weight: 500;
-	}
-	.p-paginator-page.p-highlight {
-		background-color: rgba(255, 255, 255, 0.5);
-		border: 2px solid rgba(218, 209, 197, 1);
-	}
+  .p-paginator-page {
+    border-radius: 4px;
+    min-width: 32px;
+    height: 32px;
+    border: 2px solid rgba(218, 209, 197, 0.5);
+    color: rgba(16, 15, 28, 1);
+    font-size: 14px;
+    font-weight: 500;
+    
+    &.p-highlight {
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 2px solid rgba(218, 209, 197, 1);
+    }
+  }
 
-	.p-datatable-table {
-		border-collapse: separate;
-		border-spacing: 0px 30px;
+  .p-datatable-table {
+    border-collapse: separate;
+    border-spacing: 0px 30px;
 
-		.p-datatable-thead > tr > th {
-			color: rgba(136, 125, 118, 1);
-			border-bottom: 2px solid rgba(218, 209, 197, 1);
-			background-color: transparent;
-			font-weight: 500;
-		}
+    .p-datatable-thead > tr > th {
+      color: rgba(136, 125, 118, 1);
+      border-bottom: 2px solid rgba(218, 209, 197, 1);
+      background-color: transparent;
+      font-weight: 500;
+    }
 
-		.p-datatable-tbody > tr > td {
-			border-top: 2px solid rgba(218, 209, 197, 1);
-			border-bottom: 2px solid rgba(218, 209, 197, 1);
-		}
-		.p-datatable-tbody > tr > td:first-child {
-			border: 2px solid rgba(218, 209, 197, 1);
-			border-right: 0px;
-			border-radius: 8px 0px 0px 8px;
-		}
-
-		.p-datatable-tbody > tr > td:last-child {
-			border: 2px solid rgba(218, 209, 197, 1);
-			border-left: 0px;
-			border-radius: 0px 8px 8px 0px;
-		}
-
-		.p-datatable-tbody > tr {
-			background: #fff8ef;
-			height: 112px;
-		}
-
-		.p-datatable-tbody > tr > td {
-			color: rgba(16, 15, 28, 1);
-			padding: 12px;
-		}
-	}
+    .p-datatable-tbody > tr {
+      background: #fff8ef;
+      height: 112px;
+      
+      > td {
+        border-top: 2px solid rgba(218, 209, 197, 1);
+        border-bottom: 2px solid rgba(218, 209, 197, 1);
+        color: rgba(16, 15, 28, 1);
+        padding: 12px;
+        
+        &:first-child {
+          border: 2px solid rgba(218, 209, 197, 1);
+          border-right: 0px;
+          border-radius: 8px 0px 0px 8px;
+        }
+        
+        &:last-child {
+          border: 2px solid rgba(218, 209, 197, 1);
+          border-left: 0px;
+          border-radius: 0px 8px 8px 0px;
+        }
+      }
+    }
+  }
 }
 
+// Special case for integrations table
 .integrations-table .p-datatable-tbody > tr {
-	height: 62px !important;
+  height: 62px !important;
 }
 
-/* Mobile styles for subscribers */
+// Shared mixins for mobile card styles
+@mixin mobile-view-base {
+  .desktop-view {
+    display: block;
+  }
+  
+  .mobile-view {
+    display: none;
+  }
+}
+
+@mixin card-base {
+  background: #FFF8EF;
+  border: 2px solid #DAD1C5;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+  
+  &.expanded {
+    z-index: 10;
+  }
+}
+
+@mixin card-header {
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  
+  .dropdown-arrow {
+    color: #100F1C;
+    font-size: 14px;
+  }
+}
+
+@mixin card-info {
+  flex: 1;
+}
+
+@mixin card-name {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 19px;
+  color: #100F1C;
+  margin: 0;
+}
+
+@mixin card-email {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 17px;
+  color: #887D76;
+  margin: 0;
+}
+
+@mixin card-details {
+  padding: 0 20px 20px 20px;
+  border-top: 1px solid #DAD1C5;
+  
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(218, 209, 197, 0.5);
+    
+    &:last-of-type {
+      margin-bottom: 20px;
+    }
+    
+    .stat-label {
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 17px;
+      color: #887D76;
+    }
+    
+    .stat-value {
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 17px;
+      color: #100F1C;
+    }
+  }
+}
+
+@mixin edit-button {
+  position: relative;
+  
+  .mobile-edit-dropdown {
+    width: 100%;
+    
+    .dropdown-wrapper {
+      position: relative;
+      
+      .dropdown-menu {
+        z-index: 100;
+        width: 100%;
+        left: 0;
+        right: 0;
+      }
+      
+      .dropdown {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid #DAD1C5;
+        border-radius: 8px;
+        
+        .dropdown-left, .dropdown-right {
+          display: flex;
+          justify-content: center;
+          padding: 10px;
+          text-align: center;
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// Mobile styles for subscribers
 .subscribers {
-    /* Default - show desktop view, hide mobile view */
+  @include mobile-view-base;
+  
+  .subscriber-card {
+    @include card-base;
+    
+    .subscriber-header {
+      @include card-header;
+      
+      .subscriber-info {
+        @include card-info;
+        
+        .subscriber-name {
+          @include card-name;
+          margin-bottom: 4px;
+        }
+        
+        .subscriber-email {
+          @include card-email;
+        }
+      }
+    }
+    
+    .subscriber-details {
+      @include card-details;
+      
+      .edit-button-wrapper {
+        @include edit-button;
+      }
+    }
+  }
+}
+
+// Mobile styles for segments
+.segments {
+  @include mobile-view-base;
+  
+  .segment-card {
+    @include card-base;
+    
+    .segment-header {
+      @include card-header;
+      
+      .segment-info {
+        @include card-info;
+        
+        .segment-name {
+          @include card-name;
+        }
+      }
+    }
+    
+    .segment-details {
+      @include card-details;
+      
+      .edit-button-wrapper {
+        @include edit-button;
+      }
+    }
+  }
+}
+
+// Mobile styles for groups
+.groups {
+  @include mobile-view-base;
+  
+  .group-card {
+    @include card-base;
+    
+    .group-header {
+      @include card-header;
+      
+      .group-info {
+        @include card-info;
+        
+        .group-name {
+          @include card-name;
+        }
+      }
+    }
+    
+    .group-details {
+      @include card-details;
+      
+      .edit-button-wrapper {
+        @include edit-button;
+      }
+    }
+  }
+}
+
+// Media query for mobile
+@media screen and (max-width: 768px) {
+  .subscribers,
+  .segments,
+  .groups {
     .desktop-view {
-        display: block;
+      display: none;
     }
     
     .mobile-view {
-        display: none;
+      display: block;
     }
+  }
+  
+  // Search bar mobile styles
+  .search-bar-container {
+    margin-bottom: 15px;
+  }
+  
+  // Adjust pagination for mobile
+  .pagination {
+    margin-top: 15px;
     
-    /* Mobile card styles - EXACTLY matching Figma design */
-    .subscriber-card {
-        background: #FFF8EF;
-        border: 2px solid #DAD1C5;
-        border-radius: 8px;
-        margin-bottom: 12px;
-        overflow: hidden;
-        
-        /* Common styles for both collapsed and expanded states */
-        .subscriber-header {
-            padding: 14px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            
-            .subscriber-info {
-                flex: 1;
-                
-                .subscriber-name {
-                    font-family: 'Inter', sans-serif;
-                    font-style: normal;
-                    font-weight: 500;
-                    font-size: 16px;
-                    line-height: 19px;
-                    color: #100F1C;
-                    margin: 0 0 4px 0;
-                }
-                
-                .subscriber-email {
-                    font-family: 'Inter', sans-serif;
-                    font-style: normal;
-                    font-weight: 500;
-                    font-size: 14px;
-                    line-height: 17px;
-                    color: #887D76;
-                    margin: 0;
-                }
-            }
-            
-            .dropdown-arrow {
-                color: #100F1C;
-                font-size: 14px;
-            }
-        }
-        
-        /* Expanded view styles */
-        .subscriber-details {
-            padding: 0 20px 20px 20px;
-            border-top: 1px solid #DAD1C5;
-            
-            .stat-row {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 0;
-                padding: 10px 0;
-                border-bottom: 1px solid rgba(218, 209, 197, 0.5);
-                
-                &:last-of-type {
-                    margin-bottom: 20px;
-                }
-                
-                .stat-label {
-                    font-family: 'Inter', sans-serif;
-                    font-style: normal;
-                    font-weight: 500;
-                    font-size: 14px;
-                    line-height: 17px;
-                    color: #887D76;
-                }
-                
-                .stat-value {
-                    font-family: 'Inter', sans-serif;
-                    font-style: normal;
-                    font-weight: 500;
-                    font-size: 14px;
-                    line-height: 17px;
-                    color: #100F1C;
-                }
-            }
-            
-            .edit-button-wrapper {
-                .mobile-edit-dropdown {
-                    width: 100%;
-                    
-                    .dropdown {
-                        width: 100%;
-                        background: rgba(255, 255, 255, 0.5);
-                        border: 2px solid #DAD1C5;
-                        border-radius: 8px;
-                        
-                        .dropdown-left, .dropdown-right {
-                            display: flex;
-                            justify-content: center;
-                            padding: 10px;
-                            text-align: center;
-                            width: 100%;
-                        }
-                    }
-                }
-            }
-        }
+    .btn {
+      padding: 5px 8px;
+      min-width: 32px;
+      height: 32px;
+      font-size: 14px;
     }
-}
-
-/* Media query for mobile */
-@media screen and (max-width: 768px) {
-    .subscribers {
-        .desktop-view {
-            display: none;
-        }
-        
-        .mobile-view {
-            display: block;
-        }
-        
-        /* Fix for mobile dropdown issue */
-        .subscriber-card {
-            /* Change overflow from hidden to visible to prevent dropdown clipping */
-            overflow: visible;
-            position: relative;
-            
-            /* Apply correct z-index to ensure proper layering */
-            z-index: 1;
-            
-            /* When in expanded state, increase z-index to ensure dropdown appears above other cards */
-            &.expanded {
-                z-index: 10;
-            }
-            
-            .subscriber-details {
-                .edit-button-wrapper {
-                    position: relative;
-                    
-                    .mobile-edit-dropdown {
-                        .dropdown-wrapper {
-                            position: relative;
-                            
-                            /* Ensure the dropdown menu displays above other elements */
-                            .dropdown-menu {
-                                z-index: 100;
-                                /* Ensure proper width and position */
-                                width: 100%;
-                                /* Fix position to appear below the button */
-                                left: 0;
-                                right: 0;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    /* Search bar mobile styles */
-    .search-bar-container {
-        margin-bottom: 15px;
-    }
-    
-    /* Adjust pagination for mobile */
-    .pagination {
-        margin-top: 15px;
-        
-        .btn {
-            padding: 5px 8px;
-            min-width: 32px;
-            height: 32px;
-            font-size: 14px;
-        }
-    }
+  }
 }
