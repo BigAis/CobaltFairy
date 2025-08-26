@@ -55,3 +55,149 @@
 .integrations-table .p-datatable-tbody > tr {
 	height: 62px !important;
 }
+
+/* Mobile styles for subscribers */
+.subscribers {
+    /* Default - show desktop view, hide mobile view */
+    .desktop-view {
+        display: block;
+    }
+    
+    .mobile-view {
+        display: none;
+    }
+    
+    /* Mobile card styles - EXACTLY matching Figma design */
+    .subscriber-card {
+        background: #FFF8EF;
+        border: 2px solid #DAD1C5;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        
+        /* Common styles for both collapsed and expanded states */
+        .subscriber-header {
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            
+            .subscriber-info {
+                flex: 1;
+                
+                .subscriber-name {
+                    font-family: 'Inter', sans-serif;
+                    font-style: normal;
+                    font-weight: 500;
+                    font-size: 16px;
+                    line-height: 19px;
+                    color: #100F1C;
+                    margin: 0 0 4px 0;
+                }
+                
+                .subscriber-email {
+                    font-family: 'Inter', sans-serif;
+                    font-style: normal;
+                    font-weight: 500;
+                    font-size: 14px;
+                    line-height: 17px;
+                    color: #887D76;
+                    margin: 0;
+                }
+            }
+            
+            .dropdown-arrow {
+                color: #100F1C;
+                font-size: 14px;
+            }
+        }
+        
+        /* Expanded view styles */
+        .subscriber-details {
+            padding: 0 20px 20px 20px;
+            border-top: 1px solid #DAD1C5;
+            
+            .stat-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0;
+                padding: 10px 0;
+                border-bottom: 1px solid rgba(218, 209, 197, 0.5);
+                
+                &:last-of-type {
+                    margin-bottom: 20px;
+                }
+                
+                .stat-label {
+                    font-family: 'Inter', sans-serif;
+                    font-style: normal;
+                    font-weight: 500;
+                    font-size: 14px;
+                    line-height: 17px;
+                    color: #887D76;
+                }
+                
+                .stat-value {
+                    font-family: 'Inter', sans-serif;
+                    font-style: normal;
+                    font-weight: 500;
+                    font-size: 14px;
+                    line-height: 17px;
+                    color: #100F1C;
+                }
+            }
+            
+            .edit-button-wrapper {
+                .mobile-edit-dropdown {
+                    width: 100%;
+                    
+                    .dropdown {
+                        width: 100%;
+                        background: rgba(255, 255, 255, 0.5);
+                        border: 2px solid #DAD1C5;
+                        border-radius: 8px;
+                        
+                        .dropdown-left, .dropdown-right {
+                            display: flex;
+                            justify-content: center;
+                            padding: 10px;
+                            text-align: center;
+                            width: 100%;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Media query for mobile */
+@media screen and (max-width: 768px) {
+    .subscribers {
+        .desktop-view {
+            display: none;
+        }
+        
+        .mobile-view {
+            display: block;
+        }
+    }
+    
+    /* Search bar mobile styles */
+    .search-bar-container {
+        margin-bottom: 15px;
+    }
+    
+    /* Adjust pagination for mobile */
+    .pagination {
+        margin-top: 15px;
+        
+        .btn {
+            padding: 5px 8px;
+            min-width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+    }
+}

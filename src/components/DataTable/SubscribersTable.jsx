@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAccount } from '../../context/AccountContext'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
-import { Button } from 'primereact/button'
 import { Skeleton } from 'primereact/skeleton'
 import 'primereact/resources/themes/lara-light-indigo/theme.css'
 import './DataTable.scss'
@@ -12,6 +11,7 @@ import Dropdown from '../Dropdown'
 import Checkbox from '../Checkbox'
 import PopupText from '../PopupText/PopupText'
 import { ApiService } from '../../service/api-service'
+import Button from '../Button'
 
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -38,8 +38,9 @@ const SubscribersTable = ({
 	const [currentPage, setCurrentPage] = useState(1)
 	const resultsPerPage = 10
 
-	// Remove local state if using props
-	// const [selectedSubscribers, setSelectedSubscribers] = useState([])
+	// State to track expanded subscriber cards
+	const [expandedSubscribers, setExpandedSubscribers] = useState({})
+
 	const rowsPerPage = resultsPerPage
 
 	const handlePageChange = (newPage) => {
@@ -66,18 +67,9 @@ const SubscribersTable = ({
 				page,
 			},
 		}
-		console.log('filter from getSubscribers', filterString)
-		console.log('filter from getSubscribers', qs.stringify(filterString, { encode: false }))
-		// delete filterString.filters.createdAt
 		const queryString = filterString ? qs.stringify(filterString, { encode: false }) : qs.stringify(query, { encode: false })
 
-		console.log('queryString from getSubscribers', queryString)
-
 		try {
-			// const resp = await ApiService.get(
-			// 	`fairymailer/getSubscribers?sort[0]=createdAt:desc&filters[email][$contains]=${subscriberSearchValue}&pagination[pageSize]=1000&pagination[page]=1&populate[groups][count]=1`,
-			// 	user.jwt
-			// )
 			const resp = await ApiService.get(`fairymailer/getSubscribers?${queryString}&populate[groups][count]=1`, user.jwt)
 
 			if (resp.data && resp.data.data) {
@@ -98,7 +90,6 @@ const SubscribersTable = ({
 			confirmButtonText: 'Yes, delete.',
 		}).then(async (result) => {
 			if (result.isConfirmed) {
-				console.log('Confirmed with input:', result)
 				const deleteSubscriberResponse = await ApiService.post(`fairymailer/removeSubscriber`, { data: rowData }, user.jwt)
 				if (deleteSubscriberResponse) {
 					onUpdate()
@@ -108,14 +99,8 @@ const SubscribersTable = ({
 	}
 
 	const handleActionSelect = (selectedValue, rowData) => {
-		console.log('rowdata2 is : ', rowData)
-
 		switch (selectedValue.value) {
-			case 'edit_sub':
-				console.log('Overview action triggered')
-				break
 			case 'delete_sub':
-				console.log('Edit action triggered')
 				deleteSubscriber(rowData)
 				break
 			default:
@@ -130,7 +115,6 @@ const SubscribersTable = ({
 	useEffect(() => {
 		if (user) {
 			getSubscribers(currentPage, subscribersQueryFilter)
-			console.log('useEffect running', subscribersQueryFilter)
 		}
 	}, [currentPage, user, subscriberSearchValue, subscribersQueryFilter])
 
@@ -151,59 +135,139 @@ const SubscribersTable = ({
 	}
 
 	const dateBodyTemplate = (rowData) => {
-		return dayjs(rowData.createdAt).tz('Europe/Athens').format('DD-MM-YYYY HH:mm')
+		return dayjs(rowData.createdAt).format('YYYY-MM-DD')
+	}
+
+	// Check if a subscriber is selected
+	const isSubscriberSelected = (subscriber) => {
+		return selectedSubscribers.some((sub) => sub.udid === subscriber.udid);
+	}
+
+	// Toggle subscriber selection
+	const toggleSelection = (subscriber) => {
+		if (isSubscriberSelected(subscriber)) {
+			setSelectedSubscribers(prev => prev.filter(sub => sub.udid !== subscriber.udid));
+		} else {
+			setSelectedSubscribers(prev => [...prev, subscriber]);
+		}
+	}
+
+	// Toggle expanded/collapsed state of a subscriber card
+	const toggleExpand = (subscriberId) => {
+		setExpandedSubscribers(prev => ({
+			...prev,
+			[subscriberId]: !prev[subscriberId]
+		}));
 	}
 
 	return (
-		// <div>
 		<>
-			<DataTable
-				value={subscribers}
-				paginator={false}
-				selection={selectedSubscribers}
-				onSelectionChange={(e) => setSelectedSubscribers(e.value)}
-				dataKey="udid"
-				rowClassName={() => 'p-table-row'}
-			>
-				<Column
-					body={(rowData) => (
-						<div style={{ position: 'relative' }}>
-							{/* Checkbox in the Top-Left Corner */}
-							<div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
-								<Checkbox
-									checked={selectedSubscribers.some((sub) => sub.udid === rowData.udid)}
-									onChange={(e) => {
-										if (e) {
-											setSelectedSubscribers((prev) => [...prev, rowData])
-										} else {
-											setSelectedSubscribers((prev) => prev.filter((sub) => sub.udid !== rowData.udid))
-										}
-									}}
-								/>
+			{/* Desktop Table View */}
+			<div className="desktop-view">
+				<DataTable
+					value={subscribers}
+					paginator={false}
+					selection={selectedSubscribers}
+					onSelectionChange={(e) => setSelectedSubscribers(e.value)}
+					dataKey="udid"
+					rowClassName={() => 'p-table-row'}
+				>
+					<Column
+						body={(rowData) => (
+							<div style={{ position: 'relative' }}>
+								{/* Checkbox in the Top-Left Corner */}
+								<div style={{ position: 'absolute', top: '-10px', left: '5px' }}>
+									<Checkbox
+										checked={isSubscriberSelected(rowData)}
+										onChange={(e) => {
+											if (e) {
+												setSelectedSubscribers((prev) => [...prev, rowData])
+											} else {
+												setSelectedSubscribers((prev) => prev.filter((sub) => sub.udid !== rowData.udid))
+											}
+										}}
+									/>
+								</div>
+							</div>
+						)}
+						header={() => (
+							<Checkbox
+								checked={selectedSubscribers.length === paginatedData.length && selectedSubscribers.length > 0}
+								onChange={(e) => {
+									if (e) {
+										setSelectedSubscribers([...paginatedData])
+									} else {
+										setSelectedSubscribers([])
+									}
+								}}
+							/>
+						)}
+						headerStyle={{ width: '80px' }}
+					/>
+					<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
+					<Column field="email" header="Email" body={(rowData) => (loading ? <Skeleton /> : rowData.email)} />
+					<Column field="createdAt" body={(rowData) => (loading ? <Skeleton /> : dateBodyTemplate(rowData))} header="Subscribed" />
+					<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
+				</DataTable>
+			</div>
+
+			{/* Mobile View */}
+			<div className="mobile-view">
+				{subscribers.map((subscriber) => (
+					<div 
+						key={subscriber.udid} 
+						className={`subscriber-card ${expandedSubscribers[subscriber.udid] ? 'expanded' : 'collapsed'}`}
+					>
+						{/* Collapsed View */}
+						<div className="subscriber-header" onClick={() => toggleExpand(subscriber.udid)}>
+							<div className="subscriber-info">
+								<h3 className="subscriber-name">{subscriber.name || "Unnamed Subscriber"}</h3>
+								<p className="subscriber-email">{subscriber.email}</p>
+							</div>
+							<div className="dropdown-arrow">
+								{expandedSubscribers[subscriber.udid] ? "▲" : "▼"}
 							</div>
 						</div>
-					)}
-					header={() => (
-						<Checkbox
-							checked={selectedSubscribers.length === paginatedData.length && selectedSubscribers.length > 0}
-							onChange={(e) => {
-								if (e) {
-									setSelectedSubscribers([...paginatedData])
-								} else {
-									setSelectedSubscribers([])
-								}
-							}}
-						/>
-					)}
-					headerStyle={{ width: '80px' }}
-				/>
-				<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
-				<Column field="email" header="Email" body={(rowData) => (loading ? <Skeleton /> : rowData.email)} />
-				<Column field="createdAt" body={(rowData) => (loading ? <Skeleton /> : dateBodyTemplate(rowData))} header="Subscribed" />
-				<Column header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
-			</DataTable>
+						
+						{/* Expanded View */}
+						{expandedSubscribers[subscriber.udid] && (
+							<div className="subscriber-details">
+								<div className="stat-row">
+									<div className="stat-label">Email Sent</div>
+									<div className="stat-value">5</div>
+								</div>
+								<div className="stat-row">
+									<div className="stat-label">Email Opens</div>
+									<div className="stat-value">1</div>
+								</div>
+								<div className="stat-row">
+									<div className="stat-label">Email Clicks</div>
+									<div className="stat-value">5</div>
+								</div>
+								<div className="stat-row">
+									<div className="stat-label">Subscribed</div>
+									<div className="stat-value">{dateBodyTemplate(subscriber)}</div>
+								</div>
+								
+								<div className="edit-button-wrapper">
+									<Dropdown
+										withDivider={true}
+										icon={'Plus'}
+										options={dropdownOptions}
+										onLeftClick={() => handleLeftClick(subscriber.udid)}
+										onOptionSelect={(selectedValue) => handleActionSelect(selectedValue, subscriber)}
+										className="mobile-edit-dropdown"
+									>
+										Edit
+									</Dropdown>
+								</div>
+							</div>
+						)}
+					</div>
+				))}
+			</div>
+
 			<Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
-			{/* </div> */}
 		</>
 	)
 }
