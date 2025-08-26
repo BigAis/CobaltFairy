@@ -32,6 +32,7 @@ import AddSubscriber from './AddSubscriber'
 import PopupText from '../../components/PopupText/PopupText'
 import SearchBar from '../../components/SearchBar/SearchBar'
 import GoBackButton from '../../components/GoBackButton'
+import Checkbox from '../../components/Checkbox'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -970,11 +971,12 @@ const Subscribers = ({ initialView }) => {
 								}}
 								value={subscribersFilters.dateTo}
 							></DatePicker>
-							<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '24px' }}>
-								<input type="checkbox" id="activeOnly" checked={subscribersFilters.active} onChange={(e) => handleFilterChange('active', e.target.checked)} />
-								<label htmlFor="activeOnly" style={{ fontSize: '14px', fontWeight: '500' }}>
-									Only Active Subscribers
-								</label>
+							<div style={{ marginTop: '24px' }}>
+								<Checkbox 
+									checked={subscribersFilters.active} 
+									label="Only Active Subscribers" 
+									onChange={(checked) => handleFilterChange('active', checked)}
+								/>
 							</div>
 						</div>
 						<div>
