@@ -815,21 +815,21 @@ const FlowEditor = () => {
 	
 	const removeNode = async (node) => {
 		const nodeToRemove = typeof node === 'object' ? node : nodes.find(n => n.id === node);
-		
+	
 		if (!nodeToRemove) {
 			console.error('Node not found for removal');
 			return;
 		}
-
+	
 		// Special handling for trigger nodes
 		if (nodeToRemove.type === 'trigger') {
-			let res = await PopupText.fire({ 
-				icon: 'question', 
-				text: 'Are you sure you want to remove this trigger? This will reset the entire automation.', 
-				showCancelButton: true, 
-				focusCancel: true 
+			const res = await PopupText.fire({
+				icon: 'question',
+				text: 'Are you sure you want to remove this trigger? This will reset the entire automation.',
+				showCancelButton: true,
+				focusCancel: true
 			});
-			
+	
 			if (res.isConfirmed) {
 				setHasTrigger(false);
 				setNodes([]);
@@ -838,60 +838,76 @@ const FlowEditor = () => {
 			}
 			return;
 		}
-
-	// Special handling for condition nodes
-	if (nodeToRemove.type === 'condition') {
-		// Updated: use confirm/deny/cancel buttons with a more descriptive approach
-		let res = await PopupText.fire({
-			icon: 'question',
-			title: 'Remove Condition Node',
-			text: 'You are removing a condition node. What would you like to do?',
-			showConfirmButton: true,
-			showDenyButton: true,
-			showCancelButton: true,
-			confirmButtonText: 'Keep TRUE branch (✓)',
-			denyButtonText: 'Keep FALSE branch (✗)',
-			cancelButtonText: 'More options...',
-			confirmButtonColor: '#28a745',
-			denyButtonColor: '#dc3545',
-			cancelButtonColor: '#6c757d',
-			focusCancel: false
-		});
-		
-		if (res.isConfirmed) {
-			removeConditionNode(nodeToRemove, 0); // Keep true branch (index 0)
-		} else if (res.isDenied) {
-			removeConditionNode(nodeToRemove, 1); // Keep false branch (index 1)
-		} else if (!res.isConfirmed && !res.isDenied) {
-			// Show delete all option
-			let deleteAllRes = await PopupText.fire({
-				icon: 'warning',
-				title: 'Delete All Branches',
-				text: 'Would you like to delete the condition node AND all nodes below it in both branches?',
-				showConfirmButton: true,
-				showCancelButton: true,
-				confirmButtonText: 'Yes, delete ALL',
-				cancelButtonText: 'No, cancel',
-				confirmButtonColor: '#dc3545',
-				focusCancel: true
+	
+		// **CORRECTED AND FINAL VERSION FOR CONDITION NODES**
+		if (nodeToRemove.type === 'condition') {
+			// Define handler functions for each button's action
+			const handleKeepTrue = () => {
+				PopupText.close();
+				removeConditionNode(nodeToRemove, 0);
+			};
+	
+			const handleKeepFalse = () => {
+				PopupText.close();
+				removeConditionNode(nodeToRemove, 1);
+			};
+	
+			const handleCancel = () => {
+				PopupText.close();
+			};
+	
+			const handleDeleteAll = () => {
+				// This function will be called by the 'Delete All' button.
+				// It closes the first popup and immediately opens the second confirmation popup.
+				PopupText.close();
+	
+				PopupText.fire({
+					icon: 'warning',
+					title: 'Are you sure?',
+					text: 'This will delete the condition node AND all nodes below it in both branches. This action cannot be undone.',
+					showConfirmButton: true,
+					showCancelButton: true,
+					confirmButtonText: 'Yes, Delete All',
+					cancelButtonText: 'No, Cancel',
+					confirmButtonColor: '#dc3545',
+					focusCancel: true
+				}).then((result) => {
+					// Only if the user confirms the second popup, the deletion happens.
+					if (result.isConfirmed) {
+						removeNodeAndAllChildren(nodeToRemove.id, nodes);
+					}
+				});
+			};
+	
+			// Display the main popup
+			await PopupText.fire({
+				icon: 'question',
+				title: 'Remove Condition Node',
+				text: 'You are removing a condition node. What would you like to do?',
+				showConfirmButton: false,
+				showCancelButton: false,
+				// Because `PopupText` is a `sweetalert2-react-content` wrapper,
+				// we can pass JSX to the `html` property to render React components.
+				html: (
+					<div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '20px' }}>
+						<Button onClick={handleKeepTrue} type="secondary">Keep TRUE (✓)</Button>
+						<Button onClick={handleKeepFalse} type="secondary">Keep FALSE (✗)</Button>
+						<Button onClick={handleDeleteAll} type="secondary">Delete All</Button>
+						<Button onClick={handleCancel} type="secondary">Cancel</Button>
+					</div>
+				),
 			});
-			
-			if (deleteAllRes.isConfirmed) {
-				removeNodeAndAllChildren(nodeToRemove.id, nodes);
-			}
+			return;
 		}
-		
-		return;
-	}
-
-		// For all other nodes, confirm deletion
-		let res = await PopupText.fire({ 
-			icon: 'question', 
-			text: 'Are you sure you want to remove this node?', 
-			showCancelButton: true, 
-			focusCancel: true 
+	
+		// For all other nodes, show a simple confirmation
+		const res = await PopupText.fire({
+			icon: 'question',
+			text: 'Are you sure you want to remove this node?',
+			showCancelButton: true,
+			focusCancel: true
 		});
-		
+	
 		if (res.isConfirmed) {
 			removeSingleNode(nodeToRemove);
 		}
@@ -2111,3 +2127,4 @@ const FlowEditor = () => {
 }
 
 export default FlowEditor
+
