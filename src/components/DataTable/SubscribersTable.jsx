@@ -53,9 +53,9 @@ const SubscribersTable = ({
 		navigate(`/subscribers/${uuid}`)
 	}
 
-	const getSubscribers = async (page = 1, filterString = '') => {
+	const getSubscribers = async (page = 1, filterObject = null) => {
 		setLoading(true)
-		const query = {
+		let query = {
 			filters: {
 				email: {
 					$contains: subscriberSearchValue,
@@ -67,7 +67,18 @@ const SubscribersTable = ({
 				page,
 			},
 		}
-		const queryString = filterString ? qs.stringify(filterString, { encode: false }) : qs.stringify(query, { encode: false })
+
+		if (filterObject) {
+			query = {
+				...filterObject,
+				pagination: {
+					pageSize: resultsPerPage,
+					page,
+				},
+			}
+		}
+
+		const queryString = qs.stringify(query, { encode: false })
 
 		try {
 			const resp = await ApiService.get(`fairymailer/getSubscribers?${queryString}&populate[groups][count]=1`, user.jwt)

@@ -321,10 +321,6 @@ const Subscribers = ({ initialView }) => {
 
 		const query = {
 			sort: ['createdAt:desc'],
-			pagination: {
-				pageSize: 1000,
-				page: 1,
-			},
 			filters: {
 				active: subscribersFilters.active,
 				email: subscribersFilters.email ? { $contains: subscribersFilters.email } : undefined,
