@@ -53,6 +53,45 @@ const SubscribersTable = ({
 		navigate(`/subscribers/${uuid}`)
 	}
 
+	const selectAllSubscribers = async () => {
+		if (!user || !user.jwt) return
+	
+		try {
+			// Create a query similar to the current one but with a large page size
+			let allSubscribersQuery = { ...subscribersQueryFilter }
+	
+			// If there's no filter currently applied, create a basic query
+			if (!allSubscribersQuery || Object.keys(allSubscribersQuery).length === 0) {
+				allSubscribersQuery = {
+					filters: {
+						email: { $contains: subscriberSearchValue || '' },
+					},
+					sort: ['createdAt:desc'],
+				}
+			}
+	
+			// Override pagination to get all results
+			allSubscribersQuery.pagination = {
+				pageSize: 1000, // A large number to get all subscribers
+				page: 1,
+			}
+	
+			const queryString = qs.stringify(allSubscribersQuery, { encode: false })
+			const response = await ApiService.get(`fairymailer/getSubscribers?${queryString}&populate[groups][count]=1`, user.jwt)
+	
+			if (response.data && response.data.data) {
+				// Select all subscribers from the response
+				setSelectedSubscribers(response.data.data)
+			}
+		} catch (error) {
+			console.error('Error fetching all subscribers for selection:', error)
+			PopupText.fire({
+				text: 'Error selecting all subscribers. Please try again.',
+				icon: 'error',
+			})
+		}
+	}
+
 	const getSubscribers = async (page = 1, filterObject = null) => {
 		setLoading(true)
 		let query = {
@@ -203,11 +242,13 @@ const SubscribersTable = ({
 						)}
 						header={() => (
 							<Checkbox
-								checked={selectedSubscribers.length === paginatedData.length && selectedSubscribers.length > 0}
+								checked={totalResults > 0 && selectedSubscribers.length === totalResults}
 								onChange={(e) => {
 									if (e) {
-										setSelectedSubscribers([...paginatedData])
+										// Call the new function to select all subscribers
+										selectAllSubscribers()
 									} else {
+										// Clear all selections
 										setSelectedSubscribers([])
 									}
 								}}
