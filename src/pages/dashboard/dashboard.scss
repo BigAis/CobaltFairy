@@ -11,7 +11,7 @@
 		
 		@media (max-width: 768px) {
 			padding: 1em;
-			padding-top: 70px !important; /* Account for fixed header */
+			margin-top: 60px; /* Fixed header height, no extra padding */
 		}
 		
 		.dashboard-head {
@@ -124,9 +124,12 @@
 			@media (max-width: 768px) {
 				flex-direction: column;
 				align-items: flex-start;
+				text-align: left !important;
 				
 				.page-name {
 					margin-bottom: 10px;
+					text-align: left !important;
+					align-self: flex-start;
 				}
 				
 				.btn {
