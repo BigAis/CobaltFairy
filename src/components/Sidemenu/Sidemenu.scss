@@ -3,11 +3,11 @@
     min-height: 100vh;
     background: rgba(255, 255, 255, 0.5);
     border-right: 2px solid rgba(218, 209, 197, 1);
-    position: fixed; /* Make sidemenu fixed in desktop mode */
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 100;
-    overflow-y: auto; /* Allow scrolling within sidemenu if needed */
+    overflow-y: auto;
 
     .sidemenu-inner {
         width: 265px;
@@ -18,7 +18,6 @@
         padding: 1em 0;
         position: relative;
         
-        /* Adjust spacing between elements */
         .fairymail-logo-container {
             margin-bottom: 2em;
         }
@@ -66,7 +65,6 @@
                 li:hover {
                     color: rgba(255, 76, 73, 1);
                     cursor: pointer;
-                    /* Removed background-color change */
                     text-decoration: none !important;
                     
                     a {
@@ -80,7 +78,6 @@
                 
                 li.active {
                     color: rgba(255, 76, 73, 1);
-                    /* Removed background-color change */
                     text-decoration: none !important;
                     
                     a {
@@ -105,12 +102,11 @@
         }
         
         .menu_bottom {
-            margin-top: auto; /* Push to bottom while maintaining spacing */
+            margin-top: auto;
             padding: 0 1em;
             width: 90%;
             margin-bottom: 3em;
             
-            // Create button wrapper styles
             .create-button-wrapper {
                 position: relative;
                 
@@ -124,12 +120,11 @@
                     }
                 }
                 
-                // Create dropdown menu styles matching Figma specs
                 .create-dropdown-menu {
                     position: fixed;
-                    left: 265px; // Position to the right of the sidemenu
-                    bottom: 60px; // Position above the create button
-                    width: 240px; // Increased width for proper content fitting
+                    left: 265px;
+                    bottom: 60px;
+                    width: 240px;
                     background: #FFFFFF;
                     border: 2px solid #DAD1C5;
                     border-radius: 8px;
@@ -137,7 +132,6 @@
                     z-index: 1000;
                     overflow: hidden;
                     
-                    // On mobile, position dropdown above the button
                     @media (max-width: 768px) {
                         position: absolute;
                         bottom: 100%;
@@ -149,7 +143,7 @@
                     }
                     
                     .create-dropdown-item {
-                        padding: 12px 18px; // Slightly increased padding for better spacing
+                        padding: 12px 18px;
                         font-size: 18px;
                         font-family: 'Bitter', serif;
                         font-weight: 600;
@@ -161,7 +155,7 @@
                         display: flex;
                         align-items: center;
                         gap: 8px;
-                        min-height: 44px; // Ensure consistent height for all items
+                        min-height: 44px;
                         
                         svg {
                             width: 20px;
@@ -202,7 +196,7 @@
         width: 100%;
         height: 60px;
         min-height: unset;
-        background: #FFF8EF; /* Matching Figma header color */
+        background: #FFF8EF;
         border-bottom: 2px solid rgba(218, 209, 197, 1);
         border-right: none;
         display: flex;
@@ -252,11 +246,11 @@
                 }
                 
                 .user-menu {
-                    position: fixed; /* Changed from absolute */
-                    top: 60px; /* Below mobile header */
+                    position: fixed;
+                    top: 60px;
                     right: 10px;
                     min-width: 180px;
-                    z-index: 99999; /* Much higher */
+                    z-index: 99999;
                     background-color: #FFF8EF;
                     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
                     
@@ -310,15 +304,45 @@
             .sidemenu-inner {
                 flex-direction: column;
                 height: 100%;
-                padding: 1em;
+                padding: 0;
+                
+                // Keep the mobile header but rearrange with flexbox
+                .menu-toggle,
+                .mobile-logo,  
+                .user-menu-wrapper {
+                    display: flex;
+                }
+                
+                // Create header row layout when open
+                .menu-toggle {
+                    position: absolute;
+                    top: 1em;
+                    left: 1em;
+                    z-index: 1002;
+                }
                 
                 .mobile-logo {
-                    margin: 20px 0;
+                    position: absolute;
+                    top: 1em;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 1002;
                 }
+                
+                .user-menu-wrapper {
+                    position: absolute;
+                    top: 1em;
+                    right: 1em;
+                    z-index: 1002;
+                }
+                
+                // Add top padding to account for header
+                padding-top: 80px;
                 
                 .mobile-account-picker {
                     width: 100%;
                     margin: 15px 0;
+                    padding: 0 1em;
                     
                     .account-info-card {
                         width: 100%;
@@ -344,10 +368,6 @@
                     }
                 }
                 
-                .user-menu-wrapper {
-                    display: none;
-                }
-                
                 .menu_upper, .menu_lower, .menu_bottom {
                     display: block;
                     margin-top: 20px;
@@ -370,7 +390,6 @@
                     margin-bottom: 20px;
                     width: 80%;
                     
-                    // Mobile dropdown adjustments
                     .create-button-wrapper {
                         .create-dropdown-menu {
                             position: fixed;
@@ -387,7 +406,7 @@
     }
 }
 
-/* Add this to adjust main content area in desktop mode */
+/* Adjust main content area in desktop mode */
 .dashboard-container, .fm-page-container {
     margin-left: 265px;
     width: calc(100% - 265px);
