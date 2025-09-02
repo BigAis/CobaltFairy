@@ -258,6 +258,11 @@ p.template-card-label {
 	/* Header section */
 	.page-name-container {
 		margin-bottom: 1rem;
+		.page-name {
+					margin-bottom: 10px;
+					text-align: left !important;
+					align-self: flex-start;
+					}			
 	}
 	
 	/* Campaign search input */
