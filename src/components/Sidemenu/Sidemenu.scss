@@ -307,38 +307,41 @@
                 height: 100%;
                 padding: 0;
                 
-                // Keep the mobile header but rearrange with flexbox
-                .menu-toggle,
-                .mobile-logo,  
-                .user-menu-wrapper {
+                // Create a proper header container that matches closed state
+                &::before {
+                    content: '';
                     display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 0 1em;
+                    height: 60px;
+                    width: 100%;
+                    position: relative;
+                    z-index: 1002;
                 }
                 
-                // Create header row layout when open
+                // Position header elements in flex layout (not absolute)
                 .menu-toggle {
-                    position: absolute;
-                    top: 1em;
+                    position: fixed;
+                    top: 10px;
                     left: 1em;
-                    z-index: 1002;
+                    z-index: 1003;
                 }
                 
                 .mobile-logo {
-                    position: absolute;
-                    top: 1em;
+                    position: fixed;
+                    top: 10px;
                     left: 50%;
                     transform: translateX(-50%);
-                    z-index: 1002;
+                    z-index: 1003;
                 }
                 
                 .user-menu-wrapper {
-                    position: absolute;
-                    top: 1em;
+                    position: fixed;
+                    top: 10px;
                     right: 1em;
-                    z-index: 1002;
+                    z-index: 1003;
                 }
-                
-                // Add top padding to account for header
-                padding-top: 80px;
                 
                 .mobile-account-picker {
                     width: 100%;
@@ -372,7 +375,7 @@
                 
                 .menu_upper, .menu_lower, .menu_bottom {
                     display: block;
-                    margin-top: 20px;
+                    margin-top: 80px;
                     
                     ul li a.menu-entry {
                         text-decoration: none !important;
