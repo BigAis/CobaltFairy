@@ -207,6 +207,7 @@
         z-index: 1000;
         transition: height 0.3s ease;
 
+
         .sidemenu-inner {
             width: 100%;
             height: auto;
@@ -343,6 +344,7 @@
                     width: 100%;
                     margin: 15px 0;
                     padding: 0 1em;
+                    display: none;
                     
                     .account-info-card {
                         width: 100%;

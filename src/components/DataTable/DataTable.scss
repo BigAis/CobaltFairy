@@ -191,6 +191,7 @@
 // Mobile styles for subscribers
 .subscribers {
   @include mobile-view-base;
+  text-align: left;
   
   .subscriber-card {
     @include card-base;
@@ -224,6 +225,7 @@
 
 // Mobile styles for segments
 .segments {
+  text-align: left;
   @include mobile-view-base;
   
   .segment-card {
@@ -253,6 +255,7 @@
 
 // Mobile styles for groups
 .groups {
+  text-align: left;
   @include mobile-view-base;
   
   .group-card {

@@ -11,7 +11,7 @@
 		
 		@media (max-width: 768px) {
 			padding: 1em;
-			margin-top: 60px; /* Fixed header height, no extra padding */
+			margin-top: 0px; /* Fixed header height, no extra padding */
 		}
 		
 		.dashboard-head {
@@ -113,7 +113,9 @@
 			justify-content: space-between;
 			align-items: center;
 			margin-bottom: 20px;
-			
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+
 			.page-name {
 				font-family: 'Bitter', serif;
 				font-size: 28px;
