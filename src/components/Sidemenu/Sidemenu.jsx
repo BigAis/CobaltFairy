@@ -83,7 +83,7 @@ const Sidemenu = () => {
 			}
 		},
 		{
-			label: 'Sign out',
+			label: 'Logout',
 			callback: async () => {
 				const result = await PopupText.fire({
 					icon: 'question',
@@ -130,8 +130,8 @@ const Sidemenu = () => {
 				setMenuOpen(false)
 			}
 			
-			// Close user menu when clicking outside
-			if (isMobile && userMenuOpen && userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+			// Close user menu when clicking outside on mobile (only for desktop behavior)
+			if (!isMobile && userMenuOpen && userMenuRef.current && !userMenuRef.current.contains(e.target)) {
 				setUserMenuOpen(false)
 			}
 		}
@@ -198,6 +198,8 @@ const Sidemenu = () => {
 							<button className="menu-toggle" onClick={(e) => {
 								e.stopPropagation();
 								setMenuOpen(!menuOpen);
+								// Close user menu if it's open
+								if (userMenuOpen) setUserMenuOpen(false);
 							}}>
 								<span className="menu-icon">{menuOpen ? '×' : '☰'}</span>
 							</button>
@@ -210,19 +212,11 @@ const Sidemenu = () => {
 								<div className="user-avatar" onClick={(e) => {
 									e.stopPropagation();
 									setUserMenuOpen(!userMenuOpen);
+									// Close main menu if it's open
+									if (menuOpen) setMenuOpen(false);
 								}}>
 									{getNameInitials(user?.user?.name)}
 								</div>
-								
-								{userMenuOpen && (
-									<Card className="user-menu">
-										{userMenuOptions.map((option) => (
-											<div key={option.label} className="user-menu-option" onClick={() => option.callback()}>
-												{option.label}
-											</div>
-										))}
-									</Card>
-								)}
 							</div>
 						</>
 					)}
@@ -338,6 +332,79 @@ const Sidemenu = () => {
 					)}
 				</div>
 			</div>
+			
+			{/* Mobile User Menu Fullscreen - matches Figma exactly */}
+			{isMobile && userMenuOpen && (
+				<>
+					<div className="mobile-user-menu-overlay" onClick={() => setUserMenuOpen(false)}></div>
+					<div className="mobile-user-menu-fullscreen">
+						<div className="mobile-user-menu-header">
+							<div className="header-top-bar">
+								<button 
+									className="hamburger-menu-icon" 
+									onClick={() => {
+										setUserMenuOpen(false);
+										setMenuOpen(true);
+									}}
+								>
+									☰
+								</button>
+								<div className="mobile-logo">
+									<Logo />
+								</div>
+								<div className="header-right">
+									<div className="user-avatar-large">
+										{getNameInitials(user?.user?.name)}
+									</div>
+									<button className="close-button" onClick={() => setUserMenuOpen(false)}>
+										×
+									</button>
+								</div>
+							</div>
+							<div className="menu-items-in-header">
+								{userMenuOptions.map((option, index) => (
+									<div 
+										key={index}
+										className="mobile-user-menu-item"
+										onClick={option.callback}
+									>
+										{option.label}
+									</div>
+								))}
+							</div>
+						</div>
+					</div>
+				</>
+			)}
+			
+			{/* Desktop User Menu (keep existing behavior) */}
+			{!isMobile && userMenuOpen && (
+				<Card
+					className="user-menu"
+					style={{
+						background: '#FFF9EF',
+						position: 'absolute',
+						right: '0',
+						top: '100%',
+						marginTop: '10px',
+						zIndex: '1000',
+					}}
+				>
+					{userMenuOptions.map((option) => (
+						<div
+							style={{ fontSize: '16px' }}
+							key={option.label}
+							className="user-menu-option"
+							onClick={() => {
+								option.callback()
+							}}
+						>
+							{option.label}
+						</div>
+					))}
+				</Card>
+			)}
+			
 			{isMobile && menuOpen && <div className="menu-overlay" onClick={() => setMenuOpen(false)}></div>}
 		</>
 	)
