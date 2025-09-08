@@ -26,18 +26,18 @@ const menu_items_lower = [
 
 // Create dropdown options
 const createDropdownOptions = [
-	{ 
-		label: 'Create Campaign', 
+	{
+		label: 'Create Campaign',
 		path: '/campaigns/new',
 		icon: 'Campaigns'
 	},
-	{ 
-		label: 'Import Contacts', 
+	{
+		label: 'Import Contacts',
 		path: '/subscribers/import',
 		icon: 'Contacts'
 	},
-	{ 
-		label: 'Create Automation', 
+	{
+		label: 'Create Automation',
 		path: '/automations/new',
 		icon: 'Automations',
 		requiresDesktop: true
@@ -58,10 +58,10 @@ const Sidemenu = () => {
 	// Determine active menu item
 	const getActiveItem = () => {
 		const path = location.pathname;
-		const activeUpperItem = menu_items_upper.find(item => 
+		const activeUpperItem = menu_items_upper.find(item =>
 			path === item.path || path.startsWith(item.path + '/')
 		);
-		const activeLowerItem = menu_items_lower.find(item => 
+		const activeLowerItem = menu_items_lower.find(item =>
 			path === item.path || path.startsWith(item.path + '/')
 		);
 		return activeUpperItem || activeLowerItem || null;
@@ -124,27 +124,27 @@ const Sidemenu = () => {
 			if (createDropdownRef.current && !createDropdownRef.current.contains(e.target)) {
 				setCreateDropdownOpen(false)
 			}
-			
+
 			// Close menu when clicking outside on mobile
 			if (isMobile && menuOpen && !e.target.closest('.sidemenu')) {
 				setMenuOpen(false)
 			}
-			
+
 			// Close user menu when clicking outside on mobile (only for desktop behavior)
 			if (!isMobile && userMenuOpen && userMenuRef.current && !userMenuRef.current.contains(e.target)) {
 				setUserMenuOpen(false)
 			}
 		}
-		
+
 		document.addEventListener('click', handleClickOutside)
 		return () => document.removeEventListener('click', handleClickOutside)
 	}, [isMobile, menuOpen, userMenuOpen])
 
 	const activeItem = getActiveItem();
-	
+
 	// Helper function to get user initials
 	const getNameInitials = (name) => {
-		if(!name) return "";
+		if (!name) return "";
 		return name
 			.split(' ')
 			.map((word) => word[0].toUpperCase())
@@ -203,11 +203,11 @@ const Sidemenu = () => {
 							}}>
 								<span className="menu-icon">{menuOpen ? '×' : '☰'}</span>
 							</button>
-							
+
 							<div className="mobile-logo">
 								<Logo />
 							</div>
-							
+
 							<div className="user-menu-wrapper" ref={userMenuRef}>
 								<div className="user-avatar" onClick={(e) => {
 									e.stopPropagation();
@@ -228,7 +228,7 @@ const Sidemenu = () => {
 							{menuOpen && isMobile && (
 								<div className="mobile-account-picker">
 									<Card className="account-info-card">
-										<div 
+										<div
 											className="account-info"
 											onClick={() => {
 												navigate('/choose-account', { replace: true });
@@ -244,17 +244,17 @@ const Sidemenu = () => {
 									</Card>
 								</div>
 							)}
-							
+
 							<div className="menu_upper">
 								<ul>
 									{menu_items_upper.map((item, index) => {
 										const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 										return (
-											<li 
+											<li
 												key={index}
 												onClick={() => {
 													navigate(item.path)
-													if(isMobile) setMenuOpen(false)
+													if (isMobile) setMenuOpen(false)
 												}}
 												disabled={item.disabled}
 												className={isActive ? 'active' : ''}
@@ -271,12 +271,12 @@ const Sidemenu = () => {
 									{menu_items_lower.map((item, index) => {
 										const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 										return (
-											<li 
+											<li
 												key={index}
 												onClick={() => {
 													if (!item.disabled) {
 														navigate(item.path)
-														if(isMobile) setMenuOpen(false)
+														if (isMobile) setMenuOpen(false)
 													}
 												}}
 												disabled={item.disabled}
@@ -295,11 +295,11 @@ const Sidemenu = () => {
 									subsLimit={account?.subscriber_limit || 1000}
 									onClick={handleSubsCounterClick}
 								/>
-								
+
 								{/* Create Button with Dropdown */}
 								<div className="create-button-wrapper" ref={createDropdownRef}>
-									<Button 
-										style={{ width: '100%', marginTop: '15px' }} 
+									<Button
+										style={{ width: '100%', marginTop: '15px' }}
 										onClick={(e) => {
 											e.stopPropagation();
 											setCreateDropdownOpen(!createDropdownOpen);
@@ -308,12 +308,12 @@ const Sidemenu = () => {
 									>
 										+ Create
 									</Button>
-									
+
 									{/* Create Dropdown Menu */}
 									{createDropdownOpen && (
 										<div className="create-dropdown-menu">
 											{createDropdownOptions.map((option, index) => (
-												<div 
+												<div
 													key={index}
 													className="create-dropdown-item"
 													onClick={() => {
@@ -332,7 +332,7 @@ const Sidemenu = () => {
 					)}
 				</div>
 			</div>
-			
+
 			{/* Mobile User Menu Fullscreen - matches Figma exactly */}
 			{isMobile && userMenuOpen && (
 				<>
@@ -340,8 +340,8 @@ const Sidemenu = () => {
 					<div className="mobile-user-menu-fullscreen">
 						<div className="mobile-user-menu-header">
 							<div className="header-top-bar">
-								<button 
-									className="hamburger-menu-icon" 
+								<button
+									className="hamburger-menu-icon"
 									onClick={() => {
 										setUserMenuOpen(false);
 										setMenuOpen(true);
@@ -363,7 +363,7 @@ const Sidemenu = () => {
 							</div>
 							<div className="menu-items-in-header">
 								{userMenuOptions.map((option, index) => (
-									<div 
+									<div
 										key={index}
 										className="mobile-user-menu-item"
 										onClick={option.callback}
@@ -373,10 +373,30 @@ const Sidemenu = () => {
 								))}
 							</div>
 						</div>
+						<div className="mobile-user-menu-body">
+							{/* Account Picker */}
+							<div className="mobile-account-picker-in-menu">
+								<Card className="account-info-card">
+									<div
+										className="account-info"
+										onClick={() => {
+											navigate('/choose-account', { replace: true });
+											setUserMenuOpen(false);
+										}}
+									>
+										<div>
+											<h4>{account?.name}</h4>
+											<span>{account?.payment_plan?.name || ''}</span>
+										</div>
+										<Icon name="Caret" />
+									</div>
+								</Card>
+							</div>
+						</div>
 					</div>
 				</>
 			)}
-			
+
 			{/* Desktop User Menu (keep existing behavior) */}
 			{!isMobile && userMenuOpen && (
 				<Card
@@ -404,7 +424,7 @@ const Sidemenu = () => {
 					))}
 				</Card>
 			)}
-			
+
 			{isMobile && menuOpen && <div className="menu-overlay" onClick={() => setMenuOpen(false)}></div>}
 		</>
 	)

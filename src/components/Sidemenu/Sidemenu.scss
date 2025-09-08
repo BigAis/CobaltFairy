@@ -512,6 +512,41 @@
             }
         }
     }
+    
+    .mobile-user-menu-body {
+        padding: 1em;
+        box-sizing: border-box;
+        margin-top: auto; /* Pushes to the bottom */
+    }
+
+    .mobile-account-picker-in-menu {
+        width: 100%;
+        margin-top: auto;
+        padding: 0 1em 1em;
+        
+        .account-info-card {
+            width: 100%;
+            background-color: #FFF8EF;
+            
+            .account-info {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: pointer;
+                
+                h4 {
+                    font-size: 16px;
+                    font-weight: 500;
+                    margin: 0;
+                }
+                
+                span {
+                    font-size: 14px;
+                }
+            }
+        }
+    }
 }
 
 /* Adjust main content area in desktop mode */
