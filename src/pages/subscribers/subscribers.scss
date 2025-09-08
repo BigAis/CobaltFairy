@@ -40,6 +40,10 @@ div.subscriber-filters-card > div > div {
 
 /* Add some responsive fixes for mobile */
 @media (max-width: 768px) {
+	.page-name-container { 
+		margin-top: 0;      
+	}                         
+
 	.button-filters {
 		min-width: 120px;
 	}

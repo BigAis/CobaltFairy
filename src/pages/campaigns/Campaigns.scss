@@ -257,12 +257,13 @@ p.template-card-label {
 	
 	/* Header section */
 	.page-name-container {
+		margin-top: 0; // Add this line
 		margin-bottom: 1rem;
 		.page-name {
-					margin-bottom: 10px;
-					text-align: left !important;
-					align-self: flex-start;
-					}			
+			margin-bottom: 10px;
+			text-align: left !important;
+			align-self: flex-start;
+		}			
 	}
 	
 	/* Campaign search input */
