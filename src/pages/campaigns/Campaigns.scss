@@ -571,3 +571,18 @@ p.template-card-label {
 		}
 	}
 }
+/* Responsive styles for Campaign Overview page */
+@media(max-width: 768px) {
+    .overview-row {
+        flex-direction: column;
+    }
+
+    .campaing-stats-card-wrapper {
+        flex-direction: column;
+        gap: 20px !important;
+    }
+
+    .stats-container .stats-card {
+        width: 100%;
+    }
+}

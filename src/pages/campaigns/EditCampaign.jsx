@@ -198,7 +198,7 @@ const EditCampaign = () => {
 												</div>
 											</Card>
 
-											<div className="w-100 d-flex gap-20">
+											<div className="w-100 d-flex gap-20 overview-row">
 												<Card className={'stats-card'}>
 													<p className="stat-heading">Opens and clicks</p>
 													<AreaChart />
@@ -237,7 +237,7 @@ const EditCampaign = () => {
 													</div>
 												</Card>
 											</div>
-											<div className="d-flex gap-20">
+											<div className="d-flex gap-20 overview-row">
 												<Card className={'stats-card'}>
 													<p className="stat-heading">Device Type</p>
 													<DoughnutChart stats={campaign.stats} />

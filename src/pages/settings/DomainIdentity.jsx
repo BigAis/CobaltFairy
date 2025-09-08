@@ -253,9 +253,7 @@ const DomainIdentity = () => {
 						isVerified = true
 					} else if (response.data.verified || response.data.status === 'Verified') {
 						isVerified = true
-					} else if (response.data.success || response.data.code === 200) {
-						isVerified = true
-					}
+					} 
 				}
 
 				const txtRecord = domainData?.VerificationAttributes[domainName]?.VerificationToken ?? 'err'
