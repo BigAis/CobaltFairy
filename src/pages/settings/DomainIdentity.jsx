@@ -203,8 +203,6 @@ const DomainIdentity = () => {
 					isVerified = response.data.data.verified
 				} else if (response.data.status === 'Verified' || response.data.data?.status === 'Verified') {
 					isVerified = true
-				} else if (response.data.success || response.data.code === 200) {
-					isVerified = true
 				}
 
 				setDomainSettings((prevState) => ({
@@ -330,8 +328,6 @@ const DomainIdentity = () => {
 					if (emailData.verified !== undefined) {
 						isVerified = emailData.verified
 					} else if (emailData.status === 'Verified') {
-						isVerified = true
-					} else if (response.data.success || response.data.code === 200) {
 						isVerified = true
 					}
 				}
