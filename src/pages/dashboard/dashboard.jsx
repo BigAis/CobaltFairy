@@ -289,11 +289,34 @@ const Dashboard = () => {
 	const createCampaignMetrics = (data, key) => {
 		if (!data || !data[key]) return
 
-		// Helper function to calculate percentage change
-		const calculatePercentage = (current, comparison) => {
-			if (!comparison || comparison === 0) return 0
-			return Math.round(((current - comparison) / comparison) * 100)
+	// Helper function to calculate percentage change
+	const calculatePercentage = (current, comparison) => {
+		// If no comparison data or comparison is 0, return 0
+		if (!comparison || comparison === 0) return 0
+
+		// Convert to numbers to ensure proper calculation
+		const currentNum = Number(current) || 0
+		const comparisonNum = Number(comparison) || 0
+
+		// If current is 0, return -100% (complete decrease)
+		if (currentNum === 0) return -100
+
+		// If comparison is very small relative to current (less than 5% of current value),
+		// this might indicate bad comparison data, so return 0
+		if (currentNum > 0 && comparisonNum > 0 && comparisonNum < (currentNum * 0.05)) {
+			console.warn(`Dashboard: Comparison value ${comparisonNum} is very small relative to current ${currentNum}, returning 0% to avoid misleading percentages`)
+			return 0
 		}
+
+		// Calculate percentage change
+		const percentageChange = Math.round(((currentNum - comparisonNum) / comparisonNum) * 100)
+
+		// Cap the percentage to reasonable limits to avoid display issues
+		if (percentageChange > 999) return 999
+		if (percentageChange < -999) return -999
+
+		return percentageChange
+	}
 
 		// Helper function to create timeseries data for a specific metric
 		const createTimeseriesForMetric = (metricKey) => {
