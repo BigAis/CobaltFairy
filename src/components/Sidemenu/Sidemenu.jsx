@@ -8,6 +8,7 @@ import Card from '../Card'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAccount } from '../../context/AccountContext'
 import PopupText from '../PopupText/PopupText'
+import AccountPicker from '../../pages/accountPicker/accountPicker';
 
 const menu_items_upper = [
 	{ label: 'Dashboard', path: '/dashboard', icon: 'Dashboard' },
@@ -99,13 +100,6 @@ const Sidemenu = () => {
 					window.localStorage.removeItem('fairymail_session');
 					navigate('/login')
 				}
-			}
-		},
-		{
-			label: 'Switch Account',
-			callback: () => {
-				setUserMenuOpen(false);
-				navigate('/choose-account');
 			}
 		}
 	]
@@ -332,7 +326,9 @@ const Sidemenu = () => {
 												</div>
 											))}
 										</div>
+										
 									)}
+									
 								</div>
 							</div>
 						</>
@@ -363,9 +359,7 @@ const Sidemenu = () => {
 									<div className="user-avatar-large">
 										{getNameInitials(user?.user?.name)}
 									</div>
-									<button className="close-button" onClick={() => setUserMenuOpen(false)}>
-										×
-									</button>
+
 								</div>
 							</div>
 							<div className="menu-items-in-header">
