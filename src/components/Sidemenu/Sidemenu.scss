@@ -415,13 +415,13 @@
     
     .mobile-user-menu-header {
         width: 100%;
-        height: 226px;
         background: rgba(255, 255, 255, 0.5);
         border-bottom: 2px solid #DAD1C5;
         display: flex;
         flex-direction: column;
         align-items: center;
         box-sizing: border-box;
+        flex-shrink: 0;
 
         .header-top-bar {
             display: flex;
@@ -431,7 +431,6 @@
             height: 60px;
             padding: 0 1em;
             box-sizing: border-box;
-            flex-shrink: 0;
 
             .hamburger-menu-icon {
                 background: none;
@@ -456,7 +455,6 @@
             .header-right {
                 display: flex;
                 align-items: center;
-                gap: 16px;
     
                 .user-avatar-large {
                     box-sizing: border-box;
@@ -472,20 +470,15 @@
                     font-weight: 600;
                     font-size: 18px;
                     color: #100F1C;
-                }
-                
-                .close-button {
-                    background: none;
-                    border: none;
-                    font-size: 28px;
-                    font-weight: normal;
                     cursor: pointer;
-                    color: #100F1C;
-                    padding: 0;
-                    line-height: 1;
-    
+                    transition: transform 0.2s ease;
+                    
                     &:hover {
-                        color: #FF4C49;
+                        transform: scale(1.1);
+                    }
+                    
+                    &:active {
+                        transform: scale(0.95);
                     }
                 }
             }
@@ -496,7 +489,8 @@
             flex-direction: column;
             align-items: center;
             gap: 24px;
-            margin-top: 20px;
+            margin: 20px 0;
+            padding-bottom: 20px;
 
             .mobile-user-menu-item {
                 font-family: 'Bitter';
@@ -505,44 +499,85 @@
                 color: #343037;
                 cursor: pointer;
                 transition: color 0.2s ease;
+                padding: 8px 16px;
+                border-radius: 4px;
                 
                 &:hover {
                     color: #FF4C49;
+                }
+                
+                &:active {
+                    background-color: rgba(255, 76, 73, 0.1);
                 }
             }
         }
     }
     
-    .mobile-user-menu-body {
-        padding: 1em;
-        box-sizing: border-box;
-        margin-top: auto; /* Pushes to the bottom */
-    }
-
-    .mobile-account-picker-in-menu {
+    /* New Account Picker Section */
+    .mobile-account-picker-section {
         width: 100%;
-        margin-top: auto;
-        padding: 0 1em 1em;
+        padding: 20px 1em 2em;
         
-        .account-info-card {
+        // Remove the extra divider - we'll use the existing one above
+        
+        .mobile-account-picker-content {
             width: 100%;
-            background-color: #FFF8EF;
             
-            .account-info {
+            .account-info-card {
                 width: 100%;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                cursor: pointer;
+                background: rgba(255, 255, 255, 0.5);
+                border: 2px solid #DAD1C5;
+                border-radius: 8px;
+                padding: 1em;
+                font-family: 'Inter';
+                line-height: 19px;
                 
-                h4 {
-                    font-size: 16px;
-                    font-weight: 500;
-                    margin: 0;
-                }
-                
-                span {
-                    font-size: 14px;
+                .account-info {
+                    display: flex;
+                    width: 100%;
+                    text-align: left;
+                    justify-content: space-between;
+                    align-items: center;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    
+                    &:hover {
+                        transform: translateY(-1px);
+                    }
+                    
+                    &:active {
+                        transform: translateY(0);
+                    }
+                    
+                    h4 {
+                        font-size: 16px;
+                        font-weight: 500;
+                        margin: 0 0 4px 0;
+                        color: #343037;
+                    }
+                    
+                    span {
+                        font-size: 14px;
+                        font-weight: normal;
+                        color: #887D76;
+                    }
+                    
+                    svg {
+                        transform: rotate(90deg);
+                        transition: transform 0.2s ease;
+                        
+                        path {
+                            fill: #343037;
+                        }
+                    }
+                    
+                    &:hover svg {
+                        transform: rotate(90deg) scale(1.1);
+                        
+                        path {
+                            fill: #FF4C49;
+                        }
+                    }
                 }
             }
         }

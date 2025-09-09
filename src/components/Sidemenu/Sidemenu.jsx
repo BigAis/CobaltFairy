@@ -356,10 +356,13 @@ const Sidemenu = () => {
 									<Logo />
 								</div>
 								<div className="header-right">
-									<div className="user-avatar-large">
+									{/* User avatar that closes the menu when clicked */}
+									<div 
+										className="user-avatar-large"
+										onClick={() => setUserMenuOpen(false)}
+									>
 										{getNameInitials(user?.user?.name)}
 									</div>
-
 								</div>
 							</div>
 							<div className="menu-items-in-header">
@@ -375,6 +378,26 @@ const Sidemenu = () => {
 							</div>
 						</div>
 
+						{/* Account Picker Section - Added below the menu items */}
+						<div className="mobile-account-picker-section">
+							<div className="mobile-account-picker-content">
+								<Card className="account-info-card">
+									<div
+										className="account-info"
+										onClick={() => {
+											setUserMenuOpen(false);
+											navigate('/choose-account', { replace: true });
+										}}
+									>
+										<div>
+											<h4>{account?.name}</h4>
+											<span>{account?.payment_plan?.name || ''}</span>
+										</div>
+										<Icon name="Caret" />
+									</div>
+								</Card>
+							</div>
+						</div>
 					</div>
 				</>
 			)}
