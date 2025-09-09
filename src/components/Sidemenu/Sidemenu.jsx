@@ -100,6 +100,13 @@ const Sidemenu = () => {
 					navigate('/login')
 				}
 			}
+		},
+		{
+			label: 'Switch Account',
+			callback: () => {
+				setUserMenuOpen(false);
+				navigate('/choose-account');
+			}
 		}
 	]
 
@@ -373,26 +380,7 @@ const Sidemenu = () => {
 								))}
 							</div>
 						</div>
-						<div className="mobile-user-menu-body">
-							{/* Account Picker */}
-							<div className="mobile-account-picker-in-menu">
-								<Card className="account-info-card">
-									<div
-										className="account-info"
-										onClick={() => {
-											navigate('/choose-account', { replace: true });
-											setUserMenuOpen(false);
-										}}
-									>
-										<div>
-											<h4>{account?.name}</h4>
-											<span>{account?.payment_plan?.name || ''}</span>
-										</div>
-										<Icon name="Caret" />
-									</div>
-								</Card>
-							</div>
-						</div>
+
 					</div>
 				</>
 			)}
