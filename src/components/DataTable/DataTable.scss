@@ -1,50 +1,76 @@
 // Main DataTable styles
 .p-datatable {
+  background: rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(218, 209, 197, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  
   .p-paginator-page {
-    border-radius: 4px;
-    min-width: 32px;
-    height: 32px;
+    border-radius: 8px;
+    min-width: 40px;
+    height: 40px;
     border: 2px solid rgba(218, 209, 197, 0.5);
     color: rgba(16, 15, 28, 1);
     font-size: 14px;
     font-weight: 500;
+    background: rgba(255, 255, 255, 0.3);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+      border-color: rgba(218, 209, 197, 0.8);
+      transform: translateY(-1px);
+    }
     
     &.p-highlight {
-      background-color: rgba(255, 255, 255, 0.5);
-      border: 2px solid rgba(218, 209, 197, 1);
+      background: rgba(255, 99, 93, 0.1);
+      border: 2px solid #FF635D;
+      color: #100F1C;
+      font-weight: 600;
     }
   }
 
   .p-datatable-table {
     border-collapse: separate;
-    border-spacing: 0px 30px;
+    border-spacing: 0px 16px;
+    background: transparent;
 
     .p-datatable-thead > tr > th {
       color: rgba(136, 125, 118, 1);
-      border-bottom: 2px solid rgba(218, 209, 197, 1);
-      background-color: transparent;
-      font-weight: 500;
+      border-bottom: 2px solid rgba(218, 209, 197, 0.5);
+      background: rgba(255, 255, 255, 0.2);
+      font-weight: 600;
+      font-size: 14px;
+      padding: 16px 12px;
+      text-align: left;
     }
 
     .p-datatable-tbody > tr {
-      background: #fff8ef;
-      height: 112px;
+      background: rgba(255, 255, 255, 0.4);
+      height: 88px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.6);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
       
       > td {
-        border-top: 2px solid rgba(218, 209, 197, 1);
-        border-bottom: 2px solid rgba(218, 209, 197, 1);
+        border: none;
         color: rgba(16, 15, 28, 1);
-        padding: 12px;
+        padding: 16px 12px;
+        vertical-align: middle;
+        font-size: 14px;
+        font-weight: 500;
         
         &:first-child {
-          border: 2px solid rgba(218, 209, 197, 1);
-          border-right: 0px;
           border-radius: 8px 0px 0px 8px;
         }
         
         &:last-child {
-          border: 2px solid rgba(218, 209, 197, 1);
-          border-left: 0px;
           border-radius: 0px 8px 8px 0px;
         }
       }

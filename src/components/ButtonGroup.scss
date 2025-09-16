@@ -3,11 +3,33 @@
 	display: flex;
 	flex-wrap: wrap;
 	position: relative;
+	gap: 4px;
 	
 	.btn {
-		margin-right: 3px;
-		padding: 7px 12px;
-		background: rgba(255, 255, 255, 0.25);
+		margin-right: 0;
+		padding: 12px 20px;
+		background: rgba(255, 255, 255, 0.3);
+		border: 2px solid rgba(218, 209, 197, 0.5);
+		border-radius: 8px;
+		font-family: 'Inter', sans-serif;
+		font-size: 14px;
+		font-weight: 500;
+		color: #100F1C;
+		transition: all 0.2s ease;
+		backdrop-filter: blur(10px);
+		
+		&:hover {
+			background: rgba(255, 255, 255, 0.5);
+			border-color: rgba(218, 209, 197, 0.8);
+			transform: translateY(-1px);
+		}
+		
+		&.active {
+			background: rgba(255, 99, 93, 0.1);
+			border-color: #FF635D;
+			color: #100F1C;
+			font-weight: 600;
+		}
 	}
 	
 	@media (max-width: 768px) {
