@@ -16,6 +16,19 @@
 	display: flex;
 	justify-content: flex-end;
 	margin-bottom: 1rem;
+	
+	.btn {
+		/* Ensure desktop button maintains original styling */
+		height: auto;
+		padding: 14px 18px;
+		border-radius: 8px;
+		font-size: 16px;
+		font-weight: 600;
+		font-family: 'Bitter', serif;
+		line-height: 19.2px;
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid rgba(218, 209, 197, 1);
+	}
 }
 
 .progress-bar {
@@ -316,11 +329,16 @@ p.template-card-label {
 		margin-bottom: 22px;
 		
 		.btn {
-			height: 40px;
-			padding: 12px 20px;
+			/* Restore original button styling */
+			height: auto;
+			padding: 14px 18px;
 			border-radius: 8px;
-			font-size: 14px;
-			font-weight: 500;
+			font-size: 16px;
+			font-weight: 600;
+			font-family: 'Bitter', serif;
+			line-height: 19.2px;
+			background: rgba(255, 255, 255, 0.5);
+			border: 2px solid rgba(218, 209, 197, 1);
 		}
 	}
 	
@@ -587,11 +605,18 @@ p.template-card-label {
 		background: rgba(255, 195, 173, 0.2);
 	}
 	
+	/* Mobile pagination container */
+	.pagination-container {
+		width: 100%;
+		max-width: 304px;
+		display: flex;
+		justify-content: center;
+		margin: 1rem 0;
+	}
+	
 	/* Mobile pagination - using existing Pagination component */
 	.mobile-pagination {
 		width: 100%;
-		max-width: 304px;
-		margin: 1rem 0;
 		justify-content: center;
 		gap: 8px;
 		

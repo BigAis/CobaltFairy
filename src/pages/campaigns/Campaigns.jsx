@@ -1160,16 +1160,18 @@ const Campaigns = () => {
 											)}
 
 											{filteredCampaigns.length > 0 && (
-												<Pagination 
-													currentPage={currentPage}
-													totalResults={campaignsMeta?.pagination?.total || filteredCampaigns.length}
-													resultsPerPage={itemsPerPage}
-													onChange={(page) => {
-														setCurrentPage(page)
-														getCampaigns(page)
-													}}
-													className="mobile-pagination"
-												/>
+												<div className="pagination-container">
+													<Pagination 
+														currentPage={currentPage}
+														totalResults={campaignsMeta?.pagination?.total || filteredCampaigns.length}
+														resultsPerPage={itemsPerPage}
+														onChange={(page) => {
+															setCurrentPage(page)
+															getCampaigns(page)
+														}}
+														className="mobile-pagination"
+													/>
+												</div>
 											)}
 										</div>
 									) : (
