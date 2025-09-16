@@ -106,8 +106,9 @@
 		cursor: not-allowed;
 	}
 
-	.icon {
-		margin-right: 5px;
+	/* Only add spacing when icon is followed by text, preventing indent on icon-only buttons */
+	.icon + .text {
+		margin-left: 5px;
 	}
 
 	.spinner {

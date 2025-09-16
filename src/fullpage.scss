@@ -24,6 +24,10 @@
 			font-size: 24px;
 			line-height: 30px;
 			/*padding: 0 1em;*/
+			/* Ensure header action button aligns flush with edges */
+			button.btn {
+				width: 100%;
+			}
 		}
 	}
 	.fm-page-wrapper {
