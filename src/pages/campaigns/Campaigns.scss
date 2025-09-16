@@ -255,24 +255,88 @@ p.template-card-label {
 		min-width: 100%;
 	}
 	
-	/* Header section */
-	.page-name-container {
-		margin-top: 0; // Add this line
-		margin-bottom: 1rem;
-		.page-name {
-			margin-bottom: 10px;
-			text-align: left !important;
-			align-self: flex-start;
-		}			
+	/* Main page background - Match Figma */
+	.fm-page-wrapper {
+		background: #FFF1DF;
+		min-height: 100vh;
+		position: relative;
+		width: 100%;
 	}
 	
-	/* Campaign search input */
+	.fm-page-container {
+		background: #FFF1DF;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 0;
+		gap: 22px;
+		width: 100%;
+		max-width: 340px;
+		margin: 0 auto;
+	}
+	
+	/* Header section - Match Figma design */
+	.page-name-container {
+		margin-top: 0;
+		margin-bottom: 0;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		max-width: 304px;
+		height: 31px;
+		
+		.page-name {
+			margin-bottom: 0;
+			text-align: left !important;
+			align-self: flex-start;
+			font-family: 'Bitter', serif;
+			font-weight: 700;
+			font-size: 26px;
+			line-height: 31px;
+			color: #100F1C;
+			width: 304px;
+			height: 31px;
+		}
+		
+		/* Create New button alignment */
+		.btn {
+			height: 40px;
+			padding: 12px 20px;
+			border-radius: 8px;
+			font-size: 14px;
+			font-weight: 500;
+		}
+	}
+	
+	/* Campaign search input - Match Figma design */
 	.search-campaign-input {
-		padding: 0.5rem;
+		padding: 14px 20px;
 		margin-bottom: 1rem;
 		width: 100%;
-		border: 1px solid #ddd;
+		max-width: 304px;
+		height: 41px;
+		border: 2px solid #DAD1C5;
 		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.5);
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 17px;
+		color: #887D76;
+	}
+	
+	.search-campaign-input::placeholder {
+		color: #887D76;
+	}
+	
+	/* Search bar container */
+	.input-text-container {
+		width: 100%;
+		max-width: 304px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
 	}
 	
 	/* Filter tabs */
@@ -296,12 +360,14 @@ p.template-card-label {
 		border-color: #ff635d;
 	}
 	
-	/* Button Group overrides */
+	/* Button Group overrides - Match Figma design system */
 	.btn-group.btn-sm {
 		display: flex;
 		flex-wrap: nowrap;
-		gap: 0.25rem;
+		gap: 4px;
 		width: 100%;
+		max-width: 304px;
+		height: 41px;
 	}
 	
 	.btn-group.btn-sm .btn {
@@ -309,15 +375,26 @@ p.template-card-label {
 		white-space: nowrap;
 		min-width: auto;
 		font-size: 14px;
-		padding: 0.5rem;
+		font-weight: 500;
+		line-height: 17px;
+		padding: 12px 20px;
 		border-radius: 8px;
-		background-color: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid #DAD1C5;
+		height: 41px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 	
 	.btn-group.btn-sm .btn.active {
-		background-color: rgba(255, 195, 173, 0.5);
-		border-color: #ff635d;
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid #DAD1C5;
+	}
+	
+	.btn-group.btn-sm .btn:not(.active) {
+		background: rgba(255, 255, 255, 0.15);
+		border: 2px solid rgba(218, 209, 197, 0.5);
 	}
 	
 	/* View toggle */
@@ -343,32 +420,41 @@ p.template-card-label {
 		font-weight: 500;
 	}
 	
-	/* Campaign cards layout */
+	/* Campaign cards layout - Match Figma design */
 	.campaign-item {
 		border-radius: 8px;
-		margin-bottom: 1rem;
-		background: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
+		margin-bottom: 16px;
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid #DAD1C5;
 		overflow: hidden;
+		width: 100%;
+		max-width: 304px;
 	}
 	
 	.campaign-item-header {
-		padding: 1rem;
+		padding: 20px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		cursor: pointer;
+		gap: 14px;
 	}
 	
 	.campaign-item-title {
-		font-weight: 600;
+		font-weight: 500;
 		font-size: 16px;
-		margin-bottom: 0.25rem;
+		line-height: 19px;
+		margin-bottom: 4px;
+		color: #100F1C;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.campaign-item-subject {
 		color: #887D76;
 		font-size: 14px;
+		line-height: 17px;
+		font-weight: 500;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.campaign-item-chevron {
@@ -385,31 +471,52 @@ p.template-card-label {
 	}
 	
 	.campaign-item-content {
-		padding: 0 1rem 1rem;
-		border-top: 1px solid rgba(218, 209, 197, 0.5);
+		padding: 0 20px 20px;
+		border-top: 2px solid #DAD1C5;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
 	}
 	
 	.campaign-item-img {
 		width: 100%;
-		height: auto;
+		height: 88px;
 		position: relative;
-		margin-top: 1rem;
-		margin-bottom: 1rem;
+		margin-top: 0;
+		margin-bottom: 0;
+		border-radius: 8px;
+		overflow: hidden;
 	}
 	
 	.campaign-item-img img {
 		width: 100%;
-		height: auto;
-		max-height: 150px;
+		height: 100%;
 		object-fit: cover;
+		border-radius: 8px;
+	}
+	
+	.campaign-item-info {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	
+	.campaign-item-metrics {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
 	
 	.campaign-item-details {
 		display: flex;
 		justify-content: space-between;
-		margin-bottom: 0.75rem;
+		margin-bottom: 0;
 		font-size: 14px;
-		padding: 0.25rem 0;
+		line-height: 17px;
+		padding: 0;
+		font-weight: 500;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.campaign-detail-label {
@@ -417,17 +524,23 @@ p.template-card-label {
 	}
 	
 	.overview-button {
-		display: block;
+		display: flex;
 		width: 100%;
+		height: 40px;
 		text-align: center;
-		padding: 0.5rem;
+		padding: 0 12px;
 		background: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
+		border: 2px solid #DAD1C5;
 		border-radius: 8px;
 		cursor: pointer;
 		position: relative;
 		font-weight: 500;
-		margin-top: 0.5rem;
+		font-size: 14px;
+		line-height: 17px;
+		margin-top: 0;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
 	}
 	
 	/* Dropdown menu for campaign actions */
@@ -459,37 +572,60 @@ p.template-card-label {
 		background: rgba(255, 195, 173, 0.2);
 	}
 	
-	/* Pagination */
+	/* Pagination - Match Figma design */
 	.pagination-container {
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 8px;
 		margin: 1rem 0;
+		width: 100%;
+		max-width: 304px;
+		height: 32px;
 	}
 	
 	.pagination-container span, 
 	.pagination-container button {
-		width: 30px;
-		height: 30px;
+		width: 32px;
+		height: 32px;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		border: 1px solid rgba(218, 209, 197, 1);
-		border-radius: 8px;
+		border-radius: 4px;
 		cursor: pointer;
 		font-size: 14px;
-		background-color: #FFFFFF;
+		font-weight: 500;
+		line-height: 20px;
+		font-family: 'Inter', sans-serif;
+		color: #100F1C;
 	}
 	
 	.pagination-container span.current-page {
-		background: rgba(255, 195, 173, 0.5);
-		border-color: #ff635d;
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid #DAD1C5;
 		font-weight: 500;
+	}
+	
+	.pagination-container span:not(.current-page) {
+		background: rgba(255, 255, 255, 0.15);
+		border: 2px solid rgba(218, 209, 197, 0.5);
+	}
+	
+	.pagination-container button {
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid #DAD1C5;
+	}
+	
+	.pagination-container button:disabled {
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid rgba(218, 209, 197, 0.5);
+		opacity: 0.5;
 	}
 	
 	.pagination-dots {
 		border: none !important;
+		background: none !important;
+		cursor: default;
 	}
 	
 	/* Form input */
@@ -502,11 +638,34 @@ p.template-card-label {
 		margin-top: 0.5rem;
 	}
 	
+	/* Mobile campaigns list container */
+	.mobile-campaigns-list {
+		width: 100%;
+		max-width: 304px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		padding: 0;
+		margin: 0;
+	}
+	
+	/* Ensure proper spacing between sections */
+	.filters-container {
+		margin-bottom: 22px;
+	}
+	
+	.filters-container .row {
+		margin-bottom: 22px;
+	}
+	
 	/* No campaigns message */
 	.no-campaigns {
 		text-align: center;
 		padding: 2rem 0;
 		color: #887D76;
+		font-family: 'Inter', sans-serif;
+		font-size: 14px;
+		font-weight: 500;
 	}
 	
 	/* Arrow indicator for expanded cards */

@@ -689,7 +689,7 @@ const Campaigns = () => {
 		return (
 			<div className="campaign-item" key={campaign.uuid || `campaign-${Math.random()}`}>
 				<div className="campaign-item-header" onClick={() => toggleCampaignExpand(campaign.uuid)}>
-					<div>
+					<div className="campaign-item-info">
 						<div className="campaign-item-title">{campaign.name || 'Campaign Name'}</div>
 						<div className="campaign-item-subject">{campaign.subject || 'Subject goes here'}</div>
 					</div>
@@ -710,25 +710,60 @@ const Campaigns = () => {
 				{isExpanded && (
 					<div className="campaign-item-content">
 						<div className="campaign-item-img">
-							<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
+							{campaign.uuid ? (
+								<iframe 
+									src={`https://fairymail.cobaltfairy.com/api/fairymailer/load-campaign-body/${campaign.uuid}`}
+									title="Campaign Preview"
+									style={{ 
+										width: '100%', 
+										height: '100%', 
+										border: 'none', 
+										overflow: 'hidden',
+										borderRadius: '8px'
+									}}
+								/>
+							) : (
+								<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
+							)}
 						</div>
 
-						<div className="campaign-item-details">
-							<span className="campaign-detail-label">Type</span>
-							<span>{campaign.type === 'absplit' ? 'A/B Split' : 'Normal'}</span>
-						</div>
+						<div className="campaign-item-metrics">
+							<div className="campaign-item-details">
+								<span className="campaign-detail-label">Recipients</span>
+								<span>{campaign.recipients || 0}</span>
+							</div>
 
-						<div className="campaign-item-details">
-							<span className="campaign-detail-label">{isSent ? 'Sent' : campaign.date ? 'Scheduled' : 'Created'}</span>
-							<span>
-								{isSent && campaign.sent_at
-									? new Date(campaign.sent_at).toISOString().split('T')[0]
-									: campaign.date
-									? new Date(campaign.date).toISOString().split('T')[0]
-									: campaign.createdAt
-									? new Date(campaign.createdAt).toISOString().split('T')[0]
-									: 'N/A'}
-							</span>
+							{isSent && campaign.stats && (
+								<>
+									<div className="campaign-item-details">
+										<span className="campaign-detail-label">Opens</span>
+										<span>{campaign.stats.or ? `${campaign.stats.or}% - ${Math.round((campaign.stats.or / 100) * campaign.recipients)}` : '0% - 0'}</span>
+									</div>
+
+									<div className="campaign-item-details">
+										<span className="campaign-detail-label">Clicks</span>
+										<span>{campaign.stats.cr ? `${campaign.stats.cr}% - ${Math.round((campaign.stats.cr / 100) * campaign.recipients)}` : '0% - 0'}</span>
+									</div>
+								</>
+							)}
+
+							<div className="campaign-item-details">
+								<span className="campaign-detail-label">Type</span>
+								<span>{campaign.type === 'absplit' ? 'A/B Split' : 'Normal'}</span>
+							</div>
+
+							<div className="campaign-item-details">
+								<span className="campaign-detail-label">Date</span>
+								<span>
+									{isSent && campaign.sent_at
+										? new Date(campaign.sent_at).toISOString().split('T')[0]
+										: campaign.date
+										? new Date(campaign.date).toISOString().split('T')[0]
+										: campaign.createdAt
+										? new Date(campaign.createdAt).toISOString().split('T')[0]
+										: 'N/A'}
+								</span>
+							</div>
 						</div>
 
 						<div className="overview-button" onClick={(e) => toggleActionMenu(e, campaign.uuid)}>
@@ -927,6 +962,7 @@ const Campaigns = () => {
 						)}
 					</div>
 					<div className="filters-container">
+						{/* Campaign status tabs */}
 						<div className="row" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 							<ButtonGroup
 								value={selectedCampaignType}
