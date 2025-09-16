@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid'
 import SearchBar from '../../components/SearchBar/SearchBar'
 import DatePicker from '../../components/DatePicker'
 import MultipleDropdown from '../../components/MultipleDropdown/MultipleDropdown'
+import Pagination from '../../components/Pagination'
 
 const Campaigns = () => {
 	const navigate = useNavigate()
@@ -1121,15 +1122,12 @@ const Campaigns = () => {
 											)}
 
 											{filteredCampaigns.length > 0 && (
-												<div className="pagination-container">
-													<button>{'<'}</button>
-													<span className="current-page">1</span>
-													<span>2</span>
-													<span className="pagination-dots">...</span>
-													<span>9</span>
-													<span>10</span>
-													<button>{'>'}</button>
-												</div>
+												<Pagination 
+													currentPage={currentPage} 
+													totalResults={filteredCampaigns.length} 
+													resultsPerPage={itemsPerPage} 
+													onChange={setCurrentPage} 
+												/>
 											)}
 										</div>
 									) : (
