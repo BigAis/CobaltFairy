@@ -713,30 +713,59 @@ const Campaigns = () => {
 							<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
 						</div>
 
-						<div className="campaign-item-details">
-							<span className="campaign-detail-label">Type</span>
-							<span>{campaign.type === 'absplit' ? 'A/B Split' : 'Normal'}</span>
-						</div>
+						{isSent ? (
+							<>
+								<div className="campaign-item-details">
+									<span className="campaign-detail-label">Recipients</span>
+									<span>{campaign.recipients || 0}</span>
+								</div>
 
-						<div className="campaign-item-details">
-							<span className="campaign-detail-label">{isSent ? 'Sent' : campaign.date ? 'Scheduled' : 'Created'}</span>
-							<span>
-								{isSent && campaign.sent_at
-									? new Date(campaign.sent_at).toISOString().split('T')[0]
-									: campaign.date
-									? new Date(campaign.date).toISOString().split('T')[0]
-									: campaign.createdAt
-									? new Date(campaign.createdAt).toISOString().split('T')[0]
-									: 'N/A'}
-							</span>
-						</div>
+								<div className="campaign-item-details">
+									<span className="campaign-detail-label">Opens</span>
+									<span>{campaign.stats?.or ? `${campaign.stats.or}% - ${campaign.stats.totalOpens || 0}` : '0% - 0'}</span>
+								</div>
+
+								<div className="campaign-item-details">
+									<span className="campaign-detail-label">Clicks</span>
+									<span>{campaign.stats?.cr ? `${campaign.stats.cr}% - ${campaign.stats.totalClicks || 0}` : '0% - 0'}</span>
+								</div>
+
+								<div className="campaign-item-details">
+									<span className="campaign-detail-label">Type</span>
+									<span>{campaign.type === 'absplit' ? 'A/B Split' : 'Normal'}</span>
+								</div>
+
+								<div className="campaign-item-details">
+									<span className="campaign-detail-label">Date</span>
+									<span>{campaign.sent_at ? new Date(campaign.sent_at).toISOString().split('T')[0] : 'N/A'}</span>
+								</div>
+							</>
+						) : (
+							<>
+								<div className="campaign-item-details">
+									<span className="campaign-detail-label">Type</span>
+									<span>{campaign.type === 'absplit' ? 'A/B Split' : 'Normal'}</span>
+								</div>
+
+								<div className="campaign-item-details">
+									<span className="campaign-detail-label">{campaign.date ? 'Scheduled' : 'Created'}</span>
+									<span>
+										{campaign.date
+											? new Date(campaign.date).toISOString().split('T')[0]
+											: campaign.createdAt
+											? new Date(campaign.createdAt).toISOString().split('T')[0]
+											: 'N/A'}
+									</span>
+								</div>
+							</>
+						)}
 
 						<div className="overview-button" onClick={(e) => toggleActionMenu(e, campaign.uuid)}>
 							{primaryButtonText}
 							<span
 								style={{
 									position: 'absolute',
-									right: '10px',
+									right: '12px',
 									top: '50%',
 									transform: 'translateY(-50%)',
 								}}
@@ -941,28 +970,48 @@ const Campaigns = () => {
 
 							{/* View mode toggle only shows here on desktop */}
 							{!isMobile && dropdownViewer === 'campaigns' && (
-								<ButtonGroup
-									value={viewMode}
-									options={[
-										{ value: 'list', label: 'List View' },
-										{ value: 'calendar', label: 'Calendar' },
-									]}
-									onChange={setViewMode}
-								/>
+								<div className="view-toggle-container">
+									<Button
+										type="secondary"
+										icon="List"
+										className={viewMode === 'list' ? 'active' : ''}
+										onClick={() => setViewMode('list')}
+									>
+										List View
+									</Button>
+									<Button
+										type="secondary"
+										icon="Calendar"
+										className={viewMode === 'calendar' ? 'active' : ''}
+										onClick={() => setViewMode('calendar')}
+									>
+										Calendar
+									</Button>
+								</div>
 							)}
 						</div>
 
 						{/* Show view mode toggle in a separate row on mobile */}
 						{isMobile && dropdownViewer === 'campaigns' && (
-							<div className="row" style={{ marginBottom: '1rem' }}>
-								<ButtonGroup
-									value={viewMode}
-									options={[
-										{ value: 'list', label: 'List View' },
-										{ value: 'calendar', label: 'Calendar' },
-									]}
-									onChange={setViewMode}
-								/>
+							<div className="row view-toggle-row" style={{ marginBottom: '1rem', justifyContent: 'flex-end' }}>
+								<div className="view-toggle-container mobile">
+									<Button
+										type="link"
+										icon="List"
+										className={viewMode === 'list' ? 'active' : ''}
+										onClick={() => setViewMode('list')}
+									>
+										List View
+									</Button>
+									<Button
+										type="link"
+										icon="Calendar"
+										className={viewMode === 'calendar' ? 'active' : ''}
+										onClick={() => setViewMode('calendar')}
+									>
+										Calendar
+									</Button>
+								</div>
 							</div>
 						)}
 
@@ -971,29 +1020,19 @@ const Campaigns = () => {
 								{dropdownViewer === 'campaigns' ? (
 									<>
 										<SearchBar
-											placeholder="Search Campaigns"
-											label="Search Campaigns"
+											placeholder="Campaign Name"
+											label=""
 											initialValue={searchTerm}
 											onSearch={(value) => {
 												updateSearchTerm(value)
 											}}
-											style={{ width: '100%', marginRight: '20px' }}
+											style={{ width: '100%', marginRight: '10px' }}
 										/>
-										<Button
-											type="secondary"
-											icon={'Filters'}
-											className="button-filters"
-											onClick={() => {
-												setShowFilters((prev) => !prev)
-											}}
-										>
-											Filters
-										</Button>
 									</>
 								) : (
 									<SearchBar
 										placeholder="Search Templates"
-										label="Search Templates"
+										label=""
 										initialValue={searchTerm}
 										onSearch={(value) => {
 											updateSearchTerm(value)
@@ -1122,13 +1161,13 @@ const Campaigns = () => {
 
 											{filteredCampaigns.length > 0 && (
 												<div className="pagination-container">
-													<button>{'<'}</button>
-													<span className="current-page">1</span>
-													<span>2</span>
+													<button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>‹</button>
+													<span className={currentPage === 1 ? "current-page" : ""} onClick={() => setCurrentPage(1)}>1</span>
+													<span className={currentPage === 2 ? "current-page" : ""} onClick={() => setCurrentPage(2)}>2</span>
 													<span className="pagination-dots">...</span>
-													<span>9</span>
-													<span>10</span>
-													<button>{'>'}</button>
+													<span onClick={() => setCurrentPage(9)}>9</span>
+													<span onClick={() => setCurrentPage(10)}>10</span>
+													<button onClick={() => setCurrentPage(currentPage + 1)}>›</button>
 												</div>
 											)}
 										</div>
