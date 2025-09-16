@@ -257,6 +257,21 @@ p.template-card-label {
 		min-width: 100%;
 	}
 	
+	/* Main container alignment */
+	.fm-page-container {
+		padding: 0;
+		max-width: 340px;
+		margin: 0 auto;
+		width: 100%;
+	}
+	
+	/* Ensure all content fits within the 340px container */
+	.fm-page-container > * {
+		width: 100%;
+		max-width: 304px;
+		margin: 0 auto;
+	}
+	
 	/* Header section */
 	.page-name-container {
 		margin-top: 0;
@@ -264,6 +279,7 @@ p.template-card-label {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 10px;
+		max-width: none; /* Override the general rule */
 		
 		.page-name {
 			margin-bottom: 0;
@@ -281,97 +297,76 @@ p.template-card-label {
 		}
 	}
 	
-	/* Campaign search input */
-	.search-campaign-input {
-		padding: 14px 20px;
-		margin-bottom: 22px;
+	/* Search bar container */
+	.searchbar-wrapper {
 		width: 100%;
-		background: rgba(255, 255, 255, 0.5);
-		border: 2px solid #DAD1C5;
-		border-radius: 8px;
-		font-size: 14px;
-		font-weight: 500;
-		line-height: 17px;
-		color: #887D76;
-	}
-	
-	/* Filter tabs */
-	.filter-tabs {
-		display: flex;
 		margin-bottom: 22px;
-		gap: 4px;
+		max-width: none; /* Override the general rule */
+		
+		.input-wrapper {
+			width: 100%;
+			margin-right: 0;
+			margin-bottom: 0;
+		}
+		
+		.search-button {
+			display: none; /* Hide search button on mobile as per Figma */
+		}
 	}
 	
-	.filter-tab {
-		background: rgba(255, 255, 255, 0.5);
-		border: 2px solid #DAD1C5;
-		border-radius: 8px;
-		padding: 12px 20px;
-		font-size: 14px;
-		font-weight: 500;
-		line-height: 17px;
-		cursor: pointer;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	
-	.filter-tab.active {
-		background: rgba(255, 255, 255, 0.5);
-		border: 2px solid #DAD1C5;
-	}
-	
-	/* Button Group overrides */
+	/* Filter tabs - use existing ButtonGroup styling */
 	.btn-group.btn-sm {
 		display: flex;
 		flex-wrap: nowrap;
-		gap: 0.25rem;
+		gap: 4px;
+		margin-bottom: 22px;
 		width: 100%;
+		overflow-x: auto;
+		max-width: none; /* Override the general rule */
+		
+		.btn {
+			flex: 0 0 auto;
+			white-space: nowrap;
+			padding: 12px 20px;
+			font-size: 14px;
+			font-weight: 500;
+			line-height: 17px;
+			border-radius: 8px;
+		}
 	}
 	
-	.btn-group.btn-sm .btn {
-		flex: 1;
-		white-space: nowrap;
-		min-width: auto;
-		font-size: 14px;
-		padding: 0.5rem;
-		border-radius: 8px;
-		background-color: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
-	}
-	
-	.btn-group.btn-sm .btn.active {
-		background-color: rgba(255, 195, 173, 0.5);
-		border-color: #ff635d;
-	}
-	
-	/* View toggle */
-	.mobile-view-toggle {
+	/* View toggle - use existing ButtonGroup styling */
+	.view-toggle-container {
 		display: flex;
 		justify-content: flex-end;
 		margin: 0 0 22px 0;
 		padding: 0;
-	}
-	
-	.view-toggle-option {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		color: #000000;
-		cursor: pointer;
-		padding: 0 20px;
-		font-size: 14px;
-		font-weight: 500;
-		line-height: 17px;
-	}
-	
-	.view-toggle-option.active {
-		color: #000000;
-		font-weight: 500;
-	}
-	
-	.view-toggle-option:not(.active) {
-		opacity: 0.5;
+		max-width: none; /* Override the general rule */
+		
+		.btn-group {
+			display: flex;
+			gap: 0;
+			
+			.btn {
+				padding: 0 20px;
+				font-size: 14px;
+				font-weight: 500;
+				line-height: 17px;
+				background: transparent;
+				border: none;
+				color: #000000;
+				
+				&.active {
+					background: transparent;
+					border: none;
+					color: #000000;
+				}
+				
+				&:not(.active) {
+					opacity: 0.5;
+				}
+			}
+		}
 	}
 	
 	/* Mobile campaigns list container */
@@ -380,6 +375,8 @@ p.template-card-label {
 		flex-direction: column;
 		gap: 16px;
 		width: 100%;
+		align-items: stretch;
+		max-width: none; /* Override the general rule */
 	}
 	
 	/* Campaign cards layout */
@@ -389,6 +386,8 @@ p.template-card-label {
 		background: rgba(255, 255, 255, 0.5);
 		border: 2px solid #DAD1C5;
 		overflow: hidden;
+		width: 100%;
+		align-self: stretch;
 	}
 	
 	.campaign-item-header {
@@ -511,44 +510,6 @@ p.template-card-label {
 		background: rgba(255, 195, 173, 0.2);
 	}
 	
-	/* Pagination */
-	.pagination-container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 8px;
-		margin: 1rem 0;
-	}
-	
-	.pagination-container span, 
-	.pagination-container button {
-		width: 32px;
-		height: 32px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		border: 2px solid #DAD1C5;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 14px;
-		font-weight: 500;
-		line-height: 20px;
-		background: rgba(255, 255, 255, 0.5);
-		color: #100F1C;
-	}
-	
-	.pagination-container span.current-page {
-		background: rgba(255, 255, 255, 0.5);
-		border: 2px solid #DAD1C5;
-		font-weight: 500;
-	}
-	
-	.pagination-dots {
-		border: none !important;
-		background: transparent !important;
-		color: #100F1C;
-		font-weight: 500;
-	}
 	
 	/* Form input */
 	.form-wrapper {

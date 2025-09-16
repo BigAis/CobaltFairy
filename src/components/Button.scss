@@ -33,7 +33,7 @@
 	}
 
 	&.btn-secondary {
-		border: 2px solid #DAD1C5;
+		border: 2px solid rgba(218, 209, 197, 1);
 		background: rgba(255, 255, 255, 0.5);
 
 		&.hovered:not(.inactive):not(.loading) {
@@ -42,8 +42,7 @@
 		}
 
 		&.active {
-			background-color: rgba(255, 255, 255, 0.5);
-			border: 2px solid #DAD1C5;
+			background-color: rgba(255, 255, 255, 0.7);
 		}
 
 		&.inactive {

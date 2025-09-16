@@ -5,14 +5,9 @@
 	position: relative;
 	
 	.btn {
-		margin-right: 4px;
-		padding: 12px 20px;
-		background: rgba(255, 255, 255, 0.5);
-		border: 2px solid #DAD1C5;
-		border-radius: 8px;
-		font-weight: 500;
-		font-size: 14px;
-		line-height: 17px;
+		margin-right: 3px;
+		padding: 7px 12px;
+		background: rgba(255, 255, 255, 0.25);
 	}
 	
 	@media (max-width: 768px) {
@@ -69,23 +64,13 @@
 				margin-right: 4px;
 				margin-left: 0;
 				text-align: center;
-				padding: 12px 20px;
-				border-radius: 8px;
-				background: rgba(255, 255, 255, 0.5);
-				border: 2px solid #DAD1C5;
-				font-weight: 500;
-				font-size: 14px;
-				line-height: 17px;
+				padding: 6px 14px; /* More padding for better touch targets */
+				border-radius: 6px;
 				
 				/* Ensure full text is shown */
 				text-overflow: clip;
 				overflow: visible;
 				white-space: nowrap;
-				
-				&.active {
-					background: rgba(255, 255, 255, 0.5);
-					border: 2px solid #DAD1C5;
-				}
 			}
 		}
 		
