@@ -2,6 +2,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	margin-bottom: 22px;
+	
 	.notifications-container {
 		position: fixed;
 		top: 0;
@@ -255,105 +257,143 @@ p.template-card-label {
 		min-width: 100%;
 	}
 	
+	/* Main container alignment - consistent padding throughout */
+	.fm-page-container {
+		padding: 0 18px;
+		max-width: 340px;
+		margin: 0 auto;
+		width: 100%;
+	}
+	
+	/* Ensure all content has consistent width and alignment */
+	.fm-page-container > * {
+		width: 100%;
+	}
+	
+	/* Specific padding for different sections to maintain alignment */
+	.page-name-container,
+	.filters-container,
+	.mobile-campaigns-list,
+	.pagination {
+		padding-left: 0;
+		padding-right: 0;
+	}
+	
 	/* Header section */
 	.page-name-container {
-		margin-top: 0; // Add this line
-		margin-bottom: 1rem;
+		margin-top: 0;
+		margin-bottom: 22px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+		
 		.page-name {
-			margin-bottom: 10px;
+			margin-bottom: 0;
 			text-align: left !important;
 			align-self: flex-start;
-		}			
+			font-family: 'Bitter', serif;
+			font-weight: 700;
+			font-size: 26px;
+			line-height: 31px;
+			color: #100F1C;
+		}
+		
+		.btn {
+			align-self: flex-end;
+		}
 	}
 	
-	/* Campaign search input */
-	.search-campaign-input {
-		padding: 0.5rem;
-		margin-bottom: 1rem;
+	/* Search bar container */
+	.searchbar-wrapper {
 		width: 100%;
-		border: 1px solid #ddd;
-		border-radius: 8px;
+		margin-bottom: 22px;
+		
+		.input-wrapper {
+			width: 100%;
+			margin-right: 0;
+			margin-bottom: 0;
+		}
+		
+		.search-button {
+			display: none; /* Hide search button on mobile as per Figma */
+		}
 	}
 	
-	/* Filter tabs */
-	.filter-tabs {
-		display: flex;
-		margin-bottom: 1rem;
-		gap: 0.5rem;
-	}
-	
-	.filter-tab {
-		background: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
-		border-radius: 8px;
-		padding: 0.5rem 1rem;
-		font-size: 14px;
-		cursor: pointer;
-	}
-	
-	.filter-tab.active {
-		background: rgba(255, 195, 173, 0.5);
-		border-color: #ff635d;
-	}
-	
-	/* Button Group overrides */
+	/* Filter tabs - use existing ButtonGroup styling */
 	.btn-group.btn-sm {
 		display: flex;
 		flex-wrap: nowrap;
-		gap: 0.25rem;
+		gap: 4px;
+		margin-bottom: 22px;
 		width: 100%;
+		overflow-x: auto;
+		
+		.btn {
+			flex: 0 0 auto;
+			white-space: nowrap;
+			padding: 12px 20px;
+			font-size: 14px;
+			font-weight: 500;
+			line-height: 17px;
+			border-radius: 8px;
+		}
 	}
 	
-	.btn-group.btn-sm .btn {
-		flex: 1;
-		white-space: nowrap;
-		min-width: auto;
-		font-size: 14px;
-		padding: 0.5rem;
-		border-radius: 8px;
-		background-color: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
-	}
-	
-	.btn-group.btn-sm .btn.active {
-		background-color: rgba(255, 195, 173, 0.5);
-		border-color: #ff635d;
-	}
-	
-	/* View toggle */
-	.mobile-view-toggle {
+	/* View toggle - use existing ButtonGroup styling */
+	.view-toggle-container {
 		display: flex;
-		justify-content: space-between;
-		margin: 1rem 0;
-		border-bottom: 1px solid rgba(218, 209, 197, 0.5);
-		padding-bottom: 0.5rem;
+		justify-content: flex-end;
+		margin: 0 0 22px 0;
+		padding: 0;
+		
+		.btn-group {
+			display: flex;
+			gap: 0;
+			
+			.btn {
+				padding: 0 20px;
+				font-size: 14px;
+				font-weight: 500;
+				line-height: 17px;
+				background: transparent;
+				border: none;
+				color: #000000;
+				
+				&.active {
+					background: transparent;
+					border: none;
+					color: #000000;
+				}
+				
+				&:not(.active) {
+					opacity: 0.5;
+				}
+			}
+		}
 	}
 	
-	.view-toggle-option {
+	/* Mobile campaigns list container */
+	.mobile-campaigns-list {
 		display: flex;
-		align-items: center;
-		gap: 5px;
-		color: #887D76;
-		cursor: pointer;
-		padding: 0.25rem 0;
-	}
-	
-	.view-toggle-option.active {
-		color: #000;
-		font-weight: 500;
+		flex-direction: column;
+		gap: 16px;
+		width: 100%;
+		align-items: stretch;
 	}
 	
 	/* Campaign cards layout */
 	.campaign-item {
 		border-radius: 8px;
-		margin-bottom: 1rem;
-		background: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
+		margin-bottom: 0;
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid #DAD1C5;
 		overflow: hidden;
+		width: 100%;
+		align-self: stretch;
 	}
 	
 	.campaign-item-header {
-		padding: 1rem;
+		padding: 20px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -361,23 +401,28 @@ p.template-card-label {
 	}
 	
 	.campaign-item-title {
-		font-weight: 600;
+		font-weight: 500;
 		font-size: 16px;
-		margin-bottom: 0.25rem;
+		line-height: 19px;
+		margin-bottom: 4px;
+		color: #100F1C;
 	}
 	
 	.campaign-item-subject {
 		color: #887D76;
 		font-size: 14px;
+		line-height: 17px;
+		font-weight: 500;
 	}
 	
 	.campaign-item-chevron {
 		transition: transform 0.3s ease;
-		width: 24px;
-		height: 24px;
+		width: 16px;
+		height: 16px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		color: #100F1C;
 	}
 	
 	.campaign-item-chevron.expanded {
@@ -385,31 +430,33 @@ p.template-card-label {
 	}
 	
 	.campaign-item-content {
-		padding: 0 1rem 1rem;
-		border-top: 1px solid rgba(218, 209, 197, 0.5);
+		padding: 0 20px 20px;
+		border-top: 2px solid #DAD1C5;
 	}
 	
 	.campaign-item-img {
 		width: 100%;
 		height: auto;
 		position: relative;
-		margin-top: 1rem;
-		margin-bottom: 1rem;
+		margin-top: 19px;
+		margin-bottom: 19px;
 	}
 	
 	.campaign-item-img img {
 		width: 100%;
-		height: auto;
-		max-height: 150px;
+		height: 88px;
 		object-fit: cover;
+		border-radius: 8px;
 	}
 	
 	.campaign-item-details {
 		display: flex;
 		justify-content: space-between;
-		margin-bottom: 0.75rem;
+		margin-bottom: 10px;
 		font-size: 14px;
-		padding: 0.25rem 0;
+		line-height: 17px;
+		font-weight: 500;
+		padding: 0;
 	}
 	
 	.campaign-detail-label {
@@ -420,14 +467,20 @@ p.template-card-label {
 		display: block;
 		width: 100%;
 		text-align: center;
-		padding: 0.5rem;
+		padding: 0 12px;
 		background: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
+		border: 2px solid #DAD1C5;
 		border-radius: 8px;
 		cursor: pointer;
 		position: relative;
 		font-weight: 500;
-		margin-top: 0.5rem;
+		font-size: 14px;
+		line-height: 17px;
+		margin-top: 20px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	
 	/* Dropdown menu for campaign actions */
@@ -459,37 +512,11 @@ p.template-card-label {
 		background: rgba(255, 195, 173, 0.2);
 	}
 	
-	/* Pagination */
-	.pagination-container {
-		display: flex;
+	/* Pagination - using existing component */
+	.pagination {
 		justify-content: center;
-		align-items: center;
-		gap: 0.5rem;
 		margin: 1rem 0;
-	}
-	
-	.pagination-container span, 
-	.pagination-container button {
-		width: 30px;
-		height: 30px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		border: 1px solid rgba(218, 209, 197, 1);
-		border-radius: 8px;
-		cursor: pointer;
-		font-size: 14px;
-		background-color: #FFFFFF;
-	}
-	
-	.pagination-container span.current-page {
-		background: rgba(255, 195, 173, 0.5);
-		border-color: #ff635d;
-		font-weight: 500;
-	}
-	
-	.pagination-dots {
-		border: none !important;
+		width: 100%;
 	}
 	
 	/* Form input */
@@ -499,7 +526,13 @@ p.template-card-label {
 	
 	/* Search in mobile view */
 	.filters-container .row:nth-child(2) {
-		margin-top: 0.5rem;
+		margin-top: 0;
+		margin-bottom: 22px;
+	}
+	
+	/* Filters container spacing */
+	.filters-container {
+		margin-bottom: 22px;
 	}
 	
 	/* No campaigns message */
@@ -541,6 +574,17 @@ p.template-card-label {
 	.overview-button img {
 		width: 16px;
 		height: 16px;
+	}
+	
+	.overview-button span {
+		width: 16px;
+		height: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #100F1C;
+		font-size: 16px;
+		font-weight: bold;
 	}
 	/* Loading indicator */
 	.loading-indicator {

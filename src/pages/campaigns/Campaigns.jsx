@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid'
 import SearchBar from '../../components/SearchBar/SearchBar'
 import DatePicker from '../../components/DatePicker'
 import MultipleDropdown from '../../components/MultipleDropdown/MultipleDropdown'
+import Pagination from '../../components/Pagination'
 
 const Campaigns = () => {
 	const navigate = useNavigate()
@@ -709,9 +710,23 @@ const Campaigns = () => {
 
 				{isExpanded && (
 					<div className="campaign-item-content">
-						<div className="campaign-item-img">
+					<div className="campaign-item-img">
+						{campaign.uuid ? (
+							<iframe 
+								src={`https://fairymail.cobaltfairy.com/api/fairymailer/load-campaign-body/${campaign.uuid}`}
+								title="Campaign Preview"
+								style={{ 
+									width: '100%', 
+									height: '88px', 
+									border: 'none', 
+									borderRadius: '8px',
+									pointerEvents: 'none'
+								}}
+							/>
+						) : (
 							<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
-						</div>
+						)}
+					</div>
 
 						<div className="campaign-item-details">
 							<span className="campaign-detail-label">Type</span>
@@ -1121,15 +1136,15 @@ const Campaigns = () => {
 											)}
 
 											{filteredCampaigns.length > 0 && (
-												<div className="pagination-container">
-													<button>{'<'}</button>
-													<span className="current-page">1</span>
-													<span>2</span>
-													<span className="pagination-dots">...</span>
-													<span>9</span>
-													<span>10</span>
-													<button>{'>'}</button>
-												</div>
+												<Pagination
+													currentPage={currentPage}
+													totalResults={campaignsMeta?.pagination?.total || filteredCampaigns.length}
+													resultsPerPage={itemsPerPage}
+													onChange={(page) => {
+														setCurrentPage(page)
+														getCampaigns(page)
+													}}
+												/>
 											)}
 										</div>
 									) : (
