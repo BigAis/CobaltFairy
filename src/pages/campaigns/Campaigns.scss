@@ -371,6 +371,35 @@ p.template-card-label {
 		font-weight: 500;
 	}
 	
+	/* Create new campaign button mobile */
+	.create-new-campaign-mobile {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		padding: 20px;
+		margin-bottom: 16px;
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid #DAD1C5;
+		border-radius: 8px;
+		cursor: pointer;
+		font-family: 'Inter', sans-serif;
+		font-weight: 500;
+		font-size: 14px;
+		line-height: 17px;
+		color: #100F1C;
+		
+		.icon {
+			width: 24px;
+			height: 24px;
+		}
+		
+		&:hover {
+			background: rgba(255, 255, 255, 0.7);
+			box-shadow: 0px 4px 7px 0px rgba(0, 0, 0, 0.1);
+		}
+	}
+
 	/* Campaign cards layout */
 	.campaign-item {
 		border-radius: 8px;

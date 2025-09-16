@@ -34,7 +34,7 @@ const Campaigns = () => {
 	const { user, account, createNotification } = useAccount()
 	const [searchTerm, setSearchTerm] = useState('')
 	const [loading, setLoading] = useState(true)
-	const [itemsPerPage, setItemsPerPage] = useState(100)
+	const [itemsPerPage, setItemsPerPage] = useState(10)
 	const [currentPage, setCurrentPage] = useState(1)
 	const [campaigns, setCampaigns] = useState([])
 	const [filteredCampaigns, setFilteredCampaigns] = useState([])
@@ -156,21 +156,9 @@ const Campaigns = () => {
 
 	// Filter campaigns whenever selectedCampaignType or campaigns change
 	useEffect(() => {
-		if (campaigns && campaigns.length > 0) {
-			const filtered = campaigns.filter((campaign) => {
-				if (selectedCampaignType === 'sent') {
-					return campaign.status === 'sent'
-				} else if (selectedCampaignType === 'outbox') {
-					return campaign.status === 'draft' && campaign.date // Drafts WITH a date
-				} else if (selectedCampaignType === 'draft') {
-					return campaign.status === 'draft' && !campaign.date // Drafts WITHOUT a date
-				}
-				return false
-			})
-			setFilteredCampaigns(filtered)
-		} else {
-			setFilteredCampaigns([])
-		}
+		// When using server-side filtering, campaigns already contain the filtered results
+		// So we just pass them through
+		setFilteredCampaigns(campaigns || [])
 	}, [campaigns, selectedCampaignType])
 
 	// Handle filter changes
@@ -307,10 +295,11 @@ const Campaigns = () => {
 			// Set state for UI updates
 			setSearchTerm(search)
 			setLoading(true)
+			setCurrentPage(1) // Reset to first page when searching
 
 			// Skip search if empty
 			if (!search.trim()) {
-				getCampaigns()
+				getCampaigns(1)
 				return
 			}
 
@@ -363,10 +352,19 @@ const Campaigns = () => {
 	const getCampaigns = async (page = 1) => {
 		try {
 			setLoading(true)
-			let resp = await ApiService.get(
-				`fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`,
-				user.jwt
-			)
+			
+			let endpoint = `fairymailer/getCampaigns?sort[id]=desc&populate[recp_groups][populate][subscribers][count]=true&pagination[pageSize]=${itemsPerPage}&pagination[page]=${page}`
+			
+			// Add campaign type filtering
+			if (selectedCampaignType === 'sent') {
+				endpoint += `&filters[status]=sent`
+			} else if (selectedCampaignType === 'outbox') {
+				endpoint += `&filters[status]=draft&filters[date][$notNull]=true`
+			} else if (selectedCampaignType === 'draft') {
+				endpoint += `&filters[status]=draft&filters[date][$null]=true`
+			}
+			
+			let resp = await ApiService.get(endpoint, user.jwt)
 
 			if (resp && resp.data && resp.data.data) {
 				setCampaigns(
@@ -814,6 +812,9 @@ const Campaigns = () => {
 
 		// Clear search term when changing tabs
 		setSearchTerm('')
+		
+		// Reset page to 1
+		setCurrentPage(1)
 
 		// Reset filters when changing tabs
 		setShowFilters(false)
@@ -949,9 +950,9 @@ const Campaigns = () => {
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
-						{selectedCampaignType !== 'templates' && (
+						{selectedCampaignType !== 'templates' && !isMobile && (
 							<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
-								{isMobile ? '' : 'New Campaign'}
+								New Campaign
 							</Button>
 						)}
 					</div>
@@ -1106,18 +1107,9 @@ const Campaigns = () => {
 											maxClickRate: '',
 											recipientGroups: [],
 										})
-										// Reset filteredCampaigns to match selected campaign type
-										const filtered = campaigns.filter((campaign) => {
-											if (selectedCampaignType === 'sent') {
-												return campaign.status === 'sent'
-											} else if (selectedCampaignType === 'outbox') {
-												return campaign.status === 'draft' && campaign.date
-											} else if (selectedCampaignType === 'draft') {
-												return campaign.status === 'draft' && !campaign.date
-											}
-											return false
-										})
-										setFilteredCampaigns(filtered)
+										// Reload campaigns without filters
+										setCurrentPage(1)
+										getCampaigns(1)
 									}}
 									type="secondary"
 									style={{ marginRight: '10px' }}
@@ -1138,6 +1130,12 @@ const Campaigns = () => {
 									// Mobile view for campaigns with collapsible cards or calendar
 									viewMode === 'list' ? (
 										<div className="mobile-campaigns-list">
+											{selectedCampaignType !== 'templates' && (
+												<div className="create-new-campaign-mobile" onClick={handleNewCampaignClick}>
+													<Icon name="Plus" size={24} />
+													<span>Create New</span>
+												</div>
+											)}
 											{filteredCampaigns.length > 0 ? (
 												filteredCampaigns.map((campaign) => renderMobileCampaignCard(campaign))
 											) : (
@@ -1159,15 +1157,107 @@ const Campaigns = () => {
 												</div>
 											)}
 
-											{filteredCampaigns.length > 0 && (
+											{filteredCampaigns.length > 0 && campaignsMeta && campaignsMeta.pagination && campaignsMeta.pagination.pageCount > 1 && (
 												<div className="pagination-container">
-													<button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>‹</button>
-													<span className={currentPage === 1 ? "current-page" : ""} onClick={() => setCurrentPage(1)}>1</span>
-													<span className={currentPage === 2 ? "current-page" : ""} onClick={() => setCurrentPage(2)}>2</span>
-													<span className="pagination-dots">...</span>
-													<span onClick={() => setCurrentPage(9)}>9</span>
-													<span onClick={() => setCurrentPage(10)}>10</span>
-													<button onClick={() => setCurrentPage(currentPage + 1)}>›</button>
+													<button 
+														disabled={currentPage === 1} 
+														onClick={() => {
+															setCurrentPage(currentPage - 1);
+															getCampaigns(currentPage - 1);
+														}}
+													>
+														‹
+													</button>
+													
+													{/* Generate page numbers based on actual page count */}
+													{(() => {
+														const totalPages = campaignsMeta.pagination.pageCount;
+														const pages = [];
+														
+														if (totalPages <= 5) {
+															// Show all pages if 5 or less
+															for (let i = 1; i <= totalPages; i++) {
+																pages.push(
+																	<span 
+																		key={i}
+																		className={currentPage === i ? "current-page" : ""} 
+																		onClick={() => {
+																			setCurrentPage(i);
+																			getCampaigns(i);
+																		}}
+																	>
+																		{i}
+																	</span>
+																);
+															}
+														} else {
+															// Show first page
+															pages.push(
+																<span 
+																	key={1}
+																	className={currentPage === 1 ? "current-page" : ""} 
+																	onClick={() => {
+																		setCurrentPage(1);
+																		getCampaigns(1);
+																	}}
+																>
+																	1
+																</span>
+															);
+															
+															// Show dots if current page is far from start
+															if (currentPage > 3) {
+																pages.push(<span key="dots1" className="pagination-dots">...</span>);
+															}
+															
+															// Show current page and neighbors
+															for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+																pages.push(
+																	<span 
+																		key={i}
+																		className={currentPage === i ? "current-page" : ""} 
+																		onClick={() => {
+																			setCurrentPage(i);
+																			getCampaigns(i);
+																		}}
+																	>
+																		{i}
+																	</span>
+																);
+															}
+															
+															// Show dots if current page is far from end
+															if (currentPage < totalPages - 2) {
+																pages.push(<span key="dots2" className="pagination-dots">...</span>);
+															}
+															
+															// Show last page
+															pages.push(
+																<span 
+																	key={totalPages}
+																	className={currentPage === totalPages ? "current-page" : ""} 
+																	onClick={() => {
+																		setCurrentPage(totalPages);
+																		getCampaigns(totalPages);
+																	}}
+																>
+																	{totalPages}
+																</span>
+															);
+														}
+														
+														return pages;
+													})()}
+													
+													<button 
+														disabled={currentPage === campaignsMeta.pagination.pageCount} 
+														onClick={() => {
+															setCurrentPage(currentPage + 1);
+															getCampaigns(currentPage + 1);
+														}}
+													>
+														›
+													</button>
 												</div>
 											)}
 										</div>
