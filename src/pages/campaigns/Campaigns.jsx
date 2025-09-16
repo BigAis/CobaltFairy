@@ -13,7 +13,7 @@ import ButtonGroup from '../../components/ButtonGroup'
 import './campaigns.scss'
 import InputText from '../../components/InputText/InputText'
 import PageHeader from '../../components/PageHeader/PageHeader'
-import { ApiService } from '../../service/api-service'
+import { ApiService, BASE_URL } from '../../service/api-service'
 import PopupText from '../../components/PopupText/PopupText'
 import TemplateCard from '../../components/TemplateCard/TemplateCard'
 import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
@@ -710,7 +710,15 @@ const Campaigns = () => {
 				{isExpanded && (
 					<div className="campaign-item-content">
 						<div className="campaign-item-img">
-							<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
+							{campaign.uuid ? (
+								<iframe
+									title={`preview-${campaign.uuid}`}
+									src={`${BASE_URL}/fairymailer/load-campaign-body/${campaign.uuid}`}
+									style={{ width: '100%', height: '150px', border: '0', borderRadius: '8px', background: '#ffffff' }}
+								/>
+							) : (
+								<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
+							)}
 						</div>
 
 						<div className="campaign-item-details">

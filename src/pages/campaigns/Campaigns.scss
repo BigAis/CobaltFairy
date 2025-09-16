@@ -264,6 +264,11 @@ p.template-card-label {
 			text-align: left !important;
 			align-self: flex-start;
 		}			
+		/* Ensure header action button is flush/aligned */
+		button.btn {
+			margin-left: 0;
+			margin-right: 0;
+		}
 	}
 	
 	/* Campaign search input */
@@ -348,7 +353,8 @@ p.template-card-label {
 		border-radius: 8px;
 		margin-bottom: 1rem;
 		background: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
+		/* Match system: 2px border */
+		border: 2px solid rgba(218, 209, 197, 1);
 		overflow: hidden;
 	}
 	
@@ -386,7 +392,7 @@ p.template-card-label {
 	
 	.campaign-item-content {
 		padding: 0 1rem 1rem;
-		border-top: 1px solid rgba(218, 209, 197, 0.5);
+		border-top: 2px solid rgba(218, 209, 197, 0.5);
 	}
 	
 	.campaign-item-img {
@@ -422,7 +428,7 @@ p.template-card-label {
 		text-align: center;
 		padding: 0.5rem;
 		background: #FFFFFF;
-		border: 1px solid rgba(218, 209, 197, 1);
+		border: 2px solid rgba(218, 209, 197, 1);
 		border-radius: 8px;
 		cursor: pointer;
 		position: relative;
@@ -475,8 +481,8 @@ p.template-card-label {
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		border: 1px solid rgba(218, 209, 197, 1);
-		border-radius: 8px;
+		border: 2px solid rgba(218, 209, 197, 1);
+		border-radius: 4px;
 		cursor: pointer;
 		font-size: 14px;
 		background-color: #FFFFFF;
