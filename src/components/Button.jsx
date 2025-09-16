@@ -44,6 +44,9 @@ const Button = ({
 		}
 	}
 
+	const hasText = Boolean(children)
+	const isIconOnly = Boolean(icon) && !hasText
+
 	const computedClassName = classNames(
 		'btn', // Base class
 		{
@@ -54,6 +57,7 @@ const Button = ({
 			loading,
 		},
 		`btn-${type}`, // type === 'primary' ? 'btn-primary' : 'btn-secondary',
+		{ 'icon-only': isIconOnly },
 		// type === 'primary' ? 'btn-primary' : 'btn-secondary',
 		className // clases from props
 	)
@@ -65,7 +69,7 @@ const Button = ({
 
 				{icon && !loading && <Icon name={icon} size={iconSize} className={'icon' + ' ' + blackiconclass} />}
 
-				{children && <span className="text">{children}</span>}
+				{hasText && <span className="text">{children}</span>}
 			</button>
 
 			{fileUpload && <input ref={fileInputRef} type="file" accept={accept} onChange={handleFileChange} style={{ display: 'none' }} />}

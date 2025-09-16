@@ -47,6 +47,11 @@ const Campaigns = () => {
 
 	// New state for filters
 	const [showFilters, setShowFilters] = useState(false)
+	// Build a best-effort preview URL for campaigns (fallback to placeholder)
+	const getCampaignPreviewUrl = (uuid) => {
+		if (!uuid) return '/images/cmp.png'
+		return `https://cdn.cobaltfairy.com/fairymail/campaign/img/${uuid}`
+	}
 	// Calculate default dates (last 30 days)
 	const defaultFromDate = () => {
 		const date = new Date()
@@ -248,7 +253,7 @@ const Campaigns = () => {
 			if (response && response.data && response.data.data) {
 				const filteredData = response.data.data.map((item) => ({
 					...item,
-					image: '/images/cmp.png',
+					image: getCampaignPreviewUrl(item?.uuid),
 				}))
 
 				setCampaigns(filteredData)
@@ -336,7 +341,7 @@ const Campaigns = () => {
 				if (dropdownViewer === 'campaigns') {
 					const searchResults = resp.data.data.map((item) => ({
 						...item,
-						image: '/images/cmp.png',
+						image: getCampaignPreviewUrl(item?.uuid),
 					}))
 
 					console.log('Search found:', searchResults.length, 'results')
@@ -372,7 +377,7 @@ const Campaigns = () => {
 				setCampaigns(
 					resp.data.data.map((item) => ({
 						...item,
-						image: '/images/cmp.png',
+						image: getCampaignPreviewUrl(item?.uuid),
 					}))
 				)
 
@@ -710,7 +715,7 @@ const Campaigns = () => {
 				{isExpanded && (
 					<div className="campaign-item-content">
 						<div className="campaign-item-img">
-							<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
+							<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} loading="lazy" onError={(e)=>{e.currentTarget.src='/images/cmp.png'}} />
 						</div>
 
 						<div className="campaign-item-details">

@@ -259,6 +259,11 @@ p.template-card-label {
 	.page-name-container {
 		margin-top: 0; // Add this line
 		margin-bottom: 1rem;
+		/* Ensure the action button aligns flush on mobile */
+		button.btn.btn-action.icon-only {
+			margin-left: 0;
+			align-self: center;
+		}
 		.page-name {
 			margin-bottom: 10px;
 			text-align: left !important;
@@ -475,7 +480,7 @@ p.template-card-label {
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		border: 1px solid rgba(218, 209, 197, 1);
+		border: 2px solid rgba(218, 209, 197, 1);
 		border-radius: 8px;
 		cursor: pointer;
 		font-size: 14px;
