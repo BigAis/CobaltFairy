@@ -1016,7 +1016,7 @@ const Campaigns = () => {
 											onSearch={(value) => {
 												updateSearchTerm(value)
 											}}
-											style={{ width: '100%', marginRight: '20px' }}
+											style={{ width: '100%' }}
 										/>
 										<Button
 											type="secondary"
@@ -1120,7 +1120,6 @@ const Campaigns = () => {
 										setFilteredCampaigns(filtered)
 									}}
 									type="secondary"
-									style={{ marginRight: '10px' }}
 								>
 									Clear Filters
 								</Button>
