@@ -1134,6 +1134,17 @@ const Campaigns = () => {
 												</div>
 											)}
 
+											{filteredCampaigns.length > 0 && (
+												<div className="pagination-container">
+													<button>{'<'}</button>
+													<span className="current-page">1</span>
+													<span>2</span>
+													<span className="pagination-dots">...</span>
+													<span>9</span>
+													<span>10</span>
+													<button>{'>'}</button>
+												</div>
+											)}
 										</div>
 									) : (
 										<CampaignCalendar campaigns={filteredCampaigns} selectedCampaignType={selectedCampaignType} onCampaignClick={handleCalendarCampaignClick} />
