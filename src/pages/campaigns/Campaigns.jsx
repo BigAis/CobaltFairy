@@ -709,9 +709,23 @@ const Campaigns = () => {
 
 				{isExpanded && (
 					<div className="campaign-item-content">
-						<div className="campaign-item-img">
+					<div className="campaign-item-img">
+						{campaign.uuid ? (
+							<iframe 
+								src={`https://fairymail.cobaltfairy.com/api/fairymailer/load-campaign-body/${campaign.uuid}`}
+								title="Campaign Preview"
+								style={{ 
+									width: '100%', 
+									height: '88px', 
+									border: 'none', 
+									borderRadius: '8px',
+									pointerEvents: 'none'
+								}}
+							/>
+						) : (
 							<img src={campaign.image || '/images/cmp.png'} alt={campaign.name} />
-						</div>
+						)}
+					</div>
 
 						<div className="campaign-item-details">
 							<span className="campaign-detail-label">Type</span>
