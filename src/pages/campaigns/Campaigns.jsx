@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid'
 import SearchBar from '../../components/SearchBar/SearchBar'
 import DatePicker from '../../components/DatePicker'
 import MultipleDropdown from '../../components/MultipleDropdown/MultipleDropdown'
+import Pagination from '../../components/Pagination'
 
 const Campaigns = () => {
 	const navigate = useNavigate()
@@ -955,12 +956,14 @@ const Campaigns = () => {
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
-						{selectedCampaignType !== 'templates' && (
+					</div>
+					{selectedCampaignType !== 'templates' && (
+						<div className="create-new-button-container">
 							<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
 								{isMobile ? '' : 'New Campaign'}
 							</Button>
-						)}
-					</div>
+						</div>
+					)}
 					<div className="filters-container">
 						{/* Campaign status tabs */}
 						<div className="row" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1157,15 +1160,16 @@ const Campaigns = () => {
 											)}
 
 											{filteredCampaigns.length > 0 && (
-												<div className="pagination-container">
-													<button>{'<'}</button>
-													<span className="current-page">1</span>
-													<span>2</span>
-													<span className="pagination-dots">...</span>
-													<span>9</span>
-													<span>10</span>
-													<button>{'>'}</button>
-												</div>
+												<Pagination 
+													currentPage={currentPage}
+													totalResults={campaignsMeta?.pagination?.total || filteredCampaigns.length}
+													resultsPerPage={itemsPerPage}
+													onChange={(page) => {
+														setCurrentPage(page)
+														getCampaigns(page)
+													}}
+													className="mobile-pagination"
+												/>
 											)}
 										</div>
 									) : (
