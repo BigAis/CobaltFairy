@@ -257,7 +257,7 @@ p.template-card-label {
 		min-width: 100%;
 	}
 	
-	/* Main container alignment */
+	/* Main container alignment - consistent padding throughout */
 	.fm-page-container {
 		padding: 0 18px;
 		max-width: 340px;
@@ -268,6 +268,15 @@ p.template-card-label {
 	/* Ensure all content has consistent width and alignment */
 	.fm-page-container > * {
 		width: 100%;
+	}
+	
+	/* Specific padding for different sections to maintain alignment */
+	.page-name-container,
+	.filters-container,
+	.mobile-campaigns-list,
+	.pagination {
+		padding-left: 0;
+		padding-right: 0;
 	}
 	
 	/* Header section */
@@ -503,44 +512,11 @@ p.template-card-label {
 		background: rgba(255, 195, 173, 0.2);
 	}
 	
-	/* Pagination */
-	.pagination-container {
-		display: flex;
+	/* Pagination - using existing component */
+	.pagination {
 		justify-content: center;
-		align-items: center;
-		gap: 8px;
 		margin: 1rem 0;
 		width: 100%;
-	}
-	
-	.pagination-container span, 
-	.pagination-container button {
-		width: 32px;
-		height: 32px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		border: 2px solid #DAD1C5;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 14px;
-		font-weight: 500;
-		line-height: 20px;
-		background: rgba(255, 255, 255, 0.5);
-		color: #100F1C;
-	}
-	
-	.pagination-container span.current-page {
-		background: rgba(255, 255, 255, 0.5);
-		border: 2px solid #DAD1C5;
-		font-weight: 500;
-	}
-	
-	.pagination-dots {
-		border: none !important;
-		background: transparent !important;
-		color: #100F1C;
-		font-weight: 500;
 	}
 	
 	/* Form input */
