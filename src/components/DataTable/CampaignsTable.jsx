@@ -43,6 +43,12 @@ const CampaignsTable = ({
 
 	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 
+	// Build preview URL for campaign image if available
+	const getCampaignPreviewUrl = (uuid) => {
+		if (!uuid) return '/images/cmp.png'
+		return `https://cdn.cobaltfairy.com/fairymail/campaign/img/${uuid}`
+	}
+
 	const handlePageChange = (newPage) => {
 		setCurrentPage(newPage)
 		setSelectedCampaigns([])
@@ -393,11 +399,13 @@ const CampaignsTable = ({
 										/>
 									</div>
 									{/* Image */}
-									{rowData.image ? (
-										<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
-									) : (
-										<img src={'/images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
-									)}
+									<img
+										src={rowData.image || getCampaignPreviewUrl(rowData?.uuid)}
+										alt={rowData.name}
+										style={{ minWidth: '88px', height: '88px' }}
+										loading='lazy'
+										onError={(e)=>{ e.currentTarget.src='/images/cmp.png' }}
+									/>
 								</div>
 							)
 						}
@@ -429,11 +437,13 @@ const CampaignsTable = ({
 						body={(rowData) => (
 							<div style={{ position: 'relative' }}>
 								{/* Image */}
-								{rowData.image ? (
-									<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
-								) : (
-									<img src={'/images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
-								)}
+								<img
+									src={rowData.image || getCampaignPreviewUrl(rowData?.uuid)}
+									alt={rowData.name}
+									style={{ minWidth: '88px', height: '88px' }}
+									loading='lazy'
+									onError={(e)=>{ e.currentTarget.src='/images/cmp.png' }}
+								/>
 							</div>
 						)}
 						header={() => (
