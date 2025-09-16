@@ -954,19 +954,27 @@ const Campaigns = () => {
 				<Sidemenu />
 				<div className="fm-page-container">
 					<PageHeader user={user} account={account} />
-					<div className="page-name-container">
-						<div className="page-name">Campaigns</div>
-					</div>
-					{selectedCampaignType !== 'templates' && (
-						<div className="create-new-button-container">
-							<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
-								{isMobile ? '' : 'New Campaign'}
-							</Button>
+					
+					{/* Header Section */}
+					<div className="campaigns-header">
+						<div className="campaigns-header-content">
+							<div className="page-title-section">
+								<h1 className="page-title">Campaigns</h1>
+								<p className="page-subtitle">Manage your email campaigns and templates</p>
+							</div>
+							{selectedCampaignType !== 'templates' && (
+								<div className="create-new-button-container">
+									<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
+										{isMobile ? '' : 'New Campaign'}
+									</Button>
+								</div>
+							)}
 						</div>
-					)}
-					<div className="filters-container">
+					</div>
+					{/* Filters and Controls Section */}
+					<div className="campaigns-controls">
 						{/* Campaign status tabs */}
-						<div className="row" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+						<div className="campaigns-tabs">
 							<ButtonGroup
 								value={selectedCampaignType}
 								options={[
@@ -976,24 +984,12 @@ const Campaigns = () => {
 									...(isMobile ? [] : [{ value: 'templates', label: `Templates (${templates && templates.length > 0 ? templates.length : '0'})` }]),
 								]}
 								onChange={handleTabChange}
-							></ButtonGroup>
-
-							{/* View mode toggle only shows here on desktop */}
-							{!isMobile && dropdownViewer === 'campaigns' && (
-								<ButtonGroup
-									value={viewMode}
-									options={[
-										{ value: 'list', label: 'List View' },
-										{ value: 'calendar', label: 'Calendar' },
-									]}
-									onChange={setViewMode}
-								/>
-							)}
+							/>
 						</div>
 
-						{/* Show view mode toggle in a separate row on mobile */}
-						{isMobile && dropdownViewer === 'campaigns' && (
-							<div className="row" style={{ marginBottom: '1rem' }}>
+						{/* View mode toggle */}
+						{dropdownViewer === 'campaigns' && (
+							<div className="view-mode-toggle">
 								<ButtonGroup
 									value={viewMode}
 									options={[
@@ -1005,19 +1001,21 @@ const Campaigns = () => {
 							</div>
 						)}
 
+						{/* Search and Filter Section */}
 						{viewMode === 'list' && (
-							<div className="input-text-container" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+							<div className="search-filter-section">
 								{dropdownViewer === 'campaigns' ? (
-									<>
-										<SearchBar
-											placeholder="Search Campaigns"
-											label="Search Campaigns"
-											initialValue={searchTerm}
-											onSearch={(value) => {
-												updateSearchTerm(value)
-											}}
-											style={{ width: '100%' }}
-										/>
+									<div className="search-filter-row">
+										<div className="search-container">
+											<SearchBar
+												placeholder="Search Campaigns"
+												label="Search Campaigns"
+												initialValue={searchTerm}
+												onSearch={(value) => {
+													updateSearchTerm(value)
+												}}
+											/>
+										</div>
 										<Button
 											type="secondary"
 											icon={'Filters'}
@@ -1028,16 +1026,18 @@ const Campaigns = () => {
 										>
 											Filters
 										</Button>
-									</>
+									</div>
 								) : (
-									<SearchBar
-										placeholder="Search Templates"
-										label="Search Templates"
-										initialValue={searchTerm}
-										onSearch={(value) => {
-											updateSearchTerm(value)
-										}}
-									/>
+									<div className="search-container">
+										<SearchBar
+											placeholder="Search Templates"
+											label="Search Templates"
+											initialValue={searchTerm}
+											onSearch={(value) => {
+												updateSearchTerm(value)
+											}}
+										/>
+									</div>
 								)}
 							</div>
 						)}
@@ -1128,22 +1128,30 @@ const Campaigns = () => {
 						</Card>
 					)}
 
-					{loading ? (
-						<div className="loading-indicator">Loading...</div>
-					) : (
-						<div className="">
-							{dropdownViewer === 'campaigns' ? (
-								isMobile ? (
-									// Mobile view for campaigns with collapsible cards or calendar
-									viewMode === 'list' ? (
-										<div className="mobile-campaigns-list">
-											{filteredCampaigns.length > 0 ? (
-												filteredCampaigns.map((campaign) => renderMobileCampaignCard(campaign))
-											) : (
-												<div className="no-campaigns">
-													No {selectedCampaignType} campaigns found
-													{searchTerm && (
-														<div style={{ marginTop: '15px' }}>
+					{/* Main Content Section */}
+					<div className="campaigns-content">
+						{loading ? (
+							<div className="loading-indicator">
+								<div className="loading-spinner"></div>
+								<p>Loading campaigns...</p>
+							</div>
+						) : (
+							<>
+								{dropdownViewer === 'campaigns' ? (
+									isMobile ? (
+										// Mobile view for campaigns with collapsible cards or calendar
+										viewMode === 'list' ? (
+											<div className="mobile-campaigns-list">
+												{filteredCampaigns.length > 0 ? (
+													filteredCampaigns.map((campaign) => renderMobileCampaignCard(campaign))
+												) : (
+													<div className="no-campaigns">
+														<div className="no-campaigns-icon">
+															<Icon name="Mail" size={48} />
+														</div>
+														<h3>No {selectedCampaignType} campaigns found</h3>
+														<p>Create your first campaign to get started</p>
+														{searchTerm && (
 															<Button
 																type="secondary"
 																onClick={() => {
@@ -1153,99 +1161,102 @@ const Campaigns = () => {
 															>
 																Clear Search
 															</Button>
-														</div>
-													)}
-												</div>
-											)}
+														)}
+													</div>
+												)}
 
-											{filteredCampaigns.length > 0 && (
-												<div className="pagination-container">
-													<Pagination 
-														currentPage={currentPage}
-														totalResults={campaignsMeta?.pagination?.total || filteredCampaigns.length}
-														resultsPerPage={itemsPerPage}
-														onChange={(page) => {
-															setCurrentPage(page)
-															getCampaigns(page)
-														}}
-														className="mobile-pagination"
-													/>
-												</div>
-											)}
-										</div>
+												{filteredCampaigns.length > 0 && (
+													<div className="pagination-container">
+														<Pagination 
+															currentPage={currentPage}
+															totalResults={campaignsMeta?.pagination?.total || filteredCampaigns.length}
+															resultsPerPage={itemsPerPage}
+															onChange={(page) => {
+																setCurrentPage(page)
+																getCampaigns(page)
+															}}
+															className="mobile-pagination"
+														/>
+													</div>
+												)}
+											</div>
+										) : (
+											<CampaignCalendar campaigns={filteredCampaigns} selectedCampaignType={selectedCampaignType} onCampaignClick={handleCalendarCampaignClick} />
+										)
+									) : // Desktop view for campaigns (list or calendar)
+									viewMode === 'list' ? (
+										<CampaignsTable
+											resultsPerPage={10}
+											refreshData={refreshData}
+											selectedCampaignType={selectedCampaignType}
+											dashboardPreviewOnly={false}
+											searchTerm={searchTerm}
+											campaigns={filteredCampaigns} // Pass the filtered campaigns directly
+											loading={loading}
+										/>
 									) : (
 										<CampaignCalendar campaigns={filteredCampaigns} selectedCampaignType={selectedCampaignType} onCampaignClick={handleCalendarCampaignClick} />
 									)
-								) : // Desktop view for campaigns (list or calendar)
-								viewMode === 'list' ? (
-									<CampaignsTable
-										resultsPerPage={10}
-										refreshData={refreshData}
-										selectedCampaignType={selectedCampaignType}
-										dashboardPreviewOnly={false}
-										searchTerm={searchTerm}
-										campaigns={filteredCampaigns} // Pass the filtered campaigns directly
-										loading={loading}
-									/>
 								) : (
-									<CampaignCalendar campaigns={filteredCampaigns} selectedCampaignType={selectedCampaignType} onCampaignClick={handleCalendarCampaignClick} />
-								)
-							) : (
-								// Templates view
-								<div className="d-flex flex-wrap templates-container gap-20 mt20">
-									<Card
-										style={{ cursor: 'pointer' }}
-										className={'d-flex flex-column align-items-center justify-content-center gap-20'}
-										onClick={() => {
-											PopupText.fire({
-												text: 'Enter Template Name',
-												inputField: true,
-												inputLabel: 'Template Name',
-												confirmButtonText: 'Submit',
-												onConfirm: (inputValue) => {
-													console.log('User entered:', inputValue)
-												},
-											}).then((result) => {
-												if (result.isConfirmed) {
-													console.log('Confirmed with input:', result.inputValue)
-													createTemplateByName(result.inputValue)
-												} else if (result.isCancelled) {
-													console.log('Popup cancelled')
-												}
-											})
-										}}
-									>
-										<Icon name="PlusLight" size={64}></Icon>
-										<p>Create New</p>
-									</Card>
-									{templates &&
-										templates.length > 0 &&
-										templates
-											.sort((a, b) => a.id - b.id)
-											.map((template, i) => (
-												<React.Fragment key={template.uuid || `template-${i}`}>
-													<TemplateCard
-														key={template.uuid}
-														template_udid={template.uuid}
-														templateName={template.name}
-														onPreviewClick={() => {
-															setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: true }])
-														}}
-														onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
-													/>
-													<TemplatePreview
-														template_udid={template.uuid}
-														show={template.showPreview}
-														onClose={() => {
-															setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: false }])
-														}}
-													/>
-												</React.Fragment>
-											))}
-								</div>
-							)}
-						</div>
-					)}
+									// Templates view
+									<div className="templates-grid">
+										<Card
+											style={{ cursor: 'pointer' }}
+											className={'template-create-card'}
+											onClick={() => {
+												PopupText.fire({
+													text: 'Enter Template Name',
+													inputField: true,
+													inputLabel: 'Template Name',
+													confirmButtonText: 'Submit',
+													onConfirm: (inputValue) => {
+														console.log('User entered:', inputValue)
+													},
+												}).then((result) => {
+													if (result.isConfirmed) {
+														console.log('Confirmed with input:', result.inputValue)
+														createTemplateByName(result.inputValue)
+													} else if (result.isCancelled) {
+														console.log('Popup cancelled')
+													}
+												})
+											}}
+										>
+											<div className="template-create-content">
+												<Icon name="PlusLight" size={64}></Icon>
+												<h3>Create New Template</h3>
+												<p>Start with a blank template</p>
+											</div>
+										</Card>
+										{templates &&
+											templates.length > 0 &&
+											templates
+												.sort((a, b) => a.id - b.id)
+												.map((template, i) => (
+													<React.Fragment key={template.uuid || `template-${i}`}>
+														<TemplateCard
+															key={template.uuid}
+															template_udid={template.uuid}
+															templateName={template.name}
+															onPreviewClick={() => {
+																setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: true }])
+															}}
+															onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
+														/>
+														<TemplatePreview
+															template_udid={template.uuid}
+															show={template.showPreview}
+															onClose={() => {
+																setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: false }])
+															}}
+														/>
+													</React.Fragment>
+												))}
+									</div>
+								)}
+							</>
+						)}
+					</div>
 				</div>
 			</div>
 		</>
