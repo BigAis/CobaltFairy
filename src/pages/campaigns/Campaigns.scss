@@ -259,17 +259,15 @@ p.template-card-label {
 	
 	/* Main container alignment */
 	.fm-page-container {
-		padding: 0;
+		padding: 0 18px;
 		max-width: 340px;
 		margin: 0 auto;
 		width: 100%;
 	}
 	
-	/* Ensure all content fits within the 340px container */
+	/* Ensure all content has consistent width and alignment */
 	.fm-page-container > * {
 		width: 100%;
-		max-width: 304px;
-		margin: 0 auto;
 	}
 	
 	/* Header section */
@@ -279,7 +277,6 @@ p.template-card-label {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 10px;
-		max-width: none; /* Override the general rule */
 		
 		.page-name {
 			margin-bottom: 0;
@@ -301,7 +298,6 @@ p.template-card-label {
 	.searchbar-wrapper {
 		width: 100%;
 		margin-bottom: 22px;
-		max-width: none; /* Override the general rule */
 		
 		.input-wrapper {
 			width: 100%;
@@ -322,21 +318,6 @@ p.template-card-label {
 		margin-bottom: 22px;
 		width: 100%;
 		overflow-x: auto;
-		max-width: none; /* Override the general rule */
-		position: relative;
-		
-		/* Add fading effect on the right side */
-		&::after {
-			content: '';
-			position: absolute;
-			top: 0;
-			right: 0;
-			width: 86px;
-			height: 100%;
-			background: linear-gradient(90deg, rgba(255, 241, 223, 0) 0%, #FFF1DF 100%);
-			pointer-events: none;
-			z-index: 2;
-		}
 		
 		.btn {
 			flex: 0 0 auto;
@@ -355,7 +336,6 @@ p.template-card-label {
 		justify-content: flex-end;
 		margin: 0 0 22px 0;
 		padding: 0;
-		max-width: none; /* Override the general rule */
 		
 		.btn-group {
 			display: flex;
@@ -390,7 +370,6 @@ p.template-card-label {
 		gap: 16px;
 		width: 100%;
 		align-items: stretch;
-		max-width: none; /* Override the general rule */
 	}
 	
 	/* Campaign cards layout */
@@ -531,6 +510,7 @@ p.template-card-label {
 		align-items: center;
 		gap: 8px;
 		margin: 1rem 0;
+		width: 100%;
 	}
 	
 	.pagination-container span, 
