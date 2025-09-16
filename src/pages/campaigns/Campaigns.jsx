@@ -950,7 +950,7 @@ const Campaigns = () => {
 	}
 	return (
 		<>
-			<div className="fm-page-wrapper">
+			<div className="fm-page-wrapper campaigns-page">
 				<Sidemenu />
 				<div className="fm-page-container">
 					<PageHeader user={user} account={account} />

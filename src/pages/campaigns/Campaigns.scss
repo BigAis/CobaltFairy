@@ -11,8 +11,8 @@
 	}
 }
 
-/* Desktop Create New button container */
-.create-new-button-container {
+/* Desktop Create New button container - scoped to campaigns page */
+.fm-page-wrapper .create-new-button-container {
 	display: flex;
 	justify-content: flex-end;
 	margin-bottom: 1rem;
@@ -269,21 +269,21 @@ p.template-card-label {
   }
 }
 
-/* Mobile styles for campaigns page */
+/* Mobile styles for campaigns page - scoped to campaigns only */
 @media(max-width: 768px) {
 	.fm-content-wrapper {
 		min-width: 100%;
 	}
 	
-	/* Main page background - Match Figma */
-	.fm-page-wrapper {
+	/* Main page background - Match Figma - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page {
 		background: #FFF1DF;
 		min-height: 100vh;
 		position: relative;
 		width: 100%;
 	}
 	
-	.fm-page-container {
+	.fm-page-wrapper.campaigns-page .fm-page-container {
 		background: #FFF1DF;
 		display: flex;
 		flex-direction: column;
@@ -295,8 +295,8 @@ p.template-card-label {
 		margin: 0 auto;
 	}
 	
-	/* Header section - Match Figma design */
-	.page-name-container {
+	/* Header section - Match Figma design - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .page-name-container {
 		margin-top: 0;
 		margin-bottom: 0;
 		display: flex;
@@ -320,8 +320,8 @@ p.template-card-label {
 		}
 	}
 	
-	/* Create New button container - positioned under header */
-	.create-new-button-container {
+	/* Create New button container - positioned under header - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .create-new-button-container {
 		width: 100%;
 		max-width: 304px;
 		display: flex;
@@ -342,8 +342,8 @@ p.template-card-label {
 		}
 	}
 	
-	/* Campaign search input - Match Figma design */
-	.search-campaign-input {
+	/* Campaign search input - Match Figma design - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .search-campaign-input {
 		padding: 14px 20px;
 		margin-bottom: 1rem;
 		width: 100%;
@@ -358,12 +358,12 @@ p.template-card-label {
 		color: #887D76;
 	}
 	
-	.search-campaign-input::placeholder {
+	.fm-page-wrapper.campaigns-page .search-campaign-input::placeholder {
 		color: #887D76;
 	}
 	
-	/* Search bar container */
-	.input-text-container {
+	/* Search bar container - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .input-text-container {
 		width: 100%;
 		max-width: 304px;
 		display: flex;
@@ -393,8 +393,8 @@ p.template-card-label {
 		border-color: #ff635d;
 	}
 	
-	/* Button Group overrides - Match Figma design system */
-	.btn-group.btn-sm {
+	/* Button Group overrides - Match Figma design system - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .btn-group.btn-sm {
 		display: flex;
 		flex-wrap: nowrap;
 		gap: 4px;
@@ -403,7 +403,7 @@ p.template-card-label {
 		height: 41px;
 	}
 	
-	.btn-group.btn-sm .btn {
+	.fm-page-wrapper.campaigns-page .btn-group.btn-sm .btn {
 		flex: 1;
 		white-space: nowrap;
 		min-width: auto;
@@ -420,12 +420,12 @@ p.template-card-label {
 		align-items: center;
 	}
 	
-	.btn-group.btn-sm .btn.active {
+	.fm-page-wrapper.campaigns-page .btn-group.btn-sm .btn.active {
 		background: rgba(255, 255, 255, 0.5);
 		border: 2px solid #DAD1C5;
 	}
 	
-	.btn-group.btn-sm .btn:not(.active) {
+	.fm-page-wrapper.campaigns-page .btn-group.btn-sm .btn:not(.active) {
 		background: rgba(255, 255, 255, 0.15);
 		border: 2px solid rgba(218, 209, 197, 0.5);
 	}
@@ -453,8 +453,8 @@ p.template-card-label {
 		font-weight: 500;
 	}
 	
-	/* Campaign cards layout - Match Figma design */
-	.campaign-item {
+	/* Campaign cards layout - Match Figma design - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .campaign-item {
 		border-radius: 8px;
 		margin-bottom: 16px;
 		background: rgba(255, 255, 255, 0.5);
@@ -464,7 +464,7 @@ p.template-card-label {
 		max-width: 304px;
 	}
 	
-	.campaign-item-header {
+	.fm-page-wrapper.campaigns-page .campaign-item-header {
 		padding: 20px;
 		display: flex;
 		justify-content: space-between;
@@ -473,7 +473,7 @@ p.template-card-label {
 		gap: 14px;
 	}
 	
-	.campaign-item-title {
+	.fm-page-wrapper.campaigns-page .campaign-item-title {
 		font-weight: 500;
 		font-size: 16px;
 		line-height: 19px;
@@ -482,7 +482,7 @@ p.template-card-label {
 		font-family: 'Inter', sans-serif;
 	}
 	
-	.campaign-item-subject {
+	.fm-page-wrapper.campaigns-page .campaign-item-subject {
 		color: #887D76;
 		font-size: 14px;
 		line-height: 17px;
@@ -490,7 +490,7 @@ p.template-card-label {
 		font-family: 'Inter', sans-serif;
 	}
 	
-	.campaign-item-chevron {
+	.fm-page-wrapper.campaigns-page .campaign-item-chevron {
 		transition: transform 0.3s ease;
 		width: 24px;
 		height: 24px;
@@ -499,11 +499,11 @@ p.template-card-label {
 		justify-content: center;
 	}
 	
-	.campaign-item-chevron.expanded {
+	.fm-page-wrapper.campaigns-page .campaign-item-chevron.expanded {
 		transform: rotate(180deg);
 	}
 	
-	.campaign-item-content {
+	.fm-page-wrapper.campaigns-page .campaign-item-content {
 		padding: 0 20px 20px;
 		border-top: 2px solid #DAD1C5;
 		display: flex;
@@ -511,7 +511,7 @@ p.template-card-label {
 		gap: 20px;
 	}
 	
-	.campaign-item-img {
+	.fm-page-wrapper.campaigns-page .campaign-item-img {
 		width: 100%;
 		height: 88px;
 		position: relative;
@@ -521,27 +521,27 @@ p.template-card-label {
 		overflow: hidden;
 	}
 	
-	.campaign-item-img img {
+	.fm-page-wrapper.campaigns-page .campaign-item-img img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		border-radius: 8px;
 	}
 	
-	.campaign-item-info {
+	.fm-page-wrapper.campaigns-page .campaign-item-info {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
 	}
 	
-	.campaign-item-metrics {
+	.fm-page-wrapper.campaigns-page .campaign-item-metrics {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
 	}
 	
-	.campaign-item-details {
+	.fm-page-wrapper.campaigns-page .campaign-item-details {
 		display: flex;
 		justify-content: space-between;
 		margin-bottom: 0;
@@ -552,11 +552,11 @@ p.template-card-label {
 		font-family: 'Inter', sans-serif;
 	}
 	
-	.campaign-detail-label {
+	.fm-page-wrapper.campaigns-page .campaign-detail-label {
 		color: #887D76;
 	}
 	
-	.overview-button {
+	.fm-page-wrapper.campaigns-page .overview-button {
 		display: flex;
 		width: 100%;
 		height: 40px;
@@ -576,8 +576,8 @@ p.template-card-label {
 		gap: 10px;
 	}
 	
-	/* Dropdown menu for campaign actions */
-	.campaign-dropdown-menu {
+	/* Dropdown menu for campaign actions - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .campaign-dropdown-menu {
 		position: absolute;
 		right: 1rem;
 		top: auto;
@@ -590,23 +590,23 @@ p.template-card-label {
 		width: 150px;
 	}
 	
-	.campaign-dropdown-menu-item {
+	.fm-page-wrapper.campaigns-page .campaign-dropdown-menu-item {
 		padding: 0.75rem 1rem;
 		font-size: 14px;
 		cursor: pointer;
 		border-bottom: 1px solid rgba(218, 209, 197, 0.3);
 	}
 	
-	.campaign-dropdown-menu-item:last-child {
+	.fm-page-wrapper.campaigns-page .campaign-dropdown-menu-item:last-child {
 		border-bottom: none;
 	}
 	
-	.campaign-dropdown-menu-item:hover {
+	.fm-page-wrapper.campaigns-page .campaign-dropdown-menu-item:hover {
 		background: rgba(255, 195, 173, 0.2);
 	}
 	
-	/* Mobile pagination container */
-	.pagination-container {
+	/* Mobile pagination container - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .pagination-container {
 		width: 100%;
 		max-width: 304px;
 		display: flex;
@@ -614,8 +614,8 @@ p.template-card-label {
 		margin: 1rem 0;
 	}
 	
-	/* Mobile pagination - using existing Pagination component */
-	.mobile-pagination {
+	/* Mobile pagination - using existing Pagination component - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .mobile-pagination {
 		width: 100%;
 		justify-content: center;
 		gap: 8px;
@@ -678,8 +678,8 @@ p.template-card-label {
 		margin-top: 0.5rem;
 	}
 	
-	/* Mobile campaigns list container */
-	.mobile-campaigns-list {
+	/* Mobile campaigns list container - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .mobile-campaigns-list {
 		width: 100%;
 		max-width: 304px;
 		display: flex;
@@ -689,12 +689,12 @@ p.template-card-label {
 		margin: 0;
 	}
 	
-	/* Ensure proper spacing between sections */
-	.filters-container {
+	/* Ensure proper spacing between sections - scoped to campaigns page */
+	.fm-page-wrapper.campaigns-page .filters-container {
 		margin-bottom: 22px;
 	}
 	
-	.filters-container .row {
+	.fm-page-wrapper.campaigns-page .filters-container .row {
 		margin-bottom: 22px;
 	}
 	
