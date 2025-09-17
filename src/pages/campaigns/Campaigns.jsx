@@ -45,6 +45,7 @@ const Campaigns = () => {
 
 	const [campaignsMeta, setCampaignsMeta] = useState([])
 	const [selectedCampaignType, setSelectedCampaignType] = useState('sent')
+	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 
 	// New state for filters
 	const [showFilters, setShowFilters] = useState(false)
@@ -681,6 +682,48 @@ const Campaigns = () => {
 		}
 	}
 
+	// Delete selected campaigns function
+	const deleteSelectedCampaigns = async () => {
+		if (selectedCampaigns.length === 0) return
+
+		PopupText.fire({
+			text: `Do you really want to delete ${selectedCampaigns.length} campaign(s)? This action cannot be undone.`,
+			confirmButtonText: 'Yes, delete.',
+			showCancelButton: true,
+			cancelButtonText: 'Cancel',
+			icon: 'warning'
+		}).then(async (result) => {
+			if (result.isConfirmed) {
+				let successCount = 0
+
+				// Process each campaign sequentially
+				for (const campaign of selectedCampaigns) {
+					try {
+						const deleteResponse = await ApiService.post(`fairymailer/removeCampaign`, { data: { udid: campaign.uuid } }, user.jwt)
+						if (deleteResponse) {
+							successCount++
+						}
+					} catch (error) {
+						console.error(`Error deleting campaign ${campaign.name}:`, error)
+					}
+				}
+
+				// Clear selection and refresh the list
+				setSelectedCampaigns([])
+				refreshData()
+
+				// Show success message
+				if (successCount > 0) {
+					createNotification({
+						message: `${successCount} campaign(s) deleted successfully.`,
+						type: 'default',
+						autoClose: 3000,
+					})
+				}
+			}
+		})
+	}
+
 	// Render a mobile campaign card with collapsible content
 
 	const renderMobileCampaignCard = (campaign) => {
@@ -960,12 +1003,25 @@ const Campaigns = () => {
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
-						{/* Desktop button - only show on desktop */}
-						{!isMobile && selectedCampaignType !== 'templates' && (
-							<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
-								New Campaign
-							</Button>
-						)}
+						<div className="action-buttons">
+							{/* Show delete selected button when campaigns are selected */}
+							{selectedCampaigns.length > 0 && (
+								<Button 
+									type="secondary" 
+									onClick={deleteSelectedCampaigns} 
+									style={{ marginRight: '10px' }}
+								>
+									Delete Selected ({selectedCampaigns.length})
+								</Button>
+							)}
+							
+							{/* Desktop button - only show on desktop */}
+							{!isMobile && selectedCampaignType !== 'templates' && (
+								<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
+									New Campaign
+								</Button>
+							)}
+						</div>
 					</div>
 
 					{/* Mobile button - keep original mobile structure */}
@@ -1196,6 +1252,8 @@ const Campaigns = () => {
 										searchTerm={searchTerm}
 										campaigns={filteredCampaigns} // Pass the filtered campaigns directly
 										loading={loading}
+										selectedCampaigns={selectedCampaigns}
+										setSelectedCampaigns={setSelectedCampaigns}
 									/>
 								) : (
 									<CampaignCalendar campaigns={filteredCampaigns} selectedCampaignType={selectedCampaignType} onCampaignClick={handleCalendarCampaignClick} />

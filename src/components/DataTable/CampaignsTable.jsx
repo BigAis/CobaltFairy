@@ -31,7 +31,9 @@ const CampaignsTable = ({
   refreshData = () => {}, 
   searchTerm = '',
   campaigns: propCampaigns = null,
-  loading: propLoading = false
+  loading: propLoading = false,
+  selectedCampaigns = [],
+  setSelectedCampaigns = () => {}
 }) => {
 	const navigate = useNavigate()
 	const { user, account, createNotification } = useAccount()
@@ -42,7 +44,6 @@ const CampaignsTable = ({
 	const [currentPage, setCurrentPage] = useState(1)
 	const rowsPerPage = resultsPerPage
 
-	const [selectedCampaigns, setSelectedCampaigns] = useState([])
 
 	const handlePageChange = (newPage) => {
 		setCurrentPage(newPage)
@@ -373,26 +374,41 @@ const CampaignsTable = ({
 	return (
 		<div className="campaigns-table-container">
 			{!dashboardPreviewOnly ? (
-				<DataTable value={displayData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey='id' rowClassName={() => 'p-table-row'}>
+				<DataTable value={displayData} paginator={false} dataKey="uuid" rowClassName={() => 'p-table-row'}>
+					{/* Custom checkbox column using existing Checkbox component */}
+					<Column 
+						body={(campaign) => (
+							<Checkbox
+								checked={selectedCampaigns.some((selected) => selected.uuid === campaign.uuid)}
+								onChange={(checked) => {
+									if (checked) {
+										setSelectedCampaigns((prev) => [...prev, campaign])
+									} else {
+										setSelectedCampaigns((prev) => prev.filter((selected) => selected.uuid !== campaign.uuid))
+									}
+								}}
+							/>
+						)}
+						header={() => (
+							<Checkbox
+								checked={selectedCampaigns.length === displayData.length && displayData.length > 0}
+								onChange={(checked) => {
+									if (checked) {
+										setSelectedCampaigns([...displayData])
+									} else {
+										setSelectedCampaigns([])
+									}
+								}}
+							/>
+						)}
+						headerStyle={{ width: '80px' }}
+					/>
 					<Column
 						body={(rowData) =>
 							loading ? (
 								<Skeleton />
 							) : (
 								<div style={{ position: 'relative' }}>
-									{/* Checkbox in the Top-Left Corner */}
-									<div style={{ position: 'absolute', top: '10px', left: '5px' }}>
-										<Checkbox
-											checked={selectedCampaigns.some((campaign) => campaign.name === rowData.name)}
-											onChange={(e) => {
-												if (e) {
-													setSelectedCampaigns((prev) => [...prev, rowData])
-												} else {
-													setSelectedCampaigns((prev) => prev.filter((campaign) => campaign.id !== rowData.id))
-												}
-											}}
-										/>
-									</div>
 									{/* Image */}
 									{rowData.image ? (
 										<img src={rowData.image} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
@@ -402,18 +418,6 @@ const CampaignsTable = ({
 								</div>
 							)
 						}
-						header={() => (
-							<Checkbox
-								checked={selectedCampaigns.length === displayData.length && selectedCampaigns.length > 0}
-								onChange={(e) => {
-									if (e) {
-										setSelectedCampaigns([...displayData])
-									} else {
-										setSelectedCampaigns([])
-									}
-								}}
-							/>
-						)}
 						headerStyle={{ width: '80px' }}
 					/>
 					<Column field="name" header="Name" body={(rowData) => (loading ? <Skeleton /> : rowData.name)} />
@@ -425,7 +429,35 @@ const CampaignsTable = ({
 					<Column field="uuid" header="Actions" body={(rowData) => (loading ? <Skeleton /> : actionsBodyTemplate(rowData))} />
 				</DataTable>
 			) : (
-				<DataTable value={displayData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey="id" rowClassName={() => 'p-table-row'}>
+				<DataTable value={displayData} paginator={false} dataKey="uuid" rowClassName={() => 'p-table-row'}>
+					{/* Custom checkbox column using existing Checkbox component */}
+					<Column 
+						body={(campaign) => (
+							<Checkbox
+								checked={selectedCampaigns.some((selected) => selected.uuid === campaign.uuid)}
+								onChange={(checked) => {
+									if (checked) {
+										setSelectedCampaigns((prev) => [...prev, campaign])
+									} else {
+										setSelectedCampaigns((prev) => prev.filter((selected) => selected.uuid !== campaign.uuid))
+									}
+								}}
+							/>
+						)}
+						header={() => (
+							<Checkbox
+								checked={selectedCampaigns.length === displayData.length && displayData.length > 0}
+								onChange={(checked) => {
+									if (checked) {
+										setSelectedCampaigns([...displayData])
+									} else {
+										setSelectedCampaigns([])
+									}
+								}}
+							/>
+						)}
+						headerStyle={{ width: '80px' }}
+					/>
 					<Column
 						body={(rowData) => (
 							<div style={{ position: 'relative' }}>
@@ -436,18 +468,6 @@ const CampaignsTable = ({
 									<img src={'/images/cmp.png'} alt={rowData.name} style={{ minWidth: '88px', height: '88px' }} />
 								)}
 							</div>
-						)}
-						header={() => (
-							<Checkbox
-								checked={selectedCampaigns.length === displayData.length && selectedCampaigns.length > 0}
-								onChange={(e) => {
-									if (e) {
-										setSelectedCampaigns([...displayData])
-									} else {
-										setSelectedCampaigns([])
-									}
-								}}
-							/>
 						)}
 						headerStyle={{ width: '80px' }}
 					/>
