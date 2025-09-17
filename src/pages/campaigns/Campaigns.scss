@@ -619,7 +619,7 @@ p.template-card-label {
 		max-width: 304px;
 		display: flex;
 		justify-content: center;
-		margin: 1rem 0;
+		margin: 1rem auto; /* Center align pagination */
 	}
 	
 	/* Mobile pagination - using existing Pagination component - scoped to campaigns page */
@@ -694,7 +694,18 @@ p.template-card-label {
 		flex-direction: column;
 		gap: 16px;
 		padding: 0;
-		margin: 0;
+		margin: 0 auto; /* Center align the container */
+		
+		.campaign-item {
+			border-radius: 8px;
+			margin-bottom: 0; /* Remove margin-bottom since we're using gap */
+			background: rgba(255, 255, 255, 0.5);
+			border: 2px solid #DAD1C5;
+			overflow: hidden;
+			width: 100%;
+			max-width: 304px; /* Ensure consistent width */
+			min-width: 304px; /* Prevent shrinking */
+		}
 	}
 	
 	/* Ensure proper spacing between sections - scoped to campaigns page */
@@ -714,6 +725,9 @@ p.template-card-label {
 		font-family: 'Inter', sans-serif;
 		font-size: 14px;
 		font-weight: 500;
+		width: 100%;
+		max-width: 304px;
+		margin: 0 auto;
 	}
 	
 	/* Arrow indicator for expanded cards */

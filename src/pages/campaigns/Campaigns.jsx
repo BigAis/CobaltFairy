@@ -48,6 +48,7 @@ const Campaigns = () => {
 
 	// New state for filters
 	const [showFilters, setShowFilters] = useState(false)
+	const [hasAppliedFilters, setHasAppliedFilters] = useState(false)
 	// Calculate default dates (last 30 days)
 	const defaultFromDate = () => {
 		const date = new Date()
@@ -264,6 +265,9 @@ const Campaigns = () => {
 					type: 'default',
 					autoClose: 3000,
 				})
+				
+				// Mark that filters have been applied
+				setHasAppliedFilters(true)
 			}
 		} catch (error) {
 			console.error('Error applying filters:', error)
@@ -1114,18 +1118,16 @@ const Campaigns = () => {
 											maxClickRate: '',
 											recipientGroups: [],
 										})
-										// Reset filteredCampaigns to match selected campaign type
-										const filtered = campaigns.filter((campaign) => {
-											if (selectedCampaignType === 'sent') {
-												return campaign.status === 'sent'
-											} else if (selectedCampaignType === 'outbox') {
-												return campaign.status === 'draft' && campaign.date
-											} else if (selectedCampaignType === 'draft') {
-												return campaign.status === 'draft' && !campaign.date
-											}
-											return false
-										})
-										setFilteredCampaigns(filtered)
+										
+										// Clear search term
+										setSearchTerm('')
+										
+										// Reset to original campaigns data
+										getCampaigns()
+										
+										// Reset filter states
+										setHasAppliedFilters(false)
+										setShowFilters(false)
 									}}
 									type="secondary"
 								>
