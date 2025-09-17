@@ -772,6 +772,79 @@ p.template-card-label {
 		}
 	}
 }
+/* Desktop dropdown fixes - prevent scrollbar issues */
+.fm-page-wrapper.campaigns-page {
+	/* Ensure the main container doesn't overflow when dropdowns open */
+	.fm-page-container {
+		overflow: visible;
+	}
+	
+	/* Fix dropdown positioning in DataTable */
+	.p-datatable {
+		/* Ensure the table itself doesn't cause overflow */
+		overflow: visible;
+		
+		.dropdown-wrapper {
+			position: relative;
+			overflow: visible;
+			
+			.dropdown-menu {
+				/* Ensure dropdown doesn't cause parent overflow */
+				position: absolute;
+				top: 100%;
+				left: 0;
+				right: auto;
+				z-index: 1000;
+				/* Prevent dropdown from extending beyond viewport */
+				max-width: 200px;
+				/* Ensure dropdown doesn't cause horizontal scroll */
+				transform: translateX(0);
+				/* Prevent dropdown from causing page overflow */
+				box-sizing: border-box;
+			}
+		}
+		
+		/* Ensure table cells don't cause overflow */
+		.p-datatable-tbody > tr > td {
+			overflow: visible;
+			position: relative;
+		}
+		
+		/* Ensure the table wrapper doesn't cause overflow */
+		.p-datatable-wrapper {
+			overflow: visible;
+		}
+	}
+	
+	/* Specific fix for Actions column dropdown */
+	.p-datatable .p-datatable-tbody > tr > td:last-child {
+		overflow: visible;
+		position: relative;
+		
+		.dropdown-wrapper {
+			overflow: visible;
+			
+			.dropdown-menu {
+				/* Position dropdown to open upward if near bottom of viewport */
+				position: absolute;
+				top: auto;
+				bottom: 100%;
+				left: 0;
+				right: auto;
+				margin-top: 0;
+				margin-bottom: 5px;
+				z-index: 1000;
+				max-width: 200px;
+				/* Prevent dropdown from causing page overflow */
+				box-sizing: border-box;
+			}
+		}
+	}
+	
+	/* Ensure the entire page doesn't overflow when dropdowns are open */
+	overflow: visible;
+}
+
 /* Responsive styles for Campaign Overview page */
 @media(max-width: 768px) {
     .overview-row {
