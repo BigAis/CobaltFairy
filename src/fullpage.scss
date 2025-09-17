@@ -28,6 +28,8 @@
 	}
 	.fm-page-wrapper {
 		display: flex;
+		/* Ensure page wrapper doesn't cause overflow issues */
+		overflow: visible;
 
 		@media (max-width: 768px) {
 			flex-direction: column;
@@ -36,6 +38,8 @@
 		.fm-page-container {
 			padding: 3em;
 			width: 100%;
+			/* Ensure page container doesn't cause overflow issues */
+			overflow: visible;
 
 			@media (max-width: 768px) {
 				padding: 1em;

@@ -134,6 +134,8 @@
 		overflow-y: auto;
 		margin-top: 10px;
 		text-align: left;
+		/* Prevent dropdown from causing page overflow */
+		box-sizing: border-box;
 
 		// Βελτιώνουμε το scrolling για μεγάλες λίστες
 		&::-webkit-scrollbar {
@@ -211,6 +213,44 @@
 
 	.dropdown-menu-hidden {
 		display: none;
+	}
+}
+
+/* Specific fixes for dropdowns in DataTable contexts */
+.p-datatable .dropdown-wrapper {
+	position: relative;
+	overflow: visible;
+	
+	.dropdown-menu {
+		/* Ensure dropdown doesn't cause page overflow */
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: auto;
+		z-index: 1000;
+		max-width: 200px;
+		/* Prevent dropdown from extending beyond viewport */
+		box-sizing: border-box;
+		/* Ensure dropdown doesn't cause horizontal scroll */
+		transform: translateX(0);
+	}
+}
+
+/* Specific fix for Actions column dropdown in DataTable */
+.p-datatable .p-datatable-tbody > tr > td:last-child .dropdown-wrapper {
+	.dropdown-menu {
+		/* Position dropdown to open upward if near bottom of viewport */
+		position: absolute;
+		top: auto;
+		bottom: 100%;
+		left: 0;
+		right: auto;
+		margin-top: 0;
+		margin-bottom: 5px;
+		z-index: 1000;
+		max-width: 200px;
+		/* Prevent dropdown from causing page overflow */
+		box-sizing: border-box;
 	}
 }
 

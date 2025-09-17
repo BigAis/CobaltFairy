@@ -1,5 +1,8 @@
 // Main DataTable styles
 .p-datatable {
+  /* Ensure DataTable doesn't cause overflow issues */
+  overflow: visible;
+  
   .p-paginator-page {
     border-radius: 4px;
     min-width: 32px;
@@ -18,6 +21,8 @@
   .p-datatable-table {
     border-collapse: separate;
     border-spacing: 0px 30px;
+    /* Ensure table doesn't cause overflow */
+    overflow: visible;
 
     .p-datatable-thead > tr > th {
       color: rgba(136, 125, 118, 1);
@@ -35,6 +40,9 @@
         border-bottom: 2px solid rgba(218, 209, 197, 1);
         color: rgba(16, 15, 28, 1);
         padding: 12px;
+        /* Ensure table cells don't cause overflow */
+        overflow: visible;
+        position: relative;
         
         &:first-child {
           border: 2px solid rgba(218, 209, 197, 1);
@@ -49,6 +57,11 @@
         }
       }
     }
+  }
+  
+  /* Ensure DataTable wrapper doesn't cause overflow */
+  .p-datatable-wrapper {
+    overflow: visible;
   }
 }
 
