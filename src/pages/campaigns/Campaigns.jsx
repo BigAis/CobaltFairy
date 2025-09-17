@@ -440,6 +440,43 @@ const Campaigns = () => {
 			})
 		}
 	}
+
+	const deleteTemplate = async (templateUuid, templateName) => {
+		try {
+			// Show confirmation dialog
+			const result = await PopupText.fire({
+				icon: 'question',
+				text: `Are you sure you want to delete the template "${templateName}"?`,
+				showCancelButton: true,
+				confirmButtonText: 'Yes, delete it',
+			})
+			
+			if (result.isConfirmed) {
+				// Make API call to delete the template
+				const response = await ApiService.post('fairymailer/removeTemplate', { data: { udid: templateUuid } }, user.jwt)
+				
+				if (response && response.data && response.data.code === 200) {
+					// Remove the template from the templates array
+					setTemplates(templates.filter(template => template.uuid !== templateUuid))
+					
+					createNotification({
+						message: 'Template deleted successfully',
+						type: 'default',
+						autoClose: 3000,
+					})
+				} else {
+					throw new Error('Failed to delete template')
+				}
+			}
+		} catch (error) {
+			console.error('Error deleting template:', error)
+			createNotification({
+				message: 'Failed to delete template. Please try again.',
+				type: 'warning',
+				autoClose: 5000,
+			})
+		}
+	}
 	// Toggle expand/collapse of a campaign card
 	const toggleCampaignExpand = (campaignId) => {
 		setExpandedCampaign(expandedCampaign === campaignId ? null : campaignId)
@@ -1300,6 +1337,7 @@ const Campaigns = () => {
 															setTemplates([...templates.filter((t) => t.uuid != template.uuid), { ...template, showPreview: true }])
 														}}
 														onEditClick={() => navigate(`/templates/edit/${template.uuid}`)}
+														onDeleteClick={() => deleteTemplate(template.uuid, template.name)}
 													/>
 													<TemplatePreview
 														template_udid={template.uuid}

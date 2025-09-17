@@ -218,6 +218,24 @@ p.template-card-label {
 	left: 15px;
 }
 
+// Delete template button styles
+.delete-template-btn {
+	.icon {
+		svg {
+			fill: #000 !important; // Force the icon to stay black
+		}
+		
+		path {
+			fill: #000 !important; // Ensure SVG paths are visible
+		}
+	}
+	
+	&:hover .icon svg, 
+	&:hover .icon path {
+		fill: #000 !important; // Keep icon visible on hover
+	}
+}
+
 /* Desktop view toggle */
 .desktop-view-toggle {
   display: flex;

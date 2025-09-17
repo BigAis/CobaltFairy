@@ -4,7 +4,7 @@ import Button from '../Button'
 import VerificationBadge from '../TemplateBadge'
 import { useState } from 'react'
 
-const TemplateCard = ({ template_udid, templateName, onPreviewClick, onEditClick }) => {
+const TemplateCard = ({ template_udid, templateName, onPreviewClick, onEditClick, onDeleteClick }) => {
 	const [isImgLoading,setIsImgLoading] = useState(true);
 	const imageUrl= `https://cdn.cobaltfairy.com/fairymail/template/img/${template_udid}`;
 	return (
@@ -22,6 +22,13 @@ const TemplateCard = ({ template_udid, templateName, onPreviewClick, onEditClick
 					<Button style={{ flex: '1' }} type="secondary" onClick={onEditClick}>
 						Edit
 					</Button>
+					<Button 
+						type="secondary" 
+						icon="Trash" 
+						onClick={onDeleteClick}
+						blackIcon={true}
+						className="delete-template-btn"
+					/>
 				</div>
 			</div>
 		</Card>
@@ -30,9 +37,11 @@ const TemplateCard = ({ template_udid, templateName, onPreviewClick, onEditClick
 
 // Prop validation
 TemplateCard.propTypes = {
+	template_udid: PropTypes.string.isRequired,
 	templateName: PropTypes.string.isRequired,
 	onPreviewClick: PropTypes.func.isRequired,
 	onEditClick: PropTypes.func.isRequired,
+	onDeleteClick: PropTypes.func.isRequired,
 }
 
 export default TemplateCard
