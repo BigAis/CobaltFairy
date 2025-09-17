@@ -6,6 +6,7 @@ import { Column } from 'primereact/column'
 import { Skeleton } from 'primereact/skeleton'
 import 'primereact/resources/themes/lara-light-indigo/theme.css'
 import './DataTable.scss'
+import './CampaignsTable.scss'
 import Pagination from '../Pagination'
 import Dropdown from '../Dropdown'
 import Checkbox from '../Checkbox'
@@ -370,7 +371,7 @@ const CampaignsTable = ({
 	const displayData = paginatedData
 
 	return (
-		<>
+		<div className="campaigns-table-container">
 			{!dashboardPreviewOnly ? (
 				<DataTable value={displayData} paginator={false} selection={selectedCampaigns} onSelectionChange={(e) => setSelectedCampaigns(e.value)} dataKey='id' rowClassName={() => 'p-table-row'}>
 					<Column
@@ -461,7 +462,7 @@ const CampaignsTable = ({
 				resultsPerPage={resultsPerPage} 
 				onChange={handlePageChange} 
 			/>
-		</>
+		</div>
 	)
 }
 

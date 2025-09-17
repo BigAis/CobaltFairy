@@ -1,0 +1,47 @@
+// FILE: src/components/DataTable/CampaignsTable.scss
+// Add or update these styles to fix scrollbar issues:
+
+.campaigns-table-container {
+    overflow: visible !important;
+}
+
+.p-datatable {
+    overflow: visible !important;
+    
+    .p-datatable-wrapper {
+        overflow: visible !important;
+        min-height: 50vh;
+    }
+    
+    .p-datatable-table {
+        overflow: visible !important;
+    }
+    
+    .p-datatable-tbody {
+        overflow: visible !important;
+        
+        tr {
+            overflow: visible !important;
+            height: 62px;
+            
+            td {
+                overflow: visible !important;
+                position: relative;
+            }
+        }
+    }
+}
+
+// Fix dropdown positioning in table
+.campaigns-table-container .campaign-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    min-width: 150px;
+    background: #FFFFFF;
+    border: 1px solid rgba(218, 209, 197, 1);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 5px;
+}

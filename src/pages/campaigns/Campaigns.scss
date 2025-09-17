@@ -100,6 +100,19 @@ p.stat-table-heading {
 .p-datatable-wrapper{
 	min-height:50vh
 }
+
+// Update the table wrapper styles
+.fm-page-wrapper {
+    .fm-page-container {
+        overflow-x: visible;
+    }
+}
+
+// Ensure dropdown has proper z-index
+.campaign-dropdown-menu {
+    z-index: 1001 !important;
+    position: absolute !important;
+}
 div.campaign-preview-title {
 	border: 2px solid rgba(218, 209, 197, 1);
 	border-radius: 8px 8px 0px 0px;
