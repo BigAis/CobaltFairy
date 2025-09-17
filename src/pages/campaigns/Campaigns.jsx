@@ -956,8 +956,16 @@ const Campaigns = () => {
 					<PageHeader user={user} account={account} />
 					<div className="page-name-container">
 						<div className="page-name">Campaigns</div>
+						{/* Desktop button - only show on desktop */}
+						{!isMobile && selectedCampaignType !== 'templates' && (
+							<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
+								New Campaign
+							</Button>
+						)}
 					</div>
-					{selectedCampaignType !== 'templates' && (
+
+					{/* Mobile button - keep original mobile structure */}
+					{isMobile && selectedCampaignType !== 'templates' && (
 						<div className="create-new-button-container">
 							<Button icon={'Plus'} type="action" onClick={handleNewCampaignClick}>
 								{isMobile ? '' : 'New Campaign'}
@@ -1016,7 +1024,7 @@ const Campaigns = () => {
 											onSearch={(value) => {
 												updateSearchTerm(value)
 											}}
-											style={{ width: '100%' }}
+											style={{ width: '100%', marginRight: '20px' }}
 										/>
 										<Button
 											type="secondary"

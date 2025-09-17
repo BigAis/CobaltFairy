@@ -11,25 +11,19 @@
 	}
 }
 
-/* Desktop Create New button container - scoped to campaigns page */
-.fm-page-wrapper .create-new-button-container {
-	display: flex;
-	justify-content: flex-end;
-	margin-bottom: 1rem;
-	
-	.btn {
-		/* Ensure desktop button maintains original styling */
-		width: 304px;
-		height: auto;
-		padding: 14px 18px;
-		border-radius: 8px;
-		font-size: 16px;
-		font-weight: 600;
-		font-family: 'Bitter', serif;
-		line-height: 19.2px;
-		background: rgba(255, 255, 255, 0.5);
-		border: 2px solid rgba(218, 209, 197, 1);
-	}
+/* Desktop Create New button container - only for desktop */
+@media (min-width: 769px) {
+    .fm-page-wrapper .page-name-container .btn {
+        width: auto;
+        padding: 14px 18px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        font-family: 'Bitter', serif;
+        line-height: 19.2px;
+        background: rgba(255, 255, 255, 0.5);
+        border: 2px solid rgba(218, 209, 197, 1);
+    }
 }
 
 .progress-bar {
@@ -274,13 +268,13 @@ p.template-card-label {
 
 /* Make the filter button consistent with subscribers page */
 .button-filters {
-  width: 304px;
-  min-height: 51px;
-  
-  @media (max-width: 768px) {
-    width: 304px;
-    min-height: 44px;
-  }
+    min-width: 184px;
+    min-height: 51px;
+    
+    @media (max-width: 768px) {
+        width: 304px;
+        min-height: 44px;
+    }
 }
 
 /* Mobile styles for campaigns page - scoped to campaigns only */
@@ -334,7 +328,7 @@ p.template-card-label {
 		}
 	}
 	
-	/* Create New button container - positioned under header - scoped to campaigns page */
+	/* Mobile Create New button container - scoped to campaigns page */
 	.fm-page-wrapper.campaigns-page .create-new-button-container {
 		width: 100%;
 		max-width: 304px;
@@ -343,7 +337,6 @@ p.template-card-label {
 		margin-bottom: 22px;
 		
 		.btn {
-			/* Restore original button styling */
 			width: 304px;
 			height: auto;
 			padding: 14px 18px;
