@@ -442,40 +442,86 @@ const Campaigns = () => {
 	}
 
 	const deleteTemplate = async (templateUuid, templateName) => {
-		try {
-			// Show confirmation dialog
-			const result = await PopupText.fire({
-				icon: 'question',
-				text: `Are you sure you want to delete the template "${templateName}"?`,
-				showCancelButton: true,
-				confirmButtonText: 'Yes, delete it',
-			})
+	try {
+		// Show confirmation dialog
+		const result = await PopupText.fire({
+		icon: 'question',
+		text: `Are you sure you want to delete the template "${templateName}"?`,
+		showCancelButton: true,
+		confirmButtonText: 'Yes, delete it',
+		});
+		
+		if (result.isConfirmed) {
+		// Make API call to delete the template
+		const response = await ApiService.post('fairymailer/removeTemplate', { uuid: templateUuid }, user.jwt);
+		
+		if (response && response.data) {
+			// Handle successful deletion
+			if (response.data.code === 200) {
+			// Remove the template from the templates array
+			setTemplates(templates.filter(template => template.uuid !== templateUuid));
 			
-			if (result.isConfirmed) {
-				// Make API call to delete the template
-				const response = await ApiService.post('fairymailer/removeTemplate', { data: { udid: templateUuid } }, user.jwt)
-				
-				if (response && response.data && response.data.code === 200) {
-					// Remove the template from the templates array
-					setTemplates(templates.filter(template => template.uuid !== templateUuid))
-					
-					createNotification({
-						message: 'Template deleted successfully',
-						type: 'default',
-						autoClose: 3000,
-					})
-				} else {
-					throw new Error('Failed to delete template')
-				}
-			}
-		} catch (error) {
-			console.error('Error deleting template:', error)
 			createNotification({
-				message: 'Failed to delete template. Please try again.',
-				type: 'warning',
-				autoClose: 5000,
-			})
+				message: 'Template deleted successfully',
+				type: 'default',
+				autoClose: 3000,
+			});
+			} 
+			// Handle template used in automations
+			else if (response.data.code === 409) {
+			console.log('Template used in automations:', response.data);
+			// Show error with links to automations
+			const automations = response.data.data || [];
+			
+			if (automations.length > 0) {
+				// Build HTML with links to automations
+				let automationLinks = automations.map(automation => 
+				`<a href="/automations/${automation.uuid}/edit" 
+					target="_blank" 
+					rel="noopener noreferrer"
+					style="color: #FF635D; text-decoration: underline; display: block; margin: 8px 0; font-weight: 500;">
+					${automation.name}
+				</a>`
+				).join('');
+				
+				// Show dialog with links
+				await PopupText.fire({
+				icon: 'warning',
+				title: 'Cannot Delete Template',
+				html: `
+					<p>This template is used in the following automation${automations.length > 1 ? 's' : ''}:</p>
+					<div style="margin: 15px 0; text-align: left; max-height: 200px; overflow-y: auto; padding: 10px; background: rgba(255, 195, 173, 0.1); border-radius: 8px;">
+					${automationLinks}
+					</div>
+					<p>Please remove it from ${automations.length > 1 ? 'these automations' : 'this automation'} first.</p>
+				`,
+				confirmButtonText: 'OK',
+				});
+			} else {
+				// If no automations data but still 409
+				await PopupText.fire({
+				icon: 'warning',
+				title: 'Cannot Delete Template',
+				text: response.data.message || 'This template is used in one or more automations. Please remove it from these automations first.',
+				confirmButtonText: 'OK',
+				});
+			}
+			} else {
+			// Handle other error codes
+			throw new Error(response.data.message || 'Failed to delete template');
+			}
+		} else {
+			throw new Error('Failed to delete template');
 		}
+		}
+	} catch (error) {
+		console.error('Error deleting template:', error);
+		createNotification({
+		message: 'Failed to delete template. Please try again.',
+		type: 'warning',
+		autoClose: 5000,
+		});
+	}
 	}
 	// Toggle expand/collapse of a campaign card
 	const toggleCampaignExpand = (campaignId) => {
