@@ -670,9 +670,9 @@ div.automation-node-content-wrapper i:hover {
 		flex-direction: column;
 		align-items: center;
 		padding: 0;
-		gap: 22px;
+		gap: 16px;
 		width: 100%;
-		max-width: 340px;
+		max-width: 304px;
 		margin: 0 auto;
 	}
 	
@@ -707,11 +707,12 @@ div.automation-node-content-wrapper i:hover {
 		max-width: 304px;
 		display: flex;
 		justify-content: flex-start;
-		margin-bottom: 22px;
+		margin: 0;
+		padding: 0;
 		
 		.btn {
 			width: 304px;
-			height: auto;
+			height: 41px;
 			padding: 14px 18px;
 			border-radius: 8px;
 			font-size: 16px;
@@ -751,12 +752,38 @@ div.automation-node-content-wrapper i:hover {
 		align-items: center;
 		justify-content: space-between;
 		gap: 10px;
+		margin: 0;
+		padding: 0;
+	}
+	
+	/* Search bar styling to match other elements */
+	.fm-page-wrapper.automations-page .searchbar-wrapper {
+		width: 100%;
+		max-width: 304px;
+		
+		.searchbar-input {
+			width: 100%;
+			height: 41px;
+			padding: 14px 20px;
+			border: 2px solid #DAD1C5;
+			border-radius: 8px;
+			background: rgba(255, 255, 255, 0.5);
+			font-size: 14px;
+			font-weight: 500;
+			line-height: 17px;
+			color: #887D76;
+			font-family: 'Inter', sans-serif;
+			
+			&::placeholder {
+				color: #887D76;
+			}
+		}
 	}
 	
 	/* Automation cards layout - Match Figma design - scoped to automations page */
 	.fm-page-wrapper.automations-page .automation-item {
 		border-radius: 8px;
-		margin-bottom: 16px;
+		margin: 0;
 		background: rgba(255, 255, 255, 0.5);
 		border: 2px solid #DAD1C5;
 		overflow: hidden;
@@ -914,42 +941,54 @@ div.automation-node-content-wrapper i:hover {
 		max-width: 304px;
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 12px;
 		padding: 0;
-		margin: 0 auto; /* Center align the container */
+		margin: 0;
 		
 		.automation-item {
 			border-radius: 8px;
-			margin-bottom: 0; /* Remove margin-bottom since we're using gap */
+			margin: 0;
 			background: rgba(255, 255, 255, 0.5);
 			border: 2px solid #DAD1C5;
 			overflow: hidden;
 			width: 100%;
-			max-width: 304px; /* Ensure consistent width */
-			min-width: 304px; /* Prevent shrinking */
+			max-width: 304px;
+			min-width: 304px;
 		}
 	}
 	
 	/* Ensure proper spacing between sections - scoped to automations page */
 	.fm-page-wrapper.automations-page .filters-container {
-		margin-bottom: 22px;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		max-width: 304px;
 	}
 	
 	.fm-page-wrapper.automations-page .filters-container .row {
-		margin-bottom: 22px;
+		margin: 0;
+		padding: 0;
+	}
+	
+	/* Groups container - scoped to automations page */
+	.fm-page-wrapper.automations-page .groups {
+		width: 100%;
+		max-width: 304px;
+		margin: 0;
+		padding: 0;
 	}
 	
 	/* No automations message */
 	.no-automations {
 		text-align: center;
-		padding: 2rem 0;
+		padding: 1rem 0;
 		color: #887D76;
 		font-family: 'Inter', sans-serif;
 		font-size: 14px;
 		font-weight: 500;
 		width: 100%;
 		max-width: 304px;
-		margin: 0 auto;
+		margin: 0;
 	}
 	
 	/* Arrow indicator for expanded cards */
