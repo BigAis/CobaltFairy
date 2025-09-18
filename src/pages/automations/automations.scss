@@ -670,9 +670,9 @@ div.automation-node-content-wrapper i:hover {
 		flex-direction: column;
 		align-items: center;
 		padding: 0;
-		gap: 16px;
+		gap: 22px;
 		width: 100%;
-		max-width: 304px;
+		max-width: 340px;
 		margin: 0 auto;
 	}
 	
@@ -707,12 +707,11 @@ div.automation-node-content-wrapper i:hover {
 		max-width: 304px;
 		display: flex;
 		justify-content: flex-start;
-		margin: 0;
-		padding: 0;
+		margin-bottom: 22px;
 		
 		.btn {
 			width: 304px;
-			height: 41px;
+			height: auto;
 			padding: 14px 18px;
 			border-radius: 8px;
 			font-size: 16px;
@@ -752,8 +751,6 @@ div.automation-node-content-wrapper i:hover {
 		align-items: center;
 		justify-content: space-between;
 		gap: 10px;
-		margin: 0;
-		padding: 0;
 	}
 	
 	/* Search bar styling to match other elements */
@@ -783,7 +780,7 @@ div.automation-node-content-wrapper i:hover {
 	/* Automation cards layout - Match Figma design - scoped to automations page */
 	.fm-page-wrapper.automations-page .automation-item {
 		border-radius: 8px;
-		margin: 0;
+		margin-bottom: 16px;
 		background: rgba(255, 255, 255, 0.5);
 		border: 2px solid #DAD1C5;
 		overflow: hidden;
@@ -941,54 +938,42 @@ div.automation-node-content-wrapper i:hover {
 		max-width: 304px;
 		display: flex;
 		flex-direction: column;
-		gap: 12px;
+		gap: 16px;
 		padding: 0;
-		margin: 0;
+		margin: 0 auto; /* Center align the container */
 		
 		.automation-item {
 			border-radius: 8px;
-			margin: 0;
+			margin-bottom: 0; /* Remove margin-bottom since we're using gap */
 			background: rgba(255, 255, 255, 0.5);
 			border: 2px solid #DAD1C5;
 			overflow: hidden;
 			width: 100%;
-			max-width: 304px;
-			min-width: 304px;
+			max-width: 304px; /* Ensure consistent width */
+			min-width: 304px; /* Prevent shrinking */
 		}
 	}
 	
 	/* Ensure proper spacing between sections - scoped to automations page */
 	.fm-page-wrapper.automations-page .filters-container {
-		margin: 0;
-		padding: 0;
-		width: 100%;
-		max-width: 304px;
+		margin-bottom: 22px;
 	}
 	
 	.fm-page-wrapper.automations-page .filters-container .row {
-		margin: 0;
-		padding: 0;
-	}
-	
-	/* Groups container - scoped to automations page */
-	.fm-page-wrapper.automations-page .groups {
-		width: 100%;
-		max-width: 304px;
-		margin: 0;
-		padding: 0;
+		margin-bottom: 22px;
 	}
 	
 	/* No automations message */
 	.no-automations {
 		text-align: center;
-		padding: 1rem 0;
+		padding: 2rem 0;
 		color: #887D76;
 		font-family: 'Inter', sans-serif;
 		font-size: 14px;
 		font-weight: 500;
 		width: 100%;
 		max-width: 304px;
-		margin: 0;
+		margin: 0 auto;
 	}
 	
 	/* Arrow indicator for expanded cards */

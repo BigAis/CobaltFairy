@@ -446,9 +446,14 @@ const Automations = () => {
                         </div>
                     )}
                     
-                    {/* Search Bar - Mobile responsive */}
-                    <div className="filters-container">
-                        <div className="input-text-container">
+                    {/* Search Bar - Added margin-bottom for spacing */}
+                    <div className="filters-container" style={{ marginBottom: '20px' }}>
+                        <div className="input-text-container" style={{
+                            marginTop: '10px', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between'
+                        }}>
                             <SearchBar
                                 placeholder="Search Automations" 
                                 label="Search Automations"
