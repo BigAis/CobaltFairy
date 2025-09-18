@@ -563,6 +563,10 @@ div.automation-node-content-wrapper i:hover {
 .action-buttons {
     display: flex;
     align-items: center;
+    
+    @media (max-width: 768px) {
+        display: none; /* Hide on mobile since we have separate mobile button */
+    }
 }
 /* History Tab Styles */
 .automation-history {
@@ -644,4 +648,382 @@ div.automation-node-content-wrapper i:hover {
             justify-content: center;
         }
     }
+}
+
+/* Mobile styles for automations page - scoped to automations only */
+@media(max-width: 768px) {
+	.fm-content-wrapper {
+		min-width: 100%;
+	}
+	
+	/* Main page background - Match Figma - scoped to automations page */
+	.fm-page-wrapper.automations-page {
+		background: #FFF1DF;
+		min-height: 100vh;
+		position: relative;
+		width: 100%;
+	}
+	
+	.fm-page-wrapper.automations-page .fm-page-container {
+		background: #FFF1DF;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 0;
+		gap: 22px;
+		width: 100%;
+		max-width: 340px;
+		margin: 0 auto;
+	}
+	
+	/* Header section - Match Figma design - scoped to automations page */
+	.fm-page-wrapper.automations-page .page-name-container {
+		margin-top: 0;
+		margin-bottom: 0;
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		width: 100%;
+		max-width: 304px;
+		height: 31px;
+		
+		.page-name {
+			margin-bottom: 0;
+			text-align: left !important;
+			align-self: flex-start;
+			font-family: 'Bitter', serif;
+			font-weight: 700;
+			font-size: 26px;
+			line-height: 31px;
+			color: #100F1C;
+			width: 304px;
+			height: 31px;
+		}
+	}
+	
+	/* Mobile Create New button container - scoped to automations page */
+	.fm-page-wrapper.automations-page .create-new-button-container {
+		width: 100%;
+		max-width: 304px;
+		display: flex;
+		justify-content: flex-start;
+		margin-bottom: 22px;
+		
+		.btn {
+			width: 304px;
+			height: auto;
+			padding: 14px 18px;
+			border-radius: 8px;
+			font-size: 16px;
+			font-weight: 600;
+			font-family: 'Bitter', serif;
+			line-height: 19.2px;
+			background: rgba(255, 255, 255, 0.5);
+			border: 2px solid rgba(218, 209, 197, 1);
+		}
+	}
+	
+	/* Automation search input - Match Figma design - scoped to automations page */
+	.fm-page-wrapper.automations-page .search-automation-input {
+		padding: 14px 20px;
+		margin-bottom: 1rem;
+		width: 100%;
+		max-width: 304px;
+		height: 41px;
+		border: 2px solid #DAD1C5;
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.5);
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 17px;
+		color: #887D76;
+	}
+	
+	.fm-page-wrapper.automations-page .search-automation-input::placeholder {
+		color: #887D76;
+	}
+	
+	/* Search bar container - scoped to automations page */
+	.fm-page-wrapper.automations-page .input-text-container {
+		width: 100%;
+		max-width: 304px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+	}
+	
+	/* Search bar styling to match other elements */
+	.fm-page-wrapper.automations-page .searchbar-wrapper {
+		width: 304px;
+		max-width: 304px;
+		
+		.searchbar-input {
+			width: 100%;
+			height: 41px;
+			padding: 14px 20px;
+			border: 2px solid #DAD1C5;
+			border-radius: 8px;
+			background: rgba(255, 255, 255, 0.5);
+			font-size: 14px;
+			font-weight: 500;
+			line-height: 17px;
+			color: #887D76;
+			font-family: 'Inter', sans-serif;
+			
+			&::placeholder {
+				color: #887D76;
+			}
+		}
+	}
+	
+	/* Automation cards layout - Match Figma design - scoped to automations page */
+	.fm-page-wrapper.automations-page .automation-item {
+		border-radius: 8px;
+		margin-bottom: 16px;
+		background: rgba(255, 255, 255, 0.5);
+		border: 2px solid #DAD1C5;
+		overflow: hidden;
+		width: 100%;
+		max-width: 304px;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-item-header {
+		padding: 20px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		cursor: pointer;
+		gap: 14px;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-item-title {
+		font-weight: 500;
+		font-size: 16px;
+		line-height: 19px;
+		margin-bottom: 4px;
+		color: #100F1C;
+		font-family: 'Inter', sans-serif;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-item-subject {
+		color: #887D76;
+		font-size: 14px;
+		line-height: 17px;
+		font-weight: 500;
+		font-family: 'Inter', sans-serif;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-item-chevron {
+		transition: transform 0.3s ease;
+		width: 24px;
+		height: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-item-chevron.expanded {
+		transform: rotate(180deg);
+	}
+	
+	.fm-page-wrapper.automations-page .automation-item-content {
+		padding: 0 20px 20px;
+		border-top: 2px solid #DAD1C5;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-item-info {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-item-metrics {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-item-details {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 0;
+		font-size: 14px;
+		line-height: 17px;
+		padding: 0;
+		font-weight: 500;
+		font-family: 'Inter', sans-serif;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-detail-label {
+		color: #887D76;
+	}
+	
+	.fm-page-wrapper.automations-page .overview-button {
+		display: flex;
+		width: 100%;
+		height: 40px;
+		text-align: center;
+		padding: 0 12px;
+		background: #FFFFFF;
+		border: 2px solid #DAD1C5;
+		border-radius: 8px;
+		cursor: pointer;
+		position: relative;
+		font-weight: 500;
+		font-size: 14px;
+		line-height: 17px;
+		margin-top: 0;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+	}
+	
+	/* Status badge styles */
+	.fm-page-wrapper.automations-page .status-badge {
+		display: inline-block;
+		padding: 4px 8px;
+		border-radius: 4px;
+		font-size: 12px;
+		font-weight: 500;
+		text-align: center;
+		
+		&.status-active {
+			background-color: rgba(96, 199, 0, 0.2);
+			color: #60C700;
+		}
+		
+		&.status-inactive {
+			background-color: rgba(244, 166, 34, 0.2);
+			color: #F4A622;
+		}
+	}
+	
+	/* Dropdown menu for automation actions - scoped to automations page */
+	.fm-page-wrapper.automations-page .automation-dropdown-menu {
+		position: absolute;
+		right: 1rem;
+		top: auto;
+		margin-top: -2.5rem;
+		background: #FFFFFF;
+		border: 1px solid rgba(218, 209, 197, 1);
+		border-radius: 8px;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+		z-index: 10;
+		width: 150px;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-dropdown-menu-item {
+		padding: 0.75rem 1rem;
+		font-size: 14px;
+		cursor: pointer;
+		border-bottom: 1px solid rgba(218, 209, 197, 0.3);
+	}
+	
+	.fm-page-wrapper.automations-page .automation-dropdown-menu-item:last-child {
+		border-bottom: none;
+	}
+	
+	.fm-page-wrapper.automations-page .automation-dropdown-menu-item:hover {
+		background: rgba(255, 195, 173, 0.2);
+	}
+	
+	/* Mobile automations list container - scoped to automations page */
+	.fm-page-wrapper.automations-page .mobile-automations-list {
+		width: 100%;
+		max-width: 304px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		padding: 0;
+		margin: 0 auto; /* Center align the container */
+		
+		.automation-item {
+			border-radius: 8px;
+			margin-bottom: 0; /* Remove margin-bottom since we're using gap */
+			background: rgba(255, 255, 255, 0.5);
+			border: 2px solid #DAD1C5;
+			overflow: hidden;
+			width: 100%;
+			max-width: 304px; /* Ensure consistent width */
+			min-width: 304px; /* Prevent shrinking */
+		}
+	}
+	
+	/* Ensure proper spacing between sections - scoped to automations page */
+	.fm-page-wrapper.automations-page .filters-container {
+		margin-bottom: 22px;
+	}
+	
+	.fm-page-wrapper.automations-page .filters-container .row {
+		margin-bottom: 22px;
+	}
+	
+	/* No automations message */
+	.no-automations {
+		text-align: center;
+		padding: 2rem 0;
+		color: #887D76;
+		font-family: 'Inter', sans-serif;
+		font-size: 14px;
+		font-weight: 500;
+		width: 100%;
+		max-width: 304px;
+		margin: 0 auto;
+	}
+	
+	/* Arrow indicator for expanded cards */
+	.arrow-indicator {
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+	
+	/* Arrow styling for automation items */
+	.automation-item-chevron {
+		transition: transform 0.3s ease;
+		width: 24px;
+		height: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.automation-item-chevron img {
+		width: 16px;
+		height: 16px;
+		transition: transform 0.3s ease;
+	}
+
+	.automation-item-chevron.expanded img {
+		transform: rotate(180deg);
+	}
+
+	/* Arrow styling for overview button */
+	.overview-button img {
+		width: 16px;
+		height: 16px;
+	}
+	
+	/* Loading indicator */
+	.loading-indicator {
+		text-align: center;
+		padding: 2rem 0;
+		color: #887D76;
+	}
+	
+	/* Form input */
+	.form-wrapper {
+		width: 100%;
+	}
+	
+	/* Search in mobile view */
+	.filters-container .row:nth-child(2) {
+		margin-top: 0.5rem;
+	}
 }
