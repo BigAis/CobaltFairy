@@ -902,6 +902,9 @@ const Campaigns = () => {
 		// Reset expanded and action menu states when changing tabs
 		setExpandedCampaign(null)
 		setActionMenuCampaign(null)
+		
+		// Clear selected campaigns when changing tabs
+		setSelectedCampaigns([])
 
 		// Clear search term when changing tabs
 		setSearchTerm('')

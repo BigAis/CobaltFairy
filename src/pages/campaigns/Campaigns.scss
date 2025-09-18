@@ -221,6 +221,7 @@ p.template-card-label {
 // Delete template button styles
 .delete-template-btn {
 	.icon {
+		margin-right: 0 !important; /* Remove margin to center the icon */
 		svg {
 			fill: #000 !important; // Force the icon to stay black
 		}
