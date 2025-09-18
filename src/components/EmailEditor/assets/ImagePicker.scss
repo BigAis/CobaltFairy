@@ -43,7 +43,7 @@
     .tabContent {
         border-top: 2px solid #dad1c5;
         padding-top: 10px;
-        min-height: 450px;
+        height: 450px; /* Fixed height to enable scrolling */
         .dropzone {
             border-radius: 8px;
             font-size: 16px;
@@ -54,18 +54,40 @@
             justify-content: center;
         }
         .media-library{
+            height: 100%; /* Take full height of parent */
+            display: flex;
+            flex-direction: column;
+            
+            h2 {
+                margin-bottom: 10px;
+            }
+            
+            .media-library-grid {
+                display: flex;
+                flex-wrap: wrap;
+                overflow-y: auto; /* Enable vertical scrolling */
+                max-height: calc(100% - 40px); /* Adjust for header height */
+                padding-right: 5px; /* Add slight padding for scrollbar */
+            }
+            
             .img-preview{
                 width: 120px;
-                height:120px;
+                height: 120px;
                 background-repeat: no-repeat;
                 background-size: cover;
                 background-position: 50%;
                 margin-right: 5px;
-                margin-bottom: 5px;;
+                margin-bottom: 5px;
                 border: 2px dashed #dad1c5;
                 border-radius: 8px;
-                padding:1px;
-                cursor: pointer;;
+                padding: 1px;
+                cursor: pointer;
+                transition: transform 0.2s ease, border-color 0.2s ease;
+                
+                &:hover {
+                    border-color: #ff635d;
+                    transform: scale(1.03);
+                }
             }
         }
     }

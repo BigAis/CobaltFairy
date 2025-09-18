@@ -81,7 +81,7 @@ const ImageUploadPopup = ({shown = false, setShown = ()=>{}, selectImage=(src)=>
                         {activeTab === 'mediaLibrary' && (
                             <div className='media-library'>
                                 <h2>Recently Uploaded Images</h2>
-                                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                <div className="media-library-grid default-scrollbar">
                                     {uploadedImages.map((img, index) => {
                                         return (<div className="img-preview" onClick={()=>{selectImage(img);setShown(false)}} key={index} data-test={img} style={{backgroundImage:`url('${img}')`}}/>)
                                     }
