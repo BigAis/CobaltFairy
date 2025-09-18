@@ -196,7 +196,7 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
                                         try {
                                             // Try without the nested 'data' property
                                             let sendResp = await ApiService.post(
-                                                `fairymail/delete-automation`, 
+                                                `fairymailer/delete-automation`, 
                                                 { uuid: item.uuid },  // Changed from { data: { uuid: item.uuid } }
                                                 user.jwt
                                             );
