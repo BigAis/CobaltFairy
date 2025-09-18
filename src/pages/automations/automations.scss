@@ -560,7 +560,10 @@ div.automation-node-content-wrapper i:hover {
         }
     }
 }
-
+.action-buttons {
+    display: flex;
+    align-items: center;
+}
 /* History Tab Styles */
 .automation-history {
     .history-card {

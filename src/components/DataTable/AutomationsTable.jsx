@@ -14,19 +14,16 @@ import { ApiService } from '../../service/api-service'
 import { useAccount } from '../../context/AccountContext'
 import PopupText from '../PopupText/PopupText'
 
-const AutomationsTable = ({ incomingAutomations, refreshData }) => {
-    console.log('incomingAutomations', incomingAutomations);
+const AutomationsTable = ({ incomingAutomations, refreshData, selectedAutomations, setSelectedAutomations }) => {
     const {user, account, createNotification} = useAccount()
-    const [selectedAutomations, setSelectedAutomations] = useState([])
     const [automations, setAutomations] = useState(incomingAutomations);
     const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate()
     const [currentPage, setCurrentPage] = useState(1)
-    const rowsPerPage = 20
+    const rowsPerPage = 10
 
     // Update automations state when incomingAutomations changes
     useEffect(() => {
-        console.log('AutomationsTable received updated automations:', incomingAutomations);
         setAutomations(incomingAutomations);
     }, [incomingAutomations]);
 
@@ -34,7 +31,6 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible' && typeof refreshData === 'function') {
-                console.log('Page visible again, refreshing automations data');
                 refreshData();
             }
         };
@@ -64,14 +60,9 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
     const endIndex = startIndex + rowsPerPage
     const paginatedData = automations ? automations.slice(startIndex, endIndex) : [];
 
-    useEffect(() => {
-
-    }, [selectedAutomations])
-
     // Function to update automation active status
     const updateAutomationStatus = async (automation, newStatus) => {
         try {
-            console.log(`AUTOMATION TABLE - Updating automation ${automation.id} status to:`, newStatus);
             
             // Store original state in case we need to revert
             const originalActive = automation.active;
@@ -93,7 +84,6 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
             );
             
             if (resp.status === 200) {
-                console.log('AUTOMATION TABLE - Status updated successfully in backend');
                 
                 // Show notification
                 createNotification({
@@ -104,21 +94,18 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
                 
                 // Force a global data refresh with small delay to ensure API update is complete
                 if (typeof refreshData === 'function') {
-                    console.log('AUTOMATION TABLE - Triggering global data refresh');
                     setTimeout(() => refreshData(), 300);
                 }
                 
                 // Force a second refresh after a bit longer to catch any sync issues
                 setTimeout(() => {
                     if (typeof refreshData === 'function') {
-                        console.log('AUTOMATION TABLE - Triggering second global data refresh');
                         refreshData();
                     }
                 }, 1500);
                 
                 return true;
             } else {
-                console.error('AUTOMATION TABLE - Failed to update automation status:', resp);
                 
                 // Revert UI changes
                 setAutomations(currentAutomations => 
@@ -138,7 +125,6 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
                 return false;
             }
         } catch (error) {
-            console.error("AUTOMATION TABLE - Error updating automation status:", error);
             
             // Revert UI changes
             setAutomations(currentAutomations => 
@@ -248,10 +234,8 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
                 <Switch 
                     checked={item.active} 
                     onChange={async () => {
-                        console.log(`Switch clicked for automation ${item.id}, current status:`, item.active);
                         const newActiveStatus = !item.active;
-                        const success = await updateAutomationStatus(item, newActiveStatus);
-                        console.log(`Switch update result for automation ${item.id}:`, success ? 'success' : 'failed');
+                        await updateAutomationStatus(item, newActiveStatus);
                     }}
                 />
             </div>
@@ -315,7 +299,7 @@ const AutomationsTable = ({ incomingAutomations, refreshData }) => {
                 <Column header="Status" body={enabledSwitchTemplate} />
                 <Column header="Actions" body={actionsBodyTemplate} />
             </DataTable>
-            <Pagination currentPage={1} totalResults={automations ? automations.length : 0} resultsPerPage={20} onChange={handlePageChange} />
+            <Pagination currentPage={currentPage} totalResults={automations ? automations.length : 0} resultsPerPage={rowsPerPage} onChange={handlePageChange} />
         </>
     )
 }

@@ -14,12 +14,14 @@ import SearchBar from '../../components/SearchBar/SearchBar'
 import { useAccount } from '../../context/AccountContext'
 import { ApiService } from '../../service/api-service'
 import AutomationsTable from '../../components/DataTable/AutomationsTable'
+import PopupText from '../../components/PopupText/PopupText'
 
 const Automations = () => {
     const { user, account } = useAccount()
     const [automations, setAutomations] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
     const [loading, setLoading] = useState(false)
+    const [selectedAutomations, setSelectedAutomations] = useState([])
     const navigate = useNavigate()
 
     // Load automations data
@@ -69,6 +71,60 @@ const Automations = () => {
         }
     }
 
+    const deleteSelectedAutomations = async () => {
+        if (selectedAutomations.length === 0) return
+
+        const result = await PopupText.fire({
+            icon: 'question',
+            text: `Are you sure you want to delete ${selectedAutomations.length} automation(s)? This action is irreversible.`,
+            focusCancel: false,
+            showConfirmButton: true,
+            showDenyButton: false,
+            showCancelButton: true,
+            confirmButtonText: 'Yes, DELETE them',
+            cancelButtonText: 'No, abort',
+        })
+
+        if (result.isConfirmed) {
+            let successCount = 0
+            for (const automation of selectedAutomations) {
+                if (automation.active) {
+                    await PopupText.fire({
+                        icon: 'warning',
+                        text: `You cannot delete active automations. Please deactivate "${automation.name}" first.`,
+                        showConfirmButton: false,
+                        showCancelButton: true,
+                        cancelButtonText: 'Ok',
+                    });
+                    continue;
+                }
+                try {
+                    let sendResp = await ApiService.post(
+                        `fairymailer/delete-automation`,
+                        { uuid: automation.uuid },
+                        user.jwt
+                    );
+                    if (sendResp.data && sendResp.data.code === 200) {
+                        successCount++
+                    }
+                } catch (error) {
+                    console.error(`Error deleting automation ${automation.name}:`, error)
+                }
+            }
+
+            if (successCount > 0) {
+                await PopupText.fire({
+                    icon: 'success',
+                    text: `${successCount} automation(s) deleted successfully!`,
+                    showConfirmButton: false,
+                    cancelButtonText: 'Ok'
+                });
+            }
+            setSelectedAutomations([])
+            await loadData()
+        }
+    }
+
     useEffect(() => {
         if (user) {
             loadData()
@@ -96,9 +152,16 @@ const Automations = () => {
                     <PageHeader user={user} account={account} />
                     <div className="page-name-container">
                         <div className="page-name">Automations</div>
-                        <Button icon={'Plus'} type="action" onClick={() => navigate('/automations/new')}>
-                            Add Automation
-                        </Button>
+                        <div className="action-buttons">
+                            {selectedAutomations.length > 0 && (
+                                <Button type="secondary" onClick={deleteSelectedAutomations} style={{ marginRight: '10px' }}>
+                                    Delete Selected ({selectedAutomations.length})
+                                </Button>
+                            )}
+                            <Button icon={'Plus'} type="action" onClick={() => navigate('/automations/new')}>
+                                Add Automation
+                            </Button>
+                        </div>
                     </div>
                     
                     {/* Search Bar - Added margin-bottom for spacing */}
@@ -130,7 +193,12 @@ const Automations = () => {
                                 <div className="text-center p-4">Loading automations...</div>
                             </Card>
                         ) : automations && automations.length > 0 ? (
-                            <AutomationsTable incomingAutomations={automations} refreshData={loadData} />
+                            <AutomationsTable 
+                                incomingAutomations={automations} 
+                                refreshData={loadData}
+                                selectedAutomations={selectedAutomations}
+                                setSelectedAutomations={setSelectedAutomations}
+                             />
                         ) : (
                             <Card>
                                 <div className="text-center p-4">
