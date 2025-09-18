@@ -18,57 +18,20 @@ import PopupText from '../../components/PopupText/PopupText'
 
 const Automations = () => {
     const { user, account } = useAccount()
-    const [automations, setAutomations] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
-    const [loading, setLoading] = useState(false)
     const [selectedAutomations, setSelectedAutomations] = useState([])
     const navigate = useNavigate()
 
-    // Load automations data
+    // Load automations data - now handled by AutomationsTable
     const loadData = async () => {
-        try {
-            setLoading(true)
-            // Add a cache-busting parameter to ensure we get fresh data
-            const timestamp = new Date().getTime()
-            let resp = await ApiService.get(
-                `fairymailer/getAutomations?sort[0]=createdAt:desc&pagination[pageSize]=1000&pagination[page]=1&_t=${timestamp}`,
-                user.jwt
-            )
-            if (resp.data && resp.data.data) {
-                setAutomations(resp.data.data.map(data => {
-                    data.createdAt = data.createdAt.split('T')[0]
-                    return data
-                }))
-            }
-        } catch (error) {
-            console.error('Error fetching automations:', error)
-        } finally {
-            setLoading(false)
-        }
+        // This function is now handled by the AutomationsTable component
+        // We keep it here for compatibility with the component
     }
 
     // Search function for automations
     const searchAutomations = async (term) => {
-        try {
-            setSearchTerm(term)
-            setLoading(true)
-            
-            let resp = await ApiService.get(
-                `fairymailer/getAutomations?sort[0]=createdAt:desc&filters[name][$contains]=${term}&pagination[pageSize]=1000&pagination[page]=1&`,
-                user.jwt
-            )
-            
-            if (resp.data && resp.data.data) {
-                setAutomations(resp.data.data.map(data => {
-                    data.createdAt = data.createdAt.split('T')[0]
-                    return data
-                }))
-            }
-        } catch (error) {
-            console.error('Error searching automations:', error)
-        } finally {
-            setLoading(false)
-        }
+        setSearchTerm(term)
+        // The AutomationsTable component will handle the actual search
     }
 
     const deleteSelectedAutomations = async () => {
@@ -188,32 +151,12 @@ const Automations = () => {
                     </div>
 
                     <div className="groups">
-                        {loading ? (
-                            <Card>
-                                <div className="text-center p-4">Loading automations...</div>
-                            </Card>
-                        ) : automations && automations.length > 0 ? (
-                            <AutomationsTable 
-                                incomingAutomations={automations} 
-                                refreshData={loadData}
-                                selectedAutomations={selectedAutomations}
-                                setSelectedAutomations={setSelectedAutomations}
-                             />
-                        ) : (
-                            <Card>
-                                <div className="text-center p-4">
-                                    <p>No automations found.</p>
-                                    {searchTerm && (
-                                        <Button type="secondary" onClick={() => {
-                                            setSearchTerm('')
-                                            loadData()
-                                        }}>
-                                            Clear Search
-                                        </Button>
-                                    )}
-                                </div>
-                            </Card>
-                        )}
+                        <AutomationsTable 
+                            searchTerm={searchTerm}
+                            onUpdate={loadData}
+                            selectedAutomations={selectedAutomations}
+                            setSelectedAutomations={setSelectedAutomations}
+                        />
                     </div>
                 </div>
             </div>

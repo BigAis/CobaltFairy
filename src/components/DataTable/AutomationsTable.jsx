@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
 import { Button } from 'primereact/button'
@@ -13,25 +13,28 @@ import NotificationBar from '../../components/NotificationBar/NotificationBar'
 import { ApiService } from '../../service/api-service'
 import { useAccount } from '../../context/AccountContext'
 import PopupText from '../PopupText/PopupText'
+import qs from 'qs'
 
-const AutomationsTable = ({ incomingAutomations, refreshData, selectedAutomations, setSelectedAutomations }) => {
+const AutomationsTable = ({ 
+    searchTerm, 
+    onUpdate, 
+    selectedAutomations, 
+    setSelectedAutomations 
+}) => {
     const {user, account, createNotification} = useAccount()
-    const [automations, setAutomations] = useState(incomingAutomations);
+    const [automations, setAutomations] = useState([]);
+    const [totalResults, setTotalResults] = useState(0);
     const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate()
     const [currentPage, setCurrentPage] = useState(1)
-    const rowsPerPage = 10
-
-    // Update automations state when incomingAutomations changes
-    useEffect(() => {
-        setAutomations(incomingAutomations);
-    }, [incomingAutomations]);
+    const [loading, setLoading] = useState(false)
+    const resultsPerPage = 10
 
     // Add an effect to handle page visibility changes
     useEffect(() => {
         const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible' && typeof refreshData === 'function') {
-                refreshData();
+            if (document.visibilityState === 'visible' && typeof onUpdate === 'function') {
+                onUpdate();
             }
         };
         
@@ -40,11 +43,96 @@ const AutomationsTable = ({ incomingAutomations, refreshData, selectedAutomation
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [refreshData]);
+    }, [onUpdate]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page)
     }
+
+    // Server-side data fetching function
+    const getAutomations = useCallback(async (page = 1, searchTerm = '') => {
+        setLoading(true)
+        try {
+            const query = {
+                sort: ['createdAt:desc'],
+                pagination: {
+                    pageSize: resultsPerPage,
+                    page,
+                },
+            }
+
+            // Add search filter if searchTerm exists
+            if (searchTerm) {
+                query.filters = {
+                    name: {
+                        $contains: searchTerm,
+                    },
+                }
+            }
+
+            const queryString = qs.stringify(query, { encode: false })
+            const resp = await ApiService.get(`fairymailer/getAutomations?${queryString}`, user.jwt)
+
+            if (resp.data && resp.data.data) {
+                const processedData = resp.data.data.map(data => {
+                    data.createdAt = data.createdAt.split('T')[0]
+                    return data
+                })
+                setAutomations(processedData)
+                setTotalResults(resp.data.meta.pagination.total)
+            }
+            setCurrentPage(page)
+        } catch (error) {
+            console.error('Error fetching automations:', error)
+            PopupText.fire({
+                text: 'Error fetching automations. Please try again later.',
+                icon: 'error',
+            })
+        } finally {
+            setLoading(false)
+        }
+    }, [user?.jwt, resultsPerPage])
+
+    // Select all automations function
+    const selectAllAutomations = useCallback(async () => {
+        if (!user || !user.jwt) return
+    
+        try {
+            const query = {
+                sort: ['createdAt:desc'],
+                pagination: {
+                    pageSize: 1000, // Large number to get all automations
+                    page: 1,
+                },
+            }
+
+            // Add search filter if searchTerm exists
+            if (searchTerm) {
+                query.filters = {
+                    name: {
+                        $contains: searchTerm,
+                    },
+                }
+            }
+
+            const queryString = qs.stringify(query, { encode: false })
+            const response = await ApiService.get(`fairymailer/getAutomations?${queryString}`, user.jwt)
+    
+            if (response.data && response.data.data) {
+                const processedData = response.data.data.map(data => {
+                    data.createdAt = data.createdAt.split('T')[0]
+                    return data
+                })
+                setSelectedAutomations(processedData)
+            }
+        } catch (error) {
+            console.error('Error fetching all automations for selection:', error)
+            PopupText.fire({
+                text: 'Error selecting all automations. Please try again.',
+                icon: 'error',
+            })
+        }
+    }, [user?.jwt, searchTerm, setSelectedAutomations])
 
     // Updated dropdown options to include Overview
     const dropdownOptions = [
@@ -56,9 +144,12 @@ const AutomationsTable = ({ incomingAutomations, refreshData, selectedAutomation
         navigate('/automations/'+item.uuid)
     }
 
-    const startIndex = (currentPage - 1) * rowsPerPage
-    const endIndex = startIndex + rowsPerPage
-    const paginatedData = automations ? automations.slice(startIndex, endIndex) : [];
+    // Load data when component mounts or when search term changes
+    useEffect(() => {
+        if (user) {
+            getAutomations(currentPage, searchTerm)
+        }
+    }, [currentPage, user, searchTerm, getAutomations])
 
     // Function to update automation active status
     const updateAutomationStatus = async (automation, newStatus) => {
@@ -252,7 +343,7 @@ const AutomationsTable = ({ incomingAutomations, refreshData, selectedAutomation
                 </div>
             )}
             <DataTable 
-                value={paginatedData} 
+                value={automations} 
                 paginator={false} 
                 selection={selectedAutomations} 
                 onSelectionChange={(e) => setSelectedAutomations(e.value)} 
@@ -279,10 +370,10 @@ const AutomationsTable = ({ incomingAutomations, refreshData, selectedAutomation
                     )}
                     header={() => (
                         <Checkbox
-                            checked={selectedAutomations.length === paginatedData.length && selectedAutomations.length > 0}
+                            checked={totalResults > 0 && selectedAutomations.length === totalResults}
                             onChange={(e) => {
                                 if (e) {
-                                    setSelectedAutomations([...paginatedData])
+                                    selectAllAutomations()
                                 } else {
                                     setSelectedAutomations([])
                                 }
@@ -299,7 +390,7 @@ const AutomationsTable = ({ incomingAutomations, refreshData, selectedAutomation
                 <Column header="Status" body={enabledSwitchTemplate} />
                 <Column header="Actions" body={actionsBodyTemplate} />
             </DataTable>
-            <Pagination currentPage={currentPage} totalResults={automations ? automations.length : 0} resultsPerPage={rowsPerPage} onChange={handlePageChange} />
+            <Pagination currentPage={currentPage} totalResults={totalResults} resultsPerPage={resultsPerPage} onChange={handlePageChange} />
         </>
     )
 }
