@@ -43,7 +43,7 @@ div.subscriber-filters-card > div > div {
 	// Override global padding for subscribers page
 	.fm-page-wrapper {
 		.fm-page-container {
-			padding: 1em !important;
+			padding: 1em 1.5em !important;
 		}
 	}
 	
@@ -62,7 +62,7 @@ div.subscriber-filters-card > div > div {
 
 	.filters-container {
 		margin: 0;
-		padding: 0 !important;
+		padding: 0 0.5em !important;
 		width: 100%;
 		
 		.button-group-wrapper {
@@ -96,7 +96,7 @@ div.subscriber-filters-card > div > div {
 	// Ensure subscribers list aligns with search components
 	.subscribers {
 		margin: 0 !important;
-		padding: 0;
+		padding: 0 0.5em;
 		width: 100%;
 		
 		.mobile-view {
