@@ -76,6 +76,7 @@
   overflow: visible;
   position: relative;
   z-index: 1;
+  width: 100%;
   
   &.expanded {
     z-index: 10;
@@ -283,6 +284,17 @@
   }
 }
 
+// Desktop styles - ensure mobile view padding is reset
+@media screen and (min-width: 769px) {
+  .subscribers,
+  .segments,
+  .groups {
+    .mobile-view {
+      padding: 0; /* Reset mobile padding on desktop */
+    }
+  }
+}
+
 // Media query for mobile
 @media screen and (max-width: 768px) {
   .subscribers,
@@ -294,6 +306,9 @@
     
     .mobile-view {
       display: block;
+      width: 100%;
+      margin: 0;
+      padding: 0 20px; /* Match the inner padding of other components */
     }
   }
   
