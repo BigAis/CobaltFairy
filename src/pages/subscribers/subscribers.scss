@@ -40,13 +40,6 @@ div.subscriber-filters-card > div > div {
 
 /* Add some responsive fixes for mobile */
 @media (max-width: 768px) {
-	// Override global padding for subscribers page
-	.fm-page-wrapper {
-		.fm-page-container {
-			padding: 1em 1.5em !important;
-		}
-	}
-	
 	.page-name-container { 
 		margin: 0 !important;
 		padding: 0;
