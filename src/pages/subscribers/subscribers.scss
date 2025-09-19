@@ -14,6 +14,7 @@
 
 	.page-name {
 		text-align: center;
+		padding-left: 0; /* Reset mobile padding */
 	}
 
 	.action-buttons {
@@ -21,6 +22,8 @@
 		flex-direction: row;
 		align-items: center;
 		gap: 10px;
+		padding-left: 0; /* Reset mobile padding */
+		padding-right: 0; /* Reset mobile padding */
 		
 		.btn {
 			width: auto;
@@ -29,6 +32,9 @@
 	}
 
 	.filters-container {
+		padding-left: 0; /* Reset mobile padding */
+		padding-right: 0; /* Reset mobile padding */
+		
 		.input-text-container {
 			flex-direction: row !important;
 			align-items: center !important;
@@ -89,6 +95,7 @@ div.subscriber-filters-card > div > div {
 		text-align: left !important;
 		width: 100%;
 		margin: 0;
+		padding-left: 20px; /* Match the inner padding of other components */
 	}
 
 	.action-buttons {
@@ -97,6 +104,8 @@ div.subscriber-filters-card > div > div {
 		flex-direction: column;
 		gap: 10px;
 		align-items: stretch;
+		padding-left: 20px;
+		padding-right: 20px;
 		
 		.btn {
 			width: 100%;
@@ -111,6 +120,8 @@ div.subscriber-filters-card > div > div {
 
 	.filters-container {
 		width: 100%;
+		padding-left: 20px;
+		padding-right: 20px;
 		
 		.button-group-wrapper {
 			width: 100%;
