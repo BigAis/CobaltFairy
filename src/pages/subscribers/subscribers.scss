@@ -40,16 +40,22 @@ div.subscriber-filters-card > div > div {
 
 /* Add some responsive fixes for mobile */
 @media (max-width: 768px) {
+	/* Create a consistent container for all mobile content */
+	.fm-page-container {
+		padding: 1em !important; /* Consistent padding for all content */
+	}
+	
 	/* Override global page-name-container styles for mobile only */
 	.page-name-container { 
 		margin-top: 0;
-		padding: 0 1em !important; /* Match the main content padding */
+		padding: 0 !important; /* Remove padding, use parent container */
 		max-width: 304px; /* Fixed width constraint */
 		width: 100%;
 		
 		.page-name {
 			text-align: left !important; /* Force left alignment */
 			margin: 0 !important; /* Remove any default margins */
+			padding: 0 !important; /* Remove any default padding */
 		}
 	}                         
 
@@ -60,7 +66,7 @@ div.subscriber-filters-card > div > div {
 	
 	/* Fix alignment for the main content area */
 	.filters-container {
-		padding: 0 1em !important; /* Match page-name-container padding */
+		padding: 0 !important; /* Remove padding, use parent container */
 		max-width: 304px; /* Fixed width constraint */
 		width: 100%;
 		
@@ -73,16 +79,28 @@ div.subscriber-filters-card > div > div {
 		.input-text-container {
 			margin-top: 10px;
 			display: flex;
-			align-items: center;
+			align-items: stretch; /* Make both components same height */
 			justify-content: space-between;
 			padding: 0 !important; /* Remove any default padding */
 			width: 100%;
+			gap: 10px; /* Consistent gap between search and filters */
+			
+			.search-bar-container {
+				flex: 1; /* Take remaining space */
+				margin-right: 0 !important; /* Remove inline margin */
+			}
+			
+			.button-filters {
+				flex-shrink: 0; /* Don't shrink the button */
+				min-width: 120px;
+				min-height: 51px; /* Match search input height */
+			}
 		}
 	}
 	
 	/* Ensure subscriber cards align with search bar */
 	.subscribers {
-		padding: 0 1em !important; /* Match other components */
+		padding: 0 !important; /* Remove padding, use parent container */
 		max-width: 304px; /* Fixed width constraint */
 		width: 100%;
 		
@@ -176,6 +194,10 @@ div.subscriber-filters-card > div > div {
 
 /* Ensure desktop view remains unchanged */
 @media (min-width: 769px) {
+	.fm-page-container {
+		padding: 3em !important; /* Reset to original desktop padding */
+	}
+	
 	.page-name-container {
 		padding: 0; /* Reset mobile padding for desktop */
 		max-width: none; /* Reset mobile width constraint */
