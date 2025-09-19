@@ -884,6 +884,7 @@ const Subscribers = ({ initialView }) => {
 										type="secondary"
 										icon={'Filters'}
 										className="button-filters"
+										style={{ height: '51px', minHeight: '51px' }}
 										onClick={() => {
 											setShowFilters((prev) => !prev)
 										}}
