@@ -3,6 +3,44 @@
 	align-items: center;
 	justify-content: space-between;
 }
+
+/* Desktop styles - ensure they remain unchanged */
+@media (min-width: 769px) {
+	.page-name-container {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.page-name {
+		text-align: center;
+	}
+
+	.action-buttons {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 10px;
+		
+		.btn {
+			width: auto;
+			min-width: auto;
+		}
+	}
+
+	.filters-container {
+		.input-text-container {
+			flex-direction: row !important;
+			align-items: center !important;
+			justify-content: space-between !important;
+		}
+	}
+
+	.button-filters {
+		min-width: 184px;
+		width: auto;
+	}
+}
 .button-filters {
 	min-width: 184px;
 	min-height: 51px;
@@ -41,11 +79,58 @@ div.subscriber-filters-card > div > div {
 /* Add some responsive fixes for mobile */
 @media (max-width: 768px) {
 	.page-name-container { 
-		margin-top: 0;      
-	}                         
+		margin-top: 0;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.page-name {
+		text-align: left !important;
+		width: 100%;
+		margin: 0;
+	}
+
+	.action-buttons {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		align-items: stretch;
+		
+		.btn {
+			width: 100%;
+			min-width: 100%;
+		}
+	}
 
 	.button-filters {
-		min-width: 120px;
+		min-width: 100%;
+		width: 100%;
+	}
+
+	.filters-container {
+		width: 100%;
+		
+		.button-group-wrapper {
+			width: 100%;
+			margin: 0;
+			padding: 0;
+		}
+		
+		.input-text-container {
+			flex-direction: column !important;
+			gap: 10px;
+			align-items: stretch !important;
+			width: 100%;
+			margin: 0;
+			padding: 0;
+			
+			.search-bar-container {
+				width: 100% !important;
+				margin-right: 0 !important;
+			}
+		}
 	}
 
 	.import-options {

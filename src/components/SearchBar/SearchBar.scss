@@ -19,10 +19,27 @@
   }
 }
 
+/* Desktop styles - ensure they remain unchanged */
+@media (min-width: 769px) {
+  .search-bar-container {
+    flex-direction: row;
+    
+    .input-wrapper {
+      margin-right: 10px;
+    }
+    
+    .search-button {
+      width: auto;
+      min-width: 100px;
+    }
+  }
+}
+
 // Responsive styles for smaller screens
 @media (max-width: 768px) {
   .search-bar-container {
     flex-direction: column;
+    width: 100%;
     
     .input-wrapper {
       width: 100%;
@@ -32,6 +49,7 @@
     
     .search-button {
       width: 100%;
+      min-width: 100%;
     }
   }
 }
