@@ -44,6 +44,8 @@ div.subscriber-filters-card > div > div {
 	.page-name-container { 
 		margin-top: 0;
 		padding: 0 1em !important; /* Match the main content padding */
+		max-width: 304px; /* Fixed width constraint */
+		width: 100%;
 		
 		.page-name {
 			text-align: left !important; /* Force left alignment */
@@ -59,10 +61,13 @@ div.subscriber-filters-card > div > div {
 	/* Fix alignment for the main content area */
 	.filters-container {
 		padding: 0 1em !important; /* Match page-name-container padding */
+		max-width: 304px; /* Fixed width constraint */
+		width: 100%;
 		
 		.button-group-wrapper {
 			padding: 0 !important; /* Remove any default padding */
 			margin-bottom: 10px;
+			width: 100%;
 		}
 		
 		.input-text-container {
@@ -71,15 +76,19 @@ div.subscriber-filters-card > div > div {
 			align-items: center;
 			justify-content: space-between;
 			padding: 0 !important; /* Remove any default padding */
+			width: 100%;
 		}
 	}
 	
 	/* Ensure subscriber cards align with search bar */
 	.subscribers {
 		padding: 0 1em !important; /* Match other components */
+		max-width: 304px; /* Fixed width constraint */
+		width: 100%;
 		
 		.subscriber-card {
 			margin-bottom: 12px;
+			width: 100%;
 		}
 	}
 
@@ -169,14 +178,20 @@ div.subscriber-filters-card > div > div {
 @media (min-width: 769px) {
 	.page-name-container {
 		padding: 0; /* Reset mobile padding for desktop */
+		max-width: none; /* Reset mobile width constraint */
+		width: auto; /* Reset mobile width constraint */
 	}
 	
 	.filters-container {
 		padding: 0; /* Reset mobile padding for desktop */
+		max-width: none; /* Reset mobile width constraint */
+		width: auto; /* Reset mobile width constraint */
 	}
 	
 	.subscribers {
 		padding: 0; /* Reset mobile padding for desktop */
+		max-width: none; /* Reset mobile width constraint */
+		width: auto; /* Reset mobile width constraint */
 	}
 }
 

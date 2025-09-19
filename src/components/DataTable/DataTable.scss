@@ -320,6 +320,7 @@
       margin-left: 0;
       margin-right: 0;
       width: 100%;
+      max-width: 304px; /* Match the 304px constraint */
       
       .subscriber-header {
         padding: 14px 20px;
@@ -337,6 +338,15 @@
           }
         }
       }
+    }
+  }
+}
+
+// Reset mobile width constraints for desktop
+@media (min-width: 769px) {
+  .subscribers {
+    .subscriber-card {
+      max-width: none; /* Reset mobile width constraint for desktop */
     }
   }
 }
