@@ -254,3 +254,137 @@ div.subscriber-filters-card > div > div {
 		}
 	}
 }
+
+/* Mobile alignment fixes for subscribers page - add to src/pages/subscribers/subscribers.scss */
+@media (max-width: 768px) {
+  /* Main container adjustments */
+  .fm-page-container {
+    padding: 0 !important;
+  }
+  
+  /* Fix Subscribers header left alignment */
+  .page-name-container {
+    margin: 20px 20px 22px 20px !important;
+    padding: 0 !important;
+    justify-content: flex-start !important;
+    
+    .page-name {
+      font-family: 'Bitter';
+      font-weight: 700;
+      font-size: 26px;
+      line-height: 31px;
+      text-align: left;
+      margin: 0;
+      padding-left: 0 !important;
+    }
+  }
+  
+  /* Filters container alignment */
+  .filters-container {
+    padding: 0 20px !important;
+    margin-bottom: 20px;
+    
+    /* Button group container */
+    .button-group-wrapper {
+      margin-bottom: 22px;
+      width: 100%;
+      overflow-x: auto;
+      
+      .btn-group {
+        width: max-content;
+        
+        .btn {
+          min-height: 41px;
+          padding: 12px 20px;
+          border-radius: 8px;
+          font-family: 'Inter';
+          font-size: 14px;
+        }
+      }
+    }
+    
+    /* Search bar and filter button alignment */
+    .input-text-container {
+      margin-top: 10px !important;
+      
+      .search-bar-container {
+        width: 100%;
+        
+        input {
+          background: rgba(255, 255, 255, 0.5);
+          border: 2px solid #DAD1C5;
+          border-radius: 8px;
+          height: 41px;
+        }
+      }
+      
+      .button-filters {
+        min-width: auto !important;
+        min-height: 41px !important;
+        height: 41px !important;
+        width: auto !important;
+        padding: 12px 20px !important;
+        margin-left: 10px !important;
+        border-radius: 8px;
+        font-family: 'Inter';
+        font-weight: 500;
+        font-size: 14px;
+        align-self: center !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+    }
+  }
+  
+  /* Table alignment and sizing fixes */
+  .subscribers,
+  .segments,
+  .groups,
+  .history {
+    padding: 0 20px;
+    
+    /* Card style for mobile views */
+    .subscriber-card,
+    .group-card,
+    .segment-card {
+      margin-bottom: 16px;
+      border-radius: 8px;
+      width: 100%;
+    }
+    
+    /* Header alignment in cards */
+    .subscriber-header,
+    .group-header,
+    .segment-header {
+      padding: 14px 20px;
+    }
+    
+    /* Content alignment in cards */
+    .subscriber-details,
+    .group-details,
+    .segment-details {
+      padding: 0 20px 20px;
+    }
+  }
+  
+  /* Pagination alignment */
+  .pagination {
+    padding: 0 20px;
+    margin: 22px 0;
+  }
+  
+  /* Fix filter card alignment */
+  .subscriber-filters-card {
+    margin: 0 20px 20px !important;
+    width: calc(100% - 40px) !important;
+  }
+}
+
+/* Modify the button-filters class */
+.button-filters {
+  @media (max-width: 768px) {
+    min-width: auto !important;
+    min-height: 44px !important;
+  }
+}
