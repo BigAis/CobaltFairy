@@ -41,11 +41,67 @@ div.subscriber-filters-card > div > div {
 /* Add some responsive fixes for mobile */
 @media (max-width: 768px) {
 	.page-name-container { 
-		margin-top: 0;      
+		margin: 0 !important;
+		padding: 0;
+		width: 100%;
+		
+		.page-name {
+			text-align: left;
+			margin: 0;
+			padding: 0;
+			width: 100%;
+		}
 	}                         
 
-	.button-filters {
-		min-width: 120px;
+	.filters-container {
+		margin: 0;
+		padding: 0 0.5em !important;
+		width: 100%;
+		
+		.button-group-wrapper {
+			margin: 0 !important;
+			padding: 0;
+			width: 100%;
+		}
+		
+		.input-text-container {
+			margin: 10px 0 0 0 !important;
+			padding: 0;
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			
+			.search-bar-container {
+				width: 100%;
+				margin: 0;
+				padding: 0;
+			}
+			
+			.button-filters {
+				width: 100%;
+				height: 51px;
+				min-height: 51px;
+			}
+		}
+	}
+	
+	// Ensure subscribers list aligns with search components
+	.subscribers {
+		margin: 0 !important;
+		padding: 0 0.5em;
+		width: 100%;
+		
+		.mobile-view {
+			width: 100%;
+			margin: 0;
+			padding: 0;
+			
+			.subscriber-card {
+				width: 100%;
+				margin: 0 0 8px 0;
+			}
+		}
 	}
 
 	.import-options {
