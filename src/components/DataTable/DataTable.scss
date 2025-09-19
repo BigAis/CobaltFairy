@@ -313,4 +313,30 @@
       font-size: 14px;
     }
   }
+  
+  // Mobile subscriber card alignment fixes
+  .subscribers {
+    .subscriber-card {
+      margin-left: 0;
+      margin-right: 0;
+      width: 100%;
+      
+      .subscriber-header {
+        padding: 14px 20px;
+        
+        .subscriber-info {
+          .subscriber-name {
+            font-size: 16px;
+            line-height: 19px;
+            margin-bottom: 4px;
+          }
+          
+          .subscriber-email {
+            font-size: 14px;
+            line-height: 17px;
+          }
+        }
+      }
+    }
+  }
 }

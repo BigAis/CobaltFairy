@@ -40,12 +40,47 @@ div.subscriber-filters-card > div > div {
 
 /* Add some responsive fixes for mobile */
 @media (max-width: 768px) {
+	/* Override global page-name-container styles for mobile only */
 	.page-name-container { 
-		margin-top: 0;      
+		margin-top: 0;
+		padding: 0 1em !important; /* Match the main content padding */
+		
+		.page-name {
+			text-align: left !important; /* Force left alignment */
+			margin: 0 !important; /* Remove any default margins */
+		}
 	}                         
 
 	.button-filters {
 		min-width: 120px;
+		min-height: 51px; /* Match search input height */
+	}
+	
+	/* Fix alignment for the main content area */
+	.filters-container {
+		padding: 0 1em !important; /* Match page-name-container padding */
+		
+		.button-group-wrapper {
+			padding: 0 !important; /* Remove any default padding */
+			margin-bottom: 10px;
+		}
+		
+		.input-text-container {
+			margin-top: 10px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0 !important; /* Remove any default padding */
+		}
+	}
+	
+	/* Ensure subscriber cards align with search bar */
+	.subscribers {
+		padding: 0 1em !important; /* Match other components */
+		
+		.subscriber-card {
+			margin-bottom: 12px;
+		}
 	}
 
 	.import-options {
@@ -127,6 +162,21 @@ div.subscriber-filters-card > div > div {
 				}
 			}
 		}
+	}
+}
+
+/* Ensure desktop view remains unchanged */
+@media (min-width: 769px) {
+	.page-name-container {
+		padding: 0; /* Reset mobile padding for desktop */
+	}
+	
+	.filters-container {
+		padding: 0; /* Reset mobile padding for desktop */
+	}
+	
+	.subscribers {
+		padding: 0; /* Reset mobile padding for desktop */
 	}
 }
 
