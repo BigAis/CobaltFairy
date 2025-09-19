@@ -313,4 +313,40 @@
       font-size: 14px;
     }
   }
+  
+  // Mobile subscriber card alignment fixes
+  .subscribers {
+    .subscriber-card {
+      margin-left: 0;
+      margin-right: 0;
+      width: 100%;
+      max-width: 304px; /* Match the 304px constraint */
+      
+      .subscriber-header {
+        padding: 14px 20px;
+        
+        .subscriber-info {
+          .subscriber-name {
+            font-size: 16px;
+            line-height: 19px;
+            margin-bottom: 4px;
+          }
+          
+          .subscriber-email {
+            font-size: 14px;
+            line-height: 17px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Reset mobile width constraints for desktop
+@media (min-width: 769px) {
+  .subscribers {
+    .subscriber-card {
+      max-width: none; /* Reset mobile width constraint for desktop */
+    }
+  }
 }
