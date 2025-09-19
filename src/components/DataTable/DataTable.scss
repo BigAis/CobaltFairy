@@ -72,10 +72,11 @@
   background: #FFF8EF;
   border: 2px solid #DAD1C5;
   border-radius: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   overflow: visible;
   position: relative;
   z-index: 1;
+  width: 100%;
   
   &.expanded {
     z-index: 10;
@@ -83,7 +84,7 @@
 }
 
 @mixin card-header {
-  padding: 14px 20px;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -120,18 +121,18 @@
 }
 
 @mixin card-details {
-  padding: 0 20px 20px 20px;
+  padding: 0 16px 16px 16px;
   border-top: 1px solid #DAD1C5;
   
   .stat-row {
     display: flex;
     justify-content: space-between;
     margin-bottom: 0;
-    padding: 10px 0;
+    padding: 8px 0;
     border-bottom: 1px solid rgba(218, 209, 197, 0.5);
     
     &:last-of-type {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     
     .stat-label {
@@ -294,6 +295,9 @@
     
     .mobile-view {
       display: block;
+      width: 100%;
+      margin: 0;
+      padding: 0;
     }
   }
   
@@ -311,6 +315,17 @@
       min-width: 32px;
       height: 32px;
       font-size: 14px;
+    }
+  }
+  
+  // Ensure proper alignment for mobile subscribers
+  .subscribers {
+    .mobile-view {
+      .subscriber-card {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+      }
     }
   }
 }
