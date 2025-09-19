@@ -40,9 +40,15 @@ div.subscriber-filters-card > div > div {
 
 /* Add some responsive fixes for mobile */
 @media (max-width: 768px) {
+	// Override global padding for subscribers page
+	.fm-page-wrapper {
+		.fm-page-container {
+			padding: 1em !important;
+		}
+	}
+	
 	.page-name-container { 
-		margin-top: 0;
-		margin-bottom: 0;
+		margin: 0 !important;
 		padding: 0;
 		width: 100%;
 		
@@ -54,37 +60,45 @@ div.subscriber-filters-card > div > div {
 		}
 	}                         
 
-	.button-filters {
-		min-width: 120px;
-		width: 100%;
-		height: 51px;
-		min-height: 51px;
-	}
-	
 	.filters-container {
 		margin: 0;
-		padding: 0;
+		padding: 0 !important;
+		width: 100%;
 		
 		.button-group-wrapper {
-			margin: 0;
+			margin: 0 !important;
 			padding: 0;
+			width: 100%;
 		}
 		
 		.input-text-container {
-			margin: 10px 0 0 0;
+			margin: 10px 0 0 0 !important;
 			padding: 0;
 			width: 100%;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
 			
 			.search-bar-container {
 				width: 100%;
 				margin: 0;
 				padding: 0;
 			}
+			
+			.button-filters {
+				width: 100%;
+				height: 51px;
+				min-height: 51px;
+			}
 		}
 	}
 	
 	// Ensure subscribers list aligns with search components
 	.subscribers {
+		margin: 0 !important;
+		padding: 0;
+		width: 100%;
+		
 		.mobile-view {
 			width: 100%;
 			margin: 0;
@@ -92,8 +106,7 @@ div.subscriber-filters-card > div > div {
 			
 			.subscriber-card {
 				width: 100%;
-				margin-left: 0;
-				margin-right: 0;
+				margin: 0 0 8px 0;
 			}
 		}
 	}

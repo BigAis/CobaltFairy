@@ -866,7 +866,7 @@ const Subscribers = ({ initialView }) => {
 							</div>
 
 							{view === 'subs' && (
-								<div className="input-text-container" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+								<div className="input-text-container">
 									<SearchBar
 										placeholder="Search Subscribers"
 										label="Search Subscribers"
@@ -878,13 +878,11 @@ const Subscribers = ({ initialView }) => {
 											setHasAppliedFilters(false)
 											setFilteredCount(0)
 										}}
-										style={{ width: '100%', marginRight: '20px' }}
 									/>
 									<Button
 										type="secondary"
 										icon={'Filters'}
 										className="button-filters"
-										style={{ height: '51px', minHeight: '51px' }}
 										onClick={() => {
 											setShowFilters((prev) => !prev)
 										}}
